@@ -123,7 +123,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
           Discover Your <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Passion</span> at College
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-          Join 50+ vibrant clubs, attend 200+ exciting events, and connect with 1000+ like-minded students.
+          Join 20+ vibrant clubs, attend 50+ exciting events, and connect with 500+ like-minded students.
           Your college journey starts here with Club-Connect.
         </p>
 
@@ -146,15 +146,15 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
-            <div className="text-3xl font-black text-blue-600 dark:text-blue-400 mb-2">50+</div>
+            <div className="text-3xl font-black text-blue-600 dark:text-blue-400 mb-2">20+</div>
             <div className="text-slate-600 dark:text-slate-300 font-medium">Active Clubs</div>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
-            <div className="text-3xl font-black text-green-600 dark:text-green-400 mb-2">1000+</div>
+            <div className="text-3xl font-black text-green-600 dark:text-green-400 mb-2">500+</div>
             <div className="text-slate-600 dark:text-slate-300 font-medium">Students Engaged</div>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow">
-            <div className="text-3xl font-black text-purple-600 dark:text-purple-400 mb-2">200+</div>
+            <div className="text-3xl font-black text-purple-600 dark:text-purple-400 mb-2">50+</div>
             <div className="text-slate-600 dark:text-slate-300 font-medium">Events This Year</div>
           </div>
         </div>
@@ -296,21 +296,21 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
               <Users className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">50+ Clubs</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">20+ Clubs</h3>
             <p className="text-slate-600 dark:text-slate-300">Diverse clubs for every interest</p>
           </div>
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center">
               <Calendar className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">200+ Events</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">50+ Events</h3>
             <p className="text-slate-600 dark:text-slate-300">Exciting events throughout the year</p>
           </div>
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
               <Heart className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">1000+ Students</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">500+ Students</h3>
             <p className="text-slate-600 dark:text-slate-300">Vibrant and supportive community</p>
           </div>
           <div className="text-center">
