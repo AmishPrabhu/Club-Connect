@@ -38,49 +38,183 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
     );
   }
 
-  // Mock events data - in a real app, this would come from an API
-  const events: Event[] = [
-    {
-      id: 1,
-      title: 'AI Workshop: Introduction to Machine Learning',
-      date: 'Jan 25, 2026',
-      time: '2:00 PM - 5:00 PM',
-      location: 'Computer Lab 101',
-      attendees: 45,
-      status: 'upcoming',
-      description: 'Learn the basics of machine learning with hands-on examples using Python and scikit-learn.'
-    },
-    {
-      id: 2,
-      title: 'Hackathon 2026 Kickoff',
-      date: 'Feb 10, 2026',
-      time: '10:00 AM - 12:00 PM',
-      location: 'Auditorium',
-      attendees: 120,
-      status: 'upcoming',
-      description: 'Join us for the official launch of our annual hackathon with team formation and project ideation.'
-    },
-    {
-      id: 3,
-      title: 'Cloud Computing Seminar',
-      date: 'Dec 15, 2025',
-      time: '3:00 PM - 6:00 PM',
-      location: 'Seminar Hall A',
-      attendees: 78,
-      status: 'past',
-      description: 'Explored AWS, Azure, and GCP services with practical demonstrations and use cases.'
-    },
-    {
-      id: 4,
-      title: 'Code Review Best Practices',
-      date: 'Nov 20, 2025',
-      time: '1:00 PM - 4:00 PM',
-      location: 'Meeting Room 205',
-      attendees: 32,
-      status: 'past',
-      description: 'Interactive session on effective code review techniques and tools for better collaboration.'
-    }
-  ];
+  // Generate club-specific events based on club category and name
+  const getClubEvents = (club: typeof clubs[0]): Event[] => {
+    const baseEvents: Record<string, Event[]> = {
+      technical: [
+        {
+          id: 1,
+          title: `${club.name} Tech Workshop: Hands-on Coding Session`,
+          date: 'Jan 25, 2026',
+          time: '2:00 PM - 5:00 PM',
+          location: 'Computer Lab 101',
+          attendees: 45,
+          status: 'upcoming',
+          description: `Join ${club.name} for a practical workshop covering key concepts in ${club.name.toLowerCase()} with live coding examples.`
+        },
+        {
+          id: 2,
+          title: `${club.name} Hackathon Kickoff`,
+          date: 'Feb 10, 2026',
+          time: '10:00 AM - 12:00 PM',
+          location: 'Auditorium',
+          attendees: 120,
+          status: 'upcoming',
+          description: `Launch of ${club.name}'s annual hackathon with team formation, project ideation, and exciting challenges.`
+        },
+        {
+          id: 3,
+          title: `${club.name} Advanced Seminar`,
+          date: 'Dec 15, 2025',
+          time: '3:00 PM - 6:00 PM',
+          location: 'Seminar Hall A',
+          attendees: 78,
+          status: 'past',
+          description: `Deep dive into advanced topics in ${club.name.toLowerCase()} with industry experts and practical demonstrations.`
+        },
+        {
+          id: 4,
+          title: `${club.name} Best Practices Session`,
+          date: 'Nov 20, 2025',
+          time: '1:00 PM - 4:00 PM',
+          location: 'Meeting Room 205',
+          attendees: 32,
+          status: 'past',
+          description: `Interactive session on best practices and methodologies in ${club.name.toLowerCase()} for better collaboration and results.`
+        }
+      ],
+      cultural: [
+        {
+          id: 1,
+          title: `${club.name} Cultural Showcase`,
+          date: 'Jan 25, 2026',
+          time: '2:00 PM - 5:00 PM',
+          location: 'Main Auditorium',
+          attendees: 85,
+          status: 'upcoming',
+          description: `Experience the vibrant performances and creative expressions of ${club.name} in this cultural extravaganza.`
+        },
+        {
+          id: 2,
+          title: `${club.name} Workshop Series`,
+          date: 'Feb 10, 2026',
+          time: '10:00 AM - 12:00 PM',
+          location: 'Art Studio',
+          attendees: 35,
+          status: 'upcoming',
+          description: `Hands-on workshop exploring various aspects of ${club.name.toLowerCase()} with expert guidance.`
+        },
+        {
+          id: 3,
+          title: `${club.name} Annual Exhibition`,
+          date: 'Dec 15, 2025',
+          time: '3:00 PM - 6:00 PM',
+          location: 'Gallery Hall',
+          attendees: 120,
+          status: 'past',
+          description: `Showcase of creative works and performances by ${club.name} members throughout the year.`
+        },
+        {
+          id: 4,
+          title: `${club.name} Community Outreach`,
+          date: 'Nov 20, 2025',
+          time: '1:00 PM - 4:00 PM',
+          location: 'Community Center',
+          attendees: 50,
+          status: 'past',
+          description: `Collaborative event with local community featuring ${club.name}'s cultural contributions.`
+        }
+      ],
+      sports: [
+        {
+          id: 1,
+          title: `${club.name} Training Camp`,
+          date: 'Jan 25, 2026',
+          time: '6:00 AM - 8:00 AM',
+          location: 'Sports Complex',
+          attendees: 60,
+          status: 'upcoming',
+          description: `Intensive training session for ${club.name} members focusing on skills, fitness, and team coordination.`
+        },
+        {
+          id: 2,
+          title: `${club.name} Inter-College Tournament`,
+          date: 'Feb 10, 2026',
+          time: '9:00 AM - 5:00 PM',
+          location: 'Stadium',
+          attendees: 200,
+          status: 'upcoming',
+          description: `Annual inter-college tournament organized by ${club.name} featuring multiple teams and exciting matches.`
+        },
+        {
+          id: 3,
+          title: `${club.name} Championship Finals`,
+          date: 'Dec 15, 2025',
+          time: '2:00 PM - 6:00 PM',
+          location: 'Main Stadium',
+          attendees: 150,
+          status: 'past',
+          description: `Grand finals of the ${club.name} championship with thrilling competitions and award ceremony.`
+        },
+        {
+          id: 4,
+          title: `${club.name} Fitness Workshop`,
+          date: 'Nov 20, 2025',
+          time: '10:00 AM - 12:00 PM',
+          location: 'Gymnasium',
+          attendees: 40,
+          status: 'past',
+          description: `Educational session on fitness, nutrition, and sports psychology by ${club.name} experts.`
+        }
+      ],
+      academic: [
+        {
+          id: 1,
+          title: `${club.name} Study Group Session`,
+          date: 'Jan 25, 2026',
+          time: '3:00 PM - 5:00 PM',
+          location: 'Library Study Room',
+          attendees: 25,
+          status: 'upcoming',
+          description: `Collaborative study session organized by ${club.name} to help members excel academically.`
+        },
+        {
+          id: 2,
+          title: `${club.name} Guest Lecture Series`,
+          date: 'Feb 10, 2026',
+          time: '11:00 AM - 1:00 PM',
+          location: 'Lecture Hall B',
+          attendees: 80,
+          status: 'upcoming',
+          description: `Inspiring talk by industry experts invited by ${club.name} on relevant academic and professional topics.`
+        },
+        {
+          id: 3,
+          title: `${club.name} Research Symposium`,
+          date: 'Dec 15, 2025',
+          time: '9:00 AM - 4:00 PM',
+          location: 'Conference Center',
+          attendees: 100,
+          status: 'past',
+          description: `${club.name}'s annual research symposium featuring student projects and academic presentations.`
+        },
+        {
+          id: 4,
+          title: `${club.name} Career Guidance Workshop`,
+          date: 'Nov 20, 2025',
+          time: '2:00 PM - 5:00 PM',
+          location: 'Career Center',
+          attendees: 45,
+          status: 'past',
+          description: `Workshop by ${club.name} providing insights into career paths, internships, and professional development.`
+        }
+      ]
+    };
+
+    return baseEvents[club.category] || baseEvents.technical;
+  };
+
+  const events: Event[] = getClubEvents(club);
 
   const filteredEvents = events.filter(event => event.status === activeTab);
 
