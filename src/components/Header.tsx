@@ -1,16 +1,14 @@
-import { LogIn, Sparkles, Bell, User, Sun, Moon } from 'lucide-react';
+import { LogOut, Sparkles, Bell, User, Sun, Moon } from 'lucide-react';
 import { Page } from '../App';
-import { useState } from 'react';
-import LoginModal from './LoginModal';
 import { useDarkMode } from '../context/DarkModeContext';
 
 interface HeaderProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
+  onLogout: () => void;
 }
 
-export default function Header({ currentPage, onNavigate }: HeaderProps) {
-  const [showLoginModal, setShowLoginModal] = useState(false);
+export default function Header({ currentPage, onNavigate, onLogout }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   return (
@@ -80,18 +78,16 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
               </button>
 
               <button
-                onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                onClick={onLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
               </button>
             </div>
           </div>
         </div>
       </header>
-
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
     </>
   );
 }

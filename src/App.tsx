@@ -7,13 +7,14 @@ import MemberBoardDetail from './pages/MemberBoardDetail';
 import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
 import EventDetail from './pages/EventDetail';
+import LoginPage from './pages/LoginPage';
 import { DarkModeProvider } from './context/DarkModeContext';
 
 
-export type Page = 'home' | 'dashboard' | 'club' | 'memberBoard' | 'notifications' | 'userProfile' | 'event';
+export type Page = 'login' | 'home' | 'dashboard' | 'club' | 'memberBoard' | 'notifications' | 'userProfile' | 'event';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [currentPage, setCurrentPage] = useState<Page>('login');
   const [selectedClub, setSelectedClub] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
@@ -42,11 +43,16 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    setCurrentPage('login');
+  };
+
   return (
     <DarkModeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <Header currentPage={currentPage} onNavigate={navigateToPage} />
+        {currentPage !== 'login' && <Header currentPage={currentPage} onNavigate={navigateToPage} onLogout={handleLogout} />}
 
+        {currentPage === 'login' && <LoginPage onNavigate={navigateToPage} />}
         {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} />}
         {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
         {currentPage === 'club' && selectedClub && (
