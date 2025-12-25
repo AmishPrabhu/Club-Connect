@@ -1,15 +1,19 @@
-import { LogOut, Sparkles, Bell, User, Sun, Moon } from 'lucide-react';
-import { Page } from '../App';
+import { LogOut, Sparkles, Bell, User, Sun, Moon, Shield, Settings } from 'lucide-react';
+import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
+import { User as UserType } from '../types/auth';
+import { useState } from 'react';
 
 interface HeaderProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
   onLogout: () => void;
+  user?: UserType | null;
 }
 
-export default function Header({ currentPage, onNavigate, onLogout }: HeaderProps) {
+export default function Header({ currentPage, onNavigate, onLogout, user }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <>
@@ -60,6 +64,7 @@ export default function Header({ currentPage, onNavigate, onLogout }: HeaderProp
                 {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-700 dark:text-slate-300" />}
               </button>
 
+              {/* Notifications for all users */}
               <button
                 onClick={() => onNavigate('notifications')}
                 className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn relative"
@@ -69,21 +74,98 @@ export default function Header({ currentPage, onNavigate, onLogout }: HeaderProp
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">3</span>
               </button>
 
-              <button
-                onClick={() => onNavigate('userProfile')}
-                className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn"
-                aria-label="User Profile"
-              >
-                <User className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-              </button>
+              {user ? (
+                <>
+                  {/* Admin-specific controls */}
+                  {user.role === 'admin' && (
+                    <button
+                      onClick={() => onNavigate('adminDashboard')}
+                      className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn relative"
+                      aria-label="Admin Dashboard"
+                    >
+                      <Shield className="w-5 h-5 text-amber-600" />
+                    </button>
+                  )}
 
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
+                  {/* Club Secretary-specific controls */}
+                  {user.role === 'club-secretary' && (
+                    <button
+                      onClick={() => onNavigate('clubSecretaryDashboard')}
+                      className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn relative"
+                      aria-label="Club Management"
+                    >
+                      <Settings className="w-5 h-5 text-blue-600" />
+                    </button>
+                  )}
+
+                  {/* User Menu */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    >
+                      <User className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.name}</span>
+                    </button>
+                    
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2">
+                        <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">{user.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role.replace('-', ' ')}</p>
+                          {user.clubName && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{user.clubName}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            // Navigate to appropriate dashboard based on role
+                            if (user.role === 'club-secretary') {
+                              onNavigate('clubSecretaryDashboard');
+                            } else if (user.role === 'admin') {
+                              onNavigate('adminDashboard');
+                            }
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                        >
+                          {user.role === 'club-secretary' && <Settings className="w-4 h-4" />}
+                          {user.role === 'admin' && <Shield className="w-4 h-4" />}
+                          My Account
+                        </button>
+                        <button
+                          onClick={() => {
+                            onNavigate('userProfile');
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        >
+                          Profile
+                        </button>
+                        <button
+                          onClick={() => {
+                            onLogout();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* Login Button for Club Secretaries and Admins */
+                <button
+                  onClick={() => onNavigate('login')}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Staff Login</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Calendar, Trophy, Theater, Bell, MapPin, Clock, Users, Star, Zap, Heart, Search, ChevronRight, Sparkles, LucideIcon } from 'lucide-react';
-import { Page } from '../App';
+import { Calendar, Trophy, Theater, Bell, MapPin, Clock, Users, Star, Zap, Heart, Search, ChevronRight, Sparkles, LucideIcon, ArrowLeft } from 'lucide-react';
+import { Page } from '../types/page';
 import { clubs } from '../data/clubsData';
 import ClubCard from '../components/ClubCard';
 
@@ -117,6 +117,20 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 px-4 py-2 rounded-full mb-6">
           <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Welcome to the future of campus life</span>
+        </div>
+
+        {/* College Name and Symbol */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img
+              src="/wce-logo.png"
+              alt="Walchand College of Engineering Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200">
+            Walchand College of Engineering - Sangli
+          </h2>
         </div>
 
         <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
@@ -276,14 +290,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
                 );
               })}
             </div>
+          </div>
         </div>
       </div>
-      </div>
-      </div>
-
-
-
-
+    </div>
 
       {/* Why Choose Club Gram Section */}
       <div className="mb-16">
