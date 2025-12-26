@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Users, Calendar, Trash2, Edit, Search, Filter, TrendingUp, Settings, Bell, Eye } from 'lucide-react';
+import { Shield, Users, Calendar, Trash2, Edit, Search, Filter, TrendingUp, Settings, Bell, Eye, Plus } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 import { clubs } from '../data/clubsData';
@@ -10,8 +10,6 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications'>('overview');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const mockPosts = [
     {
@@ -46,6 +44,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   ];
 
+  const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications'>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState(mockPosts);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    content: '',
+    clubId: '',
+    type: 'announcement' as 'event' | 'announcement',
+    date: new Date().toISOString().split('T')[0]
+  });
+
   const mockNotifications = [
     {
       id: '1',
@@ -79,6 +89,41 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const handleApproveClub = (clubId: string) => {
     console.log('Approving club:', clubId);
     alert('Club approved successfully!');
+  };
+
+  const handleCreatePost = () => {
+    if (!newPost.title.trim() || !newPost.clubId) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const selectedClub = clubs.find(club => club.id === newPost.clubId);
+    if (!selectedClub) {
+      alert('Selected club not found.');
+      return;
+    }
+
+    const post = {
+      id: Date.now().toString(),
+      title: newPost.title,
+      clubId: newPost.clubId,
+      clubName: selectedClub.name,
+      author: user?.name || 'Admin',
+      date: newPost.date,
+      type: newPost.type,
+      status: 'published' as const
+    };
+
+    setPosts([post, ...posts]);
+    setNewPost({
+      title: '',
+      content: '',
+      clubId: '',
+      type: 'announcement',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setIsCreatePostModalOpen(false);
+    alert('Post created successfully!');
   };
 
   return (
@@ -258,13 +303,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">
+                <button
+                  onClick={() => setIsCreatePostModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
                   Add New Post
                 </button>
               </div>
 
               <div className="space-y-4">
-                {mockPosts.map((post) => (
+                {posts.map((post) => (
                   <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -336,6 +385,97 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           )}
         </div>
       </div>
+
+      {/* Create Post Modal */}
+      {isCreatePostModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create New Post</h3>
+              <button
+                onClick={() => setIsCreatePostModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={newPost.title}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter post title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Club *
+                </label>
+                <select
+                  value={newPost.clubId}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, clubId: e.target.value }))}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a club</option>
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Type
+                </label>
+                <select
+                  value={newPost.type}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, type: e.target.value as 'event' | 'announcement' }))}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="announcement">Announcement</option>
+                  <option value="event">Event</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={newPost.date}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsCreatePostModalOpen(false)}
+                className="flex-1 px-4 py-2 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePost}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+              >
+                Create Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
