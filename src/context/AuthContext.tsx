@@ -1,5 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AuthContextType, AuthState, User, UserRole, mockUsers } from '../types/auth';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import { AuthContextType, AuthState, User, UserRole, FirestoreUser } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -15,44 +23,115 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Fetch user profile from Firestore
+const fetchUserProfile = async (firebaseUser: FirebaseUser): Promise<User | null> => {
+  try {
+    const userDocRef = doc(db, 'users', firebaseUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const data = userDoc.data() as FirestoreUser;
+      return {
+        id: firebaseUser.uid,
+        email: data.email || firebaseUser.email || '',
+        name: data.name || firebaseUser.displayName || 'User',
+        role: data.role || 'user',
+        clubId: data.clubId,
+        clubName: data.clubName,
+      };
+    } else {
+      // Create a default user profile if it doesn't exist
+      const defaultProfile: FirestoreUser = {
+        email: firebaseUser.email || '',
+        name: firebaseUser.displayName || 'User',
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await setDoc(userDocRef, defaultProfile);
+
+      return {
+        id: firebaseUser.uid,
+        email: defaultProfile.email,
+        name: defaultProfile.name,
+        role: defaultProfile.role,
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+};
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: true, // Start as loading to check auth state
   });
+
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in, fetch their profile
+        const userProfile = await fetchUserProfile(firebaseUser);
+        setAuthState({
+          user: userProfile,
+          isAuthenticated: userProfile !== null,
+          isLoading: false,
+        });
+      } else {
+        // User is signed out
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userProfile = await fetchUserProfile(userCredential.user);
 
-    // Find user with matching credentials
-    const user = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-
-    if (user) {
-      const { password: _, ...userWithoutPassword } = user;
-      setAuthState({
-        user: userWithoutPassword as User,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      return true;
-    } else {
+      if (userProfile) {
+        setAuthState({
+          user: userProfile,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return true;
+      } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return false;
     }
   };
 
-  const logout = () => {
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+  const logout = async (): Promise<void> => {
+    try {
+      await signOut(auth);
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const updateUser = (userData: Partial<User>) => {

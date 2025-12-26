@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus } from 'lucide-react';
-import { clubs } from '../data/clubsData';
+import { FirestoreClub, FirestorePost } from '../types/auth';
+import { getClubs, getPosts } from '../lib/firestoreService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import RSVPModal from '../components/RSVPModal';
 
 interface ClubDetailProps {
@@ -9,8 +12,8 @@ interface ClubDetailProps {
   onNavigateToMember: (member: any) => void;
 }
 
-interface Event {
-  id: number;
+interface DisplayEvent {
+  id: string;
   title: string;
   date: string;
   time: string;
@@ -23,199 +26,66 @@ interface Event {
 export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubDetailProps) {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: Event | null }>({
+  const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: DisplayEvent | null }>({
     isOpen: false,
     event: null
   });
+  const [club, setClub] = useState<FirestoreClub | null>(null);
+  const [posts, setPosts] = useState<FirestorePost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const club = clubs.find(c => c.id === clubId);
+  // Fetch club and posts from Firestore
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch club
+        const clubRef = doc(db, 'clubs', clubId);
+        const clubDoc = await getDoc(clubRef);
 
-  if (!club) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <p className="text-center text-xl text-slate-600 dark:text-slate-400">Club not found</p>
-      </div>
-    );
-  }
+        if (clubDoc.exists()) {
+          setClub({
+            id: clubDoc.id,
+            ...clubDoc.data(),
+            createdAt: clubDoc.data().createdAt?.toDate() || new Date(),
+            updatedAt: clubDoc.data().updatedAt?.toDate() || new Date(),
+          } as FirestoreClub);
+        }
 
-  // Generate club-specific events based on club category and name
-  const getClubEvents = (club: typeof clubs[0]): Event[] => {
-    const baseEvents: Record<string, Event[]> = {
-      technical: [
-        {
-          id: 1,
-          title: `${club.name} Tech Workshop: Hands-on Coding Session`,
-          date: 'Jan 25, 2026',
-          time: '2:00 PM - 5:00 PM',
-          location: 'Computer Lab 101',
-          attendees: 45,
-          status: 'upcoming',
-          description: `Join ${club.name} for a practical workshop covering key concepts in ${club.name.toLowerCase()} with live coding examples.`
-        },
-        {
-          id: 2,
-          title: `${club.name} Hackathon Kickoff`,
-          date: 'Feb 10, 2026',
-          time: '10:00 AM - 12:00 PM',
-          location: 'Auditorium',
-          attendees: 120,
-          status: 'upcoming',
-          description: `Launch of ${club.name}'s annual hackathon with team formation, project ideation, and exciting challenges.`
-        },
-        {
-          id: 3,
-          title: `${club.name} Advanced Seminar`,
-          date: 'Dec 15, 2025',
-          time: '3:00 PM - 6:00 PM',
-          location: 'Seminar Hall A',
-          attendees: 78,
-          status: 'past',
-          description: `Deep dive into advanced topics in ${club.name.toLowerCase()} with industry experts and practical demonstrations.`
-        },
-        {
-          id: 4,
-          title: `${club.name} Best Practices Session`,
-          date: 'Nov 20, 2025',
-          time: '1:00 PM - 4:00 PM',
-          location: 'Meeting Room 205',
-          attendees: 32,
-          status: 'past',
-          description: `Interactive session on best practices and methodologies in ${club.name.toLowerCase()} for better collaboration and results.`
-        }
-      ],
-      cultural: [
-        {
-          id: 1,
-          title: `${club.name} Cultural Showcase`,
-          date: 'Jan 25, 2026',
-          time: '2:00 PM - 5:00 PM',
-          location: 'Main Auditorium',
-          attendees: 85,
-          status: 'upcoming',
-          description: `Experience the vibrant performances and creative expressions of ${club.name} in this cultural extravaganza.`
-        },
-        {
-          id: 2,
-          title: `${club.name} Workshop Series`,
-          date: 'Feb 10, 2026',
-          time: '10:00 AM - 12:00 PM',
-          location: 'Art Studio',
-          attendees: 35,
-          status: 'upcoming',
-          description: `Hands-on workshop exploring various aspects of ${club.name.toLowerCase()} with expert guidance.`
-        },
-        {
-          id: 3,
-          title: `${club.name} Annual Exhibition`,
-          date: 'Dec 15, 2025',
-          time: '3:00 PM - 6:00 PM',
-          location: 'Gallery Hall',
-          attendees: 120,
-          status: 'past',
-          description: `Showcase of creative works and performances by ${club.name} members throughout the year.`
-        },
-        {
-          id: 4,
-          title: `${club.name} Community Outreach`,
-          date: 'Nov 20, 2025',
-          time: '1:00 PM - 4:00 PM',
-          location: 'Community Center',
-          attendees: 50,
-          status: 'past',
-          description: `Collaborative event with local community featuring ${club.name}'s cultural contributions.`
-        }
-      ],
-      sports: [
-        {
-          id: 1,
-          title: `${club.name} Training Camp`,
-          date: 'Jan 25, 2026',
-          time: '6:00 AM - 8:00 AM',
-          location: 'Sports Complex',
-          attendees: 60,
-          status: 'upcoming',
-          description: `Intensive training session for ${club.name} members focusing on skills, fitness, and team coordination.`
-        },
-        {
-          id: 2,
-          title: `${club.name} Inter-College Tournament`,
-          date: 'Feb 10, 2026',
-          time: '9:00 AM - 5:00 PM',
-          location: 'Stadium',
-          attendees: 200,
-          status: 'upcoming',
-          description: `Annual inter-college tournament organized by ${club.name} featuring multiple teams and exciting matches.`
-        },
-        {
-          id: 3,
-          title: `${club.name} Championship Finals`,
-          date: 'Dec 15, 2025',
-          time: '2:00 PM - 6:00 PM',
-          location: 'Main Stadium',
-          attendees: 150,
-          status: 'past',
-          description: `Grand finals of the ${club.name} championship with thrilling competitions and award ceremony.`
-        },
-        {
-          id: 4,
-          title: `${club.name} Fitness Workshop`,
-          date: 'Nov 20, 2025',
-          time: '10:00 AM - 12:00 PM',
-          location: 'Gymnasium',
-          attendees: 40,
-          status: 'past',
-          description: `Educational session on fitness, nutrition, and sports psychology by ${club.name} experts.`
-        }
-      ],
-      academic: [
-        {
-          id: 1,
-          title: `${club.name} Study Group Session`,
-          date: 'Jan 25, 2026',
-          time: '3:00 PM - 5:00 PM',
-          location: 'Library Study Room',
-          attendees: 25,
-          status: 'upcoming',
-          description: `Collaborative study session organized by ${club.name} to help members excel academically.`
-        },
-        {
-          id: 2,
-          title: `${club.name} Guest Lecture Series`,
-          date: 'Feb 10, 2026',
-          time: '11:00 AM - 1:00 PM',
-          location: 'Lecture Hall B',
-          attendees: 80,
-          status: 'upcoming',
-          description: `Inspiring talk by industry experts invited by ${club.name} on relevant academic and professional topics.`
-        },
-        {
-          id: 3,
-          title: `${club.name} Research Symposium`,
-          date: 'Dec 15, 2025',
-          time: '9:00 AM - 4:00 PM',
-          location: 'Conference Center',
-          attendees: 100,
-          status: 'past',
-          description: `${club.name}'s annual research symposium featuring student projects and academic presentations.`
-        },
-        {
-          id: 4,
-          title: `${club.name} Career Guidance Workshop`,
-          date: 'Nov 20, 2025',
-          time: '2:00 PM - 5:00 PM',
-          location: 'Career Center',
-          attendees: 45,
-          status: 'past',
-          description: `Workshop by ${club.name} providing insights into career paths, internships, and professional development.`
-        }
-      ]
+        // Fetch posts for this club
+        const allPosts = await getPosts();
+        const clubPosts = allPosts.filter(p => p.clubId === clubId);
+        setPosts(clubPosts);
+      } catch (error) {
+        console.error('Error fetching club data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    return baseEvents[club.category] || baseEvents.technical;
+    fetchData();
+  }, [clubId]);
+
+  // Convert posts to display events
+  const getEventsFromPosts = (): DisplayEvent[] => {
+    const now = new Date();
+    return posts.map(post => {
+      const postDate = new Date(post.date);
+      const isPast = postDate < now;
+
+      return {
+        id: post.id || '',
+        title: post.title,
+        date: post.date,
+        time: '2:00 PM - 5:00 PM', // Default time
+        location: 'Campus',
+        attendees: post.rsvps || 0,
+        status: isPast ? 'past' as const : 'upcoming' as const,
+        description: post.content
+      };
+    });
   };
 
-  const events: Event[] = getClubEvents(club);
-
+  const events = getEventsFromPosts();
   const filteredEvents = events.filter(event => event.status === activeTab);
 
   // Mock member data for different years
@@ -236,9 +106,28 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
 
   const currentMembers = memberData[selectedYear] || [];
 
-  const handleRSVP = (event: Event) => {
+  const handleRSVP = (event: DisplayEvent) => {
     setRsvpModal({ isOpen: true, event });
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!club) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <p className="text-center text-xl text-slate-600 dark:text-slate-400">Club not found</p>
+        <button onClick={onBack} className="mt-4 text-blue-600 hover:underline block mx-auto">
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -252,14 +141,15 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
 
       {/* Club Header */}
       <div className={`h-48 bg-gradient-to-r ${club.color} rounded-2xl relative mb-8 overflow-hidden`}>
-        <img
-          src={club.image}
-          alt={club.name}
-          className="w-full h-full object-cover opacity-20"
-        />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
-            <div className="text-5xl mb-3">{club.icon}</div>
+            <div className="w-20 h-20 mx-auto mb-3 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center">
+              {club.image && club.image.startsWith('http') ? (
+                <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-5xl">{club.icon}</span>
+              )}
+            </div>
             <h1 className="text-3xl font-black">{club.name}</h1>
           </div>
         </div>
@@ -287,8 +177,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
               <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                 <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Upcoming Events</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white">{club.upcomingEvents}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Posts</p>
+                  <p className="text-xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
                 </div>
               </div>
 
@@ -302,29 +192,27 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
             </div>
           </div>
 
-          {/* Events Timeline */}
+          {/* Posts Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Events</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Posts & Events</h2>
                 <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                   <button
                     onClick={() => setActiveTab('upcoming')}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                      activeTab === 'upcoming'
-                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'upcoming'
+                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Upcoming
                   </button>
                   <button
                     onClick={() => setActiveTab('past')}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                      activeTab === 'past'
-                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'past'
+                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Past Events
                   </button>
@@ -420,7 +308,13 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sticky top-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="text-3xl">{club.icon}</div>
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
+                {club.image && club.image.startsWith('http') ? (
+                  <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">{club.icon}</span>
+                )}
+              </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 {club.name} - Member Board
               </h2>
@@ -436,21 +330,19 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedYear(new Date().getFullYear())}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    selectedYear === new Date().getFullYear()
-                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${selectedYear === new Date().getFullYear()
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
                 >
                   {new Date().getFullYear()}
                 </button>
                 <button
                   onClick={() => setSelectedYear(new Date().getFullYear() - 1)}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    selectedYear === new Date().getFullYear() - 1
-                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${selectedYear === new Date().getFullYear() - 1
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
                 >
                   {new Date().getFullYear() - 1}
                 </button>
