@@ -22,17 +22,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading: false,
   });
 
-  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Find user with matching credentials
     const user = mockUsers.find(
-      u => u.email === email && u.password === password && u.role === role
+      u => u.email === email && u.password === password
     );
-    
+
     if (user) {
       const { password: _, ...userWithoutPassword } = user;
       setAuthState({

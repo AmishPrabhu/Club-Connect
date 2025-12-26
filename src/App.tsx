@@ -8,7 +8,7 @@ import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
 import EventDetail from './pages/EventDetail';
 import LoginPage from './pages/LoginPage';
-import AdminLogin from './pages/AdminLogin';
+
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import { DarkModeProvider } from './context/DarkModeContext';
@@ -83,9 +83,7 @@ function AppContent() {
       {currentPage === 'event' && selectedEvent && (
         <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
       )}
-      {currentPage === 'adminLogin' && (
-        <AdminLogin onNavigate={navigateToPage} />
-      )}
+
       {currentPage === 'adminDashboard' && (
         <AdminDashboard onNavigate={navigateToPage} />
       )}

@@ -163,7 +163,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
                   <User className="w-4 h-4" />
-                  <span>Staff Login</span>
+                  <span>Login</span>
                 </button>
               )}
             </div>
