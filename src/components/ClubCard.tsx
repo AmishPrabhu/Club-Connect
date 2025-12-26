@@ -32,11 +32,11 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${club.color} flex items-center justify-center text-3xl transform group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg overflow-hidden`}>
-          {club.image && club.image.startsWith('http') ? (
-            <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+          {club.image ? (
+            <img src={club.image} alt={club.name} className="w-full h-full object-contain p-2 bg-white" />
           ) : (
-            club.icon
-          )}
+                club.icon
+              )}
         </div>
         <div className="flex items-center gap-2">
           <button

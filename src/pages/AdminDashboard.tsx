@@ -31,10 +31,7 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
       return;
     }
 
-    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-      setError('Please enter a valid URL starting with http:// or https://');
-      return;
-    }
+    
 
     setError(null);
     setIsSaving(true);
@@ -459,8 +456,12 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                         <div key={club.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
                           <div className="flex items-center gap-3 mb-4">
                             <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
-                              {club.image && club.image.startsWith('http') ? (
-                                <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+                              {club.image ? (
+                                  <img
+                                  src={club.image}
+                                  alt={club.name}
+                                  className="w-full h-full object-contain p-2 bg-white"
+                                />
                               ) : (
                                 club.icon
                               )}

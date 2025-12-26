@@ -72,8 +72,12 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-            {club.image && club.image.startsWith('http') ? (
-              <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+            {club.image ? (
+              <img
+                src={club.image}
+                alt={club.name}
+                className="w-full h-full object-contain p-2 bg-white rounded-xl"
+              />
             ) : (
               <span className="text-4xl">{club.icon}</span>
             )}

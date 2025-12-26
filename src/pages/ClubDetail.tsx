@@ -144,8 +144,12 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <div className="w-20 h-20 mx-auto mb-3 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center">
-              {club.image && club.image.startsWith('http') ? (
-                <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+              {club.image ? (
+                <img
+                  src={club.image}
+                  alt={club.name}
+                  className="w-full h-full object-contain p-2 bg-white rounded-xl"
+                />
               ) : (
                 <span className="text-5xl">{club.icon}</span>
               )}
@@ -309,8 +313,12 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sticky top-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-                {club.image && club.image.startsWith('http') ? (
-                  <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+                {club.image ? (
+                  <img
+                    src={club.image}
+                    alt={club.name}
+                    className="w-full h-full object-contain p-2 bg-white rounded-xl"
+                  />
                 ) : (
                   <span className="text-3xl">{club.icon}</span>
                 )}

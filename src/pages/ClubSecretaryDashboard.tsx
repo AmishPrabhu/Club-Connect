@@ -119,11 +119,7 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
       return;
     }
 
-    // Basic URL validation
-    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-      setError('Please enter a valid URL starting with http:// or https://');
-      return;
-    }
+   
 
     setError(null);
     setSuccess(false);

@@ -5,7 +5,7 @@ interface RSVPModalProps {
   isOpen: boolean;
   onClose: () => void;
   event: {
-    id: number;
+    id: string | number;    
     title: string;
     date: string;
     time: string;
