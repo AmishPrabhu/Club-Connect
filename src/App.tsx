@@ -52,6 +52,14 @@ function AppContent() {
     setCurrentPage('home');
   };
 
+  const addGlobalNotification = (notification: Omit<GlobalNotification, 'id'>) => {
+    const newNotification: GlobalNotification = {
+      ...notification,
+      id: Date.now(),
+    };
+    setGlobalNotifications(prev => [newNotification, ...prev]);
+  };
+
   // Login pages are shown based on currentPage state
 
   return (

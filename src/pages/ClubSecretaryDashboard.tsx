@@ -10,9 +10,6 @@ interface ClubSecretaryDashboardProps {
 }
 
 export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecretaryDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'members' | 'notifications'>('overview');
-  const [searchQuery, setSearchQuery] = useState('');
-
   // Get the club data for this secretary
   const club = clubs.find(c => c.id === user?.clubId);
 
@@ -72,6 +69,17 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     }
   ];
 
+  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'members' | 'notifications'>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState(mockPosts);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    content: '',
+    type: 'announcement' as 'event' | 'announcement',
+    date: new Date().toISOString().split('T')[0]
+  });
+
   const handleDeletePost = (postId: string) => {
     console.log('Deleting post:', postId);
     alert('Post deleted successfully!');
@@ -82,6 +90,33 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       console.log('Removing member:', memberId);
       alert('Member removed successfully!');
     }
+  };
+
+  const handleCreatePost = () => {
+    if (!newPost.title.trim() || !newPost.content.trim()) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const post = {
+      id: Date.now().toString(),
+      title: newPost.title,
+      content: newPost.content,
+      date: newPost.date,
+      type: newPost.type,
+      status: 'published' as const,
+      rsvps: 0
+    };
+
+    setPosts([...posts, post]);
+    setNewPost({
+      title: '',
+      content: '',
+      type: 'announcement',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setIsCreatePostModalOpen(false);
+    alert('Post created successfully!');
   };
 
   const handleSendNotification = () => {
@@ -137,7 +172,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
               <Edit className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{mockPosts.length}</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
               <p className="text-sm text-slate-600 dark:text-slate-300">Published Posts</p>
             </div>
           </div>
@@ -238,20 +273,23 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2">
+                <button
+                  onClick={() => setIsCreatePostModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                >
                   <Plus className="w-4 h-4" />
                   Create New Post
                 </button>
               </div>
 
               <div className="space-y-4">
-                {mockPosts.map((post) => (
+                {posts.map((post) => (
                   <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            post.type === 'event' 
+                            post.type === 'event'
                               ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
                               : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
                           }`}>
@@ -269,7 +307,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                         <button className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeletePost(post.id)}
                           className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
                         >
@@ -279,6 +317,79 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Create Post Modal */}
+          {isCreatePostModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md mx-4">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Post</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={newPost.title}
+                      onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Post title"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Content
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={newPost.content}
+                      onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Post content"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Type
+                    </label>
+                    <select
+                      value={newPost.type}
+                      onChange={(e) => setNewPost({ ...newPost, type: e.target.value as 'event' | 'announcement' })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="announcement">Announcement</option>
+                      <option value="event">Event</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={newPost.date}
+                      onChange={(e) => setNewPost({ ...newPost, date: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setIsCreatePostModalOpen(false)}
+                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreatePost}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+                  >
+                    Create Post
+                  </button>
+                </div>
               </div>
             </div>
           )}
