@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Shield, Sparkles, GraduationCap, Settings, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Sparkles, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,7 +12,20 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { login, isLoading, user } = useAuth();
+  const { login, isLoading, user, isAuthenticated } = useAuth();
+
+  // Navigate when user is authenticated and we have user data
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        onNavigate('adminDashboard');
+      } else if (user.role === 'club-secretary') {
+        onNavigate('clubSecretaryDashboard');
+      } else {
+        onNavigate('home');
+      }
+    }
+  }, [isAuthenticated, user, onNavigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,15 +38,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
     const success = await login(email, password);
     if (!success) {
-      setError('Invalid email or password');
-    } else {
-      // Navigate based on user role after successful login
-      if (user?.role === 'admin') {
-        onNavigate('adminDashboard');
-      } else if (user?.role === 'club-secretary') {
-        onNavigate('clubSecretaryDashboard');
-      }
+      setError('Invalid email or password. Please check your credentials.');
     }
+    // Navigation is handled by useEffect when auth state updates
   };
 
   return (
@@ -83,7 +90,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="staff@wce.ac.in"
+                  placeholder="your.email@example.com"
                   required
                 />
               </div>
@@ -133,17 +140,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           </form>
         </div>
 
-        {/* Demo Credentials */}
-        <div className="mt-6 bg-slate-100 dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Demo Credentials:</h3>
-          <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-            <p><strong>Club Sec (GDSC):</strong> secretary@gdsc.wce.ac.in / secretary123</p>
-            <p><strong>Club Sec (MLSC):</strong> secretary@mlsc.wce.ac.in / secretary123</p>
-            <p><strong>Admin:</strong> admin@wce.ac.in / admin123</p>
-          </div>
+        {/* Info Box */}
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+          <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2">ℹ️ Login Info:</h3>
+          <p className="text-sm text-blue-600 dark:text-blue-400">
+            Use the credentials you created via the Setup Admin page, or ask your administrator for access.
+          </p>
         </div>
       </div>
     </div>
   );
 }
-

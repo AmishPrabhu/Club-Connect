@@ -7,6 +7,8 @@ export interface User {
   role: UserRole;
   clubId?: string; // For club secretaries
   clubName?: string; // For club secretaries
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface AuthState {
@@ -17,42 +19,63 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
 
-// Mock data for demonstration
-export const mockUsers = [
-  {
-    id: 'admin1',
-    email: 'admin@wce.ac.in',
-    password: 'admin123',
-    name: 'Admin User',
-    role: 'admin' as UserRole,
-  },
-  {
-    id: 'secretary1',
-    email: 'secretary@gdsc.wce.ac.in',
-    password: 'secretary123',
-    name: 'GDSC Secretary',
-    role: 'club-secretary' as UserRole,
-    clubId: 'gdsc',
-    clubName: 'GDG',
-  },
-  {
-    id: 'secretary2',
-    email: 'secretary@mlsc.wce.ac.in',
-    password: 'secretary123',
-    name: 'MLSC Secretary',
-    role: 'club-secretary' as UserRole,
-    clubId: 'mlsc',
-    clubName: 'MLSC',
-  },
-  {
-    id: 'user1',
-    email: 'student@wce.ac.in',
-    password: 'student123',
-    name: 'Student User',
-    role: 'user' as UserRole,
-  },
-];
+// Firestore user document structure (stored in 'users' collection)
+export interface FirestoreUser {
+  email: string;
+  name: string;
+  role: UserRole;
+  clubId?: string;
+  clubName?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Firestore club document structure
+export interface FirestoreClub {
+  id?: string;
+  name: string;
+  description: string;
+  category: 'technical' | 'academic' | 'cultural' | 'sports';
+  members: number;
+  icon: string;
+  image: string;
+  color: string;
+  upcomingEvents: number;
+  secretaryId?: string;
+  secretaryEmail?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Firestore post document structure
+export interface FirestorePost {
+  id?: string;
+  title: string;
+  content: string;
+  clubId: string;
+  clubName: string;
+  authorId: string;
+  authorName: string;
+  type: 'event' | 'announcement';
+  status: 'draft' | 'published';
+  date: string;
+  rsvps?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Firestore notification document structure
+export interface FirestoreNotification {
+  id?: string;
+  title: string;
+  message: string;
+  type: 'system' | 'club' | 'event' | 'announcement';
+  userId?: string; // Target user, empty for global
+  clubId?: string; // Source club
+  read: boolean;
+  createdAt: Date;
+}

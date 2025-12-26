@@ -1,85 +1,306 @@
-import { useState } from 'react';
-import { Shield, Users, Calendar, Trash2, Edit, Search, Filter, TrendingUp, Settings, Bell, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
-import { clubs } from '../data/clubsData';
+import { FirestoreClub, FirestorePost, FirestoreNotification } from '../types/auth';
+import {
+  getClubs,
+  createClub,
+  deleteClub,
+  createClubSecretary,
+  getPosts,
+  deletePost,
+  getNotifications,
+  createNotification,
+  deleteNotification,
+} from '../lib/firestoreService';
 
 interface AdminDashboardProps {
   onNavigate: (page: Page) => void;
 }
+
+// Admin Image URL Input Component
+function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: string; currentImage?: string; onSuccess: (url: string) => void }) {
+  const [imageUrl, setImageUrl] = useState(currentImage || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    if (!imageUrl.trim()) {
+      setError('Please enter an image URL');
+      return;
+    }
+
+    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+      setError('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+
+    setError(null);
+    setIsSaving(true);
+
+    try {
+      const { updateClubImage } = await import('../lib/firestoreService');
+      const result = await updateClubImage(clubId, imageUrl);
+
+      if (result.success) {
+        onSuccess(imageUrl);
+      } else {
+        setError(result.error || 'Failed to update image');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to update image');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="relative w-40 h-40 mx-auto">
+        <img
+          src={imageUrl || currentImage || '/club-default.jpg'}
+          alt="Club profile"
+          className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/club-default.jpg'; }}
+        />
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+      )}
+
+      <div className="space-y-2">
+        <input
+          type="url"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="Paste image URL here..."
+          className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+        >
+          {isSaving ? 'Saving...' : 'Save Image URL'}
+        </button>
+      </div>
+      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        Tip: Upload to <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Imgur</a> and paste link
+      </p>
+    </div>
+  );
+}
+
+const CLUB_CATEGORIES = ['technical', 'academic', 'cultural', 'sports'] as const;
+const GRADIENT_COLORS = [
+  'from-blue-500 to-cyan-500',
+  'from-emerald-500 to-teal-500',
+  'from-purple-500 to-pink-500',
+  'from-amber-500 to-orange-500',
+  'from-red-500 to-rose-500',
+  'from-indigo-500 to-blue-500',
+];
+
 
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const mockPosts = [
-    {
-      id: '1',
-      title: 'GDSC Workshop: Building with Gemini API',
-      clubId: 'gdsc',
-      clubName: 'GDG',
-      author: 'GDSC Secretary',
-      date: '2025-12-15',
-      type: 'event',
-      status: 'published'
-    },
-    {
-      id: '2',
-      title: 'MLSC Cloud Computing Bootcamp',
-      clubId: 'mlsc',
-      clubName: 'MLSC',
-      author: 'MLSC Secretary',
-      date: '2025-12-14',
-      type: 'event',
-      status: 'published'
-    },
-    {
-      id: '3',
-      title: 'Art Circle Exhibition',
-      clubId: 'artcircle',
-      clubName: 'Art Circle',
-      author: 'Art Circle Secretary',
-      date: '2025-12-13',
-      type: 'announcement',
-      status: 'published'
-    }
-  ];
+  // Data states
+  const [clubs, setClubs] = useState<FirestoreClub[]>([]);
+  const [posts, setPosts] = useState<FirestorePost[]>([]);
+  const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mockNotifications = [
-    {
-      id: '1',
-      message: 'New club application received from "Robotics Society"',
-      type: 'club_application',
-      date: '2025-12-15',
-      read: false
-    },
-    {
-      id: '2',
-      message: 'System maintenance scheduled for tonight at 11 PM',
-      type: 'system',
-      date: '2025-12-15',
-      read: false
-    },
-    {
-      id: '3',
-      message: 'Monthly club activity report is ready',
-      type: 'report',
-      date: '2025-12-14',
-      read: true
-    }
-  ];
+  // Modal states
+  const [showCreateClubModal, setShowCreateClubModal] = useState(false);
+  const [showCreateSecretaryModal, setShowCreateSecretaryModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
+  const [selectedClub, setSelectedClub] = useState<FirestoreClub | null>(null);
 
-  const handleDeletePost = (postId: string) => {
-    // In a real app, this would make an API call
-    console.log('Deleting post:', postId);
-    alert('Post deleted successfully!');
+  // Form states
+  const [newClub, setNewClub] = useState({
+    name: '',
+    description: '',
+    category: 'technical' as const,
+    icon: '🎯',
+    image: '/club-default.jpg',
+  });
+
+  const [newSecretary, setNewSecretary] = useState({
+    email: '',
+    password: '',
+    name: '',
+  });
+
+  const [newNotification, setNewNotification] = useState({
+    title: '',
+    message: '',
+    type: 'system' as const,
+  });
+
+  const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Load data on mount and tab change
+  useEffect(() => {
+    loadData();
+  }, [activeTab]);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      if (activeTab === 'clubs' || activeTab === 'overview') {
+        const clubsData = await getClubs();
+        setClubs(clubsData);
+      }
+      if (activeTab === 'posts' || activeTab === 'overview') {
+        const postsData = await getPosts();
+        setPosts(postsData);
+      }
+      if (activeTab === 'notifications' || activeTab === 'overview') {
+        const notificationsData = await getNotifications();
+        setNotifications(notificationsData);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleApproveClub = (clubId: string) => {
-    console.log('Approving club:', clubId);
-    alert('Club approved successfully!');
+  // Club handlers
+  const handleCreateClub = async () => {
+    setFormMessage(null);
+    if (!newClub.name || !newClub.description) {
+      setFormMessage({ type: 'error', text: 'Please fill in all required fields' });
+      return;
+    }
+
+    const randomColor = GRADIENT_COLORS[Math.floor(Math.random() * GRADIENT_COLORS.length)];
+    const clubId = await createClub({
+      ...newClub,
+      color: randomColor,
+      members: 0,
+      upcomingEvents: 0,
+    });
+
+    if (clubId) {
+      setFormMessage({ type: 'success', text: 'Club created successfully!' });
+      setNewClub({ name: '', description: '', category: 'technical', icon: '🎯', image: '/club-default.jpg' });
+      setTimeout(() => {
+        setShowCreateClubModal(false);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: 'Failed to create club' });
+    }
   };
+
+  const handleDeleteClub = async (clubId: string) => {
+    if (!confirm('Are you sure you want to delete this club? This action cannot be undone.')) return;
+
+    const success = await deleteClub(clubId);
+    if (success) {
+      loadData();
+    } else {
+      alert('Failed to delete club');
+    }
+  };
+
+  // Secretary handlers
+  const handleCreateSecretary = async () => {
+    setFormMessage(null);
+    if (!newSecretary.email || !newSecretary.password || !newSecretary.name || !selectedClub) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (newSecretary.password.length < 6) {
+      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    const result = await createClubSecretary(
+      newSecretary.email,
+      newSecretary.password,
+      newSecretary.name,
+      selectedClub.id!,
+      selectedClub.name
+    );
+
+    if (result.success) {
+      setFormMessage({ type: 'success', text: `Secretary created for ${selectedClub.name}!` });
+      setNewSecretary({ email: '', password: '', name: '' });
+      setTimeout(() => {
+        setShowCreateSecretaryModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: result.error || 'Failed to create secretary' });
+    }
+  };
+
+  // Post handlers
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    const success = await deletePost(postId);
+    if (success) {
+      loadData();
+    } else {
+      alert('Failed to delete post');
+    }
+  };
+
+  // Notification handlers
+  const handleCreateNotification = async () => {
+    setFormMessage(null);
+    if (!newNotification.title || !newNotification.message) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    const notificationId = await createNotification({
+      ...newNotification,
+      read: false,
+    });
+
+    if (notificationId) {
+      setFormMessage({ type: 'success', text: 'Notification sent!' });
+      setNewNotification({ title: '', message: '', type: 'system' });
+      setTimeout(() => {
+        setShowNotificationModal(false);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: 'Failed to send notification' });
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId: string) => {
+    const success = await deleteNotification(notificationId);
+    if (success) {
+      loadData();
+    }
+  };
+
+  const openSecretaryModal = (club: FirestoreClub) => {
+    setSelectedClub(club);
+    setShowCreateSecretaryModal(true);
+  };
+
+  const filteredClubs = clubs.filter(club =>
+    club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    club.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -118,7 +339,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">12</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
               <p className="text-sm text-slate-600 dark:text-slate-300">Active Events</p>
             </div>
           </div>
@@ -130,8 +351,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">1,234</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Total Members</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Total Posts</p>
             </div>
           </div>
         </div>
@@ -142,8 +363,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">3</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Pending Tasks</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Unread Notifications</p>
             </div>
           </div>
         </div>
@@ -151,7 +372,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       {/* Navigation Tabs */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
-        <div className="flex border-b border-slate-200 dark:border-slate-700">
+        <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: TrendingUp },
             { id: 'clubs', label: 'Manage Clubs', icon: Users },
@@ -163,11 +384,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${
-                  activeTab === tab.id
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
+                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 {tab.label}
@@ -177,165 +397,457 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         <div className="p-6">
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">New club "Robotics Society" applied</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">3 new events published</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">1 day ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">Monthly report generated</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">3 days ago</p>
-                  </div>
-                </div>
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
-          )}
-
-          {/* Clubs Tab */}
-          {activeTab === 'clubs' && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search clubs..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {clubs.map((club) => (
-                  <div key={club.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <img src={club.image} alt={club.name} className="w-12 h-12 rounded-lg object-cover" />
-                      <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white">{club.name}</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{club.category}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-slate-600 dark:text-slate-400">{club.members} members</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">{club.upcomingEvents} upcoming events</p>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all">
-                        <Eye className="w-4 h-4 inline mr-1" />
-                        View
-                      </button>
-                      <button className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all">
-                        <Settings className="w-4 h-4 inline mr-1" />
-                        Manage
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Posts Tab */}
-          {activeTab === 'posts' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">
-                  Add New Post
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {mockPosts.map((post) => (
-                  <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            post.type === 'event' 
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                          }`}>
-                            {post.type}
-                          </span>
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
-                            {post.clubName} • {post.author}
-                          </span>
+          ) : (
+            <>
+              {/* Overview Tab */}
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+                  {posts.length === 0 && clubs.length === 0 ? (
+                    <p className="text-slate-600 dark:text-slate-400">No recent activity. Start by creating a club!</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {posts.slice(0, 5).map((post) => (
+                        <div key={post.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                          <div className={`w-2 h-2 ${post.type === 'event' ? 'bg-blue-500' : 'bg-purple-500'} rounded-full`}></div>
+                          <div>
+                            <p className="font-semibold text-slate-900 dark:text-white">{post.title}</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">{post.clubName} • {post.date}</p>
+                          </div>
                         </div>
-                        <h4 className="font-bold text-slate-900 dark:text-white mb-2">{post.title}</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{post.date}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-lg transition-all">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeletePost(post.id)}
-                          className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  )}
+                </div>
+              )}
 
-          {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Notifications</h3>
-              <div className="space-y-4">
-                {mockNotifications.map((notification) => (
-                  <div 
-                    key={notification.id} 
-                    className={`p-4 rounded-xl border ${
-                      notification.read 
-                        ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
-                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-900 dark:text-white mb-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{notification.date}</p>
-                      </div>
-                      {!notification.read && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      )}
+              {/* Clubs Tab */}
+              {activeTab === 'clubs' && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search clubs..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
+                    <button
+                      onClick={() => setShowCreateClubModal(true)}
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Create Club
+                    </button>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  {filteredClubs.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">No clubs found. Create your first club!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredClubs.map((club) => (
+                        <div key={club.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
+                              {club.image && club.image.startsWith('http') ? (
+                                <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+                              ) : (
+                                club.icon
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-slate-900 dark:text-white">{club.name}</h4>
+                              <p className="text-sm text-slate-600 dark:text-slate-400 capitalize">{club.category}</p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">{club.description}</p>
+                          <div className="space-y-1 mb-4">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">{club.members} members</p>
+                            {club.secretaryEmail && (
+                              <p className="text-sm text-green-600 dark:text-green-400">Secretary: {club.secretaryEmail}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            {!club.secretaryEmail && (
+                              <button
+                                onClick={() => openSecretaryModal(club)}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1"
+                              >
+                                <UserPlus className="w-4 h-4" />
+                                Add Secretary
+                              </button>
+                            )}
+                            <button
+                              onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1"
+                            >
+                              <Edit className="w-4 h-4" />
+                              Image
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClub(club.id!)}
+                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Posts Tab */}
+              {activeTab === 'posts' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
+                  </div>
+
+                  {posts.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">No posts yet. Club secretaries can create posts.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {posts.map((post) => (
+                        <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                  : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                                  }`}>
+                                  {post.type}
+                                </span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                                  {post.clubName} • {post.authorName}
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-slate-900 dark:text-white mb-2">{post.title}</h4>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">{post.date}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleDeletePost(post.id!)}
+                                className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Notifications Tab */}
+              {activeTab === 'notifications' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Notifications</h3>
+                    <button
+                      onClick={() => setShowNotificationModal(true)}
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      Send Notification
+                    </button>
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Bell className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">No notifications yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 rounded-xl border ${notification.read
+                            ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
+                            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                            }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{notification.title}</h4>
+                              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{notification.message}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-500">
+                                {notification.createdAt instanceof Date
+                                  ? notification.createdAt.toLocaleString()
+                                  : new Date(notification.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteNotification(notification.id!)}
+                              className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+
+      {/* Create Club Modal */}
+      {showCreateClubModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create New Club</h3>
+              <button onClick={() => { setShowCreateClubModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Club Name *</label>
+                <input
+                  type="text"
+                  value={newClub.name}
+                  onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., GDSC"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description *</label>
+                <textarea
+                  rows={3}
+                  value={newClub.description}
+                  onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Brief description of the club"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Category</label>
+                <select
+                  value={newClub.category}
+                  onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {CLUB_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Icon (emoji)</label>
+                <input
+                  type="text"
+                  value={newClub.icon}
+                  onChange={(e) => setNewClub({ ...newClub, icon: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="🎯"
+                />
+              </div>
+
+              <button
+                onClick={handleCreateClub}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition-all"
+              >
+                Create Club
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Secretary Modal */}
+      {showCreateSecretaryModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Secretary for {selectedClub.name}</h3>
+              <button onClick={() => { setShowCreateSecretaryModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
+                <input
+                  type="text"
+                  value={newSecretary.name}
+                  onChange={(e) => setNewSecretary({ ...newSecretary, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Secretary Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
+                <input
+                  type="email"
+                  value={newSecretary.email}
+                  onChange={(e) => setNewSecretary({ ...newSecretary, email: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="secretary@club.wce.ac.in"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
+                <input
+                  type="password"
+                  value={newSecretary.password}
+                  onChange={(e) => setNewSecretary({ ...newSecretary, password: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <button
+                onClick={handleCreateSecretary}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create Secretary Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Notification Modal */}
+      {showNotificationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Send Notification</h3>
+              <button onClick={() => { setShowNotificationModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Title *</label>
+                <input
+                  type="text"
+                  value={newNotification.title}
+                  onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Notification title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message *</label>
+                <textarea
+                  rows={4}
+                  value={newNotification.message}
+                  onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Notification message..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Type</label>
+                <select
+                  value={newNotification.type}
+                  onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value as any })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="system">System</option>
+                  <option value="announcement">Announcement</option>
+                  <option value="event">Event</option>
+                </select>
+              </div>
+
+              <button
+                onClick={handleCreateNotification}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-5 h-5" />
+                Send Notification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Upload Modal */}
+      {showImageUploadModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Update Club Image
+              </h3>
+              <button
+                onClick={() => { setShowImageUploadModal(false); setSelectedClub(null); }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Change profile picture for <span className="font-semibold">{selectedClub.name}</span>
+            </p>
+
+            <AdminImageUploader
+              clubId={selectedClub.id!}
+              currentImage={selectedClub.image}
+              onSuccess={(url) => {
+                setClubs(prev => prev.map(c => c.id === selectedClub.id ? { ...c, image: url } : c));
+                setShowImageUploadModal(false);
+                setSelectedClub(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

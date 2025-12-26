@@ -32,7 +32,7 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${club.color} flex items-center justify-center text-3xl transform group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg overflow-hidden`}>
-          {club.image ? (
+          {club.image && club.image.startsWith('http') ? (
             <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
           ) : (
             club.icon
@@ -45,11 +45,10 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
             aria-label="Favorite club"
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isFavorited
+              className={`w-5 h-5 transition-colors ${isFavorited
                   ? 'text-red-500 fill-red-500'
                   : 'text-slate-400 hover:text-red-400'
-              }`}
+                }`}
             />
           </button>
           <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
