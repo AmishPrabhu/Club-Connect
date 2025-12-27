@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus } from 'lucide-react';
-import { FirestoreClub, FirestorePost } from '../types/auth';
+import { FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { getClubs, getPosts } from '../lib/firestoreService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import RSVPModal from '../components/RSVPModal';
+import AttachmentGallery from '../components/AttachmentGallery';
 
 interface ClubDetailProps {
   clubId: string;
   onBack: () => void;
   onNavigateToMember: (member: any) => void;
+  onNavigateToPost: (postId: string) => void;
 }
 
 interface DisplayEvent {
@@ -21,9 +23,11 @@ interface DisplayEvent {
   attendees: number;
   status: 'upcoming' | 'past';
   description: string;
+  attachments?: Attachment[];
+  eventPhotos?: Attachment[];
 }
 
-export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubDetailProps) {
+export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: DisplayEvent | null }>({
@@ -80,7 +84,9 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
         location: 'Campus',
         attendees: post.rsvps || 0,
         status: isPast ? 'past' as const : 'upcoming' as const,
-        description: post.content
+        description: post.content,
+        attachments: post.attachments,
+        eventPhotos: post.eventPhotos
       };
     });
   };
@@ -249,55 +255,59 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember }: ClubD
                         <Calendar className="w-3 h-3 text-white" />
                       </div>
 
-                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 ml-4">
+                      <div
+                        onClick={() => onNavigateToPost(event.id)}
+                        className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 ml-4 cursor-pointer hover:shadow-lg transition-shadow"
+                      >
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                               {event.title}
                             </h3>
-                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3">
+                            <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">
                               {event.description}
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div className="flex flex-wrap items-center gap-4 text-sm">
                               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                                 <Calendar className="w-4 h-4" />
                                 <span>{event.date}</span>
                               </div>
                               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                <Clock className="w-4 h-4" />
-                                <span>{event.time}</span>
+                                <Users className="w-4 h-4" />
+                                <span>{event.attendees} attending</span>
                               </div>
-                              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                                <MapPin className="w-4 h-4" />
-                                <span>{event.location}</span>
-                              </div>
+                              {((event.attachments?.length || 0) + (event.eventPhotos?.length || 0)) > 0 && (
+                                <span className="text-xs text-blue-500 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                                  📷 {(event.attachments?.length || 0) + (event.eventPhotos?.length || 0)} photos
+                                </span>
+                              )}
                             </div>
                           </div>
 
-                          {activeTab === 'upcoming' && (
-                            <button
-                              onClick={() => handleRSVP(event)}
-                              className="ml-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
-                            >
-                              <Plus className="w-4 h-4" />
-                              RSVP
-                            </button>
-                          )}
+                          <div className="flex flex-col gap-2 ml-4">
+                            {activeTab === 'upcoming' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleRSVP(event); }}
+                                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                              >
+                                <Plus className="w-4 h-4" />
+                                RSVP
+                              </button>
+                            )}
+                            {activeTab === 'past' && (
+                              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+                                <CheckCircle className="w-4 h-4" />
+                                <span>Completed</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-600">
-                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                            <Users className="w-4 h-4" />
-                            <span>{event.attendees} attending</span>
-                          </div>
-
-                          {activeTab === 'past' && (
-                            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                              <CheckCircle className="w-4 h-4" />
-                              <span>Completed</span>
-                            </div>
-                          )}
+                        <div className="pt-3 border-t border-slate-200 dark:border-slate-600">
+                          <span className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                            View Details & Photos →
+                          </span>
                         </div>
                       </div>
                     </div>

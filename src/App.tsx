@@ -7,6 +7,7 @@ import MemberBoardDetail from './pages/MemberBoardDetail';
 import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
 import EventDetail from './pages/EventDetail';
+import PostDetail from './pages/PostDetail';
 import LoginPage from './pages/LoginPage';
 
 import AdminDashboard from './pages/AdminDashboard';
@@ -22,6 +23,7 @@ function AppContent() {
   const [selectedClub, setSelectedClub] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const { user, logout } = useAuth();
 
   const navigateToClub = (clubId: string) => {
@@ -39,12 +41,18 @@ function AppContent() {
     setCurrentPage('event');
   };
 
+  const navigateToPost = (postId: string) => {
+    setSelectedPost(postId);
+    setCurrentPage('post');
+  };
+
   const navigateToPage = (page: Page) => {
     setCurrentPage(page);
-    if (page !== 'club' && page !== 'memberBoard' && page !== 'event') {
+    if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post') {
       setSelectedClub(null);
       setSelectedMember(null);
       setSelectedEvent(null);
+      setSelectedPost(null);
     }
   };
 
@@ -67,10 +75,10 @@ function AppContent() {
       )}
 
       {/* Main Pages */}
-      {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} />}
+      {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} />}
       {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
       {currentPage === 'club' && selectedClub && (
-        <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} />
+        <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
       )}
       {currentPage === 'memberBoard' && selectedMember && (
         <MemberBoardDetail club={selectedClub} onBack={() => navigateToPage('club')} />
@@ -83,6 +91,9 @@ function AppContent() {
       )}
       {currentPage === 'event' && selectedEvent && (
         <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
+      )}
+      {currentPage === 'post' && selectedPost && (
+        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} user={user} />
       )}
 
       {currentPage === 'adminDashboard' && (

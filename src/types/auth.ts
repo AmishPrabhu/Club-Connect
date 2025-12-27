@@ -51,6 +51,14 @@ export interface FirestoreClub {
   updatedAt: Date;
 }
 
+// Attachment structure for posts (Cloudinary uploads)
+export interface Attachment {
+  url: string;
+  publicId: string;  // Cloudinary public ID for management
+  type: 'image' | 'video' | 'pdf' | 'link';
+  label?: string;
+}
+
 // Firestore post document structure
 export interface FirestorePost {
   id?: string;
@@ -64,6 +72,8 @@ export interface FirestorePost {
   status: 'draft' | 'published';
   date: string;
   rsvps?: number;
+  attachments?: Attachment[];      // Description images (uploaded when creating post)
+  eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   createdAt: Date;
   updatedAt: Date;
 }

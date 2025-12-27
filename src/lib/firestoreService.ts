@@ -206,6 +206,20 @@ export const deletePost = async (postId: string): Promise<boolean> => {
     }
 };
 
+export const updatePost = async (postId: string, postData: Partial<FirestorePost>): Promise<boolean> => {
+    try {
+        const postRef = doc(db, 'posts', postId);
+        await updateDoc(postRef, {
+            ...postData,
+            updatedAt: Timestamp.now(),
+        });
+        return true;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        return false;
+    }
+};
+
 // ==================== NOTIFICATIONS ====================
 
 export const getNotifications = async (userId?: string): Promise<FirestoreNotification[]> => {

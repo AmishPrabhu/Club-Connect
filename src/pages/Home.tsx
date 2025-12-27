@@ -9,9 +9,10 @@ interface HomeProps {
   onNavigate: (page: Page) => void;
   onNavigateToClub: (clubId: string) => void;
   onNavigateToEvent: (eventId: string) => void;
+  onNavigateToPost: (postId: string) => void;
 }
 
-export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }: HomeProps) {
+export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent, onNavigateToPost }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [clubs, setClubs] = useState<FirestoreClub[]>([]);
@@ -195,6 +196,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
               (filteredPosts.length > 0 ? filteredPosts : posts).slice(0, 5).map((post) => (
                 <div
                   key={post.id}
+                  onClick={() => post.id && onNavigateToPost(post.id)}
                   className="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700 cursor-pointer"
                 >
                   <div className="flex gap-4">
@@ -210,6 +212,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
                           <span className="text-sm text-slate-500 dark:text-slate-400">
                             {post.clubName}
                           </span>
+                          {post.attachments && post.attachments.length > 0 && (
+                            <span className="text-xs text-blue-500 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                              📷 {post.attachments.length} {post.attachments.length === 1 ? 'photo' : 'photos'}
+                            </span>
+                          )}
                         </div>
                         <div className="text-sm text-slate-500 dark:text-slate-400">
                           {post.date}
@@ -243,8 +250,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent }
                     <div
                       key={notif.id}
                       className={`p-4 rounded-xl transition-all hover:scale-105 ${!notif.read
-                          ? 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-l-4 border-red-500'
-                          : 'bg-slate-50 dark:bg-slate-700/50'
+                        ? 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-l-4 border-red-500'
+                        : 'bg-slate-50 dark:bg-slate-700/50'
                         }`}
                     >
                       <div className="flex gap-3">

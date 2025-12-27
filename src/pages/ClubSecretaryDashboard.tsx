@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image } from 'lucide-react';
 import { Page } from '../types/page';
-import { User, FirestoreClub, FirestorePost } from '../types/auth';
+import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getPosts, createPost, deletePost, createNotification } from '../lib/firestoreService';
+import { getPosts, createPost, deletePost, createNotification, updatePost } from '../lib/firestoreService';
+import CloudinaryUpload from '../components/CloudinaryUpload';
+import AttachmentGallery from '../components/AttachmentGallery';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: FirestoreClub }) {
@@ -119,7 +121,7 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
       return;
     }
 
-   
+
 
     setError(null);
     setSuccess(false);
@@ -201,8 +203,12 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     title: '',
     content: '',
     type: 'announcement' as 'event' | 'announcement',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    attachments: [] as Attachment[]
   });
+
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editAttachments, setEditAttachments] = useState<Attachment[]>([]);
 
   // Fetch club data from Firestore
   useEffect(() => {
@@ -258,7 +264,8 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       authorId: user.id,
       authorName: user.name,
       status: 'published',
-      rsvps: 0
+      rsvps: 0,
+      ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {})
     });
 
     if (postId) {
@@ -267,7 +274,8 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         title: '',
         content: '',
         type: 'announcement',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        attachments: []
       });
 
       // Refresh posts
@@ -290,6 +298,23 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     if (success && user?.clubId) {
       const allPosts = await getPosts();
       setPosts(allPosts.filter(p => p.clubId === user.clubId));
+    }
+  };
+
+  const handleEditPhotos = (post: FirestorePost) => {
+    setEditingPostId(post.id!);
+    setEditAttachments(post.eventPhotos || []);  // Use eventPhotos for post-event uploads
+  };
+
+  const handleSavePhotos = async () => {
+    if (!editingPostId) return;
+
+    const success = await updatePost(editingPostId, { eventPhotos: editAttachments });  // Save to eventPhotos
+    if (success && user?.clubId) {
+      const allPosts = await getPosts();
+      setPosts(allPosts.filter(p => p.clubId === user.clubId));
+      setEditingPostId(null);
+      setEditAttachments([]);
     }
   };
 
@@ -506,8 +531,23 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                           {post.rsvps && post.rsvps > 0 && (
                             <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
                           )}
+                          {post.attachments && post.attachments.length > 0 && (
+                            <div className="mt-3">
+                              <AttachmentGallery attachments={post.attachments} />
+                            </div>
+                          )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-col">
+                          {post.type === 'event' && new Date(post.date) < new Date() && (
+                            <button
+                              onClick={() => handleEditPhotos(post)}
+                              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
+                              title="Add Event Photos"
+                            >
+                              <Image className="w-4 h-4" />
+                              Add Photos ({post.eventPhotos?.length || 0})
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeletePost(post.id!)}
                             className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
@@ -599,6 +639,21 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Description Images (Optional)
+                </label>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                  Add promotional images for your post. Event photos can be added later.
+                </p>
+                <CloudinaryUpload
+                  clubName={club.name}
+                  existingAttachments={newPost.attachments}
+                  onUploadComplete={(attachments) => setNewPost({ ...newPost, attachments })}
+                  maxFiles={10}
+                />
+              </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button
@@ -612,6 +667,45 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
               >
                 Create Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Photos Modal */}
+      {editingPostId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Event Photos</h3>
+              <button
+                onClick={() => { setEditingPostId(null); setEditAttachments([]); }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <CloudinaryUpload
+              clubName={club.name}
+              existingAttachments={editAttachments}
+              onUploadComplete={(attachments) => setEditAttachments(attachments)}
+              maxFiles={20}
+            />
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setEditingPostId(null); setEditAttachments([]); }}
+                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePhotos}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+              >
+                Save Photos
               </button>
             </div>
           </div>
