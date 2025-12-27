@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
@@ -7,6 +7,7 @@ import { db } from '../lib/firebase';
 import { getPosts, createPost, deletePost, createNotification, updatePost } from '../lib/firestoreService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
+import MemberManager from '../components/MemberManager';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: FirestoreClub }) {
@@ -195,7 +196,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
   const [club, setClub] = useState<FirestoreClub | null>(null);
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'notifications'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications'>('overview');
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -204,11 +205,17 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     content: '',
     type: 'announcement' as 'event' | 'announcement',
     date: new Date().toISOString().split('T')[0],
+    startTime: '',
+    endTime: '',
+    location: '',
     attachments: [] as Attachment[]
   });
 
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editAttachments, setEditAttachments] = useState<Attachment[]>([]);
+
+  // Ref to prevent duplicate member additions in React Strict Mode
+  const secretaryAddedRef = useRef(false);
 
   // Fetch club data from Firestore
   useEffect(() => {
@@ -230,6 +237,35 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
             createdAt: clubDoc.data().createdAt?.toDate() || new Date(),
             updatedAt: clubDoc.data().updatedAt?.toDate() || new Date(),
           } as FirestoreClub);
+
+          // Check if secretary is already a member, if not add them (only once)
+          const { getClubMembers, addClubMember, syncClubMemberCount } = await import('../lib/firestoreService');
+          const members = await getClubMembers(user.clubId);
+          const secretaryExists = members.some(m => m.email === user.email);
+
+          if (!secretaryExists && user.email && user.name && !secretaryAddedRef.current) {
+            secretaryAddedRef.current = true; // Mark as added to prevent duplicate
+            await addClubMember(user.clubId, {
+              name: user.name,
+              email: user.email,
+              role: 'secretary',
+            });
+          }
+
+          // Always sync member count with actual subcollection count
+          const actualCount = await syncClubMemberCount(user.clubId);
+
+          // Refetch club data to get updated member count
+          const updatedClubDoc = await getDoc(clubRef);
+          if (updatedClubDoc.exists()) {
+            setClub({
+              id: updatedClubDoc.id,
+              ...updatedClubDoc.data(),
+              members: actualCount, // Use the synced count
+              createdAt: updatedClubDoc.data().createdAt?.toDate() || new Date(),
+              updatedAt: updatedClubDoc.data().updatedAt?.toDate() || new Date(),
+            } as FirestoreClub);
+          }
         }
 
         // Fetch posts for this club
@@ -254,11 +290,31 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
 
     if (!club || !user) return;
 
+    // Helper to convert 24h time (e.g., "14:30") to 12h format (e.g., "2:30 PM")
+    const formatTime12h = (time24: string) => {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':').map(Number);
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    };
+
+    // Build time string if times are provided
+    let timeString: string | undefined;
+    if (newPost.startTime) {
+      timeString = formatTime12h(newPost.startTime);
+      if (newPost.endTime) {
+        timeString += ` - ${formatTime12h(newPost.endTime)}`;
+      }
+    }
+
     const postId = await createPost({
       title: newPost.title,
       content: newPost.content,
       type: newPost.type,
       date: newPost.date,
+      ...(timeString ? { time: timeString } : {}),
+      ...(newPost.location ? { location: newPost.location } : {}),
       clubId: club.id!,
       clubName: club.name,
       authorId: user.id,
@@ -275,12 +331,24 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         content: '',
         type: 'announcement',
         date: new Date().toISOString().split('T')[0],
+        startTime: '',
+        endTime: '',
+        location: '',
         attachments: []
       });
 
       // Refresh posts
       const allPosts = await getPosts();
       setPosts(allPosts.filter(p => p.clubId === user.clubId));
+
+      // Create a notification for the new post
+      await createNotification({
+        title: newPost.type === 'event' ? `New Event: ${newPost.title}` : `New Announcement: ${newPost.title}`,
+        message: newPost.content.substring(0, 150) + (newPost.content.length > 150 ? '...' : ''),
+        type: newPost.type, // 'event' or 'announcement'
+        read: false,
+        clubId: club.id!,
+      });
 
       setTimeout(() => {
         setIsCreatePostModalOpen(false);
@@ -419,6 +487,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: Settings },
+            { id: 'members', label: 'Members', icon: Users },
             { id: 'posts', label: 'Manage Posts', icon: Edit },
             { id: 'notifications', label: 'Send Notifications', icon: Bell }
           ].map((tab) => {
@@ -490,6 +559,11 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                 )}
               </div>
             </div>
+          )}
+
+          {/* Members Tab */}
+          {activeTab === 'members' && club && (
+            <MemberManager clubId={club.id!} clubName={club.name} />
           )}
 
           {/* Posts Tab */}
@@ -573,7 +647,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       {/* Create Post Modal */}
       {isCreatePostModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create New Post</h3>
               <button
@@ -637,6 +711,43 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                   value={newPost.date}
                   onChange={(e) => setNewPost({ ...newPost, date: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Time (Optional)
+                </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="time"
+                    value={newPost.startTime}
+                    onChange={(e) => setNewPost({ ...newPost, startTime: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Start time"
+                  />
+                  <span className="text-slate-500 dark:text-slate-400">to</span>
+                  <input
+                    type="time"
+                    value={newPost.endTime}
+                    onChange={(e) => setNewPost({ ...newPost, endTime: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="End time"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Leave empty if no specific time
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Location (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newPost.location}
+                  onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Main Auditorium, Room 101, Campus Ground"
                 />
               </div>
               {/* File Upload */}

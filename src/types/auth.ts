@@ -1,5 +1,17 @@
 export type UserRole = 'user' | 'club-secretary' | 'admin';
 
+// Club member roles
+export type ClubMemberRole = 'president' | 'vice-president' | 'treasurer' | 'secretary' | 'coordinator' | 'member';
+
+// Club member structure (stored as subcollection in club)
+export interface ClubMember {
+  id?: string;
+  name: string;
+  email: string;
+  role: ClubMemberRole;
+  joinedAt: Date;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -71,6 +83,8 @@ export interface FirestorePost {
   type: 'event' | 'announcement';
   status: 'draft' | 'published';
   date: string;
+  time?: string;  // Optional time span (e.g., "2:00 PM - 5:00 PM")
+  location?: string;  // Optional location for events
   rsvps?: number;
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)

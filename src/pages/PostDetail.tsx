@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Users, Share2, Image, Upload, FileImage } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus } from 'lucide-react';
 import { FirestorePost, User, Attachment } from '../types/auth';
 import { getPosts, updatePost } from '../lib/firestoreService';
 import AttachmentGallery from '../components/AttachmentGallery';
 import CloudinaryUpload from '../components/CloudinaryUpload';
+import RSVPModal from '../components/RSVPModal';
 
 interface PostDetailProps {
     postId: string;
@@ -18,6 +19,7 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
     const [isEditingPhotos, setIsEditingPhotos] = useState(false);
     const [editAttachments, setEditAttachments] = useState<Attachment[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -157,7 +159,7 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                 </div>
 
                 {/* Info Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="flex flex-wrap gap-4 mb-6">
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                         <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         <div>
@@ -165,13 +167,29 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                             <p className="font-semibold text-slate-900 dark:text-white">{post.date}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                        <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">RSVPs</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{post.rsvps || 0}</p>
+                    {post.time && (
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Time</p>
+                                <p className="font-semibold text-slate-900 dark:text-white">{post.time}</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
+                    {post.location && (
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Location</p>
+                                <p className="font-semibold text-slate-900 dark:text-white">{post.location}</p>
+                            </div>
+                        </div>
+                    )}
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                         <Image className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         <div>
@@ -180,6 +198,19 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* RSVP Button for upcoming events */}
+                {post.type === 'event' && !isPastEvent && (
+                    <div className="mb-6">
+                        <button
+                            onClick={() => setIsRsvpModalOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
+                        >
+                            <Plus className="w-5 h-5" />
+                            RSVP for this Event
+                        </button>
+                    </div>
+                )}
 
                 {/* Description */}
                 <div className="mb-8">
@@ -271,6 +302,23 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                     Posted by {post.authorName} on {new Date(post.createdAt).toLocaleDateString()}
                 </div>
             </div>
+
+            {/* RSVP Modal */}
+            {post && (
+                <RSVPModal
+                    isOpen={isRsvpModalOpen}
+                    onClose={() => setIsRsvpModalOpen(false)}
+                    event={{
+                        id: post.id || '',
+                        title: post.title,
+                        date: post.date,
+                        time: post.time || 'Time not specified',
+                        location: post.location || 'Location not specified',
+                        attendees: post.rsvps || 0
+                    }}
+                    clubName={post.clubName}
+                />
+            )}
         </div>
     );
 }

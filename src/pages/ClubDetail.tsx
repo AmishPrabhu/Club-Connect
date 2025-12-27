@@ -29,13 +29,13 @@ interface DisplayEvent {
 
 export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: DisplayEvent | null }>({
     isOpen: false,
     event: null
   });
   const [club, setClub] = useState<FirestoreClub | null>(null);
   const [posts, setPosts] = useState<FirestorePost[]>([]);
+  const [members, setMembers] = useState<Array<{ id?: string; name: string; email: string; role: string; joinedAt: Date }>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch club and posts from Firestore
@@ -47,9 +47,14 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         const clubDoc = await getDoc(clubRef);
 
         if (clubDoc.exists()) {
+          // Sync member count with actual subcollection count
+          const { syncClubMemberCount } = await import('../lib/firestoreService');
+          const actualCount = await syncClubMemberCount(clubId);
+
           setClub({
             id: clubDoc.id,
             ...clubDoc.data(),
+            members: actualCount, // Use synced count
             createdAt: clubDoc.data().createdAt?.toDate() || new Date(),
             updatedAt: clubDoc.data().updatedAt?.toDate() || new Date(),
           } as FirestoreClub);
@@ -59,6 +64,11 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         const allPosts = await getPosts();
         const clubPosts = allPosts.filter(p => p.clubId === clubId);
         setPosts(clubPosts);
+
+        // Fetch club members
+        const { getClubMembers } = await import('../lib/firestoreService');
+        const clubMembers = await getClubMembers(clubId);
+        setMembers(clubMembers);
       } catch (error) {
         console.error('Error fetching club data:', error);
       } finally {
@@ -80,8 +90,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         id: post.id || '',
         title: post.title,
         date: post.date,
-        time: '2:00 PM - 5:00 PM', // Default time
-        location: 'Campus',
+        time: post.time || 'Time not specified',
+        location: post.location || 'Location not specified',
         attendees: post.rsvps || 0,
         status: isPast ? 'past' as const : 'upcoming' as const,
         description: post.content,
@@ -94,23 +104,31 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   const events = getEventsFromPosts();
   const filteredEvents = events.filter(event => event.status === activeTab);
 
-  // Mock member data for different years
-  const memberData: Record<number, Array<{ name: string; role: string; avatar: string }>> = {
-    [new Date().getFullYear()]: [
-      { name: 'John Doe', role: 'President', avatar: '👨‍💼' },
-      { name: 'Jane Smith', role: 'Vice President', avatar: '👩‍💼' },
-      { name: 'Bob Johnson', role: 'Secretary', avatar: '👨‍💻' },
-      { name: 'Alice Brown', role: 'Treasurer', avatar: '👩‍💻' },
-    ],
-    [new Date().getFullYear() - 1]: [
-      { name: 'Mike Wilson', role: 'President', avatar: '👨‍🎓' },
-      { name: 'Sarah Davis', role: 'Vice President', avatar: '👩‍🎓' },
-      { name: 'Tom Anderson', role: 'Secretary', avatar: '👨‍💻' },
-      { name: 'Lisa Garcia', role: 'Treasurer', avatar: '👩‍💻' },
-    ],
+  // Helper function to format role display
+  const getRoleDisplay = (role: string) => {
+    const roleMap: Record<string, string> = {
+      'president': 'President',
+      'vice-president': 'Vice President',
+      'treasurer': 'Treasurer',
+      'secretary': 'Secretary',
+      'coordinator': 'Coordinator',
+      'member': 'Member',
+    };
+    return roleMap[role] || role;
   };
 
-  const currentMembers = memberData[selectedYear] || [];
+  // Helper function to get avatar emoji based on role
+  const getRoleAvatar = (role: string) => {
+    const avatarMap: Record<string, string> = {
+      'president': '👔',
+      'vice-president': '🎖️',
+      'treasurer': '💰',
+      'secretary': '📝',
+      'coordinator': '🎯',
+      'member': '👤',
+    };
+    return avatarMap[role] || '👤';
+  };
 
   const handleRSVP = (event: DisplayEvent) => {
     setRsvpModal({ isOpen: true, event });
@@ -342,48 +360,29 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
               Meet the dedicated members who make {club.name} thrive
             </p>
 
-            {/* Year Selection */}
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Select Year</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectedYear(new Date().getFullYear())}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${selectedYear === new Date().getFullYear()
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    }`}
-                >
-                  {new Date().getFullYear()}
-                </button>
-                <button
-                  onClick={() => setSelectedYear(new Date().getFullYear() - 1)}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${selectedYear === new Date().getFullYear() - 1
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    }`}
-                >
-                  {new Date().getFullYear() - 1}
-                </button>
-              </div>
-            </div>
-
-            {/* Member list for selected year */}
+            {/* Member list */}
             <div className="space-y-4">
-              {currentMembers.map((member, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-sm">
-                    {member.avatar}
+              {members.length === 0 ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                  No members yet
+                </p>
+              ) : (
+                members.slice(0, 6).map((member, index) => (
+                  <div key={member.id || index} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-sm">
+                      {getRoleAvatar(member.role)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                        {member.name}
+                      </p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                        {getRoleDisplay(member.role)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                      {member.name}
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      {member.role}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <button

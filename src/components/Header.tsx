@@ -2,7 +2,8 @@ import { LogOut, Sparkles, Bell, User, Sun, Moon, Shield, Settings } from 'lucid
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getNotifications } from '../lib/firestoreService';
 
 interface HeaderProps {
   currentPage: Page;
@@ -14,6 +15,25 @@ interface HeaderProps {
 export default function Header({ currentPage, onNavigate, onLogout, user }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      try {
+        const notifications = await getNotifications();
+        const unread = notifications.filter(n => !n.read).length;
+        setUnreadCount(unread);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotificationCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -35,21 +55,19 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             <nav className="flex items-center gap-8">
               <button
                 onClick={() => onNavigate('home')}
-                className={`text-sm font-semibold transition-all ${
-                  currentPage === 'home'
-                    ? 'text-blue-600 scale-105'
-                    : 'text-slate-600 hover:text-blue-600'
-                }`}
+                className={`text-sm font-semibold transition-all ${currentPage === 'home'
+                  ? 'text-blue-600 scale-105'
+                  : 'text-slate-600 hover:text-blue-600'
+                  }`}
               >
                 Home
               </button>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className={`text-sm font-semibold transition-all ${
-                  currentPage === 'dashboard'
-                    ? 'text-blue-600 scale-105'
-                    : 'text-slate-600 hover:text-blue-600'
-                }`}
+                className={`text-sm font-semibold transition-all ${currentPage === 'dashboard'
+                  ? 'text-blue-600 scale-105'
+                  : 'text-slate-600 hover:text-blue-600'
+                  }`}
               >
                 Dashboard
               </button>
@@ -71,7 +89,11 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">3</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
 
               {user ? (
@@ -107,7 +129,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       <User className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.name}</span>
                     </button>
-                    
+
                     {showUserMenu && (
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2">
                         <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-700">

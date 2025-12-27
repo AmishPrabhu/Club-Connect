@@ -10,7 +10,7 @@ interface NotificationsProps {
 export default function Notifications({ onBack }: NotificationsProps) {
   const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'club' | 'event' | 'announcement'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'event' | 'announcement'>('all');
 
   useEffect(() => {
     loadNotifications();
@@ -106,21 +106,21 @@ export default function Notifications({ onBack }: NotificationsProps) {
           {[
             { id: 'all', label: 'All', count: notifications.length },
             { id: 'system', label: 'System', count: notifications.filter(n => n.type === 'system').length },
-            { id: 'club', label: 'Clubs', count: notifications.filter(n => n.type === 'club').length },
-            { id: 'announcement', label: 'Announcements', count: notifications.filter(n => n.type === 'announcement').length }
+            { id: 'announcement', label: 'Announcements', count: notifications.filter(n => n.type === 'announcement').length },
+            { id: 'event', label: 'Events', count: notifications.filter(n => n.type === 'event').length }
           ].map((filter) => (
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id as any)}
               className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${activeFilter === filter.id
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+                : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
             >
               <span>{filter.label}</span>
               <span className={`text-xs px-2 py-1 rounded-full ${activeFilter === filter.id
-                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                 }`}>
                 {filter.count}
               </span>
@@ -163,8 +163,8 @@ export default function Notifications({ onBack }: NotificationsProps) {
                               {notification.title}
                             </h4>
                             <span className={`text-xs px-2 py-0.5 rounded-full ${notification.clubId
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
                               }`}>
                               {getSourceLabel(notification)}
                             </span>

@@ -5,7 +5,7 @@ interface RSVPModalProps {
   isOpen: boolean;
   onClose: () => void;
   event: {
-    id: string | number;    
+    id: string | number;
     title: string;
     date: string;
     time: string;
@@ -117,12 +117,82 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
               </p>
             </div>
 
-            <button
-              onClick={handleClose}
-              className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
-            >
-              Got it!
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  // Parse the date and time to create Google Calendar URL
+                  const eventDate = new Date(event.date);
+
+                  // Check if time is specified
+                  const hasTime = event.time && event.time !== 'Time not specified';
+
+                  let googleCalendarUrl: string;
+
+                  if (hasTime) {
+                    const [startTimeStr, endTimeStr] = event.time.split(' - ');
+
+                    // Helper to parse time like "2:00 PM" to hours and minutes
+                    const parseTime = (timeStr: string) => {
+                      const match = timeStr?.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                      if (!match) return { hours: 9, minutes: 0 }; // Default 9 AM
+                      let hours = parseInt(match[1]);
+                      const minutes = parseInt(match[2]);
+                      const period = match[3].toUpperCase();
+                      if (period === 'PM' && hours !== 12) hours += 12;
+                      if (period === 'AM' && hours === 12) hours = 0;
+                      return { hours, minutes };
+                    };
+
+                    const startTime = parseTime(startTimeStr);
+                    const endTime = endTimeStr ? parseTime(endTimeStr) : { hours: startTime.hours + 2, minutes: startTime.minutes };
+
+                    const startDate = new Date(eventDate);
+                    startDate.setHours(startTime.hours, startTime.minutes, 0);
+
+                    const endDate = new Date(eventDate);
+                    endDate.setHours(endTime.hours, endTime.minutes, 0);
+
+                    // Format dates for Google Calendar in LOCAL time (YYYYMMDDTHHmmss)
+                    const formatForGoogle = (date: Date) => {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const hours = String(date.getHours()).padStart(2, '0');
+                      const minutes = String(date.getMinutes()).padStart(2, '0');
+                      const seconds = String(date.getSeconds()).padStart(2, '0');
+                      return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+                    };
+
+                    googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title + ' - ' + clubName)}&dates=${formatForGoogle(startDate)}/${formatForGoogle(endDate)}&details=${encodeURIComponent('Event by ' + clubName + '. RSVP confirmed via Club-Connect.')}&location=${encodeURIComponent(event.location)}`;
+                  } else {
+                    // All-day event format (YYYYMMDD) - use local date components
+                    const formatDateOnly = (date: Date) => {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      return `${year}${month}${day}`;
+                    };
+                    const nextDay = new Date(eventDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title + ' - ' + clubName)}&dates=${formatDateOnly(eventDate)}/${formatDateOnly(nextDay)}&details=${encodeURIComponent('Event by ' + clubName + '. RSVP confirmed via Club-Connect.')}&location=${encodeURIComponent(event.location)}`;
+                  }
+
+                  window.open(googleCalendarUrl, '_blank');
+                }}
+                className="w-full px-4 py-3 bg-white dark:bg-slate-700 border-2 border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Calendar className="w-5 h-5" />
+                Add to Google Calendar
+              </button>
+
+              <button
+                onClick={handleClose}
+                className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              >
+                Got it!
+              </button>
+            </div>
           </>
         )}
       </div>

@@ -2,6 +2,7 @@ import {
     collection,
     doc,
     getDocs,
+    getDoc,
     addDoc,
     setDoc,
     updateDoc,
@@ -16,6 +17,7 @@ import {
     FirestorePost,
     FirestoreNotification,
     FirestoreUser,
+    ClubMember,
 } from '../types/auth';
 
 // ==================== CLUBS ====================
@@ -145,6 +147,26 @@ export const createClubSecretary = async (
                 secretaryId: uid,
                 secretaryEmail: email,
             });
+
+            // Add secretary as a club member with 'secretary' role
+            const membersRef = collection(db, 'clubs', clubId, 'members');
+            await addDoc(membersRef, {
+                name,
+                email,
+                role: 'secretary',
+                joinedAt: Timestamp.now(),
+            });
+
+            // Update member count to 1 (secretary is the first member)
+            const clubRef = doc(db, 'clubs', clubId);
+            const clubDoc = await getDoc(clubRef);
+            if (clubDoc.exists()) {
+                const currentMembers = clubDoc.data().members || 0;
+                await updateDoc(clubRef, {
+                    members: currentMembers + 1,
+                    updatedAt: Timestamp.now(),
+                });
+            }
 
             // Delete the secondary app instance
             await deleteApp(secondaryApp);
@@ -283,3 +305,117 @@ export const markNotificationAsRead = async (notificationId: string): Promise<bo
         return false;
     }
 };
+
+// ==================== CLUB MEMBERS ====================
+
+// Get all members of a club
+export const getClubMembers = async (clubId: string): Promise<ClubMember[]> => {
+    try {
+        const membersRef = collection(db, 'clubs', clubId, 'members');
+        const q = query(membersRef, orderBy('joinedAt', 'desc'));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            joinedAt: doc.data().joinedAt?.toDate() || new Date(),
+        })) as ClubMember[];
+    } catch (error) {
+        console.error('Error fetching club members:', error);
+        return [];
+    }
+};
+
+// Sync club member count with actual number of members in subcollection
+export const syncClubMemberCount = async (clubId: string): Promise<number> => {
+    try {
+        const membersRef = collection(db, 'clubs', clubId, 'members');
+        const snapshot = await getDocs(membersRef);
+        const actualCount = snapshot.size;
+
+        // Update the club's member count
+        const clubRef = doc(db, 'clubs', clubId);
+        await updateDoc(clubRef, {
+            members: actualCount,
+            updatedAt: Timestamp.now(),
+        });
+
+        return actualCount;
+    } catch (error) {
+        console.error('Error syncing member count:', error);
+        return 0;
+    }
+};
+
+// Add a member to a club
+export const addClubMember = async (
+    clubId: string,
+    memberData: Omit<ClubMember, 'id' | 'joinedAt'>
+): Promise<{ success: boolean; error?: string; memberId?: string }> => {
+    try {
+        const membersRef = collection(db, 'clubs', clubId, 'members');
+        const docRef = await addDoc(membersRef, {
+            ...memberData,
+            joinedAt: Timestamp.now(),
+        });
+
+        // Update member count in club document
+        const clubRef = doc(db, 'clubs', clubId);
+        const clubDoc = await getDoc(clubRef);
+        if (clubDoc.exists()) {
+            const currentMembers = clubDoc.data().members || 0;
+            await updateDoc(clubRef, {
+                members: currentMembers + 1,
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return { success: true, memberId: docRef.id };
+    } catch (error: any) {
+        console.error('Error adding club member:', error);
+        return { success: false, error: error.message || 'Failed to add member' };
+    }
+};
+
+// Update a member's info/role
+export const updateClubMember = async (
+    clubId: string,
+    memberId: string,
+    memberData: Partial<ClubMember>
+): Promise<boolean> => {
+    try {
+        const memberRef = doc(db, 'clubs', clubId, 'members', memberId);
+        await updateDoc(memberRef, memberData);
+        return true;
+    } catch (error) {
+        console.error('Error updating club member:', error);
+        return false;
+    }
+};
+
+// Remove a member from a club
+export const removeClubMember = async (
+    clubId: string,
+    memberId: string
+): Promise<boolean> => {
+    try {
+        const memberRef = doc(db, 'clubs', clubId, 'members', memberId);
+        await deleteDoc(memberRef);
+
+        // Update member count in club document
+        const clubRef = doc(db, 'clubs', clubId);
+        const clubDoc = await getDoc(clubRef);
+        if (clubDoc.exists()) {
+            const currentMembers = clubDoc.data().members || 1;
+            await updateDoc(clubRef, {
+                members: Math.max(0, currentMembers - 1),
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error removing club member:', error);
+        return false;
+    }
+};
+

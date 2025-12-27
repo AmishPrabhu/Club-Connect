@@ -30,8 +30,21 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent, 
           getClubs(),
           getNotifications()
         ]);
+
+        // Sync member counts for all clubs
+        const { syncClubMemberCount } = await import('../lib/firestoreService');
+        const clubsWithSyncedCounts = await Promise.all(
+          clubsData.map(async (club) => {
+            if (club.id) {
+              const actualCount = await syncClubMemberCount(club.id);
+              return { ...club, members: actualCount };
+            }
+            return club;
+          })
+        );
+
         setPosts(postsData);
-        setClubs(clubsData);
+        setClubs(clubsWithSyncedCounts);
         setNotifications(notificationsData);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -280,7 +293,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent, 
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Why Choose Club-Connect</h2>
           <p className="text-lg text-slate-600 dark:text-slate-300">Experience the best of campus life</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
               <Users className="w-8 h-8 text-white" />
@@ -301,13 +314,6 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent, 
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">1000+ Students</h3>
             <p className="text-slate-600 dark:text-slate-300">Vibrant and supportive community</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">24/7 Support</h3>
-            <p className="text-slate-600 dark:text-slate-300">Always here when you need us</p>
           </div>
         </div>
       </div>
