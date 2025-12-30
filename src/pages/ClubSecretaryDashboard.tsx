@@ -8,6 +8,7 @@ import { getPosts, createPost, deletePost, createNotification, updatePost, check
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
+import LocationPickerModal from '../components/LocationPickerModal';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: FirestoreClub }) {
@@ -111,18 +112,67 @@ function NotificationSender({ club }: { club: FirestoreClub }) {
 
 // Image URL Input Component
 function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: string; currentImage?: string; onImageUpdated: (url: string) => void }) {
-  const [imageUrl, setImageUrl] = useState(currentImage || '');
+  const [previewUrl, setPreviewUrl] = useState(currentImage || '');
+  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSave = async () => {
-    if (!imageUrl.trim()) {
-      setError('Please enter an image URL');
+  const openUploadWidget = () => {
+    if (typeof window === 'undefined' || !window.cloudinary) {
+      setError('Upload widget not available. Please refresh the page.');
       return;
     }
 
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+    if (!cloudName || !uploadPreset) {
+      setError('Cloudinary configuration missing. Please check environment variables.');
+      return;
+    }
+
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: cloudName,
+        uploadPreset: uploadPreset,
+        folder: `club_profiles/${clubId}`,
+        sources: ['local', 'camera', 'url'],
+        multiple: false,
+        maxFiles: 1,
+        cropping: true,
+        croppingAspectRatio: 1,
+        resourceType: 'image',
+        clientAllowedFormats: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+        maxFileSize: 5000000, // 5MB
+      },
+      (error: any, result: any) => {
+        if (error) {
+          setError('Upload failed. Please try again.');
+          setIsUploading(false);
+          return;
+        }
+        if (result.event === 'success') {
+          const uploadedUrl = result.info.secure_url;
+          setPreviewUrl(uploadedUrl);
+          setIsUploading(false);
+          // Auto-save the image
+          handleSave(uploadedUrl);
+        }
+      }
+    );
+
+    setIsUploading(true);
+    setError(null);
+    widget.open();
+  };
+
+  const handleSave = async (urlToSave?: string) => {
+    const url = urlToSave || previewUrl;
+    if (!url.trim()) {
+      setError('Please upload or enter an image URL');
+      return;
+    }
 
     setError(null);
     setSuccess(false);
@@ -130,10 +180,10 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
 
     try {
       const { updateClubImage } = await import('../lib/firestoreService');
-      const result = await updateClubImage(clubId, imageUrl);
+      const result = await updateClubImage(clubId, url);
 
       if (result.success) {
-        onImageUpdated(imageUrl);
+        onImageUpdated(url);
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       } else {
@@ -150,11 +200,16 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
     <div className="space-y-4">
       <div className="relative w-32 h-32 mx-auto">
         <img
-          src={imageUrl || currentImage || '/club-default.jpg'}
+          src={previewUrl || currentImage || '/club-default.jpg'}
           alt="Club profile"
           className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
           onError={(e) => { (e.target as HTMLImageElement).src = '/club-default.jpg'; }}
         />
+        {(isUploading || isSaving) && (
+          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -164,24 +219,18 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
         <p className="text-sm text-green-600 dark:text-green-400 text-center">Image updated!</p>
       )}
 
-      <div className="space-y-2">
-        <input
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="Paste image URL here..."
-          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-        >
-          {isSaving ? 'Saving...' : 'Save Image URL'}
-        </button>
-      </div>
+      <button
+        onClick={openUploadWidget}
+        disabled={isUploading || isSaving}
+        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        {isUploading ? 'Uploading...' : isSaving ? 'Saving...' : 'Upload from Device'}
+      </button>
       <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-        Tip: Upload image to <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Imgur</a> and paste the link
+        Supports JPG, PNG, GIF, WebP (max 5MB)
       </p>
     </div>
   );
@@ -227,6 +276,9 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
   // Collision warning state
   const [showCollisionWarning, setShowCollisionWarning] = useState(false);
   const [collisionEvents, setCollisionEvents] = useState<EventCollision[]>([]);
+
+  // Location Picker Modal state
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   // Ref to prevent duplicate member additions in React Strict Mode
   const secretaryAddedRef = useRef(false);
@@ -933,35 +985,119 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                   />
                 )}
 
-                {/* Outside Campus: Google Maps Search */}
+                {/* Outside Campus: Interactive Map Picker */}
                 {newPost.locationType === 'external' && (
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      id="google-places-input"
-                      value={newPost.location}
-                      onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Search for a location..."
-                    />
-                    {newPost.locationUrl && (
-                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="space-y-3">
+                    {/* Location Search Input */}
+                    <div className="relative">
+                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={newPost.location}
+                        onChange={(e) => {
+                          const location = e.target.value;
+                          setNewPost({
+                            ...newPost,
+                            location,
+                            // Auto-generate Google Maps URL from location name
+                            locationUrl: location ? `https://www.google.com/maps/search/${encodeURIComponent(location)}` : ''
+                          });
+                        }}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Search location (e.g., Central Park, NYC)"
+                      />
+                    </div>
+
+                    {/* Interactive Map */}
+                    <div className="rounded-xl overflow-hidden border-2 border-slate-300 dark:border-slate-600">
+                      {/* Map Header */}
+                      <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                          </svg>
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {newPost.location ? `Selected: ${newPost.location}` : 'Click on map to select location'}
+                          </span>
+                        </div>
+                        {newPost.location && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(newPost.location)}`;
+                              window.open(searchUrl, '_blank');
+                            }}
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                          >
+                            Open in Google Maps
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Embedded Map - Clickable */}
+                      <div
+                        className="relative cursor-pointer group"
+                        onClick={() => setShowLocationPicker(true)}
+                      >
+                        <iframe
+                          src={`https://maps.google.com/maps?q=${encodeURIComponent(newPost.location || 'India')}&z=12&output=embed`}
+                          className="w-full h-64 pointer-events-none"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                        {/* Overlay with click prompt */}
+                        <div className="absolute inset-0 bg-transparent group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-slate-200 dark:border-slate-700">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                            </svg>
+                            <span className="font-medium">Click to search & select location</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Map Footer with instructions */}
+                      <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-3">
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          💡 <strong>Tip:</strong> Click on the map to open the location search window. You can search for places and confirm the exact location to add to your event.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Optional: Paste custom Google Maps URL */}
+                    <details className="group">
+                      <summary className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400">
+                        ⚙️ Advanced: Paste a custom Google Maps link
+                      </summary>
+                      <div className="mt-2">
+                        <input
+                          type="url"
+                          value={newPost.locationUrl}
+                          onChange={(e) => setNewPost({ ...newPost, locationUrl: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Paste custom Google Maps URL (optional)"
+                        />
+                      </div>
+                    </details>
+
+                    {/* Selected Location Confirmation */}
+                    {newPost.location && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Location linked to Google Maps</span>
+                        <span className="text-sm text-green-700 dark:text-green-300 font-medium">
+                          Location selected: {newPost.location}
+                        </span>
                       </div>
                     )}
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Enter the location name and paste the Google Maps link below
-                    </p>
-                    <input
-                      type="url"
-                      value={newPost.locationUrl}
-                      onChange={(e) => setNewPost({ ...newPost, locationUrl: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Paste Google Maps link here (e.g., https://maps.google.com/...)"
-                    />
                   </div>
                 )}
               </div>
@@ -1083,6 +1219,17 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
           </div>
         </div>
       )}
+
+      {/* Location Picker Modal */}
+      <LocationPickerModal
+        isOpen={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        initialLocation={newPost.location}
+        onLocationSelect={(location, locationUrl) => {
+          setNewPost({ ...newPost, location, locationUrl });
+          setShowLocationPicker(false);
+        }}
+      />
     </div>
   );
 }

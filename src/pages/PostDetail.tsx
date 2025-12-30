@@ -235,6 +235,53 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                     )}
                 </div>
 
+                {/* Embedded Google Maps for External Locations */}
+                {post.locationUrl && post.location && (
+                    <div className="mb-6">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Event Location
+                        </h3>
+                        <a
+                            href={post.locationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group cursor-pointer"
+                        >
+                            <div className="relative">
+                                <iframe
+                                    src={`https://maps.google.com/maps?q=${encodeURIComponent(post.location)}&output=embed`}
+                                    className="w-full h-64 pointer-events-none"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
+                                <div className="absolute inset-0 bg-transparent group-hover:bg-blue-500/10 transition-colors flex items-center justify-center">
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-lg flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        Open in Google Maps
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-800 px-4 py-3 flex items-center justify-between">
+                                <span className="font-medium text-slate-900 dark:text-white">{post.location}</span>
+                                <span className="text-sm text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                    Click to open in Maps
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                )}
+
                 {/* RSVP Button for upcoming events */}
                 {post.type === 'event' && !isPastEvent && (
                     <div className="mb-6">

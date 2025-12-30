@@ -19,29 +19,78 @@ interface AdminDashboardProps {
   onNavigate: (page: Page) => void;
 }
 
-// Admin Image URL Input Component
+// Admin Image Upload Component with Cloudinary
 function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: string; currentImage?: string; onSuccess: (url: string) => void }) {
-  const [imageUrl, setImageUrl] = useState(currentImage || '');
+  const [previewUrl, setPreviewUrl] = useState(currentImage || '');
+  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
-    if (!imageUrl.trim()) {
-      setError('Please enter an image URL');
+  const openUploadWidget = () => {
+    if (typeof window === 'undefined' || !(window as any).cloudinary) {
+      setError('Upload widget not available. Please refresh the page.');
       return;
     }
 
-    
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      setError('Cloudinary configuration missing. Please check environment variables.');
+      return;
+    }
+
+    const widget = (window as any).cloudinary.createUploadWidget(
+      {
+        cloudName: cloudName,
+        uploadPreset: uploadPreset,
+        folder: `club_profiles/${clubId}`,
+        sources: ['local', 'camera', 'url'],
+        multiple: false,
+        maxFiles: 1,
+        cropping: true,
+        croppingAspectRatio: 1,
+        resourceType: 'image',
+        clientAllowedFormats: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+        maxFileSize: 5000000, // 5MB
+      },
+      (error: any, result: any) => {
+        if (error) {
+          setError('Upload failed. Please try again.');
+          setIsUploading(false);
+          return;
+        }
+        if (result.event === 'success') {
+          const uploadedUrl = result.info.secure_url;
+          setPreviewUrl(uploadedUrl);
+          setIsUploading(false);
+          // Auto-save the image
+          handleSave(uploadedUrl);
+        }
+      }
+    );
+
+    setIsUploading(true);
+    setError(null);
+    widget.open();
+  };
+
+  const handleSave = async (urlToSave?: string) => {
+    const url = urlToSave || previewUrl;
+    if (!url.trim()) {
+      setError('Please upload an image');
+      return;
+    }
 
     setError(null);
     setIsSaving(true);
 
     try {
       const { updateClubImage } = await import('../lib/firestoreService');
-      const result = await updateClubImage(clubId, imageUrl);
+      const result = await updateClubImage(clubId, url);
 
       if (result.success) {
-        onSuccess(imageUrl);
+        onSuccess(url);
       } else {
         setError(result.error || 'Failed to update image');
       }
@@ -56,39 +105,39 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
     <div className="space-y-4">
       <div className="relative w-40 h-40 mx-auto">
         <img
-          src={imageUrl || currentImage || '/club-default.jpg'}
+          src={previewUrl || currentImage || '/club-default.jpg'}
           alt="Club profile"
           className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
           onError={(e) => { (e.target as HTMLImageElement).src = '/club-default.jpg'; }}
         />
+        {(isUploading || isSaving) && (
+          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
       </div>
 
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
       )}
 
-      <div className="space-y-2">
-        <input
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="Paste image URL here..."
-          className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-        >
-          {isSaving ? 'Saving...' : 'Save Image URL'}
-        </button>
-      </div>
+      <button
+        onClick={openUploadWidget}
+        disabled={isUploading || isSaving}
+        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        {isUploading ? 'Uploading...' : isSaving ? 'Saving...' : 'Upload from Device'}
+      </button>
       <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-        Tip: Upload to <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Imgur</a> and paste link
+        Supports JPG, PNG, GIF, WebP (max 5MB)
       </p>
     </div>
   );
 }
+
 
 const CLUB_CATEGORIES = ['technical', 'academic', 'cultural', 'sports'] as const;
 const GRADIENT_COLORS = [
@@ -457,7 +506,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           <div className="flex items-center gap-3 mb-4">
                             <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
                               {club.image ? (
-                                  <img
+                                <img
                                   src={club.image}
                                   alt={club.name}
                                   className="w-full h-full object-contain p-2 bg-white"
