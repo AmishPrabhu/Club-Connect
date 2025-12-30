@@ -85,7 +85,13 @@ export interface FirestorePost {
   date: string;
   time?: string;  // Optional time span (e.g., "2:00 PM - 5:00 PM")
   location?: string;  // Optional location for events
+  locationType?: 'campus' | 'external';  // Whether location is on campus or external
+  locationUrl?: string;  // Google Maps URL for external locations
   rsvps?: number;
+  registrationStart?: string;  // Registration start date (YYYY-MM-DD)
+  registrationStartTime?: string;  // Registration start time (e.g., "10:00 AM")
+  registrationEnd?: string;    // Registration end date (YYYY-MM-DD)
+  registrationEndTime?: string;  // Registration end time (e.g., "5:00 PM")
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   createdAt: Date;

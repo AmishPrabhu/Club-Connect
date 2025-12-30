@@ -186,7 +186,21 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                             </svg>
                             <div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">Location</p>
-                                <p className="font-semibold text-slate-900 dark:text-white">{post.location}</p>
+                                {post.locationUrl ? (
+                                    <a
+                                        href={post.locationUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                    >
+                                        {post.location}
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                ) : (
+                                    <p className="font-semibold text-slate-900 dark:text-white">{post.location}</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -197,6 +211,28 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                             <p className="font-semibold text-slate-900 dark:text-white">{totalPhotos}</p>
                         </div>
                     </div>
+                    {(post.registrationStart || post.registrationEnd) && (
+                        <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <div>
+                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Registration Period</p>
+                                {post.registrationStart && (
+                                    <p className="text-sm text-slate-700 dark:text-slate-300">
+                                        <span className="font-medium">Opens:</span> {new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                        {post.registrationStartTime && ` at ${post.registrationStartTime}`}
+                                    </p>
+                                )}
+                                {post.registrationEnd && (
+                                    <p className="text-sm text-slate-700 dark:text-slate-300">
+                                        <span className="font-medium">Closes:</span> {new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                        {post.registrationEndTime && ` at ${post.registrationEndTime}`}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* RSVP Button for upcoming events */}

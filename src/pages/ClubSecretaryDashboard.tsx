@@ -205,9 +205,19 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     content: '',
     type: 'announcement' as 'event' | 'announcement',
     date: new Date().toISOString().split('T')[0],
-    startTime: '',
-    endTime: '',
+    startHour: '',
+    startMinute: '',
+    startPeriod: 'AM' as 'AM' | 'PM',
+    endHour: '',
+    endMinute: '',
+    endPeriod: 'PM' as 'AM' | 'PM',
     location: '',
+    locationType: 'campus' as 'campus' | 'external',
+    locationUrl: '',
+    registrationStart: '',
+    registrationStartTime: '',
+    registrationEnd: '',
+    registrationEndTime: '',
     attachments: [] as Attachment[]
   });
 
@@ -294,27 +304,24 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
 
     if (!club || !user) return;
 
-    // Helper to convert 24h time (e.g., "14:30") to 12h format (e.g., "2:30 PM")
-    const formatTime12h = (time24: string) => {
-      if (!time24) return '';
-      const [hours, minutes] = time24.split(':').map(Number);
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const hours12 = hours % 12 || 12;
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
-    };
-
-    // Build time string if times are provided
+    // Build time string from 12-hour format
     let timeString: string | undefined;
-    if (newPost.startTime) {
-      timeString = formatTime12h(newPost.startTime);
-      if (newPost.endTime) {
-        timeString += ` - ${formatTime12h(newPost.endTime)}`;
+    if (newPost.startHour && newPost.startMinute) {
+      timeString = `${newPost.startHour}:${newPost.startMinute} ${newPost.startPeriod}`;
+      if (newPost.endHour && newPost.endMinute) {
+        timeString += ` - ${newPost.endHour}:${newPost.endMinute} ${newPost.endPeriod}`;
       }
     }
 
     // Check for time collision if it's an event with a start time (unless forceCreate is true)
-    if (!forceCreate && newPost.type === 'event' && newPost.startTime) {
-      const collisions = await checkEventTimeCollision(newPost.date, newPost.startTime);
+    if (!forceCreate && newPost.type === 'event' && newPost.startHour) {
+      // Convert to 24h for collision check
+      let startHour24 = parseInt(newPost.startHour);
+      if (newPost.startPeriod === 'PM' && startHour24 !== 12) startHour24 += 12;
+      if (newPost.startPeriod === 'AM' && startHour24 === 12) startHour24 = 0;
+      const startTime24 = `${startHour24.toString().padStart(2, '0')}:${newPost.startMinute}`;
+
+      const collisions = await checkEventTimeCollision(newPost.date, startTime24);
       if (collisions.length > 0) {
         setCollisionEvents(collisions);
         setShowCollisionWarning(true);
@@ -329,6 +336,12 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       date: newPost.date,
       ...(timeString ? { time: timeString } : {}),
       ...(newPost.location ? { location: newPost.location } : {}),
+      locationType: newPost.locationType,
+      ...(newPost.locationUrl ? { locationUrl: newPost.locationUrl } : {}),
+      ...(newPost.registrationStart ? { registrationStart: newPost.registrationStart } : {}),
+      ...(newPost.registrationStartTime ? { registrationStartTime: newPost.registrationStartTime } : {}),
+      ...(newPost.registrationEnd ? { registrationEnd: newPost.registrationEnd } : {}),
+      ...(newPost.registrationEndTime ? { registrationEndTime: newPost.registrationEndTime } : {}),
       clubId: club.id!,
       clubName: club.name,
       authorId: user.id,
@@ -345,9 +358,19 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         content: '',
         type: 'announcement',
         date: new Date().toISOString().split('T')[0],
-        startTime: '',
-        endTime: '',
+        startHour: '',
+        startMinute: '',
+        startPeriod: 'AM',
+        endHour: '',
+        endMinute: '',
+        endPeriod: 'PM',
         location: '',
+        locationType: 'campus',
+        locationUrl: '',
+        registrationStart: '',
+        registrationStartTime: '',
+        registrationEnd: '',
+        registrationEndTime: '',
         attachments: []
       });
 
@@ -731,7 +754,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Date
+                  {newPost.type === 'event' ? 'Event Date' : 'Date'}
                 </label>
                 <input
                   type="date"
@@ -740,28 +763,133 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+
+              {/* Registration Period - Only for Events */}
+              {newPost.type === 'event' && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-3">
+                    📅 Registration Period
+                  </label>
+
+                  {/* Registration Opens */}
+                  <div className="mb-4">
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-2">Registration Opens</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={newPost.registrationStart}
+                        onChange={(e) => setNewPost({ ...newPost, registrationStart: e.target.value })}
+                        className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="time"
+                        value={newPost.registrationStartTime}
+                        onChange={(e) => setNewPost({ ...newPost, registrationStartTime: e.target.value })}
+                        className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Registration Closes */}
+                  <div>
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-2">Registration Closes</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={newPost.registrationEnd}
+                        onChange={(e) => setNewPost({ ...newPost, registrationEnd: e.target.value })}
+                        className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="time"
+                        value={newPost.registrationEndTime}
+                        onChange={(e) => setNewPost({ ...newPost, registrationEndTime: e.target.value })}
+                        className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
+                    Set when registration opens and closes for this event
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Time (Optional)
                 </label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="time"
-                    value={newPost.startTime}
-                    onChange={(e) => setNewPost({ ...newPost, startTime: e.target.value })}
-                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Start time"
-                  />
-                  <span className="text-slate-500 dark:text-slate-400">to</span>
-                  <input
-                    type="time"
-                    value={newPost.endTime}
-                    onChange={(e) => setNewPost({ ...newPost, endTime: e.target.value })}
-                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="End time"
-                  />
+
+                {/* Start Time Row */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm text-slate-600 dark:text-slate-400 w-12">From:</span>
+                  <select
+                    value={newPost.startHour}
+                    onChange={(e) => setNewPost({ ...newPost, startHour: e.target.value })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">--</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-slate-500">:</span>
+                  <select
+                    value={newPost.startMinute}
+                    onChange={(e) => setNewPost({ ...newPost, startMinute: e.target.value })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">--</option>
+                    <option value="00">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                  </select>
+                  <select
+                    value={newPost.startPeriod}
+                    onChange={(e) => setNewPost({ ...newPost, startPeriod: e.target.value as 'AM' | 'PM' })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+
+                {/* End Time Row */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600 dark:text-slate-400 w-12">To:</span>
+                  <select
+                    value={newPost.endHour}
+                    onChange={(e) => setNewPost({ ...newPost, endHour: e.target.value })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">--</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-slate-500">:</span>
+                  <select
+                    value={newPost.endMinute}
+                    onChange={(e) => setNewPost({ ...newPost, endMinute: e.target.value })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">--</option>
+                    <option value="00">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                  </select>
+                  <select
+                    value={newPost.endPeriod}
+                    onChange={(e) => setNewPost({ ...newPost, endPeriod: e.target.value as 'AM' | 'PM' })}
+                    className="px-2 py-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                   Leave empty if no specific time
                 </p>
               </div>
@@ -769,13 +897,73 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Location (Optional)
                 </label>
-                <input
-                  type="text"
-                  value={newPost.location}
-                  onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Main Auditorium, Room 101, Campus Ground"
-                />
+
+                {/* Location Type Toggle */}
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="locationType"
+                      checked={newPost.locationType === 'campus'}
+                      onChange={() => setNewPost({ ...newPost, locationType: 'campus', locationUrl: '' })}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">In Campus</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="locationType"
+                      checked={newPost.locationType === 'external'}
+                      onChange={() => setNewPost({ ...newPost, locationType: 'external' })}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Outside Campus</span>
+                  </label>
+                </div>
+
+                {/* In-Campus: Simple text input */}
+                {newPost.locationType === 'campus' && (
+                  <input
+                    type="text"
+                    value={newPost.location}
+                    onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Main Auditorium, Room 101, Campus Ground"
+                  />
+                )}
+
+                {/* Outside Campus: Google Maps Search */}
+                {newPost.locationType === 'external' && (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      id="google-places-input"
+                      value={newPost.location}
+                      onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Search for a location..."
+                    />
+                    {newPost.locationUrl && (
+                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Location linked to Google Maps</span>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Enter the location name and paste the Google Maps link below
+                    </p>
+                    <input
+                      type="url"
+                      value={newPost.locationUrl}
+                      onChange={(e) => setNewPost({ ...newPost, locationUrl: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Paste Google Maps link here (e.g., https://maps.google.com/...)"
+                    />
+                  </div>
+                )}
               </div>
               {/* File Upload */}
               <div>

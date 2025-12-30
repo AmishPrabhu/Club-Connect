@@ -81,7 +81,7 @@ function AppContent() {
         <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
       )}
       {currentPage === 'memberBoard' && selectedMember && (
-        <MemberBoardDetail club={selectedClub} onBack={() => navigateToPage('club')} />
+        <MemberBoardDetail club={selectedMember} onBack={() => navigateToPage('club')} />
       )}
       {currentPage === 'notifications' && (
         <Notifications onBack={() => navigateToPage('dashboard')} />

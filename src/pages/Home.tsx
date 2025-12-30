@@ -241,6 +241,17 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToEvent, 
                       <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">
                         {post.content}
                       </p>
+                      {(post.registrationStart || post.registrationEnd) && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">
+                            📅 Registration: {post.registrationStart && new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {post.registrationStartTime && ` ${post.registrationStartTime}`}
+                            {post.registrationEnd && ' - '}
+                            {post.registrationEnd && new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {post.registrationEndTime && ` ${post.registrationEndTime}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
