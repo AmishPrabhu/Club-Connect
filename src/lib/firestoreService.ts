@@ -217,6 +217,76 @@ export const createPost = async (postData: Omit<FirestorePost, 'id' | 'createdAt
     }
 };
 
+// Interface for event collision info
+export interface EventCollision {
+    title: string;
+    time: string;
+    clubName: string;
+}
+
+// Check for event time collisions on a given date and start time
+export const checkEventTimeCollision = async (
+    date: string,
+    startTime: string
+): Promise<EventCollision[]> => {
+    try {
+        const allPosts = await getPosts();
+
+        // Filter to only events on the same date with a time field
+        const eventsOnSameDate = allPosts.filter(post =>
+            post.type === 'event' &&
+            post.date === date &&
+            post.time
+        );
+
+        // If no start time provided, return empty (no collision check needed)
+        if (!startTime) {
+            return [];
+        }
+
+        // Convert the new event's start time to minutes for comparison
+        const [newHours, newMinutes] = startTime.split(':').map(Number);
+        const newStartMinutes = newHours * 60 + newMinutes;
+
+        const collisions: EventCollision[] = [];
+
+        for (const event of eventsOnSameDate) {
+            // Parse the existing event's time (format: "2:30 PM" or "2:30 PM - 5:00 PM")
+            const timeStr = event.time!;
+            const timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+
+            if (timeMatch) {
+                let existingHours = parseInt(timeMatch[1]);
+                const existingMinutes = parseInt(timeMatch[2]);
+                const period = timeMatch[3].toUpperCase();
+
+                // Convert to 24h format
+                if (period === 'PM' && existingHours !== 12) {
+                    existingHours += 12;
+                } else if (period === 'AM' && existingHours === 12) {
+                    existingHours = 0;
+                }
+
+                const existingStartMinutes = existingHours * 60 + existingMinutes;
+
+                // Check if times are within 30 minutes of each other (overlap)
+                if (Math.abs(newStartMinutes - existingStartMinutes) < 30) {
+                    collisions.push({
+                        title: event.title,
+                        time: event.time!,
+                        clubName: event.clubName,
+                    });
+                }
+            }
+        }
+
+        return collisions;
+    } catch (error) {
+        console.error('Error checking event time collision:', error);
+        return [];
+    }
+};
+
 export const deletePost = async (postId: string): Promise<boolean> => {
     try {
         const postRef = doc(db, 'posts', postId);

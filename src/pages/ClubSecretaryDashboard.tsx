@@ -4,7 +4,7 @@ import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getPosts, createPost, deletePost, createNotification, updatePost } from '../lib/firestoreService';
+import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision } from '../lib/firestoreService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
@@ -214,6 +214,10 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editAttachments, setEditAttachments] = useState<Attachment[]>([]);
 
+  // Collision warning state
+  const [showCollisionWarning, setShowCollisionWarning] = useState(false);
+  const [collisionEvents, setCollisionEvents] = useState<EventCollision[]>([]);
+
   // Ref to prevent duplicate member additions in React Strict Mode
   const secretaryAddedRef = useRef(false);
 
@@ -282,7 +286,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     fetchClubData();
   }, [user?.clubId]);
 
-  const handleCreatePost = async () => {
+  const handleCreatePost = async (forceCreate: boolean = false) => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
       setFormMessage({ type: 'error', text: 'Please fill in all required fields.' });
       return;
@@ -305,6 +309,16 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       timeString = formatTime12h(newPost.startTime);
       if (newPost.endTime) {
         timeString += ` - ${formatTime12h(newPost.endTime)}`;
+      }
+    }
+
+    // Check for time collision if it's an event with a start time (unless forceCreate is true)
+    if (!forceCreate && newPost.type === 'event' && newPost.startTime) {
+      const collisions = await checkEventTimeCollision(newPost.date, newPost.startTime);
+      if (collisions.length > 0) {
+        setCollisionEvents(collisions);
+        setShowCollisionWarning(true);
+        return; // Stop here, wait for user to confirm or cancel
       }
     }
 
@@ -353,10 +367,23 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       setTimeout(() => {
         setIsCreatePostModalOpen(false);
         setFormMessage(null);
+        setShowCollisionWarning(false);
+        setCollisionEvents([]);
       }, 1500);
     } else {
       setFormMessage({ type: 'error', text: 'Failed to create post' });
     }
+  };
+
+  // Handle collision warning confirmation
+  const handleConfirmCollision = () => {
+    setShowCollisionWarning(false);
+    handleCreatePost(true); // Force create, bypassing collision check
+  };
+
+  const handleCancelCollision = () => {
+    setShowCollisionWarning(false);
+    setCollisionEvents([]);
   };
 
   const handleDeletePost = async (postId: string) => {
@@ -774,10 +801,56 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                 Cancel
               </button>
               <button
-                onClick={handleCreatePost}
+                onClick={() => handleCreatePost()}
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
               >
                 Create Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collision Warning Modal */}
+      {showCollisionWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Time Collision Warning</h3>
+            </div>
+
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
+              There {collisionEvents.length === 1 ? 'is' : 'are'} already {collisionEvents.length} event{collisionEvents.length === 1 ? '' : 's'} scheduled around the same time:
+            </p>
+
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6 max-h-40 overflow-y-auto">
+              {collisionEvents.map((event, index) => (
+                <div key={index} className="flex flex-col mb-2 last:mb-0">
+                  <span className="font-semibold text-amber-800 dark:text-amber-300">{event.title}</span>
+                  <span className="text-sm text-amber-600 dark:text-amber-400">{event.time} - {event.clubName}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Do you still want to create this event?
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelCollision}
+                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={handleConfirmCollision}
+                className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition-all"
+              >
+                Create Anyway
               </button>
             </div>
           </div>
