@@ -298,14 +298,11 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                             href={post.registrationLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-lg rounded-xl font-bold transition-all transform hover:scale-[1.02] shadow-lg group"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
                         >
                             <span>Register Now</span>
-                            <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            <ExternalLink className="w-5 h-5" />
                         </a>
-                        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-2">
-                            Opens in a new tab
-                        </p>
                     </div>
                 )}
 

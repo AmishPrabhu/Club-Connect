@@ -183,6 +183,43 @@ export const createClubSecretary = async (
     }
 };
 
+// Update user profile (name, bio/description)
+export const updateUserProfile = async (
+    userId: string,
+    profileData: { name?: string; bio?: string }
+): Promise<{ success: boolean; error?: string }> => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+            ...profileData,
+            updatedAt: Timestamp.now(),
+        });
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error updating user profile:', error);
+        return { success: false, error: error.message || 'Failed to update profile' };
+    }
+};
+
+// Get user profile data
+export const getUserProfile = async (userId: string): Promise<FirestoreUser | null> => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+            return {
+                ...docSnap.data(),
+                createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+                updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+            } as FirestoreUser;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+    }
+};
+
 // ==================== POSTS ====================
 
 export const getPosts = async (): Promise<FirestorePost[]> => {

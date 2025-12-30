@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { markNotificationAsRead } from './lib/firestoreService';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -9,6 +10,7 @@ import UserProfile from './pages/UserProfile';
 import EventDetail from './pages/EventDetail';
 import PostDetail from './pages/PostDetail';
 import NotificationDetail from './pages/NotificationDetail';
+import Events from './pages/Events';
 import LoginPage from './pages/LoginPage';
 
 import AdminDashboard from './pages/AdminDashboard';
@@ -57,8 +59,12 @@ function AppContent() {
     }
   };
 
-  const navigateToNotification = (notification: any) => {
-    setSelectedPost(notification); // Reuse selectedPost state for now or add new state
+  const navigateToNotification = async (notification: any) => {
+    // Mark notification as read when navigating to it
+    if (notification.id && !notification.read) {
+      await markNotificationAsRead(notification.id);
+    }
+    setSelectedPost(notification);
     setCurrentPage('notification');
   };
 
@@ -101,6 +107,9 @@ function AppContent() {
       {currentPage === 'post' && selectedPost && (
         <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} user={user} />
       )}
+      {currentPage === 'events' && (
+        <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+      )}
 
 
       {currentPage === 'notification' && selectedPost && (
@@ -111,7 +120,7 @@ function AppContent() {
         <AdminDashboard onNavigate={navigateToPage} />
       )}
       {currentPage === 'clubSecretaryDashboard' && (
-        <ClubSecretaryDashboard onNavigate={navigateToPage} user={user} />
+        <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
       )}
 
       {/* Login Modal for Club Secretary and Admin */}

@@ -71,6 +71,15 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               >
                 Dashboard
               </button>
+              <button
+                onClick={() => onNavigate('events')}
+                className={`text-sm font-semibold transition-all ${currentPage === 'events'
+                  ? 'text-blue-600 scale-105'
+                  : 'text-slate-600 hover:text-blue-600'
+                  }`}
+              >
+                Events
+              </button>
             </nav>
 
             <div className="flex items-center gap-3">

@@ -1,38 +1,88 @@
-import { ArrowLeft, User, Mail, Calendar, Trophy, Settings, Heart, Share2 } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, User, Mail, Calendar, Settings, Heart, Share2, Save, Edit, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getUserProfile, updateUserProfile } from '../lib/firestoreService';
 
 interface UserProfileProps {
   onBack: () => void;
 }
 
 export default function UserProfile({ onBack }: UserProfileProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'achievements'>('overview');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'overview' | 'events'>('overview');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    bio: '',
+    email: '',
+    joinDate: '',
+  });
+  const [editForm, setEditForm] = useState({
+    name: '',
+    bio: '',
+  });
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Mock user data
-  const user = {
-    name: 'Alex Johnson',
-    email: 'alex.johnson@university.edu',
-    joinDate: 'September 2023',
-    avatar: '👨‍🎓',
-    bio: 'Passionate about technology and community building. Love organizing events and connecting with like-minded people!',
-    stats: {
-      eventsAttended: 12,
-      clubsJoined: 3,
-      achievements: 8,
-      points: 245
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user?.id) {
+        const profile = await getUserProfile(user.id);
+        if (profile) {
+          setProfileData({
+            name: profile.name || user.name || '',
+            bio: (profile as any).bio || '',
+            email: profile.email || user.email || '',
+            joinDate: profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown',
+          });
+          setEditForm({
+            name: profile.name || user.name || '',
+            bio: (profile as any).bio || '',
+          });
+        } else {
+          // Fallback to user context data
+          setProfileData({
+            name: user.name || '',
+            bio: '',
+            email: user.email || '',
+            joinDate: 'Recently',
+          });
+          setEditForm({
+            name: user.name || '',
+            bio: '',
+          });
+        }
+      }
+    };
+    loadProfile();
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user?.id) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    const result = await updateUserProfile(user.id, editForm);
+
+    if (result.success) {
+      setProfileData(prev => ({
+        ...prev,
+        name: editForm.name,
+        bio: editForm.bio,
+      }));
+      setIsEditing(false);
+      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    } else {
+      setMessage({ type: 'error', text: result.error || 'Failed to update profile' });
     }
+    setIsSaving(false);
   };
 
   const upcomingEvents = [
     { id: 1, title: 'AI Workshop', club: 'ACM', date: 'Jan 20, 2026', status: 'registered' },
     { id: 2, title: 'Hackathon 2026', club: 'CodeChef', date: 'Feb 15, 2026', status: 'interested' }
-  ];
-
-  const achievements = [
-    { id: 1, title: 'First Event Attendee', description: 'Attended your first club event', icon: '🎯', unlocked: true },
-    { id: 2, title: 'Club Member', description: 'Joined your first club', icon: '🤝', unlocked: true },
-    { id: 3, title: 'Event Organizer', description: 'Helped organize an event', icon: '📅', unlocked: false },
-    { id: 4, title: 'Community Builder', description: 'Invited 5 friends to join clubs', icon: '🌟', unlocked: false }
   ];
 
   return (
@@ -45,50 +95,110 @@ export default function UserProfile({ onBack }: UserProfileProps) {
         <span className="font-semibold">Back to Dashboard</span>
       </button>
 
+      {/* Message */}
+      {message && (
+        <div className={`mb-6 p-4 rounded-xl ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {message.text}
+        </div>
+      )}
+
       {/* Profile Header */}
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 mb-8">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 mb-8">
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
-            {user.avatar}
+            👨‍🎓
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-black text-slate-900 mb-2">{user.name}</h1>
-            <p className="text-slate-600 mb-4">{user.bio}</p>
-            <div className="flex items-center gap-6 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>{user.email}</span>
+            {isEditing ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bio</label>
+                  <textarea
+                    rows={3}
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Tell us about yourself..."
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-semibold transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditForm({ name: profileData.name, bio: profileData.bio });
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>Joined {user.joinDate}</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{profileData.name || 'User'}</h1>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  {profileData.bio || 'No bio yet. Click edit to add one!'}
+                </p>
+                <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    <span>{profileData.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Joined {profileData.joinDate}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-          <button className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors">
-            <Settings className="w-5 h-5 text-slate-600" />
-          </button>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="p-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            >
+              <Edit className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            </button>
+          )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <div className="text-2xl font-bold text-blue-600">{user.stats.eventsAttended}</div>
-            <div className="text-sm text-slate-600">Events Attended</div>
+        {/* Role Badge */}
+        {user?.role && (
+          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <span className={`px-3 py-1 rounded-full text-sm font-bold ${user.role === 'admin'
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                  : user.role === 'club-secretary'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                }`}>
+                {user.role === 'club-secretary' ? 'Club Secretary' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
+              {user.clubName && (
+                <span className="text-sm text-slate-600 dark:text-slate-400">• {user.clubName}</span>
+              )}
+            </div>
           </div>
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <div className="text-2xl font-bold text-green-600">{user.stats.clubsJoined}</div>
-            <div className="text-sm text-slate-600">Clubs Joined</div>
-          </div>
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <div className="text-2xl font-bold text-purple-600">{user.stats.achievements}</div>
-            <div className="text-sm text-slate-600">Achievements</div>
-          </div>
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <div className="text-2xl font-bold text-orange-600">{user.stats.points}</div>
-            <div className="text-sm text-slate-600">Points</div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -97,16 +207,14 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           {[
             { id: 'overview', label: 'Overview', icon: User },
             { id: 'events', label: 'My Events', icon: Calendar },
-            { id: 'achievements', label: 'Achievements', icon: Trophy }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${
-                activeTab === tab.id
+              className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
                   ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                   : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
-              }`}
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               <span>{tab.label}</span>
@@ -125,8 +233,8 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                       <Heart className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">RSVP'd to AI Workshop</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">ACM Club • 2 hours ago</p>
+                      <p className="font-semibold text-slate-900 dark:text-white">Profile Updated</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Your profile is now synced • Recently</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
@@ -134,8 +242,8 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                       <Share2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">Shared CodeChef event</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">With 3 friends • 1 day ago</p>
+                      <p className="font-semibold text-slate-900 dark:text-white">Welcome to Club-Connect!</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Start exploring clubs and events</p>
                     </div>
                   </div>
                 </div>
@@ -152,39 +260,12 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                     <h4 className="font-semibold text-slate-900 dark:text-white">{event.title}</h4>
                     <p className="text-sm text-slate-600 dark:text-slate-300">{event.club} • {event.date}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    event.status === 'registered'
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${event.status === 'registered'
                       ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
                       : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                  }`}>
+                    }`}>
                     {event.status === 'registered' ? 'Registered' : 'Interested'}
                   </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'achievements' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    achievement.unlocked
-                      ? 'bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10 border-yellow-200 dark:border-yellow-800'
-                      : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">{achievement.icon}</span>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">{achievement.title}</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">{achievement.description}</p>
-                    </div>
-                  </div>
-                  {achievement.unlocked && (
-                    <div className="text-xs text-green-600 dark:text-green-400 font-semibold">✓ Unlocked</div>
-                  )}
                 </div>
               ))}
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Users, Heart, Search, Sparkles, Edit, MapPin, Clock } from 'lucide-react';
+import { Calendar, Bell, Users, Heart, Search, Sparkles, Edit, MapPin, Clock, Shield, Megaphone } from 'lucide-react';
 import { Page } from '../types/page';
 import { FirestorePost, FirestoreClub, FirestoreNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs } from '../lib/firestoreService';
@@ -80,6 +80,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
       default: return 'from-amber-500 to-orange-500';
     }
   };
+
+  // Filter to show only upcoming/incomplete events on home page
+  const upcomingPosts = posts.filter(post => new Date(post.date) >= new Date());
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -181,19 +184,19 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
       )}
 
-      {/* Recent Posts and Notifications Section */}
+      {/* Upcoming Events and Notifications Section */}
       <div className="mb-16">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                {filteredPosts.length > 0 ? 'Search Results' : 'Recent Posts'}
+                {filteredPosts.length > 0 ? 'Search Results' : 'Upcoming Events'}
               </h2>
               <button
-                onClick={() => onNavigate('dashboard')}
+                onClick={() => onNavigate('events')}
                 className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
               >
-                View All Clubs
+                View All Events
               </button>
             </div>
 
@@ -201,13 +204,13 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : (filteredPosts.length > 0 ? filteredPosts : posts).length === 0 ? (
+            ) : (filteredPosts.length > 0 ? filteredPosts : upcomingPosts).length === 0 ? (
               <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
                 <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-400">No posts yet. Check back soon!</p>
+                <p className="text-slate-600 dark:text-slate-400">No upcoming events. Check back soon!</p>
               </div>
             ) : (
-              (filteredPosts.length > 0 ? filteredPosts : posts).slice(0, 5).map((post) => {
+              (filteredPosts.length > 0 ? filteredPosts : upcomingPosts).slice(0, 5).map((post) => {
                 const club = clubs.find(c => c.name === post.clubName); // Try to find club for icon
                 return (
                   <div
@@ -238,25 +241,43 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
                     {/* Card Body: Split Layout */}
                     <div className="p-0 flex flex-col sm:flex-row">
-                      {/* Left: Cover Image */}
-                      <div className="sm:w-2/5 h-48 sm:h-auto relative bg-slate-200 dark:bg-slate-700">
-                        {post.coverImage ? (
+                      {/* Left: Cover Image OR Styled Event Title (when no image) */}
+                      {post.coverImage ? (
+                        <div className="sm:w-2/5 h-48 sm:h-auto relative bg-slate-200 dark:bg-slate-700">
                           <img
                             src={post.coverImage}
                             alt={post.title}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
                           />
-                        ) : (
-                          <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} opacity-20 flex items-center justify-center`}>
-                            <Sparkles className="w-12 h-12 text-slate-400" />
+                        </div>
+                      ) : (
+                        <div className={`sm:w-1/3 p-5 flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br ${getEventColor(post.type)}`}>
+                          {/* Decorative floating circles */}
+                          <div className="absolute top-2 right-2 w-16 h-16 bg-white/10 rounded-full blur-sm" />
+                          <div className="absolute bottom-4 left-2 w-10 h-10 bg-white/10 rounded-full blur-sm" />
+                          <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-white/15 rounded-full" />
+
+                          {/* Event type icon */}
+                          <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            {post.type === 'event' ? (
+                              <Calendar className="w-7 h-7 text-white" />
+                            ) : post.type === 'announcement' ? (
+                              <Bell className="w-7 h-7 text-white" />
+                            ) : (
+                              <Sparkles className="w-7 h-7 text-white" />
+                            )}
                           </div>
-                        )}
 
-
-                      </div>
+                          {/* Event type label */}
+                          <span className="relative z-10 text-xs font-bold text-white/90 uppercase tracking-widest">
+                            {post.type}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Right: Details */}
-                      <div className="sm:w-3/5 p-6 flex flex-col justify-center">
+                      <div className={`${post.coverImage ? 'sm:w-3/5' : 'sm:w-2/3'} p-6 flex flex-col justify-center`}>
+                        {/* Always show title on the right now */}
                         <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
                           {post.title}
                         </h3>
@@ -320,10 +341,6 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                             </div>
                           )}
                         </div>
-
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                          {post.content}
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -339,11 +356,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Notifications</h3>
               </div>
 
-              {notifications.length === 0 ? (
+              {notifications.filter(n => n.type !== 'event').length === 0 ? (
                 <p className="text-slate-600 dark:text-slate-400 text-sm">No notifications yet.</p>
               ) : (
                 <div className="space-y-4">
-                  {notifications.slice(0, 5).map((notif) => (
+                  {notifications.filter(n => n.type !== 'event').slice(0, 5).map((notif) => (
                     <div
                       key={notif.id}
                       className={`p-4 rounded-xl transition-all hover:scale-105 cursor-pointer ${!notif.read
@@ -352,13 +369,19 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                         }`}
                       onClick={() => onNavigateToNotification(notif)}
                     >
-                      <div className="flex gap-3">
-                        <Bell className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-red-600' : 'text-slate-600 dark:text-slate-400'}`} />
+                      <div className="flex gap-3 items-center">
+                        {notif.type === 'system' ? (
+                          <Shield className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-yellow-500' : 'text-slate-600 dark:text-slate-400'}`} />
+                        ) : notif.type === 'announcement' ? (
+                          <Megaphone className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-red-600' : 'text-slate-600 dark:text-slate-400'}`} />
+                        ) : (
+                          <Bell className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`} />
+                        )}
                         <div>
                           <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
                             {notif.title}
                           </p>
-                          <p className="text-xs text-slate-600 dark:text-slate-400">
+                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
                             {notif.message}
                           </p>
                         </div>

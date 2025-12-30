@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -238,10 +238,11 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
 
 interface ClubSecretaryDashboardProps {
   onNavigate: (page: Page) => void;
+  onNavigateToPost: (postId: string) => void;
   user?: User | null;
 }
 
-export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecretaryDashboardProps) {
+export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, user }: ClubSecretaryDashboardProps) {
   const [club, setClub] = useState<FirestoreClub | null>(null);
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -281,6 +282,10 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
 
   // Location Picker Modal state
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+
+  // Edit Registration Link state
+  const [editingRegistrationLink, setEditingRegistrationLink] = useState<{ postId: string; currentLink: string } | null>(null);
+  const [newRegistrationLink, setNewRegistrationLink] = useState('');
 
   // Ref to prevent duplicate member additions in React Strict Mode
   const secretaryAddedRef = useRef(false);
@@ -697,9 +702,12 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
               ) : (
                 <div className="space-y-4">
                   {posts.map((post) => (
-                    <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                    <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                        <div
+                          className="flex-1 cursor-pointer"
+                          onClick={() => post.id && onNavigateToPost(post.id)}
+                        >
                           <div className="flex items-center gap-3 mb-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
                               ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
@@ -709,7 +717,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                             </span>
                             <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
                           </div>
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-2">{post.title}</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.title}</h4>
                           <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{post.content}</p>
                           {post.rsvps && post.rsvps > 0 && (
                             <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
@@ -729,6 +737,23 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                             >
                               <Image className="w-4 h-4" />
                               Add Photos ({post.eventPhotos?.length || 0})
+                            </button>
+                          )}
+                          {post.type === 'event' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingRegistrationLink({ postId: post.id!, currentLink: post.registrationLink || '' });
+                                setNewRegistrationLink(post.registrationLink || '');
+                              }}
+                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.registrationLink
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
+                                }`}
+                              title={post.registrationLink ? 'Edit Registration Link' : 'Add Registration Link'}
+                            >
+                              <Link className="w-4 h-4" />
+                              {post.registrationLink ? 'Edit Link' : 'Add Link'}
                             </button>
                           )}
                           <button
@@ -1126,9 +1151,22 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                     className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                     placeholder="https://forms.gle/..."
                   />
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Direct link to registration form or external event page.
-                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Direct link to registration form or external event page.
+                    </p>
+                    <a
+                      href="https://docs.google.com/forms/create"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create Google Form
+                    </a>
+                  </div>
                 </div>
               )}
 
@@ -1284,6 +1322,84 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
               >
                 Save Photos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Registration Link Modal */}
+      {editingRegistrationLink && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                {editingRegistrationLink.currentLink ? 'Edit Registration Link' : 'Add Registration Link'}
+              </h3>
+              <button
+                onClick={() => { setEditingRegistrationLink(null); setNewRegistrationLink(''); }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Registration Link
+                </label>
+                <input
+                  type="url"
+                  value={newRegistrationLink}
+                  onChange={(e) => setNewRegistrationLink(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                  placeholder="https://forms.gle/..."
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Paste a link to your registration form.
+                </p>
+                <a
+                  href="https://docs.google.com/forms/create"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Create Google Form
+                </a>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setEditingRegistrationLink(null); setNewRegistrationLink(''); }}
+                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (editingRegistrationLink) {
+                    const success = await updatePost(editingRegistrationLink.postId, { registrationLink: newRegistrationLink });
+                    if (success) {
+                      // Update local state
+                      setPosts(posts.map(p =>
+                        p.id === editingRegistrationLink.postId
+                          ? { ...p, registrationLink: newRegistrationLink }
+                          : p
+                      ));
+                      setEditingRegistrationLink(null);
+                      setNewRegistrationLink('');
+                    }
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+              >
+                Save Link
               </button>
             </div>
           </div>
