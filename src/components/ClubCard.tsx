@@ -35,8 +35,8 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
           {club.image ? (
             <img src={club.image} alt={club.name} className="w-full h-full object-contain p-2 bg-white" />
           ) : (
-                club.icon
-              )}
+            club.icon
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -46,8 +46,8 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
           >
             <Heart
               className={`w-5 h-5 transition-colors ${isFavorited
-                  ? 'text-red-500 fill-red-500'
-                  : 'text-slate-400 hover:text-red-400'
+                ? 'text-red-500 fill-red-500'
+                : 'text-slate-400 hover:text-red-400'
                 }`}
             />
           </button>

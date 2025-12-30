@@ -1106,8 +1106,31 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                       </div>
                     )}
                   </div>
+
+
                 )}
+
+
               </div>
+
+              {/* Registration Link - For all Events */}
+              {newPost.type === 'event' && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Registration Link (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={newPost.registrationLink}
+                    onChange={(e) => setNewPost({ ...newPost, registrationLink: e.target.value })}
+                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                    placeholder="https://forms.gle/..."
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Direct link to registration form or external event page.
+                  </p>
+                </div>
+              )}
 
               {/* Cover Image Upload */}
               <div>
