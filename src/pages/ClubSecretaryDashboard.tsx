@@ -267,6 +267,8 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
     registrationStartTime: '',
     registrationEnd: '',
     registrationEndTime: '',
+    coverImage: '',
+    registrationLink: '',
     attachments: [] as Attachment[]
   });
 
@@ -390,6 +392,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       ...(newPost.location ? { location: newPost.location } : {}),
       locationType: newPost.locationType,
       ...(newPost.locationUrl ? { locationUrl: newPost.locationUrl } : {}),
+      ...(newPost.coverImage ? { coverImage: newPost.coverImage } : {}),
       ...(newPost.registrationStart ? { registrationStart: newPost.registrationStart } : {}),
       ...(newPost.registrationStartTime ? { registrationStartTime: newPost.registrationStartTime } : {}),
       ...(newPost.registrationEnd ? { registrationEnd: newPost.registrationEnd } : {}),
@@ -400,6 +403,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
       authorName: user.name,
       status: 'published',
       rsvps: 0,
+      registrationLink: newPost.registrationLink,
       ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {})
     });
 
@@ -423,6 +427,8 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         registrationStartTime: '',
         registrationEnd: '',
         registrationEndTime: '',
+        coverImage: '',
+        registrationLink: '',
         attachments: []
       });
 
@@ -437,6 +443,7 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
         type: newPost.type, // 'event' or 'announcement'
         read: false,
         clubId: club.id!,
+        relatedId: postId,
       });
 
       setTimeout(() => {
@@ -1101,7 +1108,47 @@ export default function ClubSecretaryDashboard({ onNavigate, user }: ClubSecreta
                   </div>
                 )}
               </div>
-              {/* File Upload */}
+
+              {/* Cover Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Cover Image (Required for new design)
+                </label>
+                <div className="mb-4">
+                  {newPost.coverImage && (
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-slate-700">
+                      <img
+                        src={newPost.coverImage}
+                        alt="Cover Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => setNewPost({ ...newPost, coverImage: '' })}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
+                        title="Remove cover image"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <CloudinaryUpload
+                    clubName={club.name}
+                    existingAttachments={[]}
+                    onUploadComplete={(attachments) => {
+                      // We only take the first image if multiple selected or just the one
+                      if (attachments.length > 0) {
+                        setNewPost({ ...newPost, coverImage: attachments[0].url });
+                      }
+                    }}
+                    maxFiles={1}
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Upload a high-quality cover image for the home page card. Landscape orientation works best.
+                  </p>
+                </div>
+              </div>
+
+              {/* File Upload (Description Images) */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Description Images (Optional)

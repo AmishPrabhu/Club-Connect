@@ -5,9 +5,10 @@ import { getNotifications, markNotificationAsRead } from '../lib/firestoreServic
 
 interface NotificationsProps {
   onBack: () => void;
+  onNavigateToNotification: (notification: FirestoreNotification) => void;
 }
 
-export default function Notifications({ onBack }: NotificationsProps) {
+export default function Notifications({ onBack, onNavigateToNotification }: NotificationsProps) {
   const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'event' | 'announcement'>('all');
@@ -146,7 +147,10 @@ export default function Notifications({ onBack }: NotificationsProps) {
               return (
                 <div
                   key={notification.id}
-                  onClick={() => !notification.read && handleMarkAsRead(notification.id!)}
+                  onClick={() => {
+                    if (!notification.read) handleMarkAsRead(notification.id!);
+                    onNavigateToNotification(notification);
+                  }}
                   className={`p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
                     }`}
                 >

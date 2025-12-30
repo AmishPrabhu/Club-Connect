@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus, MapPin, Clock, ExternalLink } from 'lucide-react';
 import { FirestorePost, User, Attachment } from '../types/auth';
 import { getPosts, updatePost } from '../lib/firestoreService';
 import AttachmentGallery from '../components/AttachmentGallery';
@@ -158,81 +158,90 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                     </button>
                 </div>
 
-                {/* Info Cards */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                        <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                {/* Info Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                    {/* Date */}
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
+                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
                         <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Date</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{post.date}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Date</p>
+                            <p className="text-base font-semibold text-slate-900 dark:text-white">
+                                {new Date(post.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </p>
                         </div>
                     </div>
-                    {post.time && (
-                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                            <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Time</p>
-                                <p className="font-semibold text-slate-900 dark:text-white">{post.time}</p>
-                            </div>
+
+                    {/* Time */}
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
+                            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
-                    )}
-                    {post.location && (
-                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Location</p>
-                                {post.locationUrl ? (
-                                    <a
-                                        href={post.locationUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-                                    >
-                                        {post.location}
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                    </a>
-                                ) : (
-                                    <p className="font-semibold text-slate-900 dark:text-white">{post.location}</p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                        <Image className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Total Media</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{totalPhotos}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Time</p>
+                            <p className="text-base font-semibold text-slate-900 dark:text-white">
+                                {post.time || 'All Day'}
+                            </p>
                         </div>
                     </div>
+
+                    {/* Location */}
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
+                            <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Venue</p>
+                            {post.locationUrl ? (
+                                <a
+                                    href={post.locationUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-base font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                >
+                                    {post.location || 'Campus'}
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            ) : (
+                                <p className="text-base font-semibold text-slate-900 dark:text-white">
+                                    {post.location || 'Campus'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Registration */}
                     {(post.registrationStart || post.registrationEnd) && (
-                        <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
+                                <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            </div>
                             <div>
-                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Registration Period</p>
-                                {post.registrationStart && (
-                                    <p className="text-sm text-slate-700 dark:text-slate-300">
-                                        <span className="font-medium">Opens:</span> {new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        {post.registrationStartTime && ` at ${post.registrationStartTime}`}
-                                    </p>
-                                )}
-                                {post.registrationEnd && (
-                                    <p className="text-sm text-slate-700 dark:text-slate-300">
-                                        <span className="font-medium">Closes:</span> {new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        {post.registrationEndTime && ` at ${post.registrationEndTime}`}
-                                    </p>
-                                )}
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Registration</p>
+                                <p className="text-base font-semibold text-slate-900 dark:text-white">
+                                    {post.registrationStart && new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {post.registrationStartTime && ` ${post.registrationStartTime}`}
+                                    {(post.registrationStart || post.registrationStartTime) && (post.registrationEnd || post.registrationEndTime) && ' - '}
+                                    {post.registrationEnd && new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {post.registrationEndTime && ` ${post.registrationEndTime}`}
+                                </p>
                             </div>
                         </div>
                     )}
+
+                    {/* Total Media - kept as it was useful, but styled linearly if desired, or can be removed if strictly following home page. Keeping it for now but in list style. */}
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-full shrink-0">
+                            <Image className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Media</p>
+                            <p className="text-base font-semibold text-slate-900 dark:text-white">{totalPhotos} items</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Embedded Google Maps for External Locations */}
@@ -279,6 +288,24 @@ export default function PostDetail({ postId, onBack, user }: PostDetailProps) {
                                 </span>
                             </div>
                         </a>
+                    </div>
+                )}
+
+                {/* Registration Link Button */}
+                {post.registrationLink && (
+                    <div className="mb-6">
+                        <a
+                            href={post.registrationLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-lg rounded-xl font-bold transition-all transform hover:scale-[1.02] shadow-lg group"
+                        >
+                            <span>Register Now</span>
+                            <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-2">
+                            Opens in a new tab
+                        </p>
                     </div>
                 )}
 

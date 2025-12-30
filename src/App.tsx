@@ -8,6 +8,7 @@ import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
 import EventDetail from './pages/EventDetail';
 import PostDetail from './pages/PostDetail';
+import NotificationDetail from './pages/NotificationDetail';
 import LoginPage from './pages/LoginPage';
 
 import AdminDashboard from './pages/AdminDashboard';
@@ -56,6 +57,11 @@ function AppContent() {
     }
   };
 
+  const navigateToNotification = (notification: any) => {
+    setSelectedPost(notification); // Reuse selectedPost state for now or add new state
+    setCurrentPage('notification');
+  };
+
   const handleLogout = async () => {
     await logout();
     setCurrentPage('home');
@@ -75,7 +81,7 @@ function AppContent() {
       )}
 
       {/* Main Pages */}
-      {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} />}
+      {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} onNavigateToNotification={navigateToNotification} />}
       {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
       {currentPage === 'club' && selectedClub && (
         <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
@@ -84,7 +90,7 @@ function AppContent() {
         <MemberBoardDetail club={selectedMember} onBack={() => navigateToPage('club')} />
       )}
       {currentPage === 'notifications' && (
-        <Notifications onBack={() => navigateToPage('dashboard')} />
+        <Notifications onBack={() => navigateToPage('dashboard')} onNavigateToNotification={navigateToNotification} />
       )}
       {currentPage === 'userProfile' && (
         <UserProfile onBack={() => navigateToPage('dashboard')} />
@@ -94,6 +100,11 @@ function AppContent() {
       )}
       {currentPage === 'post' && selectedPost && (
         <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} user={user} />
+      )}
+
+
+      {currentPage === 'notification' && selectedPost && (
+        <NotificationDetail notification={selectedPost as any} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
       )}
 
       {currentPage === 'adminDashboard' && (

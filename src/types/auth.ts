@@ -92,6 +92,8 @@ export interface FirestorePost {
   registrationStartTime?: string;  // Registration start time (e.g., "10:00 AM")
   registrationEnd?: string;    // Registration end date (YYYY-MM-DD)
   registrationEndTime?: string;  // Registration end time (e.g., "5:00 PM")
+  coverImage?: string;             // Main cover image for the post
+  registrationLink?: string;       // Optional registration link for events
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   createdAt: Date;
@@ -106,6 +108,7 @@ export interface FirestoreNotification {
   type: 'system' | 'club' | 'event' | 'announcement';
   userId?: string; // Target user, empty for global
   clubId?: string; // Source club
+  relatedId?: string; // ID of the related entity (e.g., postId)
   read: boolean;
   createdAt: Date;
 }

@@ -338,6 +338,24 @@ export const getNotifications = async (userId?: string): Promise<FirestoreNotifi
     }
 };
 
+export const getNotification = async (notificationId: string): Promise<FirestoreNotification | null> => {
+    try {
+        const docRef = doc(db, 'notifications', notificationId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return {
+                id: docSnap.id,
+                ...docSnap.data(),
+                createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+            } as FirestoreNotification;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching notification:', error);
+        return null;
+    }
+};
+
 export const createNotification = async (
     notificationData: Omit<FirestoreNotification, 'id' | 'createdAt'>
 ): Promise<string | null> => {
