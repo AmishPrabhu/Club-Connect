@@ -126,8 +126,8 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                     </button>
                   )}
 
-                  {/* Club Secretary-specific controls */}
-                  {user.role === 'club-secretary' && (
+                  {/* Club Secretary, President, and Treasurer controls */}
+                  {['club-secretary', 'president', 'treasurer'].includes(user.role) && (
                     <button
                       onClick={() => onNavigate('clubSecretaryDashboard')}
                       className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn relative"
@@ -159,7 +159,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                         <button
                           onClick={() => {
                             // Navigate to appropriate dashboard based on role
-                            if (user.role === 'club-secretary') {
+                            if (['club-secretary', 'president', 'treasurer'].includes(user.role)) {
                               onNavigate('clubSecretaryDashboard');
                             } else if (user.role === 'admin') {
                               onNavigate('adminDashboard');
@@ -168,7 +168,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
                         >
-                          {user.role === 'club-secretary' && <Settings className="w-4 h-4" />}
+                          {['club-secretary', 'president', 'treasurer'].includes(user.role) && <Settings className="w-4 h-4" />}
                           {user.role === 'admin' && <Shield className="w-4 h-4" />}
                           My Account
                         </button>

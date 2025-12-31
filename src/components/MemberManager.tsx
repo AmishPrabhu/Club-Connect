@@ -6,6 +6,7 @@ import { getClubMembers, addClubMember, updateClubMember, removeClubMember } fro
 interface MemberManagerProps {
     clubId: string;
     clubName: string;
+    isReadOnly?: boolean;
 }
 
 const ROLE_OPTIONS: { value: ClubMemberRole; label: string }[] = [
@@ -26,7 +27,7 @@ const ROLE_COLORS: Record<ClubMemberRole, string> = {
     'member': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
 };
 
-export default function MemberManager({ clubId, clubName }: MemberManagerProps) {
+export default function MemberManager({ clubId, clubName, isReadOnly = false }: MemberManagerProps) {
     const [members, setMembers] = useState<ClubMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -117,13 +118,15 @@ export default function MemberManager({ clubId, clubName }: MemberManagerProps) 
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{clubName} Members</h3>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
-                >
-                    <UserPlus className="w-4 h-4" />
-                    Add Member
-                </button>
+                {!isReadOnly && (
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                    >
+                        <UserPlus className="w-4 h-4" />
+                        Add Member
+                    </button>
+                )}
             </div>
 
             {/* Members List */}
@@ -195,22 +198,24 @@ export default function MemberManager({ clubId, clubName }: MemberManagerProps) 
                                             Joined: {member.joinedAt.toLocaleDateString()}
                                         </p>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setEditingMember(member)}
-                                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"
-                                            title="Edit member"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleRemoveMember(member.id!)}
-                                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                            title="Remove member"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
+                                    {!isReadOnly && (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setEditingMember(member)}
+                                                className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                                title="Edit member"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleRemoveMember(member.id!)}
+                                                className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                title="Remove member"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'club-secretary' | 'admin';
+export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'treasurer';
 
 // Club member roles
 export type ClubMemberRole = 'president' | 'vice-president' | 'treasurer' | 'secretary' | 'coordinator' | 'member';
@@ -59,6 +59,10 @@ export interface FirestoreClub {
   upcomingEvents: number;
   secretaryId?: string;
   secretaryEmail?: string;
+  presidentId?: string;
+  presidentEmail?: string;
+  treasurerId?: string;
+  treasurerEmail?: string;
   whatsappLink?: string;  // WhatsApp community invite link
   createdAt: Date;
   updatedAt: Date;

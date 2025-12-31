@@ -183,6 +183,176 @@ export const createClubSecretary = async (
     }
 };
 
+export const createClubPresident = async (
+    email: string,
+    password: string,
+    name: string,
+    clubId: string,
+    clubName: string
+): Promise<{ success: boolean; error?: string; userId?: string }> => {
+    try {
+        // Import required functions for secondary app
+        const { initializeApp, deleteApp } = await import('firebase/app');
+        const { getAuth, createUserWithEmailAndPassword: createUser } = await import('firebase/auth');
+
+        // Get the current Firebase config
+        const firebaseConfig = {
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+            appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        };
+
+        // Create a secondary app instance to create the user without affecting current session
+        const secondaryApp = initializeApp(firebaseConfig, 'PresidentApp');
+        const secondaryAuth = getAuth(secondaryApp);
+
+        try {
+            // Create user with secondary auth instance
+            const userCredential = await createUser(secondaryAuth, email, password);
+            const uid = userCredential.user.uid;
+
+            // Create Firestore user profile with president role
+            const userProfile: FirestoreUser = {
+                email,
+                name,
+                role: 'president',
+                clubId,
+                clubName,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            await setDoc(doc(db, 'users', uid), userProfile);
+
+            // Update the club with president info
+            await updateClub(clubId, {
+                presidentId: uid,
+                presidentEmail: email,
+            });
+
+            // Add president as a club member
+            const membersRef = collection(db, 'clubs', clubId, 'members');
+            await addDoc(membersRef, {
+                name,
+                email,
+                role: 'president',
+                joinedAt: Timestamp.now(),
+            });
+
+            // Update member count
+            const clubRef = doc(db, 'clubs', clubId);
+            const clubDoc = await getDoc(clubRef);
+            if (clubDoc.exists()) {
+                const currentMembers = clubDoc.data().members || 0;
+                await updateDoc(clubRef, {
+                    members: currentMembers + 1,
+                    updatedAt: Timestamp.now(),
+                });
+            }
+
+            // Delete the secondary app instance
+            await deleteApp(secondaryApp);
+
+            return { success: true, userId: uid };
+        } catch (innerError: any) {
+            // Clean up secondary app on error
+            await deleteApp(secondaryApp);
+            throw innerError;
+        }
+    } catch (error: any) {
+        console.error('Error creating club president:', error);
+        return { success: false, error: error.message || 'Failed to create president' };
+    }
+};
+
+export const createClubTreasurer = async (
+    email: string,
+    password: string,
+    name: string,
+    clubId: string,
+    clubName: string
+): Promise<{ success: boolean; error?: string; userId?: string }> => {
+    try {
+        // Import required functions for secondary app
+        const { initializeApp, deleteApp } = await import('firebase/app');
+        const { getAuth, createUserWithEmailAndPassword: createUser } = await import('firebase/auth');
+
+        // Get the current Firebase config
+        const firebaseConfig = {
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+            appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        };
+
+        // Create a secondary app instance to create the user without affecting current session
+        const secondaryApp = initializeApp(firebaseConfig, 'TreasurerApp');
+        const secondaryAuth = getAuth(secondaryApp);
+
+        try {
+            // Create user with secondary auth instance
+            const userCredential = await createUser(secondaryAuth, email, password);
+            const uid = userCredential.user.uid;
+
+            // Create Firestore user profile with treasurer role
+            const userProfile: FirestoreUser = {
+                email,
+                name,
+                role: 'treasurer',
+                clubId,
+                clubName,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            await setDoc(doc(db, 'users', uid), userProfile);
+
+            // Update the club with treasurer info
+            await updateClub(clubId, {
+                treasurerId: uid,
+                treasurerEmail: email,
+            });
+
+            // Add treasurer as a club member
+            const membersRef = collection(db, 'clubs', clubId, 'members');
+            await addDoc(membersRef, {
+                name,
+                email,
+                role: 'treasurer',
+                joinedAt: Timestamp.now(),
+            });
+
+            // Update member count
+            const clubRef = doc(db, 'clubs', clubId);
+            const clubDoc = await getDoc(clubRef);
+            if (clubDoc.exists()) {
+                const currentMembers = clubDoc.data().members || 0;
+                await updateDoc(clubRef, {
+                    members: currentMembers + 1,
+                    updatedAt: Timestamp.now(),
+                });
+            }
+
+            // Delete the secondary app instance
+            await deleteApp(secondaryApp);
+
+            return { success: true, userId: uid };
+        } catch (innerError: any) {
+            // Clean up secondary app on error
+            await deleteApp(secondaryApp);
+            throw innerError;
+        }
+    } catch (error: any) {
+        console.error('Error creating club treasurer:', error);
+        return { success: false, error: error.message || 'Failed to create treasurer' };
+    }
+};
+
 // Update user profile (name, bio/description)
 export const updateUserProfile = async (
     userId: string,

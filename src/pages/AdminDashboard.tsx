@@ -8,6 +8,8 @@ import {
   createClub,
   deleteClub,
   createClubSecretary,
+  createClubPresident,
+  createClubTreasurer,
   getPosts,
   deletePost,
   getNotifications,
@@ -164,6 +166,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   // Modal states
   const [showCreateClubModal, setShowCreateClubModal] = useState(false);
   const [showCreateSecretaryModal, setShowCreateSecretaryModal] = useState(false);
+  const [showCreatePresidentModal, setShowCreatePresidentModal] = useState(false);
+  const [showCreateTreasurerModal, setShowCreateTreasurerModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<FirestoreClub | null>(null);
@@ -178,6 +182,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   const [newSecretary, setNewSecretary] = useState({
+    email: '',
+    password: '',
+    name: '',
+  });
+
+  // Generic state for President/Treasurer creation
+  const [newRoleUser, setNewRoleUser] = useState({
     email: '',
     password: '',
     name: '',
@@ -293,6 +304,76 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
+  // President handlers
+  const handleCreatePresident = async () => {
+    setFormMessage(null);
+    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (newRoleUser.password.length < 6) {
+      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    const result = await createClubPresident(
+      newRoleUser.email,
+      newRoleUser.password,
+      newRoleUser.name,
+      selectedClub.id!,
+      selectedClub.name
+    );
+
+    if (result.success) {
+      setFormMessage({ type: 'success', text: `President created for ${selectedClub.name}!` });
+      setNewRoleUser({ email: '', password: '', name: '' });
+      setTimeout(() => {
+        setShowCreatePresidentModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: result.error || 'Failed to create president' });
+    }
+  };
+
+  // Treasurer handlers
+  const handleCreateTreasurer = async () => {
+    setFormMessage(null);
+    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (newRoleUser.password.length < 6) {
+      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    const result = await createClubTreasurer(
+      newRoleUser.email,
+      newRoleUser.password,
+      newRoleUser.name,
+      selectedClub.id!,
+      selectedClub.name
+    );
+
+    if (result.success) {
+      setFormMessage({ type: 'success', text: `Treasurer created for ${selectedClub.name}!` });
+      setNewRoleUser({ email: '', password: '', name: '' });
+      setTimeout(() => {
+        setShowCreateTreasurerModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: result.error || 'Failed to create treasurer' });
+    }
+  };
+
   // Post handlers
   const handleDeletePost = async (postId: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
@@ -340,7 +421,20 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   const openSecretaryModal = (club: FirestoreClub) => {
     setSelectedClub(club);
+    setNewSecretary({ email: '', password: '', name: '' }); // Reset specific secretary state if any, though we use newSecretary
     setShowCreateSecretaryModal(true);
+  };
+
+  const openPresidentModal = (club: FirestoreClub) => {
+    setSelectedClub(club);
+    setNewRoleUser({ email: '', password: '', name: '' });
+    setShowCreatePresidentModal(true);
+  };
+
+  const openTreasurerModal = (club: FirestoreClub) => {
+    setSelectedClub(club);
+    setNewRoleUser({ email: '', password: '', name: '' });
+    setShowCreateTreasurerModal(true);
   };
 
   const filteredClubs = clubs.filter(club =>
@@ -524,29 +618,56 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           <div className="space-y-1 mb-4">
                             <p className="text-sm text-slate-600 dark:text-slate-400">{club.members} members</p>
                             {club.secretaryEmail && (
-                              <p className="text-sm text-green-600 dark:text-green-400">Secretary: {club.secretaryEmail}</p>
+                              <p className="text-sm text-green-600 dark:text-green-400">Sec: {club.secretaryEmail}</p>
+                            )}
+                            {club.presidentEmail && (
+                              <p className="text-sm text-purple-600 dark:text-purple-400">Pres: {club.presidentEmail}</p>
+                            )}
+                            {club.treasurerEmail && (
+                              <p className="text-sm text-amber-600 dark:text-amber-400">Treas: {club.treasurerEmail}</p>
                             )}
                           </div>
-                          <div className="flex gap-2 flex-wrap">
+                          <div className="flex flex-col gap-2 mb-4">
                             {!club.secretaryEmail && (
                               <button
                                 onClick={() => openSecretaryModal(club)}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1"
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
                               >
                                 <UserPlus className="w-4 h-4" />
                                 Add Secretary
                               </button>
                             )}
+                            {!club.presidentEmail && (
+                              <button
+                                onClick={() => openPresidentModal(club)}
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
+                              >
+                                <UserPlus className="w-4 h-4" />
+                                Add President
+                              </button>
+                            )}
+                            {!club.treasurerEmail && (
+                              <button
+                                onClick={() => openTreasurerModal(club)}
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
+                              >
+                                <UserPlus className="w-4 h-4" />
+                                Add Treasurer
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                             <button
                               onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1"
+                              className="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
                             >
                               <Edit className="w-4 h-4" />
-                              Image
+                              Edit Image
                             </button>
                             <button
                               onClick={() => handleDeleteClub(club.id!)}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all"
+                              className="bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 px-3 py-2 rounded-lg text-sm font-semibold transition-all"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -795,6 +916,132 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               >
                 <UserPlus className="w-5 h-5" />
                 Create Secretary Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create President Modal */}
+      {showCreatePresidentModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create President for {selectedClub.name}</h3>
+              <button onClick={() => { setShowCreatePresidentModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
+                <input
+                  type="text"
+                  value={newRoleUser.name}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="President Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
+                <input
+                  type="email"
+                  value={newRoleUser.email}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="president@club.wce.ac.in"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
+                <input
+                  type="password"
+                  value={newRoleUser.password}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <button
+                onClick={handleCreatePresident}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create President Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Treasurer Modal */}
+      {showCreateTreasurerModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Treasurer for {selectedClub.name}</h3>
+              <button onClick={() => { setShowCreateTreasurerModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
+                <input
+                  type="text"
+                  value={newRoleUser.name}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Treasurer Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
+                <input
+                  type="email"
+                  value={newRoleUser.email}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="treasurer@club.wce.ac.in"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
+                <input
+                  type="password"
+                  value={newRoleUser.password}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <button
+                onClick={handleCreateTreasurer}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create Treasurer Account
               </button>
             </div>
           </div>

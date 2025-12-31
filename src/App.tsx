@@ -127,7 +127,7 @@ function AppContent() {
         <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
       )}
 
-      {/* Login Modal for Club Secretary and Admin */}
+      {/* Login Modal for Club Secretary, President, Treasurer, and Admin */}
       {currentPage === 'login' && (
         <LoginPage onNavigate={navigateToPage} />
       )}

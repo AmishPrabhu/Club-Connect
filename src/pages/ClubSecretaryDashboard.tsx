@@ -250,6 +250,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const isReadOnly = user?.role === 'treasurer';
+
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
@@ -624,7 +626,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             { id: 'members', label: 'Members', icon: Users },
             { id: 'posts', label: 'Manage Posts', icon: Edit },
             { id: 'notifications', label: 'Send Notifications', icon: Bell }
-          ].map((tab) => {
+          ].filter(tab => !isReadOnly || (tab.id !== 'notifications' && tab.id !== 'posts')).map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -673,7 +675,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
                 <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
                   <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Picture</h4>
-                  <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
+                  {isReadOnly ? (
+                    <div className="relative w-32 h-32 mx-auto">
+                      <img
+                        src={club.image || '/club-default.jpg'}
+                        alt="Club profile"
+                        className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+                      />
+                    </div>
+                  ) : (
+                    <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
+                  )}
                 </div>
               </div>
 
@@ -762,21 +774,25 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                           </svg>
                           <span className="text-sm truncate">{club.whatsappLink}</span>
                         </div>
-                        <button
-                          onClick={() => setIsEditingWhatsapp(true)}
-                          className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
-                        >
-                          Edit
-                        </button>
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => setIsEditingWhatsapp(true)}
+                            className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
+                          >
+                            Edit
+                          </button>
+                        )}
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setIsEditingWhatsapp(true)}
-                        className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-5 h-5" />
-                        Add WhatsApp Community Link
-                      </button>
+                      !isReadOnly && (
+                        <button
+                          onClick={() => setIsEditingWhatsapp(true)}
+                          className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Plus className="w-5 h-5" />
+                          Add WhatsApp Community Link
+                        </button>
+                      )
                     )}
                   </div>
                 )}
@@ -807,7 +823,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
           {/* Members Tab */}
           {activeTab === 'members' && club && (
-            <MemberManager clubId={club.id!} clubName={club.name} />
+            <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} />
           )}
 
           {/* Posts Tab */}
