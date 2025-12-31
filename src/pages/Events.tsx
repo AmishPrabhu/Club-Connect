@@ -23,11 +23,11 @@ export default function Events({ onBack, onNavigateToPost }: EventsProps) {
                     getPosts(),
                     getClubs()
                 ]);
-                // Sort posts by date (newest first)
-                const sortedPosts = postsData.sort((a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
-                );
-                setPosts(sortedPosts);
+                // Filter only events (not announcements) and sort by date (newest first)
+                const events = postsData
+                    .filter(p => p.type === 'event')
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                setPosts(events);
                 setClubs(clubsData);
             } catch (error) {
                 console.error('Error loading events:', error);

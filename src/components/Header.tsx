@@ -77,6 +77,15 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               >
                 Events
               </button>
+              <button
+                onClick={() => onNavigate('announcements')}
+                className={`text-sm font-medium transition-colors ${currentPage === 'announcements'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
+                  }`}
+              >
+                Announcements
+              </button>
             </nav>
 
             <div className="flex items-center gap-3">

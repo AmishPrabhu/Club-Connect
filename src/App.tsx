@@ -11,6 +11,7 @@ import EventDetail from './pages/EventDetail';
 import PostDetail from './pages/PostDetail';
 import NotificationDetail from './pages/NotificationDetail';
 import Events from './pages/Events';
+import Announcements from './pages/Announcements';
 import LoginPage from './pages/LoginPage';
 
 import AdminDashboard from './pages/AdminDashboard';
@@ -105,10 +106,13 @@ function AppContent() {
         <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
       )}
       {currentPage === 'post' && selectedPost && (
-        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} user={user} />
+        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} />
       )}
       {currentPage === 'events' && (
         <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+      )}
+      {currentPage === 'announcements' && (
+        <Announcements onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
       )}
 
 

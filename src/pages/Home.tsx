@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info } from 'lucide-react';
+import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink } from 'lucide-react';
 import { Page } from '../types/page';
 import { FirestorePost, FirestoreClub, FirestoreNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs } from '../lib/firestoreService';
 import ClubCard from '../components/ClubCard';
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
+import RSVPModal from '../components/RSVPModal';
 
 interface HomeProps {
   onNavigate: (page: Page) => void;
@@ -24,6 +25,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [filteredClubs, setFilteredClubs] = useState<FirestoreClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [rsvpEvent, setRsvpEvent] = useState<FirestorePost | null>(null);
 
   // Fetch data on mount
   useEffect(() => {
@@ -272,9 +274,26 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                         {/* Right: Details */}
                         <div className={`${post.coverImage ? 'sm:w-3/5' : 'sm:w-2/3'} p-6 flex flex-col justify-center`}>
                           {/* Always show title on the right now */}
-                          <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
+                          <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
                             {post.title}
                           </h3>
+
+
+                          {/* Related Event Badge for Announcements */}
+                          {post.type === 'announcement' && post.relatedEventTitle && post.relatedEventId && (
+                            <div className="mb-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigateToPost(post.relatedEventId!);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer"
+                              >
+                                <Calendar className="w-3 h-3" />
+                                View Related Event: {post.relatedEventTitle}
+                              </button>
+                            </div>
+                          )}
 
                           <div className="space-y-3 mb-4">
                             {/* Date */}
@@ -335,6 +354,34 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                               </div>
                             )}
                           </div>
+
+                          {/* Action Buttons */}
+                          {post.type === 'event' && (
+                            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRsvpEvent(post);
+                                }}
+                                className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold text-sm transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
+                              >
+                                <Plus className="w-4 h-4" />
+                                RSVP
+                              </button>
+                              {post.registrationLink && (
+                                <a
+                                  href={post.registrationLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold text-sm transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  Register
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -350,11 +397,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Notifications</h3>
                 </div>
 
-                {notifications.filter(n => n.type !== 'event').length === 0 ? (
+                {notifications.length === 0 ? (
                   <p className="text-slate-600 dark:text-slate-400 text-sm">No notifications yet.</p>
                 ) : (
                   <div className="space-y-4">
-                    {notifications.filter(n => n.type !== 'event').slice(0, 5).map((notif) => (
+                    {notifications.slice(0, 5).map((notif) => (
                       <div
                         key={notif.id}
                         className={`p-4 rounded-xl transition-all hover:scale-105 cursor-pointer ${!notif.read
@@ -367,7 +414,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                           {notif.type === 'system' ? (
                             <Shield className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-yellow-500' : 'text-slate-600 dark:text-slate-400'}`} />
                           ) : notif.type === 'announcement' ? (
-                            <Megaphone className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-red-600' : 'text-slate-600 dark:text-slate-400'}`} />
+                            <Megaphone className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-purple-600' : 'text-slate-600 dark:text-slate-400'}`} />
+                          ) : notif.type === 'event' ? (
+                            <Calendar className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`} />
                           ) : (
                             <Bell className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`} />
                           )}
@@ -425,6 +474,23 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           ⚙️ Initial Setup (Create Super Admin)
         </button>
       </div>
+
+      {/* RSVP Modal */}
+      {rsvpEvent && (
+        <RSVPModal
+          isOpen={!!rsvpEvent}
+          onClose={() => setRsvpEvent(null)}
+          event={{
+            id: rsvpEvent.id || '',
+            title: rsvpEvent.title,
+            date: rsvpEvent.date,
+            time: rsvpEvent.time || 'Time not specified',
+            location: rsvpEvent.location || 'Location not specified',
+            attendees: rsvpEvent.rsvps || 0
+          }}
+          clubName={rsvpEvent.clubName}
+        />
+      )}
     </div>
   );
 }

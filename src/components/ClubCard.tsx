@@ -1,20 +1,9 @@
 import { Users, Calendar, ArrowRight, Heart } from 'lucide-react';
 import { useState } from 'react';
-
-interface Club {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  members: number;
-  icon: string;
-  image: string | null;
-  color: string;
-  upcomingEvents: number;
-}
+import { FirestoreClub } from '../types/auth';
 
 interface ClubCardProps {
-  club: Club;
+  club: FirestoreClub;
   onClick: () => void;
 }
 

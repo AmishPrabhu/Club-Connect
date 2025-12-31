@@ -59,6 +59,7 @@ export interface FirestoreClub {
   upcomingEvents: number;
   secretaryId?: string;
   secretaryEmail?: string;
+  whatsappLink?: string;  // WhatsApp community invite link
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,8 +95,11 @@ export interface FirestorePost {
   registrationEndTime?: string;  // Registration end time (e.g., "5:00 PM")
   coverImage?: string;             // Main cover image for the post
   registrationLink?: string;       // Optional registration link for events
+  eventWhatsappLink?: string;      // Optional WhatsApp group link for the event
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
+  relatedEventId?: string;         // For announcements: ID of a related upcoming event
+  relatedEventTitle?: string;      // For announcements: Title of the related event
   createdAt: Date;
   updatedAt: Date;
 }
