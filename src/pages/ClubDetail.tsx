@@ -29,6 +29,7 @@ interface DisplayEvent {
 
 export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [selectedYear, setSelectedYear] = useState<string>('All');
   const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: DisplayEvent | null }>({
     isOpen: false,
     event: null
@@ -101,8 +102,61 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
     });
   };
 
+  // Helper to parse time string (e.g., "2:00 PM - 5:00 PM") into minutes from midnight
+  const parseTime = (timeStr: string): number => {
+    try {
+      // specific regex to match the first time "HH:MM AM/PM"
+      const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (!match) return 0;
+
+      let [_, hours, minutes, period] = match;
+      let h = parseInt(hours, 10);
+      const m = parseInt(minutes, 10);
+
+      if (period.toUpperCase() === 'PM' && h !== 12) h += 12;
+      if (period.toUpperCase() === 'AM' && h === 12) h = 0;
+
+      return h * 60 + m;
+    } catch (e) {
+      return 0;
+    }
+  };
+
   const events = getEventsFromPosts();
-  const filteredEvents = events.filter(event => event.status === activeTab);
+
+  // Get unique years from past events for the filter
+  const pastYears = Array.from(new Set(
+    events
+      .filter(e => e.status === 'past')
+      .map(e => new Date(e.date).getFullYear().toString())
+  )).sort((a, b) => parseInt(b) - parseInt(a));
+
+  const filteredEvents = events.filter(event => {
+    if (event.status !== activeTab) return false;
+    if (activeTab === 'past' && selectedYear !== 'All') {
+      const eventYear = new Date(event.date).getFullYear().toString();
+      return eventYear === selectedYear;
+    }
+    return true;
+  });
+
+  // Sort events
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    const timeA = parseTime(a.time);
+    const timeB = parseTime(b.time);
+
+    if (activeTab === 'upcoming') {
+      // Ascending date, then ascending time
+      if (dateA !== dateB) return dateA - dateB;
+      return timeA - timeB;
+    } else {
+      // Descending date, then descending time
+      if (dateA !== dateB) return dateB - dateA;
+      return timeB - timeA;
+    }
+  });
 
   // Helper function to format role display
   const getRoleDisplay = (role: string) => {
@@ -240,37 +294,53 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           {/* Posts Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Posts & Events</h2>
-                <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                  <button
-                    onClick={() => setActiveTab('upcoming')}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'upcoming'
-                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                  >
-                    Upcoming
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('past')}
-                    className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'past'
-                      ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                  >
-                    Past Events
-                  </button>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                    <button
+                      onClick={() => setActiveTab('upcoming')}
+                      className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'upcoming'
+                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                      Upcoming
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('past')}
+                      className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'past'
+                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                      Past Events
+                    </button>
+                  </div>
+
+                  {activeTab === 'past' && pastYears.length > 0 && (
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border-none rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                    >
+                      <option value="All">All Years</option>
+                      {pastYears.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="p-6">
-              {filteredEvents.length === 0 ? (
+            <div className="p-6 relative max-h-[800px] overflow-y-auto custom-scrollbar">
+              {sortedEvents.length === 0 ? (
                 <div className="text-center py-12">
                   <Archive className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                    No {activeTab} events
+                    No {activeTab} events {selectedYear !== 'All' ? `in ${selectedYear}` : ''}
                   </h3>
                   <p className="text-slate-500 dark:text-slate-500">
                     {activeTab === 'upcoming'
@@ -280,101 +350,111 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {filteredEvents.map((event) => {
+                <div className="space-y-0 relative">
+                  {/* Vertical Timeline Line - hidden on very small screens if needed, but keeping for timeline effect */}
+                  <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+
+                  {sortedEvents.map((event, index) => {
                     // Find the corresponding post for cover image
                     const post = posts.find(p => p.id === event.id);
                     const isUpcoming = activeTab === 'upcoming';
 
                     return (
-                      <div
-                        key={event.id}
-                        onClick={() => onNavigateToPost(event.id)}
-                        className="group bg-slate-50 dark:bg-slate-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:h-32">
-                          {/* Left: Cover Image or Styled Icon */}
-                          {post?.coverImage ? (
-                            <div className="sm:w-1/4 h-32 sm:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                              <img
-                                src={post.coverImage}
-                                alt={event.title}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-                              />
-                            </div>
-                          ) : (
-                            <div className="sm:w-1/4 h-32 sm:h-full flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-500 flex-shrink-0">
-                              {/* Decorative floating circles */}
-                              <div className="absolute top-2 right-2 w-10 h-10 bg-white/10 rounded-full blur-sm" />
-                              <div className="absolute bottom-2 left-2 w-6 h-6 bg-white/10 rounded-full blur-sm" />
+                      <div key={event.id} className="relative pl-12 pb-8 last:pb-0">
+                        {/* Timeline Dot */}
+                        <div className={`absolute left-[11px] top-6 w-3 h-3 rounded-full border-2 ${isUpcoming
+                            ? 'bg-white border-green-500 dark:border-green-400'
+                            : 'bg-white border-slate-400 dark:border-slate-500'
+                          } z-10 box-content`} />
 
-                              {/* Event type icon */}
-                              <div className="relative z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-                                <Calendar className="w-5 h-5 text-white" />
+                        <div
+                          onClick={() => onNavigateToPost(event.id)}
+                          className="group bg-slate-50 dark:bg-slate-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:h-32">
+                            {/* Left: Cover Image or Styled Icon */}
+                            {post?.coverImage ? (
+                              <div className="sm:w-1/4 h-32 sm:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                                <img
+                                  src={post.coverImage}
+                                  alt={event.title}
+                                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                                />
                               </div>
+                            ) : (
+                              <div className="sm:w-1/4 h-32 sm:h-full flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-500 flex-shrink-0">
+                                {/* Decorative floating circles */}
+                                <div className="absolute top-2 right-2 w-10 h-10 bg-white/10 rounded-full blur-sm" />
+                                <div className="absolute bottom-2 left-2 w-6 h-6 bg-white/10 rounded-full blur-sm" />
 
-                              {/* Event type label */}
-                              <span className="relative z-10 text-xs font-bold text-white/90 uppercase tracking-wider">
-                                Event
-                              </span>
-                            </div>
-                          )}
+                                {/* Event type icon */}
+                                <div className="relative z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                  <Calendar className="w-5 h-5 text-white" />
+                                </div>
 
-                          {/* Right: Details */}
-                          <div className="sm:w-3/4 p-4 flex flex-col justify-center">
-                            {/* Header with status */}
-                            <div className="flex items-center justify-between mb-2">
-                              <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
-                                {event.title}
-                              </h3>
-                              {isUpcoming ? (
-                                <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase flex-shrink-0 ml-2">
-                                  Upcoming
+                                {/* Event type label */}
+                                <span className="relative z-10 text-xs font-bold text-white/90 uppercase tracking-wider">
+                                  Event
                                 </span>
-                              ) : (
-                                <span className="bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase flex-shrink-0 ml-2 flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3" />
-                                  Completed
-                                </span>
-                              )}
-                            </div>
+                              </div>
+                            )}
 
-                            {/* Details row */}
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-400 mb-2">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                                <span>{event.date}</span>
+                            {/* Right: Details */}
+                            <div className="sm:w-3/4 p-4 flex flex-col justify-center">
+                              {/* Header with status */}
+                              <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                                  {event.title}
+                                </h3>
+                                {isUpcoming ? (
+                                  <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase flex-shrink-0 ml-2">
+                                    Upcoming
+                                  </span>
+                                ) : (
+                                  <span className="bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase flex-shrink-0 ml-2 flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Completed
+                                  </span>
+                                )}
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                <span>{event.time}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-3.5 h-3.5 text-blue-500" />
-                                <span className="line-clamp-1">{event.location}</span>
-                              </div>
-                            </div>
 
-                            {/* Bottom row: Attendees and photos */}
-                            <div className="flex items-center gap-3 text-sm">
-                              <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
-                                <Users className="w-3.5 h-3.5" />
-                                <span>{event.attendees} attending</span>
+                              {/* Details row */}
+                              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-400 mb-2">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                                  <span>{event.date}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-blue-500" />
+                                  <span>{event.time}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3.5 h-3.5 text-blue-500" />
+                                  <span className="line-clamp-1">{event.location}</span>
+                                </div>
                               </div>
-                              {((event.attachments?.length || 0) + (event.eventPhotos?.length || 0)) > 0 && (
-                                <span className="text-xs text-blue-500 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                                  📷 {(event.attachments?.length || 0) + (event.eventPhotos?.length || 0)} photos
-                                </span>
-                              )}
-                              {isUpcoming && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); handleRSVP(event); }}
-                                  className="ml-auto px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg text-xs font-semibold transition-all transform hover:scale-105 shadow flex items-center gap-1"
-                                >
-                                  <Plus className="w-3 h-3" />
-                                  RSVP
-                                </button>
-                              )}
+
+                              {/* Bottom row: Attendees and photos */}
+                              <div className="flex items-center gap-3 text-sm">
+                                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                                  <Users className="w-3.5 h-3.5" />
+                                  <span>{event.attendees} attending</span>
+                                </div>
+                                {((event.attachments?.length || 0) + (event.eventPhotos?.length || 0)) > 0 && (
+                                  <span className="text-xs text-blue-500 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                                    📷 {(event.attachments?.length || 0) + (event.eventPhotos?.length || 0)} photos
+                                  </span>
+                                )}
+                                {isUpcoming && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleRSVP(event); }}
+                                    className="ml-auto px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg text-xs font-semibold transition-all transform hover:scale-105 shadow flex items-center gap-1"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                    RSVP
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
