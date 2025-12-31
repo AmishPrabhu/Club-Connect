@@ -93,9 +93,18 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
     <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col min-h-[calc(100vh-80px)]">
       <div className="flex-grow">
         {/* Dashboard Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Campus Portal</h1>
-          <p className="text-slate-600 dark:text-slate-400">Welcome to the Walchand College of Engineering club management system.</p>
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img
+              src="/wce-logo.png"
+              alt="Walchand College of Engineering Logo"
+              className="w-8 h-8 object-contain"
+            />
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              Walchand College of Engineering, Sangli
+            </h1>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-400">Club & event management portal</p>
         </div>
 
         {/* Stats Overview */}
@@ -441,8 +450,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         {/* Campus Calendar & Weekly Events Section */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Campus Calendar</h2>
-          <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[400px]">
-            {/* Left: Mini Calendar - Fixed Content Width */}
+          <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[460px]">
+            {/* Left: MiniCalendar - Fixed Content Width */}
             <div className="w-full lg:w-auto flex-none">
               <div className="w-full lg:w-[350px] h-full">
                 <MiniCalendar
