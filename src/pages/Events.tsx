@@ -100,11 +100,11 @@ export default function Events({ onBack, onNavigateToPost }: EventsProps) {
                         <Calendar className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">All Events & Announcements</h1>
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">All Events</h1>
                         <p className="text-slate-600 dark:text-slate-400">
                             {filteredPosts.length === posts.length
-                                ? `Browse all ${posts.length} posts from clubs`
-                                : `Showing ${filteredPosts.length} of ${posts.length} posts`
+                                ? `Browse all ${posts.length} events from clubs`
+                                : `Showing ${filteredPosts.length} of ${posts.length} events`
                             }
                         </p>
                     </div>
