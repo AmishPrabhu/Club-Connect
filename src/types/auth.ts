@@ -76,6 +76,28 @@ export interface Attachment {
   label?: string;
 }
 
+// Event Task structure for role assignments
+export interface EventTask {
+  id: string;
+  title: string;
+  assignedTo: string[];           // Array of member names
+  assignedToEmails?: string[];    // Array of member emails
+  status: 'pending' | 'in-progress' | 'completed';
+  createdBy: string;
+  createdAt: string;
+}
+
+// Budget item structure for event expenses
+export interface BudgetItem {
+  id: string;
+  description: string;
+  category: 'venue' | 'catering' | 'equipment' | 'marketing' | 'prizes' | 'transport' | 'misc';
+  estimatedCost: number;
+  actualCost: number;
+  paid: boolean;
+  notes?: string;
+}
+
 // Firestore post document structure
 export interface FirestorePost {
   id?: string;
@@ -104,6 +126,8 @@ export interface FirestorePost {
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   relatedEventId?: string;         // For announcements: ID of a related upcoming event
   relatedEventTitle?: string;      // For announcements: Title of the related event
+  eventTasks?: EventTask[];        // Tasks assigned to members for this event
+  eventBudget?: BudgetItem[];      // Budget/expense items for this event
   createdAt: Date;
   updatedAt: Date;
 }

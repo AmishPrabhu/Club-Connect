@@ -14,6 +14,8 @@ import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import LoginPage from './pages/LoginPage';
 
+import EventManagement from './pages/EventManagement';
+
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import SetupAdmin from './pages/SetupAdmin';
@@ -21,6 +23,7 @@ import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import { Page } from './types/page';
+import { useEffect } from 'react';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -28,7 +31,19 @@ function AppContent() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
+  const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = params.get('page');
+    const eventIdParam = params.get('eventId');
+
+    if (pageParam === 'eventManagement' && eventIdParam) {
+      setSelectedManagementEventId(eventIdParam);
+      setCurrentPage('eventManagement');
+    }
+  }, []);
 
   const navigateToClub = (clubId: string) => {
     setSelectedClub(clubId);
@@ -52,12 +67,19 @@ function AppContent() {
 
   const navigateToPage = (page: Page) => {
     setCurrentPage(page);
-    if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post') {
+    if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post' && page !== 'eventManagement') {
       setSelectedClub(null);
       setSelectedMember(null);
       setSelectedEvent(null);
       setSelectedPost(null);
+      setSelectedManagementEventId(null);
     }
+  };
+
+  const navigateToManagement = (eventId: string) => {
+    // Open in new tab using URL params
+    const url = `${window.location.origin}/?page=eventManagement&eventId=${eventId}`;
+    window.open(url, '_blank');
   };
 
   const navigateToNotification = async (notification: any) => {
@@ -78,7 +100,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200">
-      {currentPage !== 'login' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && (
+      {currentPage !== 'login' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
         <Header
           currentPage={currentPage}
           onNavigate={navigateToPage}
@@ -106,10 +128,10 @@ function AppContent() {
         <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
       )}
       {currentPage === 'post' && selectedPost && (
-        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} />
+        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'events' && (
-        <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+        <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'announcements' && (
         <Announcements onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
@@ -125,6 +147,10 @@ function AppContent() {
       )}
       {currentPage === 'clubSecretaryDashboard' && (
         <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
+      )}
+
+      {currentPage === 'eventManagement' && selectedManagementEventId && (
+        <EventManagement eventId={selectedManagementEventId} onBack={() => navigateToPage('home')} user={user} />
       )}
 
       {/* Login Modal for Club Secretary, President, Treasurer, and Admin */}

@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, ArrowLeft, ChevronDown, Sparkles, Bell, Filter } from 'lucide-react';
-import { FirestorePost, FirestoreClub } from '../types/auth';
+import { Calendar, Clock, MapPin, ArrowLeft, ChevronDown, Sparkles, Bell, Filter, Settings } from 'lucide-react';
+import { FirestorePost, FirestoreClub, User } from '../types/auth';
 import { getPosts, getClubs } from '../lib/firestoreService';
 
 interface EventsProps {
     onBack: () => void;
     onNavigateToPost: (postId: string) => void;
+    user?: User | null;
+    onManageEvent?: (eventId: string) => void;
 }
 
-export default function Events({ onBack, onNavigateToPost }: EventsProps) {
+export default function Events({ onBack, onNavigateToPost, user, onManageEvent }: EventsProps) {
     const [posts, setPosts] = useState<FirestorePost[]>([]);
     const [clubs, setClubs] = useState<FirestoreClub[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -187,11 +189,17 @@ export default function Events({ onBack, onNavigateToPost }: EventsProps) {
                         const club = clubs.find(c => c.name === post.clubName);
                         const isUpcoming = new Date(post.date) >= new Date();
 
+                        // Check permissions
+                        const canManage = user && (
+                            user.role === 'admin' ||
+                            ((user.role === 'club-secretary' || user.role === 'president' || user.role === 'treasurer') && user.clubId === post.clubId)
+                        );
+
                         return (
                             <div
                                 key={post.id}
                                 onClick={() => post.id && onNavigateToPost(post.id)}
-                                className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer"
+                                className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer relative"
                             >
                                 <div className="flex flex-col sm:flex-row sm:h-36">
                                     {/* Left: Cover Image or Styled Icon - Same size for both */}
@@ -241,11 +249,25 @@ export default function Events({ onBack, onNavigateToPost }: EventsProps) {
                                                 </div>
                                                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{post.clubName}</span>
                                             </div>
-                                            {isUpcoming && (
-                                                <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-1 rounded-full uppercase">
-                                                    Upcoming
-                                                </span>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {canManage && onManageEvent && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            post.id && onManageEvent(post.id);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xs font-semibold border border-slate-200 dark:border-slate-600"
+                                                    >
+                                                        <Settings className="w-3.5 h-3.5" />
+                                                        Manage
+                                                    </button>
+                                                )}
+                                                {isUpcoming && (
+                                                    <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-1 rounded-full uppercase">
+                                                        Upcoming
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {/* Title */}

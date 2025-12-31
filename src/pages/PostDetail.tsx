@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus, MapPin, Clock, ExternalLink, Settings } from 'lucide-react';
 import { FirestorePost, User, Attachment } from '../types/auth';
 import { getPosts, updatePost } from '../lib/firestoreService';
 import AttachmentGallery from '../components/AttachmentGallery';
@@ -11,9 +11,10 @@ interface PostDetailProps {
     onBack: () => void;
     onNavigateToPost?: (postId: string) => void;
     user?: User | null;
+    onManageEvent?: (eventId: string) => void;
 }
 
-export default function PostDetail({ postId, onBack, onNavigateToPost, user }: PostDetailProps) {
+export default function PostDetail({ postId, onBack, onNavigateToPost, user, onManageEvent }: PostDetailProps) {
     const [post, setPost] = useState<FirestorePost | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isShared, setIsShared] = useState(false);
@@ -38,7 +39,13 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user }: P
         fetchPost();
     }, [postId]);
 
-    // Check if current user can edit this post (is the club secretary for this club)
+    // Check if current user can edit this post logic
+    const canManageEvent = user && post && (
+        user.role === 'admin' ||
+        ((user.role === 'club-secretary' || user.role === 'president' || user.role === 'treasurer') && user.clubId === post.clubId)
+    );
+
+    // Check if current user can edit photos (specifically secretary/admin)
     const canEditPhotos = user && post && (
         (user.role === 'club-secretary' && user.clubId === post.clubId) ||
         user.role === 'admin'
@@ -150,13 +157,24 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user }: P
                             {post.title}
                         </h1>
                     </div>
-                    <button
-                        onClick={handleShare}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                    >
-                        <Share2 className="w-4 h-4" />
-                        {isShared ? 'Shared!' : 'Share'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {canManageEvent && onManageEvent && (
+                            <button
+                                onClick={() => post.id && onManageEvent(post.id)}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors font-medium"
+                            >
+                                <Settings className="w-4 h-4" />
+                                Manage
+                            </button>
+                        )}
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                        >
+                            <Share2 className="w-4 h-4" />
+                            {isShared ? 'Shared!' : 'Share'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Info Grid */}
