@@ -41,9 +41,11 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
-              <div className="bg-blue-600 p-2 rounded-md">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
+              <img
+                src="/club-connect-logo.png"
+                alt="Club Connect Logo"
+                className="w-10 h-10 object-contain rounded-md"
+              />
               <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Club-Connect
               </span>

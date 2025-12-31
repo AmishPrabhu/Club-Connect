@@ -10,4 +10,12 @@ body {
   @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: radial-gradient(circle, rgba(71, 85, 105, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-attachment: fixed;
+}
+
+.dark body,
+body:is(.dark *) {
+  background-image: radial-gradient(circle, rgba(203, 213, 225, 0.3) 1px, transparent 1px);
 }
