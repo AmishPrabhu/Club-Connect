@@ -1,4 +1,4 @@
-import { LogOut, Sparkles, Bell, User, Sun, Moon, Shield, Settings } from 'lucide-react';
+import { LogOut, Bell, User, Sun, Moon, Shield, Settings } from 'lucide-react';
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
@@ -37,17 +37,14 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
   return (
     <>
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700 shadow-lg">
+      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onNavigate('home')}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <div className="relative bg-gradient-to-br from-blue-600 to-cyan-500 p-2 rounded-xl transform group-hover:scale-110 transition-transform">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
+              <div className="bg-blue-600 p-2 rounded-md">
+                <Shield className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Club-Connect
               </span>
             </div>
@@ -55,27 +52,27 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             <nav className="flex items-center gap-8">
               <button
                 onClick={() => onNavigate('home')}
-                className={`text-sm font-semibold transition-all ${currentPage === 'home'
-                  ? 'text-blue-600 scale-105'
-                  : 'text-slate-600 hover:text-blue-600'
+                className={`text-sm font-medium transition-colors ${currentPage === 'home'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
                   }`}
               >
                 Home
               </button>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className={`text-sm font-semibold transition-all ${currentPage === 'dashboard'
-                  ? 'text-blue-600 scale-105'
-                  : 'text-slate-600 hover:text-blue-600'
+                className={`text-sm font-medium transition-colors ${currentPage === 'dashboard'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
                   }`}
               >
                 Dashboard
               </button>
               <button
                 onClick={() => onNavigate('events')}
-                className={`text-sm font-semibold transition-all ${currentPage === 'events'
-                  ? 'text-blue-600 scale-105'
-                  : 'text-slate-600 hover:text-blue-600'
+                className={`text-sm font-medium transition-colors ${currentPage === 'events'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
                   }`}
               >
                 Events
@@ -85,21 +82,21 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             <div className="flex items-center gap-3">
               <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn"
+                className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
                 aria-label="Toggle Dark Mode"
               >
-                {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-700 dark:text-slate-300" />}
+                {isDarkMode ? <Sun className="w-4 h-4 text-slate-600 dark:text-slate-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
               </button>
 
               {/* Notifications for all users */}
               <button
                 onClick={() => onNavigate('notifications')}
-                className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all transform hover:scale-110 animate-bounceIn relative"
+                className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative border border-slate-200 dark:border-slate-700"
                 aria-label="Notifications"
               >
-                <Bell className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold px-1">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-red-600 rounded-full text-[10px] flex items-center justify-center text-white font-medium px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -191,7 +188,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 /* Login Button for Club Secretaries and Admins */
                 <button
                   onClick={() => onNavigate('login')}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm transition-colors"
                 >
                   <User className="w-4 h-4" />
                   <span>Login</span>

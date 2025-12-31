@@ -76,7 +76,7 @@ function AppContent() {
   // Login pages are shown based on currentPage state
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {currentPage !== 'login' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && (
         <Header
           currentPage={currentPage}
