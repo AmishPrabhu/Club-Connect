@@ -4,9 +4,11 @@ import { FirestorePost } from '../types/auth';
 
 interface MiniCalendarProps {
     events: FirestorePost[];
+    selectedDate?: Date | null;
+    onDateSelect: (date: Date) => void;
 }
 
-export default function MiniCalendar({ events }: MiniCalendarProps) {
+export default function MiniCalendar({ events, selectedDate, onDateSelect }: MiniCalendarProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const daysInMonth = useMemo(() => {
@@ -80,24 +82,36 @@ export default function MiniCalendar({ events }: MiniCalendarProps) {
                         new Date().getDate() === day &&
                         new Date().getMonth() === currentDate.getMonth() &&
                         new Date().getFullYear() === currentDate.getFullYear();
+
+                    const isSelected = selectedDate &&
+                        selectedDate.getDate() === day &&
+                        selectedDate.getMonth() === currentDate.getMonth() &&
+                        selectedDate.getFullYear() === currentDate.getFullYear();
+
                     const hasEventOnDay = hasEvent(day);
 
                     return (
                         <div
                             key={day}
+                            onClick={() => {
+                                const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                                onDateSelect(newDate);
+                            }}
                             className={`
-                aspect-square flex flex-col items-center justify-center rounded-md text-sm font-medium relative group
-                ${isToday
-                                    ? 'bg-blue-600 text-white'
-                                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                aspect-square flex flex-col items-center justify-center rounded-md text-sm font-medium relative group cursor-pointer transition-colors
+                ${isSelected
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : isToday
+                                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }
               `}
                         >
                             {day}
-                            {hasEventOnDay && !isToday && (
-                                <div className="w-1 h-1 rounded-full bg-blue-500 mt-1" />
+                            {hasEventOnDay && !isSelected && (
+                                <div className={`w-1 h-1 rounded-full mt-1 ${isToday ? 'bg-blue-500' : 'bg-blue-500'}`} />
                             )}
-                            {hasEventOnDay && isToday && (
+                            {hasEventOnDay && isSelected && (
                                 <div className="w-1 h-1 rounded-full bg-white mt-1" />
                             )}
                         </div>

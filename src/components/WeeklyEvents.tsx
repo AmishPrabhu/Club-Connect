@@ -5,10 +5,26 @@ import { FirestorePost } from '../types/auth';
 interface WeeklyEventsProps {
     events: FirestorePost[];
     onNavigateToPost: (postId: string) => void;
+    selectedDate?: Date | null;
 }
 
-export default function WeeklyEvents({ events, onNavigateToPost }: WeeklyEventsProps) {
-    const weeklyEvents = useMemo(() => {
+export default function WeeklyEvents({ events, onNavigateToPost, selectedDate }: WeeklyEventsProps) {
+    const displayEvents = useMemo(() => {
+        if (selectedDate) {
+            // Filter for specific date
+            const startOfDay = new Date(selectedDate);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const endOfDay = new Date(selectedDate);
+            endOfDay.setHours(23, 59, 59, 999);
+
+            return events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate >= startOfDay && eventDate <= endOfDay;
+            }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        }
+
+        // Default: This week's events
         const now = new Date();
         // Start from TODAY (beginning of day)
         const startOfRange = new Date(now);
@@ -30,15 +46,19 @@ export default function WeeklyEvents({ events, onNavigateToPost }: WeeklyEventsP
 
             return eventDateStart >= startOfRange && eventDate <= endOfWeek;
         }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    }, [events]);
+    }, [events, selectedDate]);
 
-    if (weeklyEvents.length === 0) {
+    if (displayEvents.length === 0) {
         return (
             <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 h-full flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
                     <Calendar className="w-6 h-6 text-slate-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No Events This Week</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    {selectedDate
+                        ? `No Events on ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                        : 'No Events This Week'}
+                </h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm">
                     Check the full calendar for upcoming activities.
                 </p>
@@ -50,11 +70,13 @@ export default function WeeklyEvents({ events, onNavigateToPost }: WeeklyEventsP
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 h-full flex flex-col">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-blue-600" />
-                This Week's Events
+                {selectedDate
+                    ? `Events on ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`
+                    : "This Week's Events"}
             </h2>
 
             <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                {weeklyEvents.map(event => (
+                {displayEvents.map(event => (
                     <div
                         key={event.id}
                         onClick={() => event.id && onNavigateToPost(event.id)}

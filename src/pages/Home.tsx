@@ -23,6 +23,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [filteredPosts, setFilteredPosts] = useState<FirestorePost[]>([]);
   const [filteredClubs, setFilteredClubs] = useState<FirestoreClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Fetch data on mount
   useEffect(() => {
@@ -121,30 +122,45 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Quick Actions & Search */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search clubs, events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm transition-colors"
-            >
-              Search
-            </button>
+        {/* Quick Actions & Search */}
+        <div className="mb-8">
+          {/* Navigation Buttons */}
+          <div className="flex justify-center gap-6 mb-8">
             <button
               onClick={() => onNavigate('dashboard')}
-              className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="px-8 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
             >
-              Browse All
+              <Users className="w-5 h-5" />
+              View All Clubs
             </button>
+            <button
+              onClick={() => onNavigate('notifications')}
+              className="px-8 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
+            >
+              <Bell className="w-5 h-5" />
+              Notifications
+            </button>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search clubs, events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSearch}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm transition-colors"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
 
@@ -380,13 +396,21 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             {/* Left: Mini Calendar - Fixed Content Width */}
             <div className="w-full lg:w-auto flex-none">
               <div className="w-full lg:w-[350px] h-full">
-                <MiniCalendar events={posts} />
+                <MiniCalendar
+                  events={posts}
+                  selectedDate={selectedDate}
+                  onDateSelect={setSelectedDate}
+                />
               </div>
             </div>
 
             {/* Right: Weekly Events - Takes Remaining Space */}
             <div className="flex-1 h-full min-w-0">
-              <WeeklyEvents events={posts} onNavigateToPost={onNavigateToPost} />
+              <WeeklyEvents
+                events={posts}
+                onNavigateToPost={onNavigateToPost}
+                selectedDate={selectedDate}
+              />
             </div>
           </div>
         </div>
