@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock } from 'lucide-react';
+import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { FirestorePost, User, ClubMember, EventTask, BudgetItem } from '../types/auth';
 import { getPosts, updatePost, getClubMembers } from '../lib/firestoreService';
 
@@ -33,6 +34,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
     const [tasks, setTasks] = useState<EventTask[]>([]);
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskAssignees, setNewTaskAssignees] = useState<string[]>([]);
+    const [newTaskDeadline, setNewTaskDeadline] = useState('');
 
     // Budget State
     const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -115,7 +117,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
     };
 
     // Task Management Functions
-    const addTask = () => {
+    const addTask = async () => {
         if (!newTaskTitle.trim()) return;
         const assignees = newTaskAssignees.length > 0 ? newTaskAssignees : ['Unassigned'];
         const emails = assignees.map(name => clubMembers.find(m => m.name === name)?.email).filter(Boolean) as string[];
@@ -124,6 +126,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
             title: newTaskTitle,
             assignedTo: assignees,
             assignedToEmails: emails,
+            deadline: newTaskDeadline || undefined,
             status: 'pending',
             createdBy: user?.name || 'Unknown',
             createdAt: new Date().toISOString(),
@@ -131,6 +134,27 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
         setTasks([...tasks, newTask]);
         setNewTaskTitle('');
         setNewTaskAssignees([]);
+        setNewTaskDeadline('');
+
+        // Send email notifications to assignees (if emails are available and not 'Unassigned')
+        if (emails.length > 0 && !assignees.includes('Unassigned')) {
+            try {
+                await sendTaskAssignmentEmails(
+                    emails,
+                    assignees,
+                    newTaskTitle,
+                    newTaskDeadline || undefined,
+                    post?.title || 'Event',
+                    user?.name || 'Unknown'
+                );
+                if (isEmailConfigured()) {
+                    setMessage({ type: 'success', text: 'Task created and notification emails sent!' });
+                }
+            } catch (error) {
+                console.error('Failed to send notification emails:', error);
+                // Task is still created even if email fails
+            }
+        }
     };
 
     const toggleAssignee = (name: string) => {
@@ -481,8 +505,8 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                             type="button"
                                                             onClick={() => toggleAssignee(member.name)}
                                                             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${newTaskAssignees.includes(member.name)
-                                                                    ? 'bg-blue-600 text-white'
-                                                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                                                                 }`}
                                                         >
                                                             {member.name}
@@ -495,6 +519,19 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                     {newTaskAssignees.length} member(s) selected
                                                 </p>
                                             )}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                <Clock className="w-4 h-4 inline mr-1" />
+                                                Deadline (optional)
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={newTaskDeadline}
+                                                onChange={(e) => setNewTaskDeadline(e.target.value)}
+                                                min={new Date().toISOString().split('T')[0]}
+                                                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                            />
                                         </div>
                                     </div>
                                     <button
@@ -541,6 +578,15 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                                     {name}
                                                                 </span>
                                                             ))}
+                                                            {task.deadline && (
+                                                                <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 ${new Date(task.deadline) < new Date() && task.status !== 'completed'
+                                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                                                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                                                    }`}>
+                                                                    <Clock className="w-3 h-3" />
+                                                                    {new Date(task.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <select

@@ -82,10 +82,12 @@ export interface EventTask {
   title: string;
   assignedTo: string[];           // Array of member names
   assignedToEmails?: string[];    // Array of member emails
+  deadline?: string;              // Deadline date (YYYY-MM-DD format)
   status: 'pending' | 'in-progress' | 'completed';
   createdBy: string;
   createdAt: string;
 }
+
 
 // Budget item structure for event expenses
 export interface BudgetItem {
