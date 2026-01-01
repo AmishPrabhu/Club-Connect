@@ -8,12 +8,30 @@ interface AnnouncementsProps {
     onNavigateToPost: (postId: string) => void;
 }
 
+import ImageModal from '../components/ImageModal';
+
+// ... existing imports
+
 export default function Announcements({ onBack, onNavigateToPost }: AnnouncementsProps) {
+    // ... existing state
     const [posts, setPosts] = useState<FirestorePost[]>([]);
     const [clubs, setClubs] = useState<FirestoreClub[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(15);
     const [clubFilter, setClubFilter] = useState<string>('all');
+
+    // Image Modal State
+    const [modalImage, setModalImage] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
+        e.stopPropagation();
+        setModalImage(imageUrl);
+        setIsModalOpen(true);
+    };
+
+    // ... existing useEffect
+
 
     useEffect(() => {
         const loadData = async () => {
@@ -140,12 +158,18 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                 <div className="flex flex-col sm:flex-row">
                                     {/* Left: Cover Image or Styled Icon */}
                                     {post.coverImage ? (
-                                        <div className="sm:w-1/4 h-40 sm:h-auto relative bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                                        <div
+                                            className="sm:w-1/4 h-40 sm:h-auto relative bg-slate-200 dark:bg-slate-700 flex-shrink-0 group/image overflow-hidden"
+                                            onClick={(e) => openImageModal(e, post.coverImage!)}
+                                        >
                                             <img
                                                 src={post.coverImage}
                                                 alt={post.title}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
                                             />
+                                            <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
+                                                <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="sm:w-1/4 h-40 sm:h-auto flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 min-h-[120px]">
@@ -218,6 +242,12 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                     )}
                 </>
             )}
+            {/* Image Modal */}
+            <ImageModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                imageUrl={modalImage || ''}
+            />
         </div>
     );
 }

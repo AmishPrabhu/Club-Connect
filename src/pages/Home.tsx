@@ -16,6 +16,11 @@ interface HomeProps {
   onNavigateToNotification: (notification: FirestoreNotification) => void;
 }
 
+// ... imports
+import ImageModal from '../components/ImageModal';
+
+// ... existing interfaces
+
 export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, onNavigateToNotification }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState<FirestorePost[]>([]);
@@ -26,6 +31,17 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [rsvpEvent, setRsvpEvent] = useState<FirestorePost | null>(null);
+
+  // Image Modal State
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
+    e.stopPropagation();
+    setModalImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
 
   // Fetch data on mount
   useEffect(() => {
@@ -248,13 +264,18 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                       <div className="p-0 flex flex-col sm:flex-row">
                         {/* Left: Cover Image OR Styled Event Title (when no image) */}
                         {post.coverImage ? (
-                          <div className="sm:w-2/5 h-48 sm:h-auto relative bg-slate-200 dark:bg-slate-700">
+                          <div className="sm:w-2/5 h-48 sm:h-auto relative bg-slate-200 dark:bg-slate-700 group/image overflow-hidden"
+                            onClick={(e) => openImageModal(e, post.coverImage!)}>
                             <img
                               src={post.coverImage}
                               alt={post.title}
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
                             />
+                            <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
+                              <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                            </div>
                           </div>
+
                         ) : (
                           <div className={`sm:w-1/3 p-5 flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br ${getEventColor(post.type)}`}>
                             {/* Decorative floating circles */}
@@ -500,6 +521,12 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           clubName={rsvpEvent.clubName}
         />
       )}
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageUrl={modalImage || ''}
+      />
     </div>
   );
 }

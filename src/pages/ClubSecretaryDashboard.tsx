@@ -9,7 +9,8 @@ import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
-import LocationPickerModal from '../components/LocationPickerModal';
+import LinkPickerModal from '../components/LinkPickerModal';
+import ImageModal from '../components/ImageModal';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: FirestoreClub }) {
@@ -247,6 +248,16 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [club, setClub] = useState<FirestoreClub | null>(null);
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Image Modal State
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
+    e.stopPropagation();
+    setModalImage(imageUrl);
+    setIsModalOpen(true);
+  };
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications'>('overview');
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -1536,12 +1547,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   </label>
                   <div className="mb-4">
                     {newPost.coverImage && (
-                      <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-slate-700">
+                      <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-slate-700 group cursor-zoom-in"
+                        onClick={(e) => openImageModal(e, newPost.coverImage)}>
                         <img
                           src={newPost.coverImage}
                           alt="Cover Preview"
                           className="w-full h-full object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 duration-300 pointer-events-none">
+                          <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm shadow-sm">Click to expand</span>
+                        </div>
+
                         <button
                           onClick={() => setNewPost({ ...newPost, coverImage: '' })}
                           className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
@@ -1854,6 +1870,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           setShowLocationPicker(false);
         }}
       />
-    </div >
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageUrl={modalImage || ''}
+      />
+    </div>
   );
 }

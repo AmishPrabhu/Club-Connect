@@ -6,27 +6,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import RSVPModal from '../components/RSVPModal';
 import AttachmentGallery from '../components/AttachmentGallery';
+import ImageModal from '../components/ImageModal';
 
 interface ClubDetailProps {
-  clubId: string;
-  onBack: () => void;
-  onNavigateToMember: (member: any) => void;
-  onNavigateToPost: (postId: string) => void;
+  // ... existing interfaces
 }
-
-interface DisplayEvent {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  status: 'upcoming' | 'past';
-  description: string;
-  attachments?: Attachment[];
-  eventPhotos?: Attachment[];
-}
-
+//...
 export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedYear, setSelectedYear] = useState<string>('All');
@@ -38,6 +23,17 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [members, setMembers] = useState<Array<{ id?: string; name: string; email: string; role: string; joinedAt: Date }>>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Image Modal State
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
+    e.stopPropagation();
+    setModalImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
 
   // Fetch club and posts from Firestore
   useEffect(() => {
@@ -389,12 +385,18 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                           <div className="flex flex-col sm:flex-row sm:h-32">
                             {/* Left: Cover Image or Styled Icon */}
                             {post?.coverImage ? (
-                              <div className="sm:w-1/4 h-32 sm:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                              <div
+                                className="sm:w-1/4 h-32 sm:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0 group/image overflow-hidden"
+                                onClick={(e) => openImageModal(e, post.coverImage!)}
+                              >
                                 <img
                                   src={post.coverImage}
                                   alt={event.title}
-                                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
                                 />
+                                <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
+                                  <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                </div>
                               </div>
                             ) : (
                               <div className="sm:w-1/4 h-32 sm:h-full flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-500 flex-shrink-0">
@@ -550,6 +552,13 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           clubName={club.name}
         />
       )}
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        imageUrl={modalImage || ''}
+      />
     </div>
   );
 }
