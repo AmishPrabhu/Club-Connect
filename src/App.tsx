@@ -27,6 +27,7 @@ import { useEffect } from 'react';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [previousPage, setPreviousPage] = useState<Page>('home'); // Track history
   const [selectedClub, setSelectedClub] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
@@ -56,11 +57,13 @@ function AppContent() {
   };
 
   const navigateToEvent = (eventId: string) => {
+    setPreviousPage(currentPage); // Store current page
     setSelectedEvent(eventId);
     setCurrentPage('event');
   };
 
   const navigateToPost = (postId: string) => {
+    setPreviousPage(currentPage); // Store current page
     setSelectedPost(postId);
     setCurrentPage('post');
   };
@@ -125,10 +128,10 @@ function AppContent() {
         <UserProfile onBack={() => navigateToPage('dashboard')} />
       )}
       {currentPage === 'event' && selectedEvent && (
-        <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
+        <EventDetail eventId={selectedEvent} onBack={() => navigateToPage(previousPage)} />
       )}
       {currentPage === 'post' && selectedPost && (
-        <PostDetail postId={selectedPost} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+        <PostDetail postId={selectedPost} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'events' && (
         <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />

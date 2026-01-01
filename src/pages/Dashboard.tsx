@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, TrendingUp, Users } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { FirestoreClub } from '../types/auth';
-import { getClubs } from '../lib/firestoreService';
+import { getClubs, getPosts } from '../lib/firestoreService';
 
 interface DashboardProps {
   onNavigateToClub: (clubId: string) => void;
@@ -16,20 +16,36 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
 
   const categories = ['all', 'technical', 'cultural', 'sports', 'academic'];
 
-  // Fetch clubs from Firestore
+  // Fetch clubs and posts from Firestore
   useEffect(() => {
-    const loadClubs = async () => {
+    const loadData = async () => {
       try {
-        const clubsData = await getClubs();
-        setClubs(clubsData);
+        const [clubsData, postsData] = await Promise.all([
+          getClubs(),
+          getPosts()
+        ]);
+
+        // Calculate total events for each club
+        const clubsWithCounts = clubsData.map(club => {
+          const clubEventsCount = postsData.filter(post =>
+            post.clubId === club.id
+          ).length;
+
+          return {
+            ...club,
+            upcomingEvents: clubEventsCount // Overwrite with total count
+          };
+        });
+
+        setClubs(clubsWithCounts);
       } catch (error) {
-        console.error('Error loading clubs:', error);
+        console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadClubs();
+    loadData();
   }, []);
 
   const filteredClubs = clubs.filter((club) => {
@@ -68,8 +84,8 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${selectedCategory === category
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
               >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
