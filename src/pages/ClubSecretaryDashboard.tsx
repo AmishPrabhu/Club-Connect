@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -301,6 +301,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [editingEventWhatsapp, setEditingEventWhatsapp] = useState<{ postId: string; currentLink: string } | null>(null);
   const [newEventWhatsappLink, setNewEventWhatsappLink] = useState('');
 
+  // Instagram Link state
+  const [instagramLink, setInstagramLink] = useState('');
+  const [isEditingInstagram, setIsEditingInstagram] = useState(false);
+  const [instagramSaving, setInstagramSaving] = useState(false);
+
   // Ref to prevent duplicate member additions in React Strict Mode
   const secretaryAddedRef = useRef(false);
 
@@ -326,6 +331,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           } as FirestoreClub;
           setClub(clubData);
           setWhatsappLink(clubData.whatsappLink || '');
+          setInstagramLink(clubData.instagramLink || '');
 
           // Check if secretary is already a member, if not add them (only once)
           const { getClubMembers, addClubMember, syncClubMemberCount } = await import('../lib/firestoreService');
@@ -815,6 +821,113 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                           Add WhatsApp Community Link
                         </button>
                       )
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Instagram Link Section */}
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Instagram className="w-5 h-5 text-pink-500" />
+                    Instagram Page
+                  </h4>
+                  {!isEditingInstagram && club.instagramLink && (
+                    <a
+                      href={club.instagramLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
+                    >
+                      Open Link
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+
+                {isEditingInstagram ? (
+                  <div className="space-y-3">
+                    <input
+                      type="url"
+                      value={instagramLink}
+                      onChange={(e) => setInstagramLink(e.target.value)}
+                      className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white"
+                      placeholder="https://instagram.com/..."
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setIsEditingInstagram(false);
+                          setInstagramLink(club.instagramLink || '');
+                        }}
+                        className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!club.id) return;
+                          setInstagramSaving(true);
+                          try {
+                            const { updateClub } = await import('../lib/firestoreService');
+                            await updateClub(club.id, { instagramLink });
+                            setClub({ ...club, instagramLink });
+                            setIsEditingInstagram(false);
+                          } catch (error) {
+                            console.error('Error saving Instagram link:', error);
+                          } finally {
+                            setInstagramSaving(false);
+                          }
+                        }}
+                        disabled={instagramSaving}
+                        className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {instagramSaving ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Link'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {club.instagramLink ? (
+                      <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate">
+                          <Instagram className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm truncate">{club.instagramLink}</span>
+                        </div>
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => setIsEditingInstagram(true)}
+                            className="p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded-full transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg">
+                        <Instagram className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                          Add an Instagram page link
+                        </p>
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => setIsEditingInstagram(true)}
+                            className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline"
+                          >
+                            Add Link
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus } from 'lucide-react';
+import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus, Instagram } from 'lucide-react';
 import { FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { getClubs, getPosts } from '../lib/firestoreService';
 import { doc, getDoc } from 'firebase/firestore';
@@ -289,6 +289,21 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                 </a>
               </div>
             )}
+
+            {/* Instagram Page Link */}
+            {club.instagramLink && (
+              <div className="mt-4">
+                <a
+                  href={club.instagramLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
+                >
+                  <Instagram className="w-6 h-6" />
+                  Follow on Instagram
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Posts Timeline */}
@@ -363,8 +378,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                       <div key={event.id} className="relative pl-12 pb-8 last:pb-0">
                         {/* Timeline Dot */}
                         <div className={`absolute left-[11px] top-6 w-3 h-3 rounded-full border-2 ${isUpcoming
-                            ? 'bg-white border-green-500 dark:border-green-400'
-                            : 'bg-white border-slate-400 dark:border-slate-500'
+                          ? 'bg-white border-green-500 dark:border-green-400'
+                          : 'bg-white border-slate-400 dark:border-slate-500'
                           } z-10 box-content`} />
 
                         <div

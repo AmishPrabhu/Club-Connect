@@ -64,6 +64,7 @@ export interface FirestoreClub {
   treasurerId?: string;
   treasurerEmail?: string;
   whatsappLink?: string;  // WhatsApp community invite link
+  instagramLink?: string; // Instagram profile link
   createdAt: Date;
   updatedAt: Date;
 }
