@@ -15,11 +15,7 @@ interface HomeProps {
   onNavigateToPost: (postId: string) => void;
   onNavigateToNotification: (notification: FirestoreNotification) => void;
 }
-
-// ... imports
 import ImageModal from '../components/ImageModal';
-
-// ... existing interfaces
 
 export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, onNavigateToNotification }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');

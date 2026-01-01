@@ -9,7 +9,7 @@ import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
-import LinkPickerModal from '../components/LinkPickerModal';
+import LocationPickerModal from '../components/LocationPickerModal';
 import ImageModal from '../components/ImageModal';
 
 // Notification Sender Component
