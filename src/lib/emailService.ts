@@ -26,6 +26,7 @@ interface TaskEmailData {
 // EmailJS configuration from environment
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || '';
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '';
+const EMAILJS_EVENT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_EVENT_TEMPLATE_ID || '';
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '';
 
 /**
@@ -33,6 +34,13 @@ const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '';
  */
 export const isEmailConfigured = (): boolean => {
     return !!(EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY);
+};
+
+/**
+ * Check if event update emails are configured (has separate template)
+ */
+export const isEventEmailConfigured = (): boolean => {
+    return !!(EMAILJS_SERVICE_ID && EMAILJS_EVENT_TEMPLATE_ID && EMAILJS_PUBLIC_KEY);
 };
 
 /**
@@ -118,4 +126,75 @@ const formatDeadline = (dateString: string): string => {
     } catch {
         return dateString;
     }
+};
+
+/**
+ * Send event update email to a single attendee
+ * Uses the dedicated event update template (VITE_EMAILJS_EVENT_TEMPLATE_ID)
+ */
+export const sendEventUpdateEmail = async (
+    recipientEmail: string,
+    recipientName: string,
+    eventTitle: string,
+    updateMessage: string,
+    clubName: string
+): Promise<boolean> => {
+    if (!isEventEmailConfigured()) {
+        console.warn('Event email template is not configured. Skipping event update notification.');
+        return false;
+    }
+
+    try {
+        const emailjs = await import('@emailjs/browser');
+
+        // Template variables for event update template
+        const templateParams = {
+            to_name: recipientName,
+            to_email: recipientEmail,
+            event_title: eventTitle,
+            update_message: updateMessage,
+            club_name: clubName,
+        };
+
+        await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_EVENT_TEMPLATE_ID,
+            templateParams,
+            EMAILJS_PUBLIC_KEY
+        );
+
+        console.log(`Event update email sent to ${recipientEmail}`);
+        return true;
+    } catch (error) {
+        console.error('Failed to send event update email:', error);
+        return false;
+    }
+};
+
+/**
+ * Send event update emails to all RSVPed attendees
+ */
+export const sendEventUpdateEmails = async (
+    attendees: Array<{ name: string; email: string }>,
+    eventTitle: string,
+    updateMessage: string,
+    clubName: string
+): Promise<void> => {
+    if (!isEventEmailConfigured()) {
+        console.warn('Event email template is not configured. Skipping event update notifications.');
+        return;
+    }
+
+    const promises = attendees.map(attendee =>
+        sendEventUpdateEmail(
+            attendee.email,
+            attendee.name,
+            eventTitle,
+            updateMessage,
+            clubName
+        )
+    );
+
+    await Promise.allSettled(promises);
+    console.log(`Sent ${attendees.length} event update emails`);
 };

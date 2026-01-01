@@ -18,6 +18,7 @@ import {
     FirestoreNotification,
     FirestoreUser,
     ClubMember,
+    EventRSVP,
 } from '../types/auth';
 
 // ==================== CLUBS ====================
@@ -714,3 +715,102 @@ export const removeClubMember = async (
     }
 };
 
+// ==================== EVENT RSVPs ====================
+
+// Create an RSVP for an event
+export const createEventRSVP = async (
+    eventId: string,
+    name: string,
+    email: string
+): Promise<{ success: boolean; error?: string; rsvpId?: string }> => {
+    try {
+        // Check if email already RSVPed for this event
+        const rsvpsRef = collection(db, 'posts', eventId, 'rsvps');
+        const snapshot = await getDocs(rsvpsRef);
+        const existingRsvp = snapshot.docs.find(doc => doc.data().email === email);
+
+        if (existingRsvp) {
+            return { success: false, error: 'You have already RSVPed for this event' };
+        }
+
+        // Create RSVP
+        const docRef = await addDoc(rsvpsRef, {
+            eventId,
+            name,
+            email,
+            rsvpedAt: Timestamp.now(),
+        });
+
+        // Update RSVP count on the post
+        const postRef = doc(db, 'posts', eventId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+            const currentRsvps = postDoc.data().rsvps || 0;
+            await updateDoc(postRef, {
+                rsvps: currentRsvps + 1,
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return { success: true, rsvpId: docRef.id };
+    } catch (error: any) {
+        console.error('Error creating RSVP:', error);
+        return { success: false, error: error.message || 'Failed to create RSVP' };
+    }
+};
+
+// Get all RSVPs for an event
+export const getEventRSVPs = async (eventId: string): Promise<EventRSVP[]> => {
+    try {
+        const rsvpsRef = collection(db, 'posts', eventId, 'rsvps');
+        const q = query(rsvpsRef, orderBy('rsvpedAt', 'desc'));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            rsvpedAt: doc.data().rsvpedAt?.toDate() || new Date(),
+        })) as EventRSVP[];
+    } catch (error) {
+        console.error('Error fetching event RSVPs:', error);
+        return [];
+    }
+};
+
+// Delete an RSVP
+export const deleteEventRSVP = async (
+    eventId: string,
+    rsvpId: string
+): Promise<boolean> => {
+    try {
+        const rsvpRef = doc(db, 'posts', eventId, 'rsvps', rsvpId);
+        await deleteDoc(rsvpRef);
+
+        // Update RSVP count on the post
+        const postRef = doc(db, 'posts', eventId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+            const currentRsvps = postDoc.data().rsvps || 1;
+            await updateDoc(postRef, {
+                rsvps: Math.max(0, currentRsvps - 1),
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error deleting RSVP:', error);
+        return false;
+    }
+};
+
+// Get RSVP count for an event
+export const getEventRSVPCount = async (eventId: string): Promise<number> => {
+    try {
+        const rsvpsRef = collection(db, 'posts', eventId, 'rsvps');
+        const snapshot = await getDocs(rsvpsRef);
+        return snapshot.size;
+    } catch (error) {
+        console.error('Error getting RSVP count:', error);
+        return 0;
+    }
+};

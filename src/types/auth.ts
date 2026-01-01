@@ -146,3 +146,12 @@ export interface FirestoreNotification {
   read: boolean;
   createdAt: Date;
 }
+
+// Event RSVP structure (stored as subcollection under posts)
+export interface EventRSVP {
+  id?: string;
+  eventId: string;
+  name: string;
+  email: string;
+  rsvpedAt: Date;
+}

@@ -1,5 +1,6 @@
-import { X, Calendar, MapPin, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Calendar, MapPin, Clock, Users, CheckCircle, AlertCircle, Mail, User } from 'lucide-react';
 import { useState } from 'react';
+import { createEventRSVP } from '../lib/firestoreService';
 
 interface RSVPModalProps {
   isOpen: boolean;
@@ -16,27 +17,141 @@ interface RSVPModalProps {
 }
 
 export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModalProps) {
-  const [step, setStep] = useState<'confirm' | 'success' | 'error'>('confirm');
+  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'error'>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
   if (!isOpen) return null;
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleSubmitForm = () => {
+    if (!name.trim()) {
+      setErrorMessage('Please enter your name');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setErrorMessage('Please enter a valid email address');
+      return;
+    }
+    setErrorMessage('');
+    setStep('confirm');
+  };
+
   const handleRSVP = async () => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setStep('success');
+    setErrorMessage('');
+
+    try {
+      const result = await createEventRSVP(String(event.id), name.trim(), email.trim());
+
+      if (result.success) {
+        setStep('success');
+      } else {
+        setErrorMessage(result.error || 'Failed to RSVP. Please try again.');
+        setStep('error');
+      }
+    } catch (error) {
+      console.error('RSVP error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
+      setStep('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
-    setStep('confirm');
+    setStep('form');
+    setName('');
+    setEmail('');
+    setErrorMessage('');
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform animate-slideUp">
+        {/* Form Step */}
+        {step === 'form' && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">RSVP for Event</h2>
+              <button
+                onClick={handleClose}
+                className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                <h3 className="font-bold text-slate-900 dark:text-white mb-1">{event.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300">by {clubName}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <User className="w-4 h-4 inline mr-1" />
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Mail className="w-4 h-4 inline mr-1" />
+                  Your Email *
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  You'll receive event updates and reminders at this email
+                </p>
+              </div>
+
+              {errorMessage && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                  {errorMessage}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleClose}
+                className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitForm}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              >
+                Continue
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Confirm Step */}
         {step === 'confirm' && (
           <>
             <div className="flex items-center justify-between mb-6">
@@ -75,12 +190,22 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">Your Details</h4>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Name:</strong> {name}
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Email:</strong> {email}
+                </p>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-400 mb-1">RSVP Confirmation</h4>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      By confirming, you'll receive email reminders and updates about this event. You can cancel your RSVP anytime.
+                    <h4 className="font-semibold text-amber-900 dark:text-amber-400 mb-1">Email Notifications</h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      You'll receive email updates about this event including any announcements or changes.
                     </p>
                   </div>
                 </div>
@@ -89,10 +214,10 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
 
             <div className="flex gap-3">
               <button
-                onClick={handleClose}
+                onClick={() => setStep('form')}
                 className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
-                Cancel
+                Back
               </button>
               <button
                 onClick={handleRSVP}
@@ -105,6 +230,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
           </>
         )}
 
+        {/* Success Step */}
         {step === 'success' && (
           <>
             <div className="text-center mb-6">
@@ -113,7 +239,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
               </div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">RSVP Confirmed!</h2>
               <p className="text-slate-600 dark:text-slate-300">
-                You're all set for {event.title}. Check your email for event details and reminders.
+                You're all set for {event.title}. We'll send event updates to {email}.
               </p>
             </div>
 
@@ -191,6 +317,36 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
                 className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
               >
                 Got it!
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Error Step */}
+        {step === 'error' && (
+          <>
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">RSVP Failed</h2>
+              <p className="text-slate-600 dark:text-slate-300">
+                {errorMessage || 'Something went wrong. Please try again.'}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleClose}
+                className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setStep('form')}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              >
+                Try Again
               </button>
             </div>
           </>

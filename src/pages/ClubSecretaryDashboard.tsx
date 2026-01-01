@@ -4,7 +4,8 @@ import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision } from '../lib/firestoreService';
+import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs } from '../lib/firestoreService';
+import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
@@ -472,6 +473,27 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         clubId: club.id!,
         relatedId: postId,
       });
+
+      // Send email notifications to RSVPed attendees if this is an announcement linked to an event
+      if (newPost.type === 'announcement' && newPost.relatedEventId && isEmailConfigured()) {
+        try {
+          const rsvps = await getEventRSVPs(newPost.relatedEventId);
+          if (rsvps.length > 0) {
+            const relatedEvent = posts.find(p => p.id === newPost.relatedEventId);
+            const attendees = rsvps.map(rsvp => ({ name: rsvp.name, email: rsvp.email }));
+            await sendEventUpdateEmails(
+              attendees,
+              relatedEvent?.title || 'Event',
+              `New announcement: ${newPost.title}`,
+              club.name
+            );
+            console.log(`Sent ${rsvps.length} email notifications for event announcement`);
+          }
+        } catch (emailError) {
+          console.error('Failed to send event announcement emails:', emailError);
+          // Don't fail the post creation if emails fail
+        }
+      }
 
       setTimeout(() => {
         setIsCreatePostModalOpen(false);

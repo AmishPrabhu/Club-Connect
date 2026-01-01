@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, Mail } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
-import { FirestorePost, User, ClubMember, EventTask, BudgetItem } from '../types/auth';
-import { getPosts, updatePost, getClubMembers } from '../lib/firestoreService';
+import { FirestorePost, User, ClubMember, EventTask, BudgetItem, EventRSVP } from '../types/auth';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs } from '../lib/firestoreService';
 
 interface EventManagementProps {
     eventId: string;
@@ -15,8 +15,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'budget'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'budget' | 'attendees'>('details');
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
+    const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
 
     // Form State for Details
     const [formData, setFormData] = useState({
@@ -70,6 +71,12 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                     if (foundPost.clubId) {
                         const members = await getClubMembers(foundPost.clubId);
                         setClubMembers(members);
+                    }
+
+                    // Fetch RSVPs for attendees tab
+                    if (foundPost.id) {
+                        const rsvps = await getEventRSVPs(foundPost.id);
+                        setEventRsvps(rsvps);
                     }
                 }
             } catch (error) {
@@ -330,6 +337,21 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                 </span>
                             )}
                         </button>
+                        <button
+                            onClick={() => setActiveTab('attendees')}
+                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'attendees'
+                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                                }`}
+                        >
+                            <Mail className="w-5 h-5" />
+                            Attendees
+                            {(post?.rsvps || 0) > 0 && (
+                                <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs rounded-full">
+                                    {post?.rsvps || 0}
+                                </span>
+                            )}
+                        </button>
                     </div>
 
                     <div className="p-6">
@@ -580,8 +602,8 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                             ))}
                                                             {task.deadline && (
                                                                 <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 ${new Date(task.deadline) < new Date() && task.status !== 'completed'
-                                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                                                                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                                                    : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
                                                                     }`}>
                                                                     <Clock className="w-3 h-3" />
                                                                     {new Date(task.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
@@ -763,8 +785,68 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                             </div>
                         )}
                     </div>
+
+                    {/* Attendees Tab */}
+                    {activeTab === 'attendees' && (
+                        <div className="space-y-6">
+                            {/* Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Total RSVPs</p>
+                                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
+                                </div>
+                            </div>
+
+                            {/* Attendee List */}
+                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                                    <h3 className="font-bold text-slate-900 dark:text-white">RSVPed Attendees ({eventRsvps.length})</h3>
+                                </div>
+                                {eventRsvps.length === 0 ? (
+                                    <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                        <p>No RSVPs yet. Attendees will appear here when they RSVP for this event.</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-slate-50 dark:bg-slate-700/50">
+                                                <tr>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Name</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Email</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">RSVPed On</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                                                {eventRsvps.map(rsvp => (
+                                                    <tr key={rsvp.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                        <td className="px-4 py-3 text-slate-900 dark:text-white font-medium">{rsvp.name}</td>
+                                                        <td className="px-4 py-3">
+                                                            <a href={`mailto:${rsvp.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                                {rsvp.email}
+                                                            </a>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                                                            {rsvp.rsvpedAt.toLocaleDateString('en-IN', {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }
+
