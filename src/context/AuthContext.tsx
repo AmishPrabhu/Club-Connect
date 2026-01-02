@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
-import { AuthContextType, AuthState, User, UserRole, FirestoreUser } from '../types/auth';
+import { AuthContextType, AuthState, User, FirestoreUser } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

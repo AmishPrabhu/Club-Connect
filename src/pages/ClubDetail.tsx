@@ -1,15 +1,30 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus, Instagram } from 'lucide-react';
 import { FirestoreClub, FirestorePost, Attachment } from '../types/auth';
-import { getClubs, getPosts } from '../lib/firestoreService';
+import { getPosts } from '../lib/firestoreService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import RSVPModal from '../components/RSVPModal';
-import AttachmentGallery from '../components/AttachmentGallery';
 import ImageModal from '../components/ImageModal';
 
+interface DisplayEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees: number;
+  status: 'past' | 'upcoming';
+  description: string;
+  attachments?: Attachment[];
+  eventPhotos?: Attachment[];
+}
+
 interface ClubDetailProps {
-  // ... existing interfaces
+  clubId: string;
+  onBack: () => void;
+  onNavigateToMember: (member: any) => void;
+  onNavigateToPost: (postId: string) => void;
 }
 //...
 export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
@@ -365,7 +380,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   {/* Vertical Timeline Line - hidden on very small screens if needed, but keeping for timeline effect */}
                   <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
 
-                  {sortedEvents.map((event, index) => {
+                  {sortedEvents.map((event) => {
                     // Find the corresponding post for cover image
                     const post = posts.find(p => p.id === event.id);
                     const isUpcoming = activeTab === 'upcoming';

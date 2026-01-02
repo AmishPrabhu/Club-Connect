@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Mail, Calendar, Settings, Heart, Share2, Save, Edit, X } from 'lucide-react';
+import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile } from '../lib/firestoreService';
@@ -186,10 +186,10 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-bold ${user.role === 'admin'
-                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                  : user.role === 'club-secretary'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                    : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                : user.role === 'club-secretary'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                 }`}>
                 {user.role === 'club-secretary' ? 'Club Secretary' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </span>
@@ -212,8 +212,8 @@ export default function UserProfile({ onBack }: UserProfileProps) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -261,8 +261,8 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                     <p className="text-sm text-slate-600 dark:text-slate-300">{event.club} • {event.date}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${event.status === 'registered'
-                      ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                      : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                    : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
                     }`}>
                     {event.status === 'registered' ? 'Registered' : 'Interested'}
                   </span>

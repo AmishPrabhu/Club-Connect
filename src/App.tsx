@@ -19,6 +19,7 @@ import EventManagement from './pages/EventManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import SetupAdmin from './pages/SetupAdmin';
+import StudentAIAssistant from './components/StudentAIAssistant';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -146,7 +147,7 @@ function AppContent() {
       )}
 
       {currentPage === 'adminDashboard' && (
-        <AdminDashboard onNavigate={navigateToPage} />
+        <AdminDashboard />
       )}
       {currentPage === 'clubSecretaryDashboard' && (
         <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
@@ -165,6 +166,12 @@ function AppContent() {
       {currentPage === 'setupAdmin' && (
         <SetupAdmin onNavigate={navigateToPage} />
       )}
+
+      {/* AI Assistant Widget - Global */}
+      <StudentAIAssistant
+        onNavigateToClub={navigateToClub}
+        onNavigateToEvent={navigateToEvent}
+      />
     </div>
   );
 }

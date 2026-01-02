@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send } from 'lucide-react';
-import { Page } from '../types/page';
+
 import { useAuth } from '../context/AuthContext';
 import { FirestoreClub, FirestorePost, FirestoreNotification } from '../types/auth';
 import {
@@ -17,9 +17,7 @@ import {
   deleteNotification,
 } from '../lib/firestoreService';
 
-interface AdminDashboardProps {
-  onNavigate: (page: Page) => void;
-}
+
 
 // Admin Image Upload Component with Cloudinary
 function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: string; currentImage?: string; onSuccess: (url: string) => void }) {
@@ -152,7 +150,7 @@ const GRADIENT_COLORS = [
 ];
 
 
-export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
+export default function AdminDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
