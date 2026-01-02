@@ -166,12 +166,20 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
             };
 
             setMessages(prev => [...prev, botMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error("AI Chat Error:", error);
+
+            let errorMessage = `Connection Error: ${error.message}`;
+
+            // specific check for rate limits
+            if (error.message?.includes('429') || error.message?.includes('Resource has been exhausted')) {
+                errorMessage = "I'm currently overloaded with requests (Rate Limit Exceeded). Please try again in a minute.";
+            }
+
             setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: "Sorry, I'm having trouble connecting to the campus network right now. Please try again.",
+                content: errorMessage,
                 timestamp: new Date()
             }]);
         } finally {

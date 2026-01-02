@@ -399,13 +399,14 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
       if (error.message?.includes('API key')) {
         errorMessage = 'Invalid or missing API Key.';
-      } else if (error.message?.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection.';
-      } else if (error.toString().includes('400')) {
-        errorMessage = 'Bad request. Try a different image or prompt.';
+      } else if (error.message?.includes('429') || error.message?.includes('Resource has been exhausted')) {
+        errorMessage = 'Daily or minute quota exceeded. Please check usage in Google AI Studio.';
+      } else {
+        // Show actual error for debugging
+        errorMessage = `Error: ${error.message}`;
       }
 
-      setFormMessage({ type: 'error', text: `${errorMessage} Check console for details.` });
+      setFormMessage({ type: 'error', text: `${errorMessage}` });
     } finally {
       setIsGeneratingAi(false);
     }
