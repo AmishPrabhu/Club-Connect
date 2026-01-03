@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -324,8 +323,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   const handleGenerateCaption = async () => {
-    if (!import.meta.env.VITE_GEMINI_API_KEY) {
-      setFormMessage({ type: 'error', text: 'Gemini API Key is missing in .env' });
+    if (!import.meta.env.VITE_GROQ_API_KEY) {
+      setFormMessage({ type: 'error', text: 'Groq API Key is missing in .env' });
       return;
     }
 
@@ -333,15 +332,6 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setAiGeneratedContent('');
 
     try {
-      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-flash-latest",
-        // Allow using the API key from the browser (client-side)
-        // Note: This exposes the API key to users. For production, use a backend proxy.
-        // @ts-ignore - The type definition might strictly forbid this but it is required for client-side only apps
-        safetySettings: [],
-      });
-
       let promptText = `Write a creative and engaging caption for a club post.
       context:
       Title: ${newPost.title}
@@ -349,49 +339,42 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       Date: ${newPost.date}
       User Instructions: ${aiPrompt}`;
 
-      // Additional debug check
-      console.log("Generating caption with model:", "gemini-flash-latest");
-
       if (newPost.type === 'event') {
         promptText += `\nTime: ${newPost.startHour}:${newPost.startMinute} ${newPost.startPeriod}`;
         promptText += `\nLocation: ${newPost.location}`;
       }
 
-      let result;
+      // Dynamic import
+      const { getGroqChatCompletion, generateImageCaption } = await import('../lib/groqService');
+
+      let text = '';
 
       if (newPost.coverImage) {
         // Fetch image and convert to base64
         try {
           const response = await fetch(newPost.coverImage);
           const blob = await response.blob();
-          const base64Data = await new Promise<string>((resolve) => {
+          const base64Image = await new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.readAsDataURL(blob);
-            reader.onloadend = () => resolve(reader.result as string);
+            reader.onloadend = () => {
+              const res = reader.result as string;
+              resolve(res.split(',')[1]);
+            };
           });
 
-          // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
-          const base64Image = base64Data.split(',')[1];
-
-          const imagePart = {
-            inlineData: {
-              data: base64Image,
-              mimeType: blob.type
-            }
-          };
-
-          result = await model.generateContent([promptText, imagePart]);
+          text = await generateImageCaption(base64Image, promptText);
         } catch (imgError) {
           console.error("Error processing image for AI:", imgError);
-          // Fallback to text only if image fails
-          result = await model.generateContent(promptText);
+          // Fallback to text only
+          // @ts-ignore
+          text = await getGroqChatCompletion([{ role: "user", content: promptText }]);
         }
       } else {
-        result = await model.generateContent(promptText);
+        // @ts-ignore
+        text = await getGroqChatCompletion([{ role: "user", content: promptText }]);
       }
 
-      const response = await result.response;
-      const text = response.text();
       setAiGeneratedContent(text);
     } catch (error: any) {
       console.error("AI Generation Error Full:", error);
@@ -399,8 +382,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
       if (error.message?.includes('API key')) {
         errorMessage = 'Invalid or missing API Key.';
-      } else if (error.message?.includes('429') || error.message?.includes('Resource has been exhausted')) {
-        errorMessage = 'Daily or minute quota exceeded. Please check usage in Google AI Studio.';
+      } else if (error.message?.includes('429')) {
+        errorMessage = 'Daily or minute quota exceeded on Groq. Please check console.groq.com.';
       } else {
         // Show actual error for debugging
         errorMessage = `Error: ${error.message}`;

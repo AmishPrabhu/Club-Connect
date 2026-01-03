@@ -7,7 +7,7 @@ import ClubDetail from './pages/ClubDetail';
 import MemberBoardDetail from './pages/MemberBoardDetail';
 import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
-import EventDetail from './pages/EventDetail';
+// import EventDetail from './pages/EventDetail'; // Deleted
 import PostDetail from './pages/PostDetail';
 import NotificationDetail from './pages/NotificationDetail';
 import Events from './pages/Events';
@@ -129,7 +129,7 @@ function AppContent() {
         <UserProfile onBack={() => navigateToPage('dashboard')} />
       )}
       {currentPage === 'event' && selectedEvent && (
-        <EventDetail eventId={selectedEvent} onBack={() => navigateToPage(previousPage)} />
+        <PostDetail postId={selectedEvent} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'post' && selectedPost && (
         <PostDetail postId={selectedPost} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />

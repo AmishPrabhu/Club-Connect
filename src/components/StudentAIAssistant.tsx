@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { X, Send, Mic, StopCircle, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import { getClubs, getPosts } from '../lib/firestoreService';
 import { FirestoreClub, FirestorePost } from '../types/auth';
@@ -18,19 +17,9 @@ interface StudentAIAssistantProps {
     onNavigateToEvent?: (eventId: string) => void;
 }
 
-// Helper to convert Blob to Base64
-const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            const base64data = reader.result as string;
-            // Remove the prefix "data:audio/webm;base64,"
-            resolve(base64data.split(',')[1]);
-        };
-        reader.onerror = reject;
-    });
-};
+
+// Helper to convert Blob to Base64 (kept properly scoped or removed if unused)
+// const blobToBase64 = (blob: Blob): Promise<string> => { ... };
 
 export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent }: StudentAIAssistantProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,10 +43,6 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
-
-    // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     useEffect(() => {
         // Scroll to bottom when messages change
@@ -103,7 +88,7 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         try {
             // Prepare Context for the System Prompt
             const clubsContext = clubs.map(c => `- ${c.name} (ID: ${c.id}): ${c.description || 'No description'}`).join('\n');
-            const eventsContext = events.map(e => `- ${e.title} (${e.type}) by ${e.clubName} on ${e.date} at ${e.time || 'TBA'}. Location: ${e.location || 'Campus'}`).join('\n');
+            const eventsContext = events.map(e => `- [ID: ${e.id}] ${e.title} (${e.type}) by ${e.clubName} on ${e.date} at ${e.time || 'TBA'}`).join('\n');
 
             const systemPrompt = `
         You are the Campus Guide AI Assistant for Walchand College of Engineering.
@@ -111,9 +96,11 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         Strict Persona Rules:
         - Be helpful, enthusiastic, and concise.
         - Answer questions about clubs and events using the Context Data below.
-        - If the user explicitly asks to go to a club page, append: [[NAVIGATE_TO_CLUB:club_id]].
-        - If the user explicitly asks to go to an event page, append: [[NAVIGATE_TO_EVENT:event_id]].
+        - If the user explicitly asks to go to a club page, you may answer and then append: [[NAVIGATE_TO_CLUB:club_id]].
+        - If the user explicitly asks to go to an event page, you may answer and then append: [[NAVIGATE_TO_EVENT:event_id]].
         - Do NOT invent information. If you don't know, say "I don't have that info right now."
+        - CRITICAL: You must ONLY use the IDs listed in the Context Data. Do not guess IDs.
+        - CRITICAL: When navigating, the tag must be at the end of the message.
 
         Context Data:
         [CLUBS]
@@ -123,27 +110,30 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         ${eventsContext}
       `;
 
-            // Chat with history
-            const chat = model.startChat({
-                history: [
-                    { role: "user", parts: [{ text: systemPrompt }] },
-                    { role: "model", parts: [{ text: "Understood. I am the Campus Guide. I will use the provided context to answer questions and navigate users when requested." }] },
-                    // Convert previous messages for history (limit last 10 for efficiency)
-                    ...messages.slice(-10).map(m => ({
-                        role: m.role === 'user' ? 'user' : 'model',
-                        parts: [{ text: m.content }]
-                    }))
-                ]
-            });
+            console.log("System Prompt:", systemPrompt); // DEBUG
 
-            const result = await chat.sendMessage(inputText);
-            const responseText = result.response.text();
+            // Import dynamically to avoid circular dependencies if any (standard practice)
+            const { getGroqChatCompletion } = await import('../lib/groqService');
+
+            // Construct messages array for Groq
+            const chatMessages = [
+                { role: "system", content: systemPrompt },
+                ...messages.slice(-10).map(m => ({
+                    role: m.role,
+                    content: m.content
+                })),
+                { role: "user", content: inputText }
+            ];
+
+            // @ts-ignore
+            const responseText = await getGroqChatCompletion(chatMessages);
+            console.log("AI Response:", responseText); // DEBUG
 
             // Check for Navigation Tags
             let finalContent = responseText;
 
             // Club Navigation
-            const navClubMatch = responseText.match(/\[\[NAVIGATE_TO_CLUB:(.+?)\]\]/);
+            const navClubMatch = responseText.match(/\[\[NAVIGATE_TO_CLUB:\s*(.+?)\]\]/); // Added \s* for safety
             if (navClubMatch && onNavigateToClub) {
                 const clubId = navClubMatch[1];
                 finalContent = finalContent.replace(navClubMatch[0], '');
@@ -151,11 +141,16 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
             }
 
             // Event Navigation
-            const navEventMatch = responseText.match(/\[\[NAVIGATE_TO_EVENT:(.+?)\]\]/);
+            const navEventMatch = responseText.match(/\[\[NAVIGATE_TO_EVENT:\s*(.+?)\]\]/);
             if (navEventMatch && onNavigateToEvent) {
                 const eventId = navEventMatch[1];
                 finalContent = finalContent.replace(navEventMatch[0], '');
-                onNavigateToEvent(eventId);
+                onNavigateToEvent(eventId.trim());
+            }
+
+            // Fallback if AI navigated but said nothing (should be successful now with new prompt, but safe to keep)
+            if (!finalContent.trim() && (navClubMatch || navEventMatch)) {
+                finalContent = "Navigating to the requested page...";
             }
 
             const botMessage: Message = {
@@ -172,8 +167,8 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
             let errorMessage = `Connection Error: ${error.message}`;
 
             // specific check for rate limits
-            if (error.message?.includes('429') || error.message?.includes('Resource has been exhausted')) {
-                errorMessage = "I'm currently overloaded with requests (Rate Limit Exceeded). Please try again in a minute.";
+            if (error.message?.includes('429')) {
+                errorMessage = "I'm currently overloaded with requests (Rate Limit Exceeded). Please try again later.";
             }
 
             setMessages(prev => [...prev, {
@@ -221,20 +216,9 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         setIsTranscribing(true);
 
         try {
-            const base64Audio = await blobToBase64(audioBlob);
+            const { transcribeAudio } = await import('../lib/groqService');
 
-            // Use Gemini for transcription
-            const result = await model.generateContent([
-                "Transcribe this audio exactly to text. Do not add any commentary.",
-                {
-                    inlineData: {
-                        mimeType: "audio/webm",
-                        data: base64Audio
-                    }
-                }
-            ]);
-
-            const text = result.response.text();
+            const text = await transcribeAudio(audioBlob);
             setInputText(text.trim());
         } catch (error) {
             console.error("Transcription error:", error);
@@ -379,7 +363,7 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
 
                         <div className="text-[10px] text-center text-slate-600 flex items-center justify-center gap-1">
                             <Sparkles className="w-3 h-3" />
-                            <span>Powered by Gemini AI</span>
+                            <span>Powered by Groq</span>
                         </div>
                     </div>
                 </div>
