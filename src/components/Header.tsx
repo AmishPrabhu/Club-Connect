@@ -1,9 +1,10 @@
-import { LogOut, Bell, User, Sun, Moon, Shield, Settings } from 'lucide-react';
+import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle } from 'lucide-react';
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
 import { useState, useEffect } from 'react';
 import { getNotifications } from '../lib/firestoreService';
+import { useTour } from '../context/TourContext';
 
 interface HeaderProps {
   currentPage: Page;
@@ -16,6 +17,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { startTour } = useTour();
 
   // Fetch unread notification count
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
       <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')} id="tour-logo">
               <img
                 src="/club-connect-logo.png"
                 alt="Club Connect Logo"
@@ -63,6 +65,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               </button>
               <button
                 onClick={() => onNavigate('dashboard')}
+                id="tour-dashboard-nav"
                 className={`text-sm font-medium transition-colors ${currentPage === 'dashboard'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
@@ -72,6 +75,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               </button>
               <button
                 onClick={() => onNavigate('events')}
+                id="tour-events-nav"
                 className={`text-sm font-medium transition-colors ${currentPage === 'events'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
@@ -81,6 +85,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               </button>
               <button
                 onClick={() => onNavigate('announcements')}
+                id="tour-announcements-nav"
                 className={`text-sm font-medium transition-colors ${currentPage === 'announcements'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
@@ -92,7 +97,16 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
             <div className="flex items-center gap-3">
               <button
+                onClick={startTour}
+                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-semibold transition-all border border-indigo-600/20"
+              >
+                <PlayCircle className="w-3.5 h-3.5" />
+                Start Tour
+              </button>
+
+              <button
                 onClick={toggleDarkMode}
+                id="tour-dark-mode-toggle"
                 className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
                 aria-label="Toggle Dark Mode"
               >
@@ -102,6 +116,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               {/* Notifications for all users */}
               <button
                 onClick={() => onNavigate('notifications')}
+                id="tour-notifications"
                 className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative border border-slate-200 dark:border-slate-700"
                 aria-label="Notifications"
               >
@@ -138,7 +153,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                   )}
 
                   {/* User Menu */}
-                  <div className="relative">
+                  <div className="relative" id="tour-profile">
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
                       className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"

@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { markNotificationAsRead } from './lib/firestoreService';
+import { DarkModeProvider } from './context/DarkModeContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import { NavigationProvider, useNavigation } from './context/NavigationContext';
+import { TourProvider } from './context/TourContext';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -7,100 +10,39 @@ import ClubDetail from './pages/ClubDetail';
 import MemberBoardDetail from './pages/MemberBoardDetail';
 import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
-// import EventDetail from './pages/EventDetail'; // Deleted
 import PostDetail from './pages/PostDetail';
 import NotificationDetail from './pages/NotificationDetail';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import LoginPage from './pages/LoginPage';
-
 import EventManagement from './pages/EventManagement';
-
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import SetupAdmin from './pages/SetupAdmin';
 import StudentAIAssistant from './components/StudentAIAssistant';
-import { DarkModeProvider } from './context/DarkModeContext';
-import { AuthProvider } from './context/AuthContext';
-import { useAuth } from './context/AuthContext';
-import { Page } from './types/page';
-import { useEffect } from 'react';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [previousPage, setPreviousPage] = useState<Page>('home'); // Track history
-  const [selectedClub, setSelectedClub] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-  const [selectedPost, setSelectedPost] = useState<string | null>(null);
-  const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
+  const {
+    currentPage,
+    previousPage,
+    selectedClub,
+    selectedMember,
+    selectedEvent,
+    selectedPost,
+    selectedManagementEventId,
+    navigateToPage,
+    navigateToClub,
+    navigateToMemberBoard,
+    navigateToEvent,
+    navigateToPost,
+    navigateToManagement,
+    navigateToNotification,
+    handleLogout
+  } = useNavigation();
+
   const { user, logout } = useAuth();
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const pageParam = params.get('page');
-    const eventIdParam = params.get('eventId');
-
-    if (pageParam === 'eventManagement' && eventIdParam) {
-      setSelectedManagementEventId(eventIdParam);
-      setCurrentPage('eventManagement');
-    }
-  }, []);
-
-  const navigateToClub = (clubId: string) => {
-    setSelectedClub(clubId);
-    setCurrentPage('club');
-  };
-
-  const navigateToMemberBoard = (member: any) => {
-    setSelectedMember(member);
-    setCurrentPage('memberBoard');
-  };
-
-  const navigateToEvent = (eventId: string) => {
-    setPreviousPage(currentPage); // Store current page
-    setSelectedEvent(eventId);
-    setCurrentPage('event');
-  };
-
-  const navigateToPost = (postId: string) => {
-    setPreviousPage(currentPage); // Store current page
-    setSelectedPost(postId);
-    setCurrentPage('post');
-  };
-
-  const navigateToPage = (page: Page) => {
-    setCurrentPage(page);
-    if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post' && page !== 'eventManagement') {
-      setSelectedClub(null);
-      setSelectedMember(null);
-      setSelectedEvent(null);
-      setSelectedPost(null);
-      setSelectedManagementEventId(null);
-    }
-  };
-
-  const navigateToManagement = (eventId: string) => {
-    // Open in new tab using URL params
-    const url = `${window.location.origin}/?page=eventManagement&eventId=${eventId}`;
-    window.open(url, '_blank');
-  };
-
-  const navigateToNotification = async (notification: any) => {
-    // Mark notification as read when navigating to it
-    if (notification.id && !notification.read) {
-      await markNotificationAsRead(notification.id);
-    }
-    setSelectedPost(notification);
-    setCurrentPage('notification');
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    setCurrentPage('home');
-  };
-
-  // Login pages are shown based on currentPage state
+  const onLogoutClick = () => handleLogout(logout);
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200">
@@ -108,7 +50,7 @@ function AppContent() {
         <Header
           currentPage={currentPage}
           onNavigate={navigateToPage}
-          onLogout={handleLogout}
+          onLogout={onLogoutClick}
           user={user}
         />
       )}
@@ -180,7 +122,11 @@ function App() {
   return (
     <DarkModeProvider>
       <AuthProvider>
-        <AppContent />
+        <NavigationProvider>
+          <TourProvider>
+            <AppContent />
+          </TourProvider>
+        </NavigationProvider>
       </AuthProvider>
     </DarkModeProvider>
   );

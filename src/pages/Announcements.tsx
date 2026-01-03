@@ -148,7 +148,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
             ) : (
                 <>
                     {/* Announcements List */}
-                    <div className="space-y-4">
+                    <div className="space-y-4" id="tour-announcements-list">
                         {visiblePosts.map((post) => (
                             <div
                                 key={post.id}

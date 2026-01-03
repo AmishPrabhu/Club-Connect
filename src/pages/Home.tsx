@@ -120,7 +120,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="tour-stats-grid">
           <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800 p-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Clubs</span>
@@ -146,7 +146,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
         {/* Quick Actions & Search */}
         {/* Quick Actions & Search */}
-        <div className="mb-8">
+        <div className="mb-8" id="tour-quick-actions">
           {/* Navigation Buttons */}
           <div className="flex justify-center gap-6 mb-8">
             <button
@@ -202,7 +202,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         )}
 
         {/* Upcoming Events and Notifications Section */}
-        <div className="mb-16">
+        <div className="mb-16" id="tour-upcoming-events">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-6">
@@ -416,7 +416,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               )}
             </div>
 
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1" id="tour-notifications-panel">
               <div className="sticky top-24 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-6">
                   <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-pulse" />
@@ -465,7 +465,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Campus Calendar & Weekly Events Section */}
-        <div className="mb-16">
+        <div className="mb-16" id="tour-calendar-section">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Campus Calendar</h2>
           <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[460px]">
             {/* Left: MiniCalendar - Fixed Content Width */}

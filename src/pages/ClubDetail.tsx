@@ -500,7 +500,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         </div>
 
         {/* Right Side - 30% */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2" id="tour-member-board">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sticky top-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">

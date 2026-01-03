@@ -132,7 +132,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
             </div>
 
             {/* Filters */}
-            <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <div className="mb-6 flex flex-col sm:flex-row gap-4" id="tour-events-filter">
                 {/* Status Filter Tabs */}
                 <div className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
                     <button

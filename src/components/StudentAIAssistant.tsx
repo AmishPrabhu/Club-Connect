@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Send, Mic, StopCircle, Loader2, Sparkles, Trash2 } from 'lucide-react';
+import { X, Send, Mic, StopCircle, Loader2, Sparkles, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { getClubs, getPosts } from '../lib/firestoreService';
 import { FirestoreClub, FirestorePost } from '../types/auth';
 
@@ -35,6 +35,7 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
+    const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
     // Context Data
     const [clubs, setClubs] = useState<FirestoreClub[]>([]);
@@ -43,6 +44,18 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
+
+    const speak = (text: string) => {
+        if (!isSpeakerOn) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        // Try to find a good voice
+        const preferredVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Microsoft David")) || voices[0];
+        if (preferredVoice) utterance.voice = preferredVoice;
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+    };
 
     useEffect(() => {
         // Scroll to bottom when messages change
@@ -71,6 +84,13 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         }
     }, [isOpen]);
 
+    // Stop speaking immediately if speaker is turned off
+    useEffect(() => {
+        if (!isSpeakerOn) {
+            window.speechSynthesis.cancel();
+        }
+    }, [isSpeakerOn]);
+
     const handleSendMessage = async () => {
         if (!inputText.trim()) return;
 
@@ -87,8 +107,25 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
 
         try {
             // Prepare Context for the System Prompt
-            const clubsContext = clubs.map(c => `- ${c.name} (ID: ${c.id}): ${c.description || 'No description'}`).join('\n');
-            const eventsContext = events.map(e => `- [ID: ${e.id}] ${e.title} (${e.type}) by ${e.clubName} on ${e.date} at ${e.time || 'TBA'}`).join('\n');
+            const clubsContext = clubs.map(c => `
+            - Club: ${c.name} (ID: ${c.id})
+              Description: ${c.description || 'No description'}
+              WhatsApp: ${c.whatsappLink || 'N/A'}
+              Instagram: ${c.instagramLink || 'N/A'}
+            `).join('\n');
+            const eventsContext = events.map(e => `
+            - Event ID: ${e.id}
+              Title: ${e.title}
+              Type: ${e.type}
+              Club: ${e.clubName}
+              Date: ${e.date}
+              Time: ${e.time || 'Time not specified'}
+              Location: ${e.location || 'Location not specified'}
+              RSVPs (Enrolled): ${e.rsvps || 0}
+              Registration Start: ${e.registrationStart || 'N/A'} ${e.registrationStartTime || ''}
+              Registration Deadline: ${e.registrationEnd || 'N/A'} ${e.registrationEndTime || ''}
+              Registration Link: ${e.registrationLink || 'N/A'}
+            `).join('\n');
 
             const systemPrompt = `
         You are the Campus Guide AI Assistant for Walchand College of Engineering.
@@ -96,6 +133,8 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
         Strict Persona Rules:
         - Be helpful, enthusiastic, and concise.
         - Answer questions about clubs and events using the Context Data below.
+        - You have access to detailed data like Registration Deadlines, RSVP counts, Locations, and specific Times. USE IT.
+        - If asked about "remaining slots", explain that you only know the current RSVP count (unless a capacity is explicitly mentioned in the description).
         - If the user explicitly asks to go to a club page, you may answer and then append: [[NAVIGATE_TO_CLUB:club_id]].
         - If the user explicitly asks to go to an event page, you may answer and then append: [[NAVIGATE_TO_EVENT:event_id]].
         - Do NOT invent information. If you don't know, say "I don't have that info right now."
@@ -161,6 +200,8 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
             };
 
             setMessages(prev => [...prev, botMessage]);
+            speak(finalContent.trim());
+
         } catch (error: any) {
             console.error("AI Chat Error:", error);
 
@@ -177,6 +218,7 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
                 content: errorMessage,
                 timestamp: new Date()
             }]);
+            speak(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -238,7 +280,7 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none font-sans">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none font-sans" id="tour-ai-assistant">
             {/* Chat Window */}
             {isOpen && (
                 <div className="mb-4 w-[450px] sm:w-[500px] h-[700px] flex flex-col overflow-hidden pointer-events-auto transition-all animate-in slide-in-from-bottom-10 fade-in duration-300 rounded-3xl shadow-2xl border border-white/10 ring-1 ring-black/5 bg-slate-900/95 backdrop-blur-xl">
@@ -264,6 +306,13 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
                             </div>
                         </div>
                         <div className="flex items-center gap-1 relative z-10">
+                            <button
+                                onClick={() => setIsSpeakerOn(!isSpeakerOn)}
+                                className={`text-white/70 hover:text-white p-2 hover:bg-white/15 rounded-full transition-all duration-200 ${isSpeakerOn ? 'text-green-300 bg-white/10' : ''}`}
+                                title={isSpeakerOn ? "Mute Jarvis" : "Enable Jarvis Voice"}
+                            >
+                                {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                            </button>
                             <button
                                 onClick={handleClearChat}
                                 className="text-white/70 hover:text-white p-2 hover:bg-white/15 rounded-full transition-all duration-200"
@@ -299,7 +348,22 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
                                         : 'bg-slate-800/80 hover:bg-slate-800 transition-colors text-slate-100 border border-slate-700/50 rounded-2xl rounded-tl-sm'
                                         }`}
                                 >
-                                    {msg.content}
+                                    {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                                        part.match(/https?:\/\/[^\s]+/) ? (
+                                            <a
+                                                key={i}
+                                                href={part}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-300 hover:text-blue-100 underline break-all"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {part}
+                                            </a>
+                                        ) : (
+                                            part
+                                        )
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -366,27 +430,30 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
                             <span>Powered by Groq</span>
                         </div>
                     </div>
-                </div>
-            )}
+                </div >
+            )
+            }
 
             {/* Floating Toggle Button */}
-            {!isOpen && (
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="group relative flex items-center gap-3 pl-5 pr-6 py-4 bg-slate-900 border border-slate-700/50 hover:border-blue-500/50 text-white rounded-full shadow-2xl transition-all duration-300 pointer-events-auto hover:-translate-y-1 hover:shadow-blue-900/20 overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex items-center gap-3">
-                        <div className="bg-gradient-to-tr from-blue-500 to-indigo-500 p-2 rounded-lg shadow-lg group-hover:rotate-12 transition-transform duration-300">
-                            <Sparkles className="w-5 h-5 text-white" />
+            {
+                !isOpen && (
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="group relative flex items-center gap-3 pl-5 pr-6 py-4 bg-slate-900 border border-slate-700/50 hover:border-blue-500/50 text-white rounded-full shadow-2xl transition-all duration-300 pointer-events-auto hover:-translate-y-1 hover:shadow-blue-900/20 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative flex items-center gap-3">
+                            <div className="bg-gradient-to-tr from-blue-500 to-indigo-500 p-2 rounded-lg shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                                <Sparkles className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="text-left">
+                                <span className="block font-bold text-sm tracking-wide group-hover:text-blue-200 transition-colors">AI Assistant</span>
+                                <span className="block text-[10px] text-slate-400 group-hover:text-slate-300">Chat with Campus Guide</span>
+                            </div>
                         </div>
-                        <div className="text-left">
-                            <span className="block font-bold text-sm tracking-wide group-hover:text-blue-200 transition-colors">AI Assistant</span>
-                            <span className="block text-[10px] text-slate-400 group-hover:text-slate-300">Chat with Campus Guide</span>
-                        </div>
-                    </div>
-                </button>
-            )}
-        </div>
+                    </button>
+                )
+            }
+        </div >
     );
 }

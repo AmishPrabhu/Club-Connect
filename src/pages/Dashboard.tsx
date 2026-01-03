@@ -56,7 +56,7 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12" id="tour-dashboard-stats">
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />

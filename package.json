@@ -13,6 +13,7 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.57.4",
+    "driver.js": "^1.4.0",
     "firebase": "^12.7.0",
     "groq-sdk": "^0.37.0",
     "lucide-react": "^0.344.0",
