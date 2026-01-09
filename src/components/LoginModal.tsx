@@ -6,14 +6,14 @@ interface LoginModalProps {
 
 export default function LoginModal({ onClose }: LoginModalProps) {
   const roles = [
-    { id: 'student', label: 'Student', icon: GraduationCap, color: 'from-blue-600 to-blue-700' },
-    { id: 'teacher', label: 'Teacher', icon: User, color: 'from-emerald-600 to-emerald-700' },
-    { id: 'admin', label: 'Admin', icon: Shield, color: 'from-amber-600 to-amber-700' },
+    { id: 'student', label: 'Student', icon: GraduationCap, color: 'bg-blue-600 hover:bg-blue-700' },
+    { id: 'teacher', label: 'Teacher', icon: User, color: 'bg-emerald-600 hover:bg-emerald-700' },
+    { id: 'admin', label: 'Admin', icon: Shield, color: 'bg-amber-600 hover:bg-amber-700' },
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform animate-slideUp">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-md w-full p-8 border border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Choose Your Role</h2>
           <button
@@ -28,12 +28,12 @@ export default function LoginModal({ onClose }: LoginModalProps) {
           {roles.map((role) => (
             <button
               key={role.id}
-              className={`w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${role.color} text-white hover:shadow-lg transform hover:scale-105 transition-all`}
+              className={`w-full flex items-center gap-4 p-4 rounded-md ${role.color} text-white transition-colors shadow-sm`}
             >
-              <div className="p-2 bg-white/20 rounded-lg">
-                <role.icon className="w-6 h-6" />
+              <div className="p-1 bg-white/20 rounded-md">
+                <role.icon className="w-5 h-5" />
               </div>
-              <span className="text-lg font-semibold">Login as {role.label}</span>
+              <span className="text-lg font-medium">Login as {role.label}</span>
             </button>
           ))}
         </div>

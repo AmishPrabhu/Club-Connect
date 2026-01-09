@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { DarkModeProvider } from './context/DarkModeContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import { NavigationProvider, useNavigation } from './context/NavigationContext';
+import { TourProvider } from './context/TourContext';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -6,65 +10,124 @@ import ClubDetail from './pages/ClubDetail';
 import MemberBoardDetail from './pages/MemberBoardDetail';
 import Notifications from './pages/Notifications';
 import UserProfile from './pages/UserProfile';
-import EventDetail from './pages/EventDetail';
-import { DarkModeProvider } from './context/DarkModeContext';
+import PostDetail from './pages/PostDetail';
+import NotificationDetail from './pages/NotificationDetail';
+import Events from './pages/Events';
+import Announcements from './pages/Announcements';
+import LoginPage from './pages/LoginPage';
+import EventManagement from './pages/EventManagement';
+import AdminDashboard from './pages/AdminDashboard';
+import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
+import SetupAdmin from './pages/SetupAdmin';
+import StudentAIAssistant from './components/StudentAIAssistant';
 
+function AppContent() {
+  const {
+    currentPage,
+    previousPage,
+    selectedClub,
+    selectedMember,
+    selectedEvent,
+    selectedPost,
+    selectedManagementEventId,
+    navigateToPage,
+    navigateToClub,
+    navigateToMemberBoard,
+    navigateToEvent,
+    navigateToPost,
+    navigateToManagement,
+    navigateToNotification,
+    handleLogout
+  } = useNavigation();
 
-export type Page = 'home' | 'dashboard' | 'club' | 'memberBoard' | 'notifications' | 'userProfile' | 'event';
+  const { user, logout } = useAuth();
 
-function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [selectedClub, setSelectedClub] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-
-  const navigateToClub = (clubId: string) => {
-    setSelectedClub(clubId);
-    setCurrentPage('club');
-  };
-
-  const navigateToMemberBoard = (member: any) => {
-    setSelectedMember(member);
-    setCurrentPage('memberBoard');
-  };
-
-  const navigateToEvent = (eventId: string) => {
-    setSelectedEvent(eventId);
-    setCurrentPage('event');
-  };
-
-  const navigateToPage = (page: Page) => {
-    setCurrentPage(page);
-    if (page !== 'club' && page !== 'memberBoard' && page !== 'event') {
-      setSelectedClub(null);
-      setSelectedMember(null);
-      setSelectedEvent(null);
-    }
-  };
+  const onLogoutClick = () => handleLogout(logout);
 
   return (
-    <DarkModeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <Header currentPage={currentPage} onNavigate={navigateToPage} />
+    <div className="min-h-screen text-slate-900 dark:text-slate-200">
+      {currentPage !== 'login' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
+        <Header
+          currentPage={currentPage}
+          onNavigate={navigateToPage}
+          onLogout={onLogoutClick}
+          user={user}
+        />
+      )}
 
-        {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} />}
-        {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
-        {currentPage === 'club' && selectedClub && (
-          <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} />
-        )}
-        {currentPage === 'memberBoard' && selectedMember && (
-          <MemberBoardDetail club={selectedClub} onBack={() => navigateToPage('club')} />
-        )}
-        {currentPage === 'notifications' && (
-          <Notifications onBack={() => navigateToPage('dashboard')} />
-        )}
-        {currentPage === 'userProfile' && (
-          <UserProfile onBack={() => navigateToPage('dashboard')} />
-        )}
-        {currentPage === 'event' && selectedEvent && (
-          <EventDetail eventId={selectedEvent} onBack={() => navigateToPage('home')} />
-        )}
-      </div>
+      {/* Main Pages */}
+      {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} onNavigateToNotification={navigateToNotification} />}
+      {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
+      {currentPage === 'club' && selectedClub && (
+        <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
+      )}
+      {currentPage === 'memberBoard' && selectedMember && (
+        <MemberBoardDetail club={selectedMember} onBack={() => navigateToPage('club')} />
+      )}
+      {currentPage === 'notifications' && (
+        <Notifications onBack={() => navigateToPage('dashboard')} onNavigateToNotification={navigateToNotification} />
+      )}
+      {currentPage === 'userProfile' && (
+        <UserProfile onBack={() => navigateToPage('dashboard')} />
+      )}
+      {currentPage === 'event' && selectedEvent && (
+        <PostDetail postId={selectedEvent} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+      )}
+      {currentPage === 'post' && selectedPost && (
+        <PostDetail postId={selectedPost} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+      )}
+      {currentPage === 'events' && (
+        <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+      )}
+      {currentPage === 'announcements' && (
+        <Announcements onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+      )}
+
+
+      {currentPage === 'notification' && selectedPost && (
+        <NotificationDetail notification={selectedPost as any} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+      )}
+
+      {currentPage === 'adminDashboard' && (
+        <AdminDashboard />
+      )}
+      {currentPage === 'clubSecretaryDashboard' && (
+        <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
+      )}
+
+      {currentPage === 'eventManagement' && selectedManagementEventId && (
+        <EventManagement eventId={selectedManagementEventId} onBack={() => navigateToPage('home')} user={user} />
+      )}
+
+      {/* Login Modal for Club Secretary, President, Treasurer, and Admin */}
+      {currentPage === 'login' && (
+        <LoginPage onNavigate={navigateToPage} />
+      )}
+
+      {/* Setup Admin Page */}
+      {currentPage === 'setupAdmin' && (
+        <SetupAdmin onNavigate={navigateToPage} />
+      )}
+
+      {/* AI Assistant Widget - Global */}
+      <StudentAIAssistant
+        onNavigateToClub={navigateToClub}
+        onNavigateToEvent={navigateToEvent}
+      />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DarkModeProvider>
+      <AuthProvider>
+        <NavigationProvider>
+          <TourProvider>
+            <AppContent />
+          </TourProvider>
+        </NavigationProvider>
+      </AuthProvider>
     </DarkModeProvider>
   );
 }

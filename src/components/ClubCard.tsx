@@ -1,20 +1,9 @@
 import { Users, Calendar, ArrowRight, Heart } from 'lucide-react';
 import { useState } from 'react';
-
-interface Club {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  members: number;
-  icon: string;
-  image: string | null;
-  color: string;
-  upcomingEvents: number;
-}
+import { FirestoreClub } from '../types/auth';
 
 interface ClubCardProps {
-  club: Club;
+  club: FirestoreClub;
   onClick: () => void;
 }
 
@@ -28,14 +17,14 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 cursor-pointer border border-slate-200 dark:border-slate-700 hover-lift animate-fadeIn"
+      className="group bg-white dark:bg-slate-900 rounded-lg p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors cursor-pointer"
     >
       <div className="flex items-start justify-between mb-4">
-        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${club.color} flex items-center justify-center text-3xl transform group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-lg overflow-hidden`}>
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800`}>
           {club.image ? (
-            <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+            <img src={club.image} alt={club.name} className="w-full h-full object-contain p-1" />
           ) : (
-            club.icon
+            <span className="text-3xl">{club.icon}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -45,11 +34,10 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
             aria-label="Favorite club"
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                isFavorited
-                  ? 'text-red-500 fill-red-500'
-                  : 'text-slate-400 hover:text-red-400'
-              }`}
+              className={`w-5 h-5 transition-colors ${isFavorited
+                ? 'text-red-500 fill-red-500'
+                : 'text-slate-400 hover:text-red-400'
+                }`}
             />
           </button>
           <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
@@ -74,7 +62,7 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
         </div>
       </div>
 
-      <div className={`mt-4 inline-block px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${club.color} text-white`}>
+      <div className="mt-4 inline-block px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
         {club.category}
       </div>
     </div>

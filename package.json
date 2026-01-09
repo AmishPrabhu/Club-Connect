@@ -11,8 +11,13 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.57.4",
+    "driver.js": "^1.4.0",
+    "firebase": "^12.7.0",
+    "groq-sdk": "^0.37.0",
     "lucide-react": "^0.344.0",
+    "pigeon-maps": "^0.22.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
