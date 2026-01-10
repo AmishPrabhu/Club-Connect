@@ -22,7 +22,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       } else if (['club-secretary', 'president', 'treasurer'].includes(user.role)) {
         onNavigate('clubSecretaryDashboard');
       } else {
-        onNavigate('studentDashboard');
+        onNavigate('userProfile');
       }
     }
   }, [isAuthenticated, user, onNavigate]);

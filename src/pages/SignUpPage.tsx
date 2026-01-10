@@ -24,7 +24,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
             } else if (['club-secretary', 'president', 'treasurer'].includes(user.role)) {
                 onNavigate('clubSecretaryDashboard');
             } else {
-                onNavigate('studentDashboard');
+                onNavigate('userProfile');
             }
         }
     }, [isAuthenticated, user, onNavigate]);

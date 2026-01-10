@@ -17,7 +17,10 @@ interface HomeProps {
 }
 import ImageModal from '../components/ImageModal';
 
+import { useAuth } from '../context/AuthContext';
+
 export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, onNavigateToNotification }: HomeProps) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [clubs, setClubs] = useState<FirestoreClub[]>([]);
@@ -515,6 +518,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             attendees: rsvpEvent.rsvps || 0
           }}
           clubName={rsvpEvent.clubName}
+          user={user}
         />
       )}
       {/* Image Modal */}

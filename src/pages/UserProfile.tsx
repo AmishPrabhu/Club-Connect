@@ -1,13 +1,22 @@
-import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X } from 'lucide-react';
+import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, getUserMemberships } from '../lib/firestoreService';
+import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts } from '../lib/firestoreService';
+import { Page } from '../types/page';
+import { FirestorePost } from '../types/auth';
 
 interface UserProfileProps {
   onBack: () => void;
+  onNavigate: (page: Page) => void;
+  onNavigateToPost: (postId: string) => void;
 }
 
-export default function UserProfile({ onBack }: UserProfileProps) {
+interface UserEvent {
+  event: FirestorePost;
+  rsvpDate: Date;
+}
+
+export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: UserProfileProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'events'>('overview');
   const [isEditing, setIsEditing] = useState(false);
@@ -25,6 +34,11 @@ export default function UserProfile({ onBack }: UserProfileProps) {
     email: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Event State
+  const [eventTab, setEventTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -67,6 +81,46 @@ export default function UserProfile({ onBack }: UserProfileProps) {
     loadProfile();
   }, [user]);
 
+  // Fetch Events
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      if (!user?.email) {
+        setEventsLoading(false);
+        return;
+      }
+
+      try {
+        // Get user's RSVPs
+        const userRSVPs = await getUserRSVPsByEmail(user.email);
+
+        // Get all posts to match event details
+        const allPosts = await getPosts();
+
+        // Map RSVPs to events
+        const events: UserEvent[] = [];
+        for (const { eventId, rsvp } of userRSVPs) {
+          const event = allPosts.find(p => p.id === eventId);
+          if (event) {
+            events.push({
+              event,
+              rsvpDate: rsvp.rsvpedAt,
+            });
+          }
+        }
+
+        // Sort by event date
+        events.sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime());
+        setUserEvents(events);
+      } catch (error) {
+        console.error('Error fetching user events:', error);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchUserEvents();
+  }, [user?.email]);
+
   const handleSave = async () => {
     if (!user?.id) return;
 
@@ -90,10 +144,10 @@ export default function UserProfile({ onBack }: UserProfileProps) {
     setIsSaving(false);
   };
 
-  const upcomingEvents = [
-    { id: 1, title: 'AI Workshop', club: 'ACM', date: 'Jan 20, 2026', status: 'registered' },
-    { id: 2, title: 'Hackathon 2026', club: 'CodeChef', date: 'Feb 15, 2026', status: 'interested' }
-  ];
+  const now = new Date();
+  const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
+  const pastEvents = userEvents.filter(e => new Date(e.event.date) < now);
+  const displayedEvents = eventTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -102,7 +156,7 @@ export default function UserProfile({ onBack }: UserProfileProps) {
         className="flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-8 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span className="font-semibold">Back to Dashboard</span>
+        <span className="font-semibold">Back to Home</span>
       </button>
 
       {/* Message */}
@@ -302,22 +356,125 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           )}
 
           {activeTab === 'events' && (
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">My Events</h3>
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                  <div>
-                    <h4 className="font-semibold text-slate-900 dark:text-white">{event.title}</h4>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">{event.club} • {event.date}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${event.status === 'registered'
-                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                    : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                    }`}>
-                    {event.status === 'registered' ? 'Registered' : 'Interested'}
-                  </span>
+            <div className="space-y-6">
+              {/* Event Tabs */}
+              <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setEventTab('upcoming')}
+                  className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'upcoming'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    }`}
+                >
+                  Upcoming ({upcomingEvents.length})
+                  {eventTab === 'upcoming' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setEventTab('past')}
+                  className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'past'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    }`}
+                >
+                  Past ({pastEvents.length})
+                  {eventTab === 'past' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                  )}
+                </button>
+              </div>
+
+              {/* Event List */}
+              {eventsLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
                 </div>
-              ))}
+              ) : displayedEvents.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                  {eventTab === 'upcoming' ? (
+                    <>
+                      <CalendarCheck className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">No upcoming events found.</p>
+                      <button
+                        onClick={() => onNavigate('events')}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-sm"
+                      >
+                        Browse Events
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <History className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 dark:text-slate-400">No past events found.</p>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {displayedEvents.map(({ event, rsvpDate }) => (
+                    <div
+                      key={event.id}
+                      className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${eventTab === 'upcoming'
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                              }`}>
+                              {eventTab === 'upcoming' ? 'Upcoming' : 'Completed'}
+                            </span>
+                            <span className="text-xs text-slate-500 font-medium">by {event.clubName}</span>
+                          </div>
+
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                            {event.title}
+                          </h4>
+
+                          <div className="flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {new Date(event.date).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </div>
+                            {event.time && (
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5" />
+                                {event.time}
+                              </div>
+                            )}
+                            {event.location && (
+                              <div className="flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5" />
+                                {event.location}
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-slate-400 mt-2">
+                            RSVP'd on {rsvpDate.toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2 items-center">
+                          <button
+                            onClick={() => event.id && onNavigateToPost(event.id)}
+                            className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                            title="View Details"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

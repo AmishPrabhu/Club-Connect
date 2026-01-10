@@ -70,7 +70,11 @@ function AppContent() {
         <Notifications onBack={() => navigateToPage('dashboard')} onNavigateToNotification={navigateToNotification} />
       )}
       {currentPage === 'userProfile' && (
-        <UserProfile onBack={() => navigateToPage('dashboard')} />
+        <UserProfile
+          onBack={() => navigateToPage('home')}
+          onNavigate={navigateToPage}
+          onNavigateToPost={navigateToPost}
+        />
       )}
       {currentPage === 'event' && selectedEvent && (
         <PostDetail postId={selectedEvent} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />

@@ -11,7 +11,10 @@ interface EventDetailModalProps {
     canManageEvent?: boolean;
 }
 
+import { useAuth } from '../context/AuthContext';
+
 export default function EventDetailModal({ isOpen, onClose, event, onManageEvent, canManageEvent }: EventDetailModalProps) {
+    const { user } = useAuth();
     const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
     const [isShared, setIsShared] = useState(false);
 
@@ -232,6 +235,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                     attendees: event.rsvps || 0
                 }}
                 clubName={event.clubName}
+                user={user}
             />
         </>
     );
