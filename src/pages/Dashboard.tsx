@@ -61,7 +61,7 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-            Explore Clubs
+            All Clubs
           </h1>
         </div>
 
