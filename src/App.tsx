@@ -20,6 +20,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import EventManagement from './pages/EventManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
+import AdvisorDashboard from './pages/AdvisorDashboard';
 import SetupAdmin from './pages/SetupAdmin';
 import StudentAIAssistant from './components/StudentAIAssistant';
 
@@ -103,6 +104,10 @@ function AppContent() {
 
       {currentPage === 'studentDashboard' && (
         <StudentDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} />
+      )}
+
+      {currentPage === 'advisorDashboard' && (
+        <AdvisorDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} />
       )}
 
       {currentPage === 'eventManagement' && selectedManagementEventId && (

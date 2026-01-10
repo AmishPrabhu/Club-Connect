@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'treasurer';
+export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'treasurer' | 'advisor';
 
 // Club member roles
 export type ClubMemberRole = 'president' | 'vice-president' | 'treasurer' | 'secretary' | 'coordinator' | 'member';
@@ -66,6 +66,9 @@ export interface FirestoreClub {
   presidentEmail?: string;
   treasurerId?: string;
   treasurerEmail?: string;
+  advisorId?: string;
+  advisorEmail?: string;
+  advisorName?: string;
   whatsappLink?: string;  // WhatsApp community invite link
   instagramLink?: string; // Instagram profile link
   createdAt: Date;
@@ -102,6 +105,10 @@ export interface BudgetItem {
   actualCost: number;
   paid: boolean;
   notes?: string;
+  receiptUrl?: string;      // URL of uploaded receipt image
+  verified?: boolean;        // Verification status (only advisor can set)
+  verifiedAt?: Date;         // When it was verified
+  verifiedBy?: string;       // Advisor who verified
 }
 
 // Firestore post document structure

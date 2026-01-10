@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, UserPlus, X, Check, Users } from 'lucide-react';
-import { ClubMember, ClubMemberRole } from '../types/auth';
+import { ClubMember, ClubMemberRole, UserRole } from '../types/auth';
 import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/firestoreService';
 
 interface MemberManagerProps {
     clubId: string;
     clubName: string;
     isReadOnly?: boolean;
+    userRole?: UserRole; // Add user role to check permissions
 }
+
+// Roles that only admin/advisor can assign or edit
+const PROTECTED_ROLES: ClubMemberRole[] = ['president', 'secretary', 'treasurer'];
 
 const ROLE_OPTIONS: { value: ClubMemberRole; label: string }[] = [
     { value: 'president', label: 'President' },
@@ -27,12 +31,26 @@ const ROLE_COLORS: Record<ClubMemberRole, string> = {
     'member': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
 };
 
-export default function MemberManager({ clubId, clubName, isReadOnly = false }: MemberManagerProps) {
+export default function MemberManager({ clubId, clubName, isReadOnly = false, userRole }: MemberManagerProps) {
     const [members, setMembers] = useState<ClubMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<ClubMember | null>(null);
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Check if user can manage protected roles
+    const canManageProtectedRoles = userRole === 'admin' || userRole === 'advisor';
+
+    // Filter role options based on permissions
+    const availableRoleOptions = canManageProtectedRoles
+        ? ROLE_OPTIONS
+        : ROLE_OPTIONS.filter(role => !PROTECTED_ROLES.includes(role.value));
+
+    // Check if a member can be edited/deleted by current user
+    const canEditMember = (member: ClubMember) => {
+        if (canManageProtectedRoles) return true;
+        return !PROTECTED_ROLES.includes(member.role);
+    };
 
     // Form state
     const [newMember, setNewMember] = useState({
@@ -162,7 +180,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false }: 
                                         onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value as ClubMemberRole })}
                                         className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        {ROLE_OPTIONS.map((role) => (
+                                        {availableRoleOptions.map((role) => (
                                             <option key={role.value} value={role.value}>
                                                 {role.label}
                                             </option>
@@ -198,7 +216,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false }: 
                                             Joined: {member.joinedAt.toLocaleDateString()}
                                         </p>
                                     </div>
-                                    {!isReadOnly && (
+                                    {!isReadOnly && canEditMember(member) && (
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setEditingMember(member)}
@@ -279,7 +297,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false }: 
                                     onChange={(e) => setNewMember({ ...newMember, role: e.target.value as ClubMemberRole })}
                                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {ROLE_OPTIONS.map((role) => (
+                                    {availableRoleOptions.map((role) => (
                                         <option key={role.value} value={role.value}>
                                             {role.label}
                                         </option>

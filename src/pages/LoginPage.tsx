@@ -21,6 +21,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     if (isAuthenticated && user) {
       if (user.role === 'admin') {
         onNavigate('adminDashboard');
+      } else if (user.role === 'advisor') {
+        onNavigate('advisorDashboard');
       } else if (['club-secretary', 'president', 'treasurer'].includes(user.role)) {
         onNavigate('clubSecretaryDashboard');
       } else {

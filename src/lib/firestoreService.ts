@@ -356,6 +356,72 @@ export const createClubTreasurer = async (
     }
 };
 
+export const createClubAdvisor = async (
+    email: string,
+    password: string,
+    name: string,
+    clubId: string,
+    clubName: string
+): Promise<{ success: boolean; error?: string; userId?: string }> => {
+    try {
+        // Import required functions for secondary app
+        const { initializeApp, deleteApp } = await import('firebase/app');
+        const { getAuth, createUserWithEmailAndPassword: createUser } = await import('firebase/auth');
+
+        // Get the current Firebase config
+        const firebaseConfig = {
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+            appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        };
+
+        // Create a secondary app instance to create the user without affecting current session
+        const secondaryApp = initializeApp(firebaseConfig, 'AdvisorApp');
+        const secondaryAuth = getAuth(secondaryApp);
+
+        try {
+            // Create user with secondary auth instance
+            const userCredential = await createUser(secondaryAuth, email, password);
+            const uid = userCredential.user.uid;
+
+            // Create Firestore user profile with advisor role
+            const userProfile: FirestoreUser = {
+                email,
+                name,
+                role: 'advisor',
+                clubId,
+                clubName,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            await setDoc(doc(db, 'users', uid), userProfile);
+
+            // Update the club with advisor info (advisors are not added as club members)
+            await updateClub(clubId, {
+                advisorId: uid,
+                advisorEmail: email,
+                advisorName: name,
+            });
+
+            // Delete the secondary app instance
+            await deleteApp(secondaryApp);
+
+            return { success: true, userId: uid };
+        } catch (innerError: any) {
+            // Clean up secondary app on error
+            await deleteApp(secondaryApp);
+            throw innerError;
+        }
+    } catch (error: any) {
+        console.error('Error creating club advisor:', error);
+        return { success: false, error: error.message || 'Failed to create advisor' };
+    }
+};
+
 // Update user profile (name, bio/description)
 export const updateUserProfile = async (
     userId: string,

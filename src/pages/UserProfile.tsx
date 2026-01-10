@@ -269,216 +269,218 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
-        <div className="flex border-b border-slate-200 dark:border-slate-700">
-          {[
-            { id: 'overview', label: 'Overview', icon: User },
-            { id: 'events', label: 'My Events', icon: Calendar },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
-                }`}
-            >
-              <tab.icon className="w-5 h-5" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+      {/* Tabs - Hide for advisors */}
+      {user?.role !== 'advisor' && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
+          <div className="flex border-b border-slate-200 dark:border-slate-700">
+            {[
+              { id: 'overview', label: 'Overview', icon: User },
+              { id: 'events', label: 'My Events', icon: Calendar },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Club Memberships</h3>
-                {memberships.length > 0 ? (
-                  <div className="grid gap-4">
-                    {memberships.map((membership, index) => (
-                      <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${membership.clubColor ? `bg-gradient-to-br ${membership.clubColor}` : 'bg-slate-200 dark:bg-slate-600'}`}>
-                          {membership.clubImage ? (
-                            <img src={membership.clubImage} alt={membership.clubName} className="w-full h-full object-cover rounded-xl" />
-                          ) : (
-                            membership.clubIcon || '🏛️'
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 dark:text-white">{membership.clubName}</h4>
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
+          <div className="p-6">
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Club Memberships</h3>
+                  {memberships.length > 0 ? (
+                    <div className="grid gap-4">
+                      {memberships.map((membership, index) => (
+                        <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${membership.clubColor ? `bg-gradient-to-br ${membership.clubColor}` : 'bg-slate-200 dark:bg-slate-600'}`}>
+                            {membership.clubImage ? (
+                              <img src={membership.clubImage} alt={membership.clubName} className="w-full h-full object-cover rounded-xl" />
+                            ) : (
+                              membership.clubIcon || '🏛️'
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white">{membership.clubName}</h4>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
                               ${membership.role === 'president' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' :
-                                membership.role === 'vice-president' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
-                                  membership.role === 'treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                    membership.role === 'secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                                      'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-300'
-                              }`}>
-                              {membership.role.charAt(0).toUpperCase() + membership.role.slice(1).replace('-', ' ')}
-                            </span>
-                            <span className="text-slate-500 dark:text-slate-400">• Since {new Date(membership.joinedAt).toLocaleDateString()}</span>
+                                  membership.role === 'vice-president' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
+                                    membership.role === 'treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                      membership.role === 'secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-300'
+                                }`}>
+                                {membership.role.charAt(0).toUpperCase() + membership.role.slice(1).replace('-', ' ')}
+                              </span>
+                              <span className="text-slate-500 dark:text-slate-400">• Since {new Date(membership.joinedAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 dark:text-slate-400 italic">Not a member of any club yet.</p>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                      <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                        <Heart className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900 dark:text-white">Profile Updated</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Your profile is now synced • Recently</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                        <Share2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900 dark:text-white">Welcome to Club-Connect!</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Start exploring clubs and events</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'events' && (
+              <div className="space-y-6">
+                {/* Event Tabs */}
+                <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={() => setEventTab('upcoming')}
+                    className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'upcoming'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                  >
+                    Upcoming ({upcomingEvents.length})
+                    {eventTab === 'upcoming' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setEventTab('past')}
+                    className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'past'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                  >
+                    Past ({pastEvents.length})
+                    {eventTab === 'past' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Event List */}
+                {eventsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : displayedEvents.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    {eventTab === 'upcoming' ? (
+                      <>
+                        <CalendarCheck className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <p className="text-slate-500 dark:text-slate-400 mb-4">No upcoming events found.</p>
+                        <button
+                          onClick={() => onNavigate('events')}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-sm"
+                        >
+                          Browse Events
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <History className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <p className="text-slate-500 dark:text-slate-400">No past events found.</p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {displayedEvents.map(({ event, rsvpDate }) => (
+                      <div
+                        key={event.id}
+                        className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${eventTab === 'upcoming'
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                }`}>
+                                {eventTab === 'upcoming' ? 'Upcoming' : 'Completed'}
+                              </span>
+                              <span className="text-xs text-slate-500 font-medium">by {event.clubName}</span>
+                            </div>
+
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                              {event.title}
+                            </h4>
+
+                            <div className="flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {new Date(event.date).toLocaleDateString('en-US', {
+                                  weekday: 'short',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                              {event.time && (
+                                <div className="flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  {event.time}
+                                </div>
+                              )}
+                              {event.location && (
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin className="w-3.5 h-3.5" />
+                                  {event.location}
+                                </div>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-slate-400 mt-2">
+                              RSVP'd on {rsvpDate.toLocaleDateString()}
+                            </p>
+                          </div>
+
+                          <div className="flex gap-2 items-center">
+                            <button
+                              onClick={() => event.id && onNavigateToPost(event.id)}
+                              className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                              title="View Details"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-slate-600 dark:text-slate-400 italic">Not a member of any club yet.</p>
                 )}
               </div>
-
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">Profile Updated</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">Your profile is now synced • Recently</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                      <Share2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">Welcome to Club-Connect!</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">Start exploring clubs and events</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'events' && (
-            <div className="space-y-6">
-              {/* Event Tabs */}
-              <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700">
-                <button
-                  onClick={() => setEventTab('upcoming')}
-                  className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'upcoming'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
-                >
-                  Upcoming ({upcomingEvents.length})
-                  {eventTab === 'upcoming' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                </button>
-                <button
-                  onClick={() => setEventTab('past')}
-                  className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'past'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
-                >
-                  Past ({pastEvents.length})
-                  {eventTab === 'past' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                </button>
-              </div>
-
-              {/* Event List */}
-              {eventsLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : displayedEvents.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                  {eventTab === 'upcoming' ? (
-                    <>
-                      <CalendarCheck className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-500 dark:text-slate-400 mb-4">No upcoming events found.</p>
-                      <button
-                        onClick={() => onNavigate('events')}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-sm"
-                      >
-                        Browse Events
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <History className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-500 dark:text-slate-400">No past events found.</p>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {displayedEvents.map(({ event, rsvpDate }) => (
-                    <div
-                      key={event.id}
-                      className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${eventTab === 'upcoming'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                              }`}>
-                              {eventTab === 'upcoming' ? 'Upcoming' : 'Completed'}
-                            </span>
-                            <span className="text-xs text-slate-500 font-medium">by {event.clubName}</span>
-                          </div>
-
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-2">
-                            {event.title}
-                          </h4>
-
-                          <div className="flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5" />
-                              {new Date(event.date).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric'
-                              })}
-                            </div>
-                            {event.time && (
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5" />
-                                {event.time}
-                              </div>
-                            )}
-                            {event.location && (
-                              <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3.5 h-3.5" />
-                                {event.location}
-                              </div>
-                            )}
-                          </div>
-
-                          <p className="text-xs text-slate-400 mt-2">
-                            RSVP'd on {rsvpDate.toLocaleDateString()}
-                          </p>
-                        </div>
-
-                        <div className="flex gap-2 items-center">
-                          <button
-                            onClick={() => event.id && onNavigateToPost(event.id)}
-                            className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
-                            title="View Details"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

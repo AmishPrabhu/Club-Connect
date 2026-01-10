@@ -748,6 +748,8 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                         <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Estimated</th>
                                                         <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Actual</th>
                                                         <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Paid</th>
+                                                        <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Receipt</th>
+                                                        <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Verified</th>
                                                         <th className="px-4 py-3"></th>
                                                     </tr>
                                                 </thead>
@@ -780,6 +782,66 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                                         <Circle className="w-5 h-5 text-slate-400" />
                                                                     )}
                                                                 </button>
+                                                            </td>
+                                                            {/* Receipt Upload Cell */}
+                                                            <td className="px-4 py-3 text-center">
+                                                                {item.receiptUrl ? (
+                                                                    <a
+                                                                        href={item.receiptUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-600 hover:text-blue-700 text-sm underline"
+                                                                    >
+                                                                        View
+                                                                    </a>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            if (typeof window !== 'undefined' && (window as any).cloudinary) {
+                                                                                const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                                                                                const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+                                                                                if (cloudName && uploadPreset) {
+                                                                                    const widget = (window as any).cloudinary.createUploadWidget(
+                                                                                        {
+                                                                                            cloudName,
+                                                                                            uploadPreset,
+                                                                                            folder: `receipts/${eventId}`,
+                                                                                            sources: ['local', 'camera'],
+                                                                                            multiple: false,
+                                                                                            maxFiles: 1,
+                                                                                            resourceType: 'image',
+                                                                                            clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf'],
+                                                                                            maxFileSize: 5000000,
+                                                                                        },
+                                                                                        (_error: any, result: any) => {
+                                                                                            if (result.event === 'success') {
+                                                                                                updateBudgetItem(item.id, { receiptUrl: result.info.secure_url });
+                                                                                            }
+                                                                                        }
+                                                                                    );
+                                                                                    widget.open();
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        className="px-2 py-1 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded transition-colors"
+                                                                    >
+                                                                        Upload
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                            {/* Verified Badge Cell */}
+                                                            <td className="px-4 py-3 text-center">
+                                                                {item.verified ? (
+                                                                    <span className="px-2 py-1 text-xs rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400">
+                                                                        ✓ Verified
+                                                                    </span>
+                                                                ) : item.paid && item.receiptUrl ? (
+                                                                    <span className="px-2 py-1 text-xs rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                                                        Pending
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-slate-400">—</span>
+                                                                )}
                                                             </td>
                                                             <td className="px-4 py-3">
                                                                 <button

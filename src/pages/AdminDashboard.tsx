@@ -10,6 +10,7 @@ import {
   createClubSecretary,
   createClubPresident,
   createClubTreasurer,
+  createClubAdvisor,
   getPosts,
   deletePost,
   getNotifications,
@@ -166,6 +167,8 @@ export default function AdminDashboard() {
   const [showCreateSecretaryModal, setShowCreateSecretaryModal] = useState(false);
   const [showCreatePresidentModal, setShowCreatePresidentModal] = useState(false);
   const [showCreateTreasurerModal, setShowCreateTreasurerModal] = useState(false);
+  const [showCreateAdvisorModal, setShowCreateAdvisorModal] = useState(false);
+  const [showEditAdvisorModal, setShowEditAdvisorModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<FirestoreClub | null>(null);
@@ -181,14 +184,14 @@ export default function AdminDashboard() {
 
   const [newSecretary, setNewSecretary] = useState({
     email: '',
-    password: '',
+    password: 'Hello@123',
     name: '',
   });
 
-  // Generic state for President/Treasurer creation
+  // Generic state for President/Treasurer/Advisor creation
   const [newRoleUser, setNewRoleUser] = useState({
     email: '',
-    password: '',
+    password: 'Hello@123',
     name: '',
   });
 
@@ -290,7 +293,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Secretary created for ${selectedClub.name}!` });
-      setNewSecretary({ email: '', password: '', name: '' });
+      setNewSecretary({ email: '', password: 'Hello@123', name: '' });
       setTimeout(() => {
         setShowCreateSecretaryModal(false);
         setSelectedClub(null);
@@ -325,7 +328,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `President created for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: '', name: '' });
+      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
       setTimeout(() => {
         setShowCreatePresidentModal(false);
         setSelectedClub(null);
@@ -360,7 +363,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Treasurer created for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: '', name: '' });
+      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
       setTimeout(() => {
         setShowCreateTreasurerModal(false);
         setSelectedClub(null);
@@ -419,20 +422,108 @@ export default function AdminDashboard() {
 
   const openSecretaryModal = (club: FirestoreClub) => {
     setSelectedClub(club);
-    setNewSecretary({ email: '', password: '', name: '' }); // Reset specific secretary state if any, though we use newSecretary
+    setNewSecretary({ email: '', password: 'Hello@123', name: '' });
     setShowCreateSecretaryModal(true);
   };
 
   const openPresidentModal = (club: FirestoreClub) => {
     setSelectedClub(club);
-    setNewRoleUser({ email: '', password: '', name: '' });
+    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
     setShowCreatePresidentModal(true);
   };
 
   const openTreasurerModal = (club: FirestoreClub) => {
     setSelectedClub(club);
-    setNewRoleUser({ email: '', password: '', name: '' });
+    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
     setShowCreateTreasurerModal(true);
+  };
+
+  const openAdvisorModal = (club: FirestoreClub) => {
+    setSelectedClub(club);
+    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+    setShowCreateAdvisorModal(true);
+  };
+
+  // Advisor handlers
+  const handleCreateAdvisor = async () => {
+    setFormMessage(null);
+    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (newRoleUser.password.length < 6) {
+      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    const result = await createClubAdvisor(
+      newRoleUser.email,
+      newRoleUser.password,
+      newRoleUser.name,
+      selectedClub.id!,
+      selectedClub.name
+    );
+
+    if (result.success) {
+      setFormMessage({ type: 'success', text: `Advisor created for ${selectedClub.name}!` });
+      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setTimeout(() => {
+        setShowCreateAdvisorModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: result.error || 'Failed to create advisor' });
+    }
+  };
+
+  const openEditAdvisorModal = (club: FirestoreClub) => {
+    setSelectedClub(club);
+    setNewRoleUser({
+      email: club.advisorEmail || '',
+      password: 'Hello@123',
+      name: club.advisorName || ''
+    });
+    setShowEditAdvisorModal(true);
+  };
+
+  // Replace advisor (delete old account and create new one)
+  const handleReplaceAdvisor = async () => {
+    setFormMessage(null);
+    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (newRoleUser.password.length < 6) {
+      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    // Note: We can't delete the old Firebase Auth account from client-side
+    // So we just create a new advisor account and update the club reference
+    const result = await createClubAdvisor(
+      newRoleUser.email,
+      newRoleUser.password,
+      newRoleUser.name,
+      selectedClub.id!,
+      selectedClub.name
+    );
+
+    if (result.success) {
+      setFormMessage({ type: 'success', text: `Advisor updated for ${selectedClub.name}!` });
+      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setTimeout(() => {
+        setShowEditAdvisorModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: result.error || 'Failed to update advisor' });
+    }
   };
 
   const filteredClubs = clubs.filter(club =>
@@ -624,6 +715,9 @@ export default function AdminDashboard() {
                             {club.treasurerEmail && (
                               <p className="text-sm text-amber-600 dark:text-amber-400">Treas: {club.treasurerEmail}</p>
                             )}
+                            {club.advisorEmail && (
+                              <p className="text-sm text-cyan-600 dark:text-cyan-400">Advisor: {club.advisorName || club.advisorEmail}</p>
+                            )}
                           </div>
                           <div className="flex flex-col gap-2 mb-4">
                             {!club.secretaryEmail && (
@@ -651,6 +745,23 @@ export default function AdminDashboard() {
                               >
                                 <UserPlus className="w-4 h-4" />
                                 Add Treasurer
+                              </button>
+                            )}
+                            {!club.advisorEmail ? (
+                              <button
+                                onClick={() => openAdvisorModal(club)}
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
+                              >
+                                <UserPlus className="w-4 h-4" />
+                                Add Advisor
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openEditAdvisorModal(club)}
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-300 border border-cyan-200 dark:border-cyan-800 transition-all flex items-center gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                Edit Advisor
                               </button>
                             )}
                           </div>
@@ -1040,6 +1151,136 @@ export default function AdminDashboard() {
               >
                 <UserPlus className="w-5 h-5" />
                 Create Treasurer Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Advisor Modal */}
+      {showCreateAdvisorModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Advisor for {selectedClub.name}</h3>
+              <button onClick={() => { setShowCreateAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Advisor Name *</label>
+                <input
+                  type="text"
+                  value={newRoleUser.name}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Advisor Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
+                <input
+                  type="email"
+                  value={newRoleUser.email}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="advisor@wce.ac.in"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
+                <input
+                  type="password"
+                  value={newRoleUser.password}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <button
+                onClick={handleCreateAdvisor}
+                className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Create Advisor Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Advisor Modal */}
+      {showEditAdvisorModal && selectedClub && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Advisor for {selectedClub.name}</h3>
+              <button onClick={() => { setShowEditAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-4">
+              ⚠️ This will create a new advisor account. The old advisor will need to be removed manually from Firebase.
+            </p>
+
+            {formMessage && (
+              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {formMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Advisor Name *</label>
+                <input
+                  type="text"
+                  value={newRoleUser.name}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Advisor Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Email *</label>
+                <input
+                  type="email"
+                  value={newRoleUser.email}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="advisor@wce.ac.in"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Password *</label>
+                <input
+                  type="password"
+                  value={newRoleUser.password}
+                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <button
+                onClick={handleReplaceAdvisor}
+                className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Edit className="w-5 h-5" />
+                Update Advisor Account
               </button>
             </div>
           </div>
