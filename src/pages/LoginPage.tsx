@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, Sparkles, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 interface LoginPageProps {
   onNavigate: (page: Page) => void;
@@ -11,6 +12,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [error, setError] = useState('');
   const { login, isLoading, user, isAuthenticated } = useAuth();
 
@@ -120,6 +122,16 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               </div>
             </div>
 
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsForgotPasswordOpen(true)}
+                className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
@@ -161,6 +173,12 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           </p>
         </div>
       </div>
+
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+        initialEmail={email}
+      />
     </div>
   );
 }

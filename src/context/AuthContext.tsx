@@ -6,11 +6,13 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { AuthContextType, AuthState, User, FirestoreUser } from '../types/auth';
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -236,6 +238,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signInWithGoogle,
     logout,
     updateUser,
+    resetPassword: async (email: string) => {
+      await sendPasswordResetEmail(auth, email);
+    },
   };
 
   return (

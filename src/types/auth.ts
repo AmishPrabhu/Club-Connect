@@ -35,6 +35,7 @@ export interface AuthContextType extends AuthState {
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 // Firestore user document structure (stored in 'users' collection)
