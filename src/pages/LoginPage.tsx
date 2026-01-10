@@ -178,6 +178,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
         initialEmail={email}
+        onNavigate={onNavigate}
       />
     </div>
   );

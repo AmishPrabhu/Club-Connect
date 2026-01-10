@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { X, Mail, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+import { Page } from '../types/page';
+
 interface ForgotPasswordModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialEmail?: string;
+    onNavigate?: (page: Page) => void;
 }
 
-export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = '' }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onNavigate }: ForgotPasswordModalProps) {
     const [email, setEmail] = useState(initialEmail);
     const [isLoading, setIsLoading] = useState(false);
-    const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'userNotFound'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const { resetPassword } = useAuth();
 
@@ -37,6 +40,17 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
         setErrorMessage('');
 
         try {
+            // First check if the email exists in Firestore
+            const { checkEmailExists } = await import('../lib/firestoreService');
+            const emailExists = await checkEmailExists(email);
+
+            if (!emailExists) {
+                setStatus('userNotFound');
+                setErrorMessage('No account found with this email address.');
+                setIsLoading(false);
+                return;
+            }
+
             await resetPassword(email);
             setStatus('success');
             setTimeout(() => {
@@ -46,12 +60,11 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
             }, 3000);
         } catch (error: any) {
             console.error('Reset password error:', error);
-            setStatus('error');
-            if (error.code === 'auth/user-not-found') {
-                setErrorMessage('No account found with this email address.');
-            } else if (error.code === 'auth/invalid-email') {
+            if (error.code === 'auth/invalid-email') {
+                setStatus('error');
                 setErrorMessage('Please enter a valid email address.');
             } else {
+                setStatus('error');
                 setErrorMessage('Failed to send reset email. Please try again.');
             }
         } finally {
@@ -85,6 +98,42 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                                 We've sent a password reset link to <br />
                                 <span className="font-medium text-slate-900 dark:text-white">{email}</span>
                             </p>
+                        </div>
+                    ) : status === 'userNotFound' ? (
+                        <div className="text-center py-6">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600 dark:text-amber-400">
+                                <AlertCircle className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Account Found</h3>
+                            <p className="text-slate-600 dark:text-slate-400 mb-6">
+                                We couldn't find an account with <br />
+                                <span className="font-medium text-slate-900 dark:text-white">{email}</span>
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setStatus('idle');
+                                        setErrorMessage('');
+                                    }}
+                                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                >
+                                    Try Again
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        onClose();
+                                        if (onNavigate) {
+                                            onNavigate('signUp');
+                                        }
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                >
+                                    Create Account
+                                    <ArrowRight className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                     ) : hasPrefilledEmail ? (
                         // Confirmation UI when email is pre-filled

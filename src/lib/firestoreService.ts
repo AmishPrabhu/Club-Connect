@@ -978,3 +978,16 @@ export const getUserMemberships = async (email: string): Promise<any[]> => {
         return [];
     }
 };
+
+// Check if a user with this email exists in Firestore
+export const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', email.toLowerCase().trim()));
+        const snapshot = await getDocs(q);
+        return !snapshot.empty;
+    } catch (error) {
+        console.error('Error checking email existence:', error);
+        return false;
+    }
+};
