@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Shield, Calendar, DollarSign, Clock, Users, Eye, FileText, ExternalLink, UserPlus, Edit, X } from 'lucide-react';
+import { Shield, Calendar, DollarSign, Clock, Users, Eye, FileText, ExternalLink, UserPlus, Edit, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Page } from '../types/page';
 import { FirestorePost, BudgetItem, FirestoreClub } from '../types/auth';
-import { getPosts, getClubs, updatePost, createClubSecretary, createClubPresident, createClubTreasurer } from '../lib/firestoreService';
+import { getPosts, getClubs, updatePost, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer } from '../lib/firestoreService';
 
 interface AdvisorDashboardProps {
     onNavigate: (page: Page) => void;
@@ -144,6 +144,33 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
             }
         } catch (error) {
             setFormMessage({ type: 'error', text: 'An error occurred' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+
+    const handleRemoveRole = async (role: 'secretary' | 'president' | 'treasurer') => {
+        if (!club?.id) return;
+
+        if (!window.confirm(`Are you sure you want to remove the ${role}? This will unlink their account from the club.`)) {
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const result = await removeClubOfficer(club.id, role);
+            if (result.success) {
+                // Refresh club data
+                const clubs = await getClubs();
+                const foundClub = clubs.find(c => c.id === user?.clubId);
+                if (foundClub) setClub(foundClub);
+            } else {
+                alert('Failed to remove officer');
+            }
+        } catch (error) {
+            console.error('Error removing role:', error);
+            alert('An error occurred');
         } finally {
             setIsSaving(false);
         }
@@ -494,13 +521,24 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => openEditRoleModal('secretary')}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                        {club?.secretaryEmail ? 'Edit' : 'Add'}
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => openEditRoleModal('secretary')}
+                                            className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            {club?.secretaryEmail ? 'Edit' : 'Add'}
+                                        </button>
+                                        {club?.secretaryEmail && (
+                                            <button
+                                                onClick={() => handleRemoveRole('secretary')}
+                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                title="Remove Secretary"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* President */}
@@ -513,13 +551,24 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => openEditRoleModal('president')}
-                                        className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/40 transition-colors"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                        {club?.presidentEmail ? 'Edit' : 'Add'}
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => openEditRoleModal('president')}
+                                            className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/40 transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            {club?.presidentEmail ? 'Edit' : 'Add'}
+                                        </button>
+                                        {club?.presidentEmail && (
+                                            <button
+                                                onClick={() => handleRemoveRole('president')}
+                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                title="Remove President"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Treasurer */}
@@ -532,13 +581,24 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={() => openEditRoleModal('treasurer')}
-                                        className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                        {club?.treasurerEmail ? 'Edit' : 'Add'}
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => openEditRoleModal('treasurer')}
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            {club?.treasurerEmail ? 'Edit' : 'Add'}
+                                        </button>
+                                        {club?.treasurerEmail && (
+                                            <button
+                                                onClick={() => handleRemoveRole('treasurer')}
+                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                title="Remove Treasurer"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

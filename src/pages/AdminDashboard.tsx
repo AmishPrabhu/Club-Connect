@@ -11,6 +11,7 @@ import {
   createClubPresident,
   createClubTreasurer,
   createClubAdvisor,
+  removeClubOfficer,
   getPosts,
   deletePost,
   getNotifications,
@@ -526,6 +527,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRemoveAdvisor = async (club: FirestoreClub) => {
+    if (!club.id) return;
+
+    if (!window.confirm(`Are you sure you want to remove the Advisor from ${club.name}?`)) {
+      return;
+    }
+
+    const result = await removeClubOfficer(club.id, 'advisor');
+    if (result.success) {
+      alert('Advisor removed successfully');
+      loadData();
+    } else {
+      alert('Failed to remove advisor: ' + result.error);
+    }
+  };
+
   const filteredClubs = clubs.filter(club =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     club.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -756,13 +773,22 @@ export default function AdminDashboard() {
                                 Add Advisor
                               </button>
                             ) : (
-                              <button
-                                onClick={() => openEditAdvisorModal(club)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-300 border border-cyan-200 dark:border-cyan-800 transition-all flex items-center gap-2"
-                              >
-                                <Edit className="w-4 h-4" />
-                                Edit Advisor
-                              </button>
+                              <div className="flex gap-2 w-full">
+                                <button
+                                  onClick={() => openEditAdvisorModal(club)}
+                                  className="flex-1 text-left px-3 py-2 rounded-lg text-sm text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-300 border border-cyan-200 dark:border-cyan-800 transition-all flex items-center gap-2"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                  Edit Advisor
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveAdvisor(club)}
+                                  className="px-3 py-2 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 transition-all"
+                                  title="Remove Advisor"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             )}
                           </div>
 

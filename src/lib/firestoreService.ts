@@ -12,6 +12,7 @@ import {
     Timestamp,
     collectionGroup,
     where,
+    deleteField,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
@@ -419,6 +420,41 @@ export const createClubAdvisor = async (
     } catch (error: any) {
         console.error('Error creating club advisor:', error);
         return { success: false, error: error.message || 'Failed to create advisor' };
+    }
+};
+
+export const removeClubOfficer = async (
+    clubId: string,
+    role: 'secretary' | 'president' | 'treasurer' | 'advisor'
+): Promise<{ success: boolean; error?: string }> => {
+    try {
+        const updates: any = {};
+
+        if (role === 'secretary') {
+            updates.secretaryId = deleteField();
+            updates.secretaryEmail = deleteField();
+        } else if (role === 'president') {
+            updates.presidentId = deleteField();
+            updates.presidentEmail = deleteField();
+        } else if (role === 'treasurer') {
+            updates.treasurerId = deleteField();
+            updates.treasurerEmail = deleteField();
+        } else if (role === 'advisor') {
+            updates.advisorId = deleteField();
+            updates.advisorEmail = deleteField();
+            updates.advisorName = deleteField();
+        }
+
+        const clubRef = doc(db, 'clubs', clubId);
+        await updateDoc(clubRef, {
+            ...updates,
+            updatedAt: Timestamp.now(),
+        });
+
+        return { success: true };
+    } catch (error: any) {
+        console.error(`Error removing club ${role}:`, error);
+        return { success: false, error: error.message || `Failed to remove ${role}` };
     }
 };
 
