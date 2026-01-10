@@ -1,7 +1,7 @@
 import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile } from '../lib/firestoreService';
+import { getUserProfile, updateUserProfile, getUserMemberships } from '../lib/firestoreService';
 
 interface UserProfileProps {
   onBack: () => void;
@@ -18,9 +18,11 @@ export default function UserProfile({ onBack }: UserProfileProps) {
     email: '',
     joinDate: '',
   });
+  const [memberships, setMemberships] = useState<any[]>([]); // Add state for memberships
   const [editForm, setEditForm] = useState({
     name: '',
     bio: '',
+    email: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -38,6 +40,7 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           setEditForm({
             name: profile.name || user.name || '',
             bio: (profile as any).bio || '',
+            email: profile.email || '',
           });
         } else {
           // Fallback to user context data
@@ -50,7 +53,14 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           setEditForm({
             name: user.name || '',
             bio: '',
+            email: user.email || '',
           });
+        }
+
+        // Fetch memberships
+        if (user.email) {
+          const userMemberships = await getUserMemberships(user.email);
+          setMemberships(userMemberships);
         }
       }
     };
@@ -143,7 +153,11 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                   <button
                     onClick={() => {
                       setIsEditing(false);
-                      setEditForm({ name: profileData.name, bio: profileData.bio });
+                      setEditForm({
+                        name: profileData.name,
+                        bio: profileData.bio,
+                        email: profileData.email
+                      });
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
                   >
@@ -225,6 +239,42 @@ export default function UserProfile({ onBack }: UserProfileProps) {
         <div className="p-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Club Memberships</h3>
+                {memberships.length > 0 ? (
+                  <div className="grid gap-4">
+                    {memberships.map((membership, index) => (
+                      <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${membership.clubColor ? `bg-gradient-to-br ${membership.clubColor}` : 'bg-slate-200 dark:bg-slate-600'}`}>
+                          {membership.clubImage ? (
+                            <img src={membership.clubImage} alt={membership.clubName} className="w-full h-full object-cover rounded-xl" />
+                          ) : (
+                            membership.clubIcon || '🏛️'
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white">{membership.clubName}</h4>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
+                              ${membership.role === 'president' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' :
+                                membership.role === 'vice-president' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
+                                  membership.role === 'treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                    membership.role === 'secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                      'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-300'
+                              }`}>
+                              {membership.role.charAt(0).toUpperCase() + membership.role.slice(1).replace('-', ' ')}
+                            </span>
+                            <span className="text-slate-500 dark:text-slate-400">• Since {new Date(membership.joinedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400 italic">Not a member of any club yet.</p>
+                )}
+              </div>
+
               <div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
                 <div className="space-y-3">

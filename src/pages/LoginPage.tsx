@@ -22,7 +22,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       } else if (['club-secretary', 'president', 'treasurer'].includes(user.role)) {
         onNavigate('clubSecretaryDashboard');
       } else {
-        onNavigate('home');
+        onNavigate('studentDashboard');
       }
     }
   }, [isAuthenticated, user, onNavigate]);
@@ -140,11 +140,24 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           </form>
         </div>
 
+        {/* Sign Up Link */}
+        <div className="mt-6 text-center">
+          <p className="text-slate-600 dark:text-slate-400">
+            Don't have an account?{' '}
+            <button
+              onClick={() => onNavigate('signUp')}
+              className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+            >
+              Create one
+            </button>
+          </p>
+        </div>
+
         {/* Info Box */}
         <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
           <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2">ℹ️ Login Info:</h3>
           <p className="text-sm text-blue-600 dark:text-blue-400">
-            Use the credentials you created via the Setup Admin page, or ask your administrator for access.
+            Club officers use credentials from Setup Admin. Students can create a new account.
           </p>
         </div>
       </div>

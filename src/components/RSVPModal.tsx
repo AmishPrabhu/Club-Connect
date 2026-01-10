@@ -1,6 +1,7 @@
 import { X, Calendar, MapPin, Clock, Users, CheckCircle, AlertCircle, Mail, User } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createEventRSVP } from '../lib/firestoreService';
+import { User as UserType } from '../types/auth';
 
 interface RSVPModalProps {
   isOpen: boolean;
@@ -14,16 +15,32 @@ interface RSVPModalProps {
     attendees: number;
   };
   clubName: string;
+  user?: UserType | null; // Optional user prop for logged-in users
 }
 
-export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModalProps) {
-  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'error'>('form');
+export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RSVPModalProps) {
+  // If user is logged in, skip directly to confirm step
+  const initialStep = user ? 'confirm' : 'form';
+  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'error'>(initialStep);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  // Form state - auto-fill from user if logged in
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+
+  // Update form when modal opens with user data
+  useEffect(() => {
+    if (isOpen) {
+      if (user) {
+        setName(user.name || '');
+        setEmail(user.email || '');
+        setStep('confirm');
+      } else {
+        setStep('form');
+      }
+    }
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -67,9 +84,12 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
   };
 
   const handleClose = () => {
-    setStep('form');
-    setName('');
-    setEmail('');
+    // Reset to appropriate initial step based on user login status
+    setStep(user ? 'confirm' : 'form');
+    if (!user) {
+      setName('');
+      setEmail('');
+    }
     setErrorMessage('');
     onClose();
   };
@@ -77,7 +97,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName }: RSVPModa
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform animate-slideUp">
-        {/* Form Step */}
+        {/* Form Step - Only shown for non-logged-in users */}
         {step === 'form' && (
           <>
             <div className="flex items-center justify-between mb-6">

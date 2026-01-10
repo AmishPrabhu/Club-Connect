@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2 } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -11,6 +11,7 @@ import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
 import LocationPickerModal from '../components/LocationPickerModal';
 import ImageModal from '../components/ImageModal';
+import { useNavigation } from '../context/NavigationContext';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: FirestoreClub }) {
@@ -258,7 +259,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setModalImage(imageUrl);
     setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events'>('overview');
+  const { navigateToManagement } = useNavigation();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -284,6 +286,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     registrationEndTime: '',
     coverImage: '',
     registrationLink: '',
+    responseSpreadsheetUrl: '',
     eventWhatsappLink: '',
     relatedEventId: '',
     attachments: [] as Attachment[]
@@ -526,6 +529,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       status: 'published',
       rsvps: 0,
       registrationLink: newPost.registrationLink,
+      responseSpreadsheetUrl: newPost.responseSpreadsheetUrl,
       eventWhatsappLink: newPost.eventWhatsappLink,
       ...(newPost.relatedEventId ? {
         relatedEventId: newPost.relatedEventId,
@@ -556,6 +560,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         registrationEndTime: '',
         coverImage: '',
         registrationLink: '',
+        responseSpreadsheetUrl: '',
         eventWhatsappLink: '',
         relatedEventId: '',
         attachments: []
@@ -747,9 +752,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           {[
             { id: 'overview', label: 'Overview', icon: Settings },
             { id: 'members', label: 'Members', icon: Users },
+            { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
             { id: 'posts', label: 'Manage Posts', icon: Edit },
             { id: 'notifications', label: 'Send Notifications', icon: Bell }
-          ].filter(tab => !isReadOnly || (tab.id !== 'notifications' && tab.id !== 'posts')).map((tab) => {
+          ].filter(tab => {
+            // Treasurer sees: overview, members, events
+            if (isReadOnly) {
+              return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly;
+            }
+            // Non-treasurer (secretary/president) sees all except treasurerOnly tabs
+            return !tab.treasurerOnly;
+          }).map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -1055,6 +1068,95 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           {activeTab === 'members' && club && (
             <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} />
           )}
+
+          {/* Events Tab - For Treasurer */}
+          {activeTab === 'events' && (
+            <div className="space-y-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Events</h3>
+
+              {posts.filter(p => p.type === 'event').length === 0 ? (
+                <div className="text-center py-12">
+                  <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-600 dark:text-slate-400">No events yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {posts
+                    .filter(p => p.type === 'event')
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((post) => {
+                      const isPast = new Date(post.date) < new Date();
+                      return (
+                        <div
+                          key={post.id}
+                          className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
+                                  ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                  }`}>
+                                  {isPast ? 'Past Event' : 'Upcoming'}
+                                </span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                                  {new Date(post.date).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                                {post.time && (
+                                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                                    • {post.time}
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">
+                                {post.title}
+                              </h4>
+                              {post.location && (
+                                <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-2">
+                                  📍 {post.location}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                                {post.rsvps !== undefined && post.rsvps > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Users className="w-4 h-4" />
+                                    {post.rsvps} RSVPs
+                                  </span>
+                                )}
+                                {(post as any).eventBudget && (post as any).eventBudget.length > 0 && (
+                                  <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                    💰 Budget tracked
+                                  </span>
+                                )}
+                                {(post as any).eventTasks && (post as any).eventTasks.length > 0 && (
+                                  <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                    ✓ {(post as any).eventTasks.filter((t: any) => t.status === 'completed').length}/{(post as any).eventTasks.length} tasks
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => post.id && navigateToManagement(post.id)}
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
+                            >
+                              <Settings2 className="w-4 h-4" />
+                              Manage
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+
 
           {/* Posts Tab */}
           {activeTab === 'posts' && (
@@ -1589,7 +1691,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                           Direct link to registration form or external event page.
                         </p>
                         <a
-                          href="https://docs.google.com/forms/create"
+                          href="https://docs.google.com/forms/d/19TusTlc1nhbdLPidDZ0goDn4tRqDZOs2ZaDozTlz9Wc/copy"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
@@ -1600,6 +1702,25 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                           Create Google Form
                         </a>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Response Spreadsheet URL - For all Events */}
+                  {newPost.type === 'event' && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Response Spreadsheet URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={newPost.responseSpreadsheetUrl}
+                        onChange={(e) => setNewPost({ ...newPost, responseSpreadsheetUrl: e.target.value })}
+                        className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                        placeholder="https://docs.google.com/spreadsheets/d/..."
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Paste the Google Sheets URL that collects your form responses for quick access.
+                      </p>
                     </div>
                   )}
 

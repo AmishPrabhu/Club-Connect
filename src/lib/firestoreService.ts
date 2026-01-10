@@ -10,6 +10,8 @@ import {
     query,
     orderBy,
     Timestamp,
+    collectionGroup,
+    where,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
@@ -776,6 +778,45 @@ export const getEventRSVPs = async (eventId: string): Promise<EventRSVP[]> => {
     }
 };
 
+// Get all RSVPs for a user by email (searches across all events)
+export const getUserRSVPsByEmail = async (email: string): Promise<{ eventId: string; rsvp: EventRSVP }[]> => {
+    try {
+        // First get all posts that are events
+        const postsRef = collection(db, 'posts');
+        const postsSnapshot = await getDocs(postsRef);
+        const eventPosts = postsSnapshot.docs.filter(doc => doc.data().type === 'event');
+
+        const userRSVPs: { eventId: string; rsvp: EventRSVP }[] = [];
+
+        // Check each event's RSVPs subcollection for the user's email
+        for (const eventDoc of eventPosts) {
+            const rsvpsRef = collection(db, 'posts', eventDoc.id, 'rsvps');
+            const rsvpsSnapshot = await getDocs(rsvpsRef);
+
+            for (const rsvpDoc of rsvpsSnapshot.docs) {
+                if (rsvpDoc.data().email?.toLowerCase() === email.toLowerCase()) {
+                    userRSVPs.push({
+                        eventId: eventDoc.id,
+                        rsvp: {
+                            id: rsvpDoc.id,
+                            eventId: eventDoc.id,
+                            name: rsvpDoc.data().name,
+                            email: rsvpDoc.data().email,
+                            rsvpedAt: rsvpDoc.data().rsvpedAt?.toDate() || new Date(),
+                            attendance: rsvpDoc.data().attendance,
+                        },
+                    });
+                }
+            }
+        }
+
+        return userRSVPs;
+    } catch (error) {
+        console.error('Error fetching user RSVPs by email:', error);
+        return [];
+    }
+};
+
 // Delete an RSVP
 export const deleteEventRSVP = async (
     eventId: string,
@@ -812,5 +853,128 @@ export const getEventRSVPCount = async (eventId: string): Promise<number> => {
     } catch (error) {
         console.error('Error getting RSVP count:', error);
         return 0;
+    }
+};
+
+// Update participant attendance status
+export const updateParticipantAttendance = async (
+    eventId: string,
+    participantId: string,
+    attendance: 'present' | 'absent' | 'pending'
+): Promise<boolean> => {
+    try {
+        const rsvpRef = doc(db, 'posts', eventId, 'rsvps', participantId);
+        await updateDoc(rsvpRef, { attendance });
+        return true;
+    } catch (error) {
+        console.error('Error updating participant attendance:', error);
+        return false;
+    }
+};
+
+// Add a participant manually (for Google Form responses)
+export const addEventParticipant = async (
+    eventId: string,
+    name: string,
+    email: string
+): Promise<{ success: boolean; error?: string; participantId?: string }> => {
+    try {
+        // Check if email already exists for this event
+        const rsvpsRef = collection(db, 'posts', eventId, 'rsvps');
+        const snapshot = await getDocs(rsvpsRef);
+        const existingParticipant = snapshot.docs.find(doc => doc.data().email.toLowerCase() === email.toLowerCase());
+
+        if (existingParticipant) {
+            return { success: false, error: 'This email is already registered for this event' };
+        }
+
+        // Add participant
+        const docRef = await addDoc(rsvpsRef, {
+            eventId,
+            name,
+            email,
+            rsvpedAt: Timestamp.now(),
+            attendance: 'pending',
+        });
+
+        // Update RSVP count on the post
+        const postRef = doc(db, 'posts', eventId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+            const currentRsvps = postDoc.data().rsvps || 0;
+            await updateDoc(postRef, {
+                rsvps: currentRsvps + 1,
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return { success: true, participantId: docRef.id };
+    } catch (error: any) {
+        console.error('Error adding participant:', error);
+        return { success: false, error: error.message || 'Failed to add participant' };
+    }
+};
+
+// Delete a participant
+export const deleteEventParticipant = async (
+    eventId: string,
+    participantId: string
+): Promise<boolean> => {
+    try {
+        const rsvpRef = doc(db, 'posts', eventId, 'rsvps', participantId);
+        await deleteDoc(rsvpRef);
+
+        // Update RSVP count on the post
+        const postRef = doc(db, 'posts', eventId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+            const currentRsvps = postDoc.data().rsvps || 1;
+            await updateDoc(postRef, {
+                rsvps: Math.max(0, currentRsvps - 1),
+                updatedAt: Timestamp.now(),
+            });
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error deleting participant:', error);
+        return false;
+    }
+};
+
+// Get all club memberships for a user by email
+export const getUserMemberships = async (email: string): Promise<any[]> => {
+    try {
+        const membersRef = collectionGroup(db, 'members');
+        const q = query(membersRef, where('email', '==', email));
+        const snapshot = await getDocs(q);
+
+        const memberships: any[] = [];
+
+        for (const docSnapshot of snapshot.docs) {
+            // Check if this is a club member (parent should be 'clubs')
+            // ref.parent is the collection ('members'), ref.parent.parent is the club doc
+            const clubDocRef = docSnapshot.ref.parent.parent;
+
+            if (clubDocRef && clubDocRef.path.startsWith('clubs/')) {
+                const clubDoc = await getDoc(clubDocRef);
+                if (clubDoc.exists()) {
+                    memberships.push({
+                        clubId: clubDoc.id,
+                        clubName: clubDoc.data().name,
+                        clubImage: clubDoc.data().image,
+                        clubIcon: clubDoc.data().icon,
+                        clubColor: clubDoc.data().color,
+                        role: docSnapshot.data().role,
+                        joinedAt: docSnapshot.data().joinedAt?.toDate() || new Date(),
+                    });
+                }
+            }
+        }
+
+        return memberships;
+    } catch (error) {
+        console.error('Error fetching user memberships:', error);
+        return [];
     }
 };

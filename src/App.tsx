@@ -15,6 +15,8 @@ import NotificationDetail from './pages/NotificationDetail';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import StudentDashboard from './pages/StudentDashboard';
 import EventManagement from './pages/EventManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
@@ -46,7 +48,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200">
-      {currentPage !== 'login' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
+      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
         <Header
           currentPage={currentPage}
           onNavigate={navigateToPage}
@@ -95,6 +97,10 @@ function AppContent() {
         <ClubSecretaryDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} user={user} />
       )}
 
+      {currentPage === 'studentDashboard' && (
+        <StudentDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} />
+      )}
+
       {currentPage === 'eventManagement' && selectedManagementEventId && (
         <EventManagement eventId={selectedManagementEventId} onBack={() => navigateToPage('home')} user={user} />
       )}
@@ -102,6 +108,11 @@ function AppContent() {
       {/* Login Modal for Club Secretary, President, Treasurer, and Admin */}
       {currentPage === 'login' && (
         <LoginPage onNavigate={navigateToPage} />
+      )}
+
+      {/* Sign Up Page for Students */}
+      {currentPage === 'signUp' && (
+        <SignUpPage onNavigate={navigateToPage} />
       )}
 
       {/* Setup Admin Page */}

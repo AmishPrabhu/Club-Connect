@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, Mail } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, DollarSign, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { FirestorePost, User, ClubMember, EventTask, BudgetItem, EventRSVP } from '../types/auth';
-import { getPosts, updatePost, getClubMembers, getEventRSVPs } from '../lib/firestoreService';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant } from '../lib/firestoreService';
 
 interface EventManagementProps {
     eventId: string;
@@ -15,9 +15,10 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'budget' | 'attendees'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'budget' | 'participants'>('details');
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
     const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
+    const [isImporting, setIsImporting] = useState(false);
 
     // Form State for Details
     const [formData, setFormData] = useState({
@@ -28,6 +29,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
         location: '',
         locationUrl: '',
         registrationlink: '',
+        responseSpreadsheetUrl: '',
         eventWhatsappLink: '',
     });
 
@@ -61,6 +63,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                         location: foundPost.location || '',
                         locationUrl: foundPost.locationUrl || '',
                         registrationlink: foundPost.registrationLink || '',
+                        responseSpreadsheetUrl: (foundPost as any).responseSpreadsheetUrl || '',
                         eventWhatsappLink: foundPost.eventWhatsappLink || '',
                     });
                     // Load tasks and budget from post if they exist
@@ -104,6 +107,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                 location: formData.location,
                 locationUrl: formData.locationUrl,
                 registrationLink: formData.registrationlink,
+                responseSpreadsheetUrl: formData.responseSpreadsheetUrl,
                 eventWhatsappLink: formData.eventWhatsappLink,
                 eventTasks: tasks,
                 eventBudget: budgetItems,
@@ -111,7 +115,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
 
             if (success) {
                 setMessage({ type: 'success', text: 'Event updated successfully!' });
-                setPost(prev => prev ? { ...prev, ...formData, registrationLink: formData.registrationlink } : null);
+                setPost(prev => prev ? { ...prev, ...formData, registrationLink: formData.registrationlink, responseSpreadsheetUrl: formData.responseSpreadsheetUrl } as any : null);
             } else {
                 setMessage({ type: 'error', text: 'Failed to update event.' });
             }
@@ -338,14 +342,14 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                             )}
                         </button>
                         <button
-                            onClick={() => setActiveTab('attendees')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'attendees'
+                            onClick={() => setActiveTab('participants')}
+                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'participants'
                                 ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
                                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                                 }`}
                         >
-                            <Mail className="w-5 h-5" />
-                            Attendees
+                            <Users className="w-5 h-5" />
+                            Participants
                             {(post?.rsvps || 0) > 0 && (
                                 <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs rounded-full">
                                     {post?.rsvps || 0}
@@ -461,6 +465,16 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                     onChange={(e) => setFormData({ ...formData, registrationlink: e.target.value })}
                                                     className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
                                                     placeholder="https://..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Responses Spreadsheet</label>
+                                                <input
+                                                    type="url"
+                                                    value={formData.responseSpreadsheetUrl}
+                                                    onChange={(e) => setFormData({ ...formData, responseSpreadsheetUrl: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                                                    placeholder="https://docs.google.com/spreadsheets/d/..."
                                                 />
                                             </div>
                                             <div>
@@ -786,26 +800,262 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                         )}
                     </div>
 
-                    {/* Attendees Tab */}
-                    {activeTab === 'attendees' && (
+                    {/* Participants Tab */}
+                    {activeTab === 'participants' && (
                         <div className="space-y-6">
                             {/* Stats */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
-                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Total RSVPs</p>
+                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Total Registered</p>
                                     <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
+                                </div>
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">Present</p>
+                                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                                        {eventRsvps.filter(r => r.attendance === 'present').length}
+                                    </p>
+                                </div>
+                                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">Absent</p>
+                                    <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                                        {eventRsvps.filter(r => r.attendance === 'absent').length}
+                                    </p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Pending</p>
+                                    <p className="text-2xl font-bold text-slate-700 dark:text-slate-300">
+                                        {eventRsvps.filter(r => !r.attendance || r.attendance === 'pending').length}
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Attendee List */}
+                            {/* Add Participant Form */}
+                            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <UserPlus className="w-5 h-5 text-purple-500" />
+                                    Add Participant (from Google Form)
+                                </h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                    Manually add participants from your Google Form responses.
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name</label>
+                                        <input
+                                            type="text"
+                                            id="newParticipantName"
+                                            className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                            placeholder="Participant name"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+                                        <input
+                                            type="email"
+                                            id="newParticipantEmail"
+                                            className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                            placeholder="email@example.com"
+                                        />
+                                    </div>
+                                    <div className="flex items-end">
+                                        <button
+                                            onClick={async () => {
+                                                const nameInput = document.getElementById('newParticipantName') as HTMLInputElement;
+                                                const emailInput = document.getElementById('newParticipantEmail') as HTMLInputElement;
+                                                const name = nameInput?.value.trim();
+                                                const email = emailInput?.value.trim();
+
+                                                if (!name || !email) {
+                                                    setMessage({ type: 'error', text: 'Please enter both name and email' });
+                                                    return;
+                                                }
+
+                                                const result = await addEventParticipant(eventId, name, email);
+                                                if (result.success) {
+                                                    setMessage({ type: 'success', text: 'Participant added successfully!' });
+                                                    nameInput.value = '';
+                                                    emailInput.value = '';
+                                                    // Refresh participants list
+                                                    const updatedRsvps = await getEventRSVPs(eventId);
+                                                    setEventRsvps(updatedRsvps);
+                                                } else {
+                                                    setMessage({ type: 'error', text: result.error || 'Failed to add participant' });
+                                                }
+                                            }}
+                                            className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            Add Participant
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Import from Sheet */}
+                                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Import from Google Sheet</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                Publish your response sheet as CSV (File → Share → Publish to web → CSV)
+                                            </p>
+                                        </div>
+                                        <button
+                                            disabled={isImporting || !(post as any)?.responseSpreadsheetUrl}
+                                            onClick={async () => {
+                                                const sheetUrl = (post as any)?.responseSpreadsheetUrl;
+                                                if (!sheetUrl) {
+                                                    setMessage({ type: 'error', text: 'Please add a Response Spreadsheet URL in the Details tab first' });
+                                                    return;
+                                                }
+
+                                                setIsImporting(true);
+                                                setMessage(null);
+
+                                                try {
+                                                    // Convert Google Sheets URL to CSV export URL
+                                                    let csvUrl = sheetUrl;
+
+                                                    // Extract spreadsheet ID and build proper export URL
+                                                    const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                                                    if (sheetIdMatch) {
+                                                        const sheetId = sheetIdMatch[1];
+                                                        csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+                                                    } else if (sheetUrl.includes('/edit')) {
+                                                        csvUrl = sheetUrl.replace(/\/edit.*$/, '/export?format=csv');
+                                                    }
+
+                                                    console.log('Fetching CSV from:', csvUrl);
+
+                                                    // Use CORS proxy to bypass browser restrictions
+                                                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
+
+                                                    const response = await fetch(proxyUrl);
+                                                    if (!response.ok) throw new Error('Failed to fetch sheet. Make sure the sheet is shared as "Anyone with the link can view".');
+
+                                                    const csvText = await response.text();
+                                                    console.log('CSV data received, first 200 chars:', csvText.substring(0, 200));
+                                                    const lines = csvText.split('\n').filter(line => line.trim());
+
+                                                    if (lines.length < 2) {
+                                                        setMessage({ type: 'error', text: 'No data found in the sheet' });
+                                                        setIsImporting(false);
+                                                        return;
+                                                    }
+
+                                                    // Parse header to find name and email columns
+                                                    const headers = lines[0].split(',').map(h => h.toLowerCase().replace(/"/g, '').trim());
+                                                    const nameIdx = headers.findIndex(h => h.includes('name'));
+                                                    const emailIdx = headers.findIndex(h => h.includes('email') || h.includes('mail'));
+
+                                                    if (nameIdx === -1 || emailIdx === -1) {
+                                                        setMessage({ type: 'error', text: 'Could not find Name and Email columns in the sheet' });
+                                                        setIsImporting(false);
+                                                        return;
+                                                    }
+
+                                                    // Parse CSV rows and import new participants
+                                                    let imported = 0;
+                                                    let skipped = 0;
+                                                    const existingEmails = eventRsvps.map(r => r.email.toLowerCase());
+
+                                                    for (let i = 1; i < lines.length; i++) {
+                                                        // Simple CSV parsing (handles basic cases)
+                                                        const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
+                                                        const name = cols[nameIdx];
+                                                        const email = cols[emailIdx];
+
+                                                        if (name && email && email.includes('@')) {
+                                                            if (existingEmails.includes(email.toLowerCase())) {
+                                                                skipped++;
+                                                            } else {
+                                                                const result = await addEventParticipant(eventId, name, email);
+                                                                if (result.success) {
+                                                                    imported++;
+                                                                    existingEmails.push(email.toLowerCase());
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    // Refresh participants list
+                                                    const updatedRsvps = await getEventRSVPs(eventId);
+                                                    setEventRsvps(updatedRsvps);
+
+                                                    setMessage({
+                                                        type: 'success',
+                                                        text: `Imported ${imported} new participant${imported !== 1 ? 's' : ''}${skipped > 0 ? `, ${skipped} already existed` : ''}`
+                                                    });
+                                                } catch (error: any) {
+                                                    console.error('Import error:', error);
+                                                    setMessage({
+                                                        type: 'error',
+                                                        text: error.message || 'Failed to import from sheet. Make sure it is published to web as CSV.'
+                                                    });
+                                                } finally {
+                                                    setIsImporting(false);
+                                                }
+                                            }}
+                                            className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${isImporting || !(post as any)?.responseSpreadsheetUrl
+                                                ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                                                : 'bg-green-600 hover:bg-green-700 text-white'
+                                                }`}
+                                        >
+                                            {isImporting ? (
+                                                <>
+                                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Importing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                    </svg>
+                                                    Import from Sheet
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Participant List */}
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                                    <h3 className="font-bold text-slate-900 dark:text-white">RSVPed Attendees ({eventRsvps.length})</h3>
+                                <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                    <h3 className="font-bold text-slate-900 dark:text-white">Participants ({eventRsvps.length})</h3>
+                                    <div className="flex items-center gap-3">
+                                        <a
+                                            href={(post as any)?.responseSpreadsheetUrl || "https://docs.google.com/forms/d/1jVFhtGWaIcnVl0JjJw1P3sc09-nEuCCfBn9RCB9RKB8/edit#responses"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1 font-medium"
+                                        >
+                                            View Responses
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </a>
+                                        {post?.registrationLink && (
+                                            <a
+                                                href={post.registrationLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                            >
+                                                Open Form
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                                 {eventRsvps.length === 0 ? (
                                     <div className="p-8 text-center text-slate-500 dark:text-slate-400">
                                         <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                        <p>No RSVPs yet. Attendees will appear here when they RSVP for this event.</p>
+                                        <p>No participants yet. Add participants from your Google Form responses above.</p>
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
@@ -814,26 +1064,83 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                 <tr>
                                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Name</th>
                                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Email</th>
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">RSVPed On</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Registered On</th>
+                                                    <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">Attendance</th>
+                                                    <th className="px-4 py-3"></th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                                {eventRsvps.map(rsvp => (
-                                                    <tr key={rsvp.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                                        <td className="px-4 py-3 text-slate-900 dark:text-white font-medium">{rsvp.name}</td>
+                                                {eventRsvps.map(participant => (
+                                                    <tr key={participant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                        <td className="px-4 py-3 text-slate-900 dark:text-white font-medium">{participant.name}</td>
                                                         <td className="px-4 py-3">
-                                                            <a href={`mailto:${rsvp.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                                                                {rsvp.email}
+                                                            <a href={`mailto:${participant.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                                {participant.email}
                                                             </a>
                                                         </td>
                                                         <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                                                            {rsvp.rsvpedAt.toLocaleDateString('en-IN', {
+                                                            {participant.rsvpedAt.toLocaleDateString('en-IN', {
                                                                 day: 'numeric',
                                                                 month: 'short',
                                                                 year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
                                                             })}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (!participant.id) return;
+                                                                        const success = await updateParticipantAttendance(eventId, participant.id, 'present');
+                                                                        if (success) {
+                                                                            setEventRsvps(prev => prev.map(p =>
+                                                                                p.id === participant.id ? { ...p, attendance: 'present' } : p
+                                                                            ));
+                                                                        }
+                                                                    }}
+                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'present'
+                                                                        ? 'bg-green-600 text-white'
+                                                                        : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
+                                                                        }`}
+                                                                >
+                                                                    <CheckCircle className="w-3.5 h-3.5 inline mr-1" />
+                                                                    Present
+                                                                </button>
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (!participant.id) return;
+                                                                        const success = await updateParticipantAttendance(eventId, participant.id, 'absent');
+                                                                        if (success) {
+                                                                            setEventRsvps(prev => prev.map(p =>
+                                                                                p.id === participant.id ? { ...p, attendance: 'absent' } : p
+                                                                            ));
+                                                                        }
+                                                                    }}
+                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'absent'
+                                                                        ? 'bg-red-600 text-white'
+                                                                        : 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
+                                                                        }`}
+                                                                >
+                                                                    <XCircle className="w-3.5 h-3.5 inline mr-1" />
+                                                                    Absent
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (!participant.id) return;
+                                                                    if (confirm('Are you sure you want to remove this participant?')) {
+                                                                        const success = await deleteEventParticipant(eventId, participant.id);
+                                                                        if (success) {
+                                                                            setEventRsvps(prev => prev.filter(p => p.id !== participant.id));
+                                                                            setMessage({ type: 'success', text: 'Participant removed' });
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}

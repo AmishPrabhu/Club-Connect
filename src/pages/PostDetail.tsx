@@ -350,19 +350,46 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                     )}
 
                     {/* Registration Link Button */}
-                    {post.registrationLink && (
-                        <div className="mb-6">
-                            <a
-                                href={post.registrationLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
-                            >
-                                <span>Register Now</span>
-                                <ExternalLink className="w-5 h-5" />
-                            </a>
-                        </div>
-                    )}
+                    {post.registrationLink && (() => {
+                        // Check if registration period has ended
+                        if (post.registrationEnd) {
+                            let registrationEndDateTime = new Date(post.registrationEnd);
+                            // If there's an end time, parse and apply it
+                            if (post.registrationEndTime) {
+                                const timeMatch = post.registrationEndTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+                                if (timeMatch) {
+                                    let hours = parseInt(timeMatch[1]);
+                                    const minutes = parseInt(timeMatch[2]);
+                                    const period = timeMatch[3];
+                                    if (period) {
+                                        if (period.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+                                        if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
+                                    }
+                                    registrationEndDateTime.setHours(hours, minutes, 59, 999);
+                                }
+                            } else {
+                                // No time specified, set to end of day
+                                registrationEndDateTime.setHours(23, 59, 59, 999);
+                            }
+                            // If registration end date/time has passed, don't show the button
+                            if (registrationEndDateTime < new Date()) {
+                                return null;
+                            }
+                        }
+                        return (
+                            <div className="mb-6">
+                                <a
+                                    href={post.registrationLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
+                                >
+                                    <span>Register Now</span>
+                                    <ExternalLink className="w-5 h-5" />
+                                </a>
+                            </div>
+                        );
+                    })()}
 
                     {/* Event WhatsApp Group Button */}
                     {post.eventWhatsappLink && (
@@ -515,6 +542,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                             attendees: post.rsvps || 0
                         }}
                         clubName={post.clubName}
+                        user={user}
                     />
                 )}
                 <ImageModal

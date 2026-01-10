@@ -152,6 +152,18 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                     </button>
                   )}
 
+                  {/* Student Dashboard control */}
+                  {user.role === 'user' && (
+                    <button
+                      onClick={() => onNavigate('studentDashboard')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all text-sm font-medium"
+                      aria-label="My Dashboard"
+                    >
+                      <User className="w-4 h-4" />
+                      My Dashboard
+                    </button>
+                  )}
+
                   {/* User Menu */}
                   <div className="relative" id="tour-profile">
                     <button
@@ -178,6 +190,8 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                               onNavigate('clubSecretaryDashboard');
                             } else if (user.role === 'admin') {
                               onNavigate('adminDashboard');
+                            } else {
+                              onNavigate('studentDashboard');
                             }
                             setShowUserMenu(false);
                           }}
@@ -185,7 +199,8 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                         >
                           {['club-secretary', 'president', 'treasurer'].includes(user.role) && <Settings className="w-4 h-4" />}
                           {user.role === 'admin' && <Shield className="w-4 h-4" />}
-                          My Account
+                          {user.role === 'user' && <User className="w-4 h-4" />}
+                          My Dashboard
                         </button>
                         <button
                           onClick={() => {

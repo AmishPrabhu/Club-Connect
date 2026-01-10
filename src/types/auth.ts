@@ -31,6 +31,8 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -124,6 +126,7 @@ export interface FirestorePost {
   registrationEndTime?: string;  // Registration end time (e.g., "5:00 PM")
   coverImage?: string;             // Main cover image for the post
   registrationLink?: string;       // Optional registration link for events
+  responseSpreadsheetUrl?: string;  // Optional Google Sheets URL for form responses
   eventWhatsappLink?: string;      // Optional WhatsApp group link for the event
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
@@ -155,4 +158,5 @@ export interface EventRSVP {
   name: string;
   email: string;
   rsvpedAt: Date;
+  attendance?: 'present' | 'absent' | 'pending';  // Attendance status for the event
 }

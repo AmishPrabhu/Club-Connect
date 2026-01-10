@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser
@@ -134,6 +137,89 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const signUp = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Create user profile in Firestore
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      const userProfile: FirestoreUser = {
+        email: email,
+        name: name,
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await setDoc(userDocRef, userProfile);
+
+      setAuthState({
+        user: {
+          id: userCredential.user.uid,
+          email: email,
+          name: name,
+          role: 'user',
+        },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+
+      // Map Firebase errors to user-friendly messages
+      let errorMessage = 'Failed to create account';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address';
+      }
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+
+      // fetchUserProfile will create the profile if it doesn't exist
+      const userProfile = await fetchUserProfile(userCredential.user);
+
+      if (userProfile) {
+        setAuthState({
+          user: userProfile,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return { success: true };
+      } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        return { success: false, error: 'Failed to create user profile' };
+      }
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+
+      let errorMessage = 'Failed to sign in with Google';
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign in cancelled';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Popup was blocked. Please allow popups for this site.';
+      }
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const updateUser = (userData: Partial<User>) => {
     if (authState.user) {
       setAuthState(prev => ({
@@ -146,6 +232,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     ...authState,
     login,
+    signUp,
+    signInWithGoogle,
     logout,
     updateUser,
   };
