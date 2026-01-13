@@ -40,7 +40,8 @@ function AppContent() {
     navigateToPost,
     navigateToManagement,
     navigateToNotification,
-    handleLogout
+    handleLogout,
+    closeManagementTab
   } = useNavigation();
 
   const { user, logout } = useAuth();
@@ -111,7 +112,7 @@ function AppContent() {
       )}
 
       {currentPage === 'eventManagement' && selectedManagementEventId && (
-        <EventManagement eventId={selectedManagementEventId} onBack={() => navigateToPage('home')} user={user} />
+        <EventManagement eventId={selectedManagementEventId} onBack={closeManagementTab} user={user} />
       )}
 
       {/* Login Modal for Club Secretary, President, Treasurer, and Admin */}

@@ -10,6 +10,7 @@ interface NavigationContextType {
     selectedEvent: string | null;
     selectedPost: string | null;
     selectedManagementEventId: string | null;
+    isOpenedFromUrl: boolean;
     navigateToPage: (page: Page) => void;
     navigateToClub: (clubId: string) => void;
     navigateToMemberBoard: (member: any) => void;
@@ -18,6 +19,7 @@ interface NavigationContextType {
     navigateToManagement: (eventId: string) => void;
     navigateToNotification: (notification: any) => Promise<void>;
     handleLogout: (logoutFn: () => Promise<void>) => Promise<void>;
+    closeManagementTab: () => void;
 }
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -38,6 +40,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
     const [selectedPost, setSelectedPost] = useState<string | null>(null);
     const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
+    const [isOpenedFromUrl, setIsOpenedFromUrl] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -47,6 +50,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         if (pageParam === 'eventManagement' && eventIdParam) {
             setSelectedManagementEventId(eventIdParam);
             setCurrentPage('eventManagement');
+            setIsOpenedFromUrl(true);
         }
     }, []);
 
@@ -85,8 +89,25 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     };
 
     const navigateToManagement = (eventId: string) => {
+        // Open in new tab with URL params
         const url = `${window.location.origin}/?page=eventManagement&eventId=${eventId}`;
         window.open(url, '_blank');
+    };
+
+    const closeManagementTab = () => {
+        if (isOpenedFromUrl) {
+            // If opened from URL (new tab), close the tab
+            window.close();
+            // Fallback: if window.close() doesn't work (browser security), navigate to home
+            // Clear URL params and go to home
+            window.history.replaceState({}, '', window.location.origin);
+            setCurrentPage('home');
+            setSelectedManagementEventId(null);
+            setIsOpenedFromUrl(false);
+        } else {
+            // If opened via internal navigation, go back to previous page
+            navigateToPage(previousPage);
+        }
     };
 
     const navigateToNotification = async (notification: any) => {
@@ -112,6 +133,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 selectedEvent,
                 selectedPost,
                 selectedManagementEventId,
+                isOpenedFromUrl,
                 navigateToPage,
                 navigateToClub,
                 navigateToMemberBoard,
@@ -120,6 +142,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 navigateToManagement,
                 navigateToNotification,
                 handleLogout,
+                closeManagementTab,
             }}
         >
             {children}

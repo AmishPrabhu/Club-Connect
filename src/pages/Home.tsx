@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink } from 'lucide-react';
 import { Page } from '../types/page';
 import { FirestorePost, FirestoreClub, FirestoreNotification } from '../types/auth';
-import { getPosts, getNotifications, getClubs } from '../lib/firestoreService';
+import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/firestoreService';
 import ClubCard from '../components/ClubCard';
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
@@ -30,6 +30,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [rsvpEvent, setRsvpEvent] = useState<FirestorePost | null>(null);
+  const [totalStudents, setTotalStudents] = useState<number>(0);
 
   // Image Modal State
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -46,10 +47,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [postsData, clubsData, notificationsData] = await Promise.all([
+        const [postsData, clubsData, notificationsData, studentCount] = await Promise.all([
           getPosts(),
           getClubs(),
-          getNotifications()
+          getNotifications(),
+          getTotalStudentCount()
         ]);
 
         // Sync member counts for all clubs
@@ -67,6 +69,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         setPosts(postsData);
         setClubs(clubsWithSyncedCounts);
         setNotifications(notificationsData);
+        setTotalStudents(studentCount);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -131,7 +134,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Students</span>
               <Users className="w-5 h-5 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white">1000+</div>
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">{totalStudents || '0'}</div>
           </div>
           <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800 p-6">
             <div className="flex items-center justify-between mb-2">

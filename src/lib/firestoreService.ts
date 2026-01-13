@@ -1093,3 +1093,43 @@ export const checkEmailExists = async (email: string): Promise<boolean> => {
         return false;
     }
 };
+
+// Get total student count (includes students, club officers, and all club members)
+export const getTotalStudentCount = async (): Promise<number> => {
+    try {
+        // Get all users from the users collection
+        const usersRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersRef);
+
+        // Count users with student-related roles (excluding admin and advisor)
+        const studentRoles = ['student', 'club-secretary', 'president', 'treasurer'];
+        let studentUserCount = 0;
+
+        usersSnapshot.docs.forEach(doc => {
+            const role = doc.data().role;
+            if (studentRoles.includes(role)) {
+                studentUserCount++;
+            }
+        });
+
+        // Also count all unique club members across all clubs
+        // Using collectionGroup to get all members subcollections
+        const membersSnapshot = await getDocs(collectionGroup(db, 'members'));
+
+        // Use a Set to track unique emails (avoid counting same member in multiple clubs twice)
+        const uniqueMemberEmails = new Set<string>();
+        membersSnapshot.docs.forEach(doc => {
+            const email = doc.data().email;
+            if (email) {
+                uniqueMemberEmails.add(email.toLowerCase());
+            }
+        });
+
+        // Return the larger of the two counts (some members might be in users collection too)
+        // This gives us the most accurate count of unique students
+        return Math.max(studentUserCount, uniqueMemberEmails.size);
+    } catch (error) {
+        console.error('Error getting total student count:', error);
+        return 0;
+    }
+};
