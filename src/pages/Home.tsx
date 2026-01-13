@@ -78,7 +78,15 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   }, []);
 
   const handleSearch = () => {
-    const lowerQuery = searchQuery.toLowerCase();
+    const lowerQuery = searchQuery.trim().toLowerCase();
+
+    // If search query is empty, clear filtered results to show default view
+    if (!lowerQuery) {
+      setFilteredClubs([]);
+      setFilteredPosts([]);
+      return;
+    }
+
     const matchingClubs = clubs.filter(club =>
       club.name.toLowerCase().includes(lowerQuery) ||
       club.description.toLowerCase().includes(lowerQuery)
@@ -107,20 +115,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col min-h-[calc(100vh-80px)]">
       <div className="flex-grow">
-        {/* Dashboard Header */}
-        <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <img
-              src="/wce-logo.png"
-              alt="Walchand College of Engineering Logo"
-              className="w-8 h-8 object-contain"
-            />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              Walchand College of Engineering, Sangli
-            </h1>
-          </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Club & event management portal</p>
-        </div>
+
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="tour-stats-grid">

@@ -44,13 +44,18 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')} id="tour-logo">
               <img
-                src="/club-connect-logo.png"
-                alt="Club Connect Logo"
+                src="/wce-logo.png"
+                alt="Walchand College of Engineering Logo"
                 className="w-10 h-10 object-contain rounded-md"
               />
-              <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Club-Connect
-              </span>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+                  Walchand College of Engineering, Sangli
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Club & Event Portal
+                </span>
+              </div>
             </div>
 
             <nav className="flex items-center gap-8">
