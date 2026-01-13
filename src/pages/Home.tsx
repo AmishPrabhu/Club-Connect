@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink, ChevronRight } from 'lucide-react';
 import { Page } from '../types/page';
 import { FirestorePost, FirestoreClub, FirestoreNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/firestoreService';
-import ClubCard from '../components/ClubCard';
+
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
 import RSVPModal from '../components/RSVPModal';
@@ -25,12 +25,15 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [posts, setPosts] = useState<FirestorePost[]>([]);
   const [clubs, setClubs] = useState<FirestoreClub[]>([]);
   const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<FirestorePost[]>([]);
-  const [filteredClubs, setFilteredClubs] = useState<FirestoreClub[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [rsvpEvent, setRsvpEvent] = useState<FirestorePost | null>(null);
   const [totalStudents, setTotalStudents] = useState<number>(0);
+
+  // Search Dropdown State
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Image Modal State
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -80,29 +83,46 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
     loadData();
   }, []);
 
-  const handleSearch = () => {
-    const lowerQuery = searchQuery.trim().toLowerCase();
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
 
-    // If search query is empty, clear filtered results to show default view
-    if (!lowerQuery) {
-      setFilteredClubs([]);
-      setFilteredPosts([]);
-      return;
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
-    const matchingClubs = clubs.filter(club =>
-      club.name.toLowerCase().includes(lowerQuery) ||
-      club.description.toLowerCase().includes(lowerQuery)
-    );
-    const matchingPosts = posts.filter(post =>
-      post.title.toLowerCase().includes(lowerQuery) ||
-      post.content.toLowerCase().includes(lowerQuery) ||
-      post.type.toLowerCase().includes(lowerQuery)
-    );
-
-    setFilteredClubs(matchingClubs);
-    setFilteredPosts(matchingPosts);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowDropdown(e.target.value.length > 0);
   };
+
+  const matchingClubs = clubs.filter(club =>
+    club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    club.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const matchingEvents = posts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.content.toLowerCase().includes(searchQuery.toLowerCase())
+  ).filter(p => p.type === 'event');
+
+  const handleResultClick = (type: 'club' | 'post', id: string) => {
+    if (type === 'club') {
+      onNavigateToClub(id);
+    } else {
+      onNavigateToPost(id);
+    }
+    setShowDropdown(false);
+    setSearchQuery('');
+  };
+
+
 
   const getEventColor = (type: string) => {
     switch (type) {
@@ -112,8 +132,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
     }
   };
 
-  // Filter to show only upcoming/incomplete events on home page
-  const upcomingPosts = posts.filter(post => new Date(post.date) >= new Date());
+  // Filter to show only upcoming/incomplete events on home page (exclude announcements)
+  const upcomingPosts = posts.filter(post => new Date(post.date) >= new Date() && post.type === 'event');
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col min-h-[calc(100vh-80px)]">
@@ -141,7 +161,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Upcoming Events</span>
               <Calendar className="w-5 h-5 text-purple-600" />
             </div>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white">{posts.length || '0'}</div>
+            <div className="text-3xl font-bold text-slate-900 dark:text-white">{upcomingPosts.length || '0'}</div>
           </div>
         </div>
 
@@ -166,41 +186,99 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             </button>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
+          <div className="flex flex-col md:flex-row gap-4 relative z-20">
+            <div className="flex-1 relative" ref={dropdownRef}>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search clubs, events..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
+                onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
+
+              {/* Live Search Dropdown */}
+              {showDropdown && searchQuery.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Clubs Section */}
+                  {matchingClubs.length > 0 && (
+                    <div className="py-2 border-b border-slate-100 dark:border-slate-700/50">
+                      <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
+                        Clubs
+                      </div>
+                      {matchingClubs.map((club) => (
+                        <button
+                          key={club.id}
+                          onClick={() => handleResultClick('club', club.id!)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                              {club.image ? (
+                                <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <Users className="w-4 h-4 text-slate-400" />
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {club.name}
+                              </h4>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Events Section */}
+                  {matchingEvents.length > 0 && (
+                    <div className="py-2">
+                      <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
+                        Events
+                      </div>
+                      {matchingEvents.map((post) => (
+                        <button
+                          key={post.id}
+                          onClick={() => handleResultClick('post', post.id!)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${getEventColor(post.type)} flex-shrink-0`}>
+                              <Calendar className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                                {post.title}
+                              </h4>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {new Date(post.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {matchingClubs.length === 0 && matchingEvents.length === 0 && (
+                    <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                      <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>No matches found for "{searchQuery}"</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm transition-colors"
-              >
-                Search
-              </button>
-            </div>
+
           </div>
         </div>
 
         {/* Search Results for Clubs */}
-        {filteredClubs.length > 0 && (
-          <div className="mb-16">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Search Results - Clubs</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClubs.map((club) => (
-                <ClubCard key={club.id} club={club as any} onClick={() => onNavigateToClub(club.id!)} />
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Upcoming Events and Notifications Section */}
         <div className="mb-16" id="tour-upcoming-events">
@@ -208,7 +286,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {filteredPosts.length > 0 ? 'Search Results' : 'Upcoming Events'}
+                  Upcoming Events
                 </h2>
                 <button
                   onClick={() => onNavigate('events')}
@@ -222,13 +300,13 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                 <div className="flex items-center justify-center py-12">
                   <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              ) : (filteredPosts.length > 0 ? filteredPosts : upcomingPosts).length === 0 ? (
+              ) : upcomingPosts.length === 0 ? (
                 <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
                   <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                   <p className="text-slate-600 dark:text-slate-400">No upcoming events. Check back soon!</p>
                 </div>
               ) : (
-                (filteredPosts.length > 0 ? filteredPosts : upcomingPosts).slice(0, 5).map((post) => {
+                upcomingPosts.slice(0, 5).map((post) => {
                   const club = clubs.find(c => c.name === post.clubName); // Try to find club for icon
                   return (
                     <div

@@ -3,6 +3,19 @@ export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'trea
 // Club member roles
 export type ClubMemberRole = 'president' | 'vice-president' | 'treasurer' | 'secretary' | 'coordinator' | 'member';
 
+// Club message structure
+export interface ClubMessage {
+  id?: string;
+  clubId: string;
+  clubName: string;
+  senderId: string;
+  senderName: string;
+  senderRole: string;
+  title: string;
+  body: string;
+  createdAt: Date;
+}
+
 // Club member structure (stored as subcollection in club)
 export interface ClubMember {
   id?: string;

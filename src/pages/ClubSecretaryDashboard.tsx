@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2 } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2, MessageSquare } from 'lucide-react';
 import { Page } from '../types/page';
-import { User, FirestoreClub, FirestorePost, Attachment } from '../types/auth';
+import { User, FirestoreClub, FirestorePost, Attachment, ClubMessage } from '../types/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs } from '../lib/firestoreService';
+import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs, createClubMessage, getClubMessages } from '../lib/firestoreService';
 import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
@@ -239,6 +239,143 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
   );
 }
 
+// Message Sender Component
+function MessageSender({ club, user }: { club: FirestoreClub; user: User }) {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [result, setResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [pastMessages, setPastMessages] = useState<ClubMessage[]>([]);
+
+  useEffect(() => {
+    loadMessages();
+  }, [club.id]);
+
+  const loadMessages = async () => {
+    if (club.id) {
+      const msgs = await getClubMessages(club.id);
+      setPastMessages(msgs);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!title.trim() || !body.trim()) {
+      setResult({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (!club.id) return;
+
+    setIsSending(true);
+    setResult(null);
+
+    try {
+      const success = await createClubMessage(club.id, {
+        clubId: club.id,
+        clubName: club.name,
+        senderId: user.id,
+        senderName: user.name,
+        senderRole: user.role,
+        title,
+        body,
+      });
+
+      if (success) {
+        setResult({ type: 'success', text: 'Message sent successfully!' });
+        setTitle('');
+        setBody('');
+        loadMessages(); // Refresh list
+      } else {
+        setResult({ type: 'error', text: 'Failed to send message' });
+      }
+    } catch (error) {
+      setResult({ type: 'error', text: 'Failed to send message' });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Club Messages</h3>
+
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mb-8">
+          <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Send New Message to Members</h4>
+
+          {result && (
+            <div className={`p-3 rounded-lg mb-4 ${result.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
+              {result.text}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Subject</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Message Subject"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message Body</label>
+              <textarea
+                rows={4}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Write your message here..."
+              />
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={isSending}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+            >
+              {isSending ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Broadcast Message
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Sent Messages History</h4>
+        {pastMessages.length === 0 ? (
+          <p className="text-slate-500 dark:text-slate-400 italic">No messages sent yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {pastMessages.map((msg) => (
+              <div key={msg.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between items-start mb-2">
+                  <h5 className="font-bold text-slate-900 dark:text-white">{msg.title}</h5>
+                  <span className="text-xs text-slate-500">{new Date(msg.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap">{msg.body}</p>
+                <div className="mt-2 text-xs text-slate-400">
+                  Sent by {msg.senderName} ({msg.senderRole})
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface ClubSecretaryDashboardProps {
   onNavigate: (page: Page) => void;
   onNavigateToPost: (postId: string) => void;
@@ -258,8 +395,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     e.stopPropagation();
     setModalImage(imageUrl);
     setIsModalOpen(true);
+    setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages'>('overview');
   const { navigateToManagement } = useNavigation();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -754,7 +892,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             { id: 'members', label: 'Members', icon: Users },
             { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
             { id: 'posts', label: 'Manage Posts', icon: Edit },
-            { id: 'notifications', label: 'Send Notifications', icon: Bell }
+            { id: 'notifications', label: 'Send Notifications', icon: Bell },
+            { id: 'messages', label: 'Messages', icon: MessageSquare }
           ].filter(tab => {
             // Treasurer sees: overview, members, events
             if (isReadOnly) {
@@ -793,275 +932,273 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Name:</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{club.name}</span>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">Total Members:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{club.members}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">Total Posts:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{posts.length}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Category:</span>
-                      <span className="font-semibold text-slate-900 dark:text-white capitalize">{club.category}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Total Members:</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{club.members}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Total Posts:</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{posts.length}</span>
-                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Picture</h4>
+                    {isReadOnly ? (
+                      <div className="relative w-32 h-32 mx-auto">
+                        <img
+                          src={club.image || '/club-default.jpg'}
+                          alt="Club profile"
+                          className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+                        />
+                      </div>
+                    ) : (
+                      <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Picture</h4>
-                  {isReadOnly ? (
-                    <div className="relative w-32 h-32 mx-auto">
-                      <img
-                        src={club.image || '/club-default.jpg'}
-                        alt="Club profile"
-                        className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+
+                {/* WhatsApp Community Link Section */}
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      WhatsApp Community
+                    </h4>
+                    {!isEditingWhatsapp && club.whatsappLink && (
+                      <a
+                        href={club.whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
+                      >
+                        Open Link
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+
+                  {isEditingWhatsapp ? (
+                    <div className="space-y-3">
+                      <input
+                        type="url"
+                        value={whatsappLink}
+                        onChange={(e) => setWhatsappLink(e.target.value)}
+                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 dark:text-white"
+                        placeholder="https://chat.whatsapp.com/... or https://whatsapp.com/channel/..."
                       />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Paste your WhatsApp group or community invite link here.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setIsEditingWhatsapp(false);
+                            setWhatsappLink(club.whatsappLink || '');
+                          }}
+                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!club.id) return;
+                            setWhatsappSaving(true);
+                            try {
+                              const { updateClub } = await import('../lib/firestoreService');
+                              await updateClub(club.id, { whatsappLink });
+                              setClub({ ...club, whatsappLink });
+                              setIsEditingWhatsapp(false);
+                            } catch (error) {
+                              console.error('Error saving WhatsApp link:', error);
+                            } finally {
+                              setWhatsappSaving(false);
+                            }
+                          }}
+                          disabled={whatsappSaving}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {whatsappSaving ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Link'
+                          )}
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
-                  )}
-                </div>
-              </div>
-
-              {/* WhatsApp Community Link Section */}
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    WhatsApp Community
-                  </h4>
-                  {!isEditingWhatsapp && club.whatsappLink && (
-                    <a
-                      href={club.whatsappLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
-                    >
-                      Open Link
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  )}
-                </div>
-
-                {isEditingWhatsapp ? (
-                  <div className="space-y-3">
-                    <input
-                      type="url"
-                      value={whatsappLink}
-                      onChange={(e) => setWhatsappLink(e.target.value)}
-                      className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 dark:text-white"
-                      placeholder="https://chat.whatsapp.com/... or https://whatsapp.com/channel/..."
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Paste your WhatsApp group or community invite link here.
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setIsEditingWhatsapp(false);
-                          setWhatsappLink(club.whatsappLink || '');
-                        }}
-                        className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!club.id) return;
-                          setWhatsappSaving(true);
-                          try {
-                            const { updateClub } = await import('../lib/firestoreService');
-                            await updateClub(club.id, { whatsappLink });
-                            setClub({ ...club, whatsappLink });
-                            setIsEditingWhatsapp(false);
-                          } catch (error) {
-                            console.error('Error saving WhatsApp link:', error);
-                          } finally {
-                            setWhatsappSaving(false);
-                          }
-                        }}
-                        disabled={whatsappSaving}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {whatsappSaving ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Saving...
-                          </>
-                        ) : (
-                          'Save Link'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    {club.whatsappLink ? (
-                      <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 truncate">
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-sm truncate">{club.whatsappLink}</span>
+                    <div>
+                      {club.whatsappLink ? (
+                        <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 truncate">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-sm truncate">{club.whatsappLink}</span>
+                          </div>
+                          {!isReadOnly && (
+                            <button
+                              onClick={() => setIsEditingWhatsapp(true)}
+                              className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
+                            >
+                              Edit
+                            </button>
+                          )}
                         </div>
-                        {!isReadOnly && (
+                      ) : (
+                        !isReadOnly && (
                           <button
                             onClick={() => setIsEditingWhatsapp(true)}
-                            className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
+                            className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
                           >
-                            Edit
+                            <Plus className="w-5 h-5" />
+                            Add WhatsApp Community Link
                           </button>
-                        )}
-                      </div>
-                    ) : (
-                      !isReadOnly && (
-                        <button
-                          onClick={() => setIsEditingWhatsapp(true)}
-                          className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
-                        >
-                          <Plus className="w-5 h-5" />
-                          Add WhatsApp Community Link
-                        </button>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Instagram Link Section */}
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Instagram className="w-5 h-5 text-pink-500" />
-                    Instagram Page
-                  </h4>
-                  {!isEditingInstagram && club.instagramLink && (
-                    <a
-                      href={club.instagramLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
-                    >
-                      Open Link
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
+                        )
+                      )}
+                    </div>
                   )}
                 </div>
 
-                {isEditingInstagram ? (
-                  <div className="space-y-3">
-                    <input
-                      type="url"
-                      value={instagramLink}
-                      onChange={(e) => setInstagramLink(e.target.value)}
-                      className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white"
-                      placeholder="https://instagram.com/..."
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setIsEditingInstagram(false);
-                          setInstagramLink(club.instagramLink || '');
-                        }}
-                        className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                {/* Instagram Link Section */}
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <Instagram className="w-5 h-5 text-pink-500" />
+                      Instagram Page
+                    </h4>
+                    {!isEditingInstagram && club.instagramLink && (
+                      <a
+                        href={club.instagramLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
                       >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!club.id) return;
-                          setInstagramSaving(true);
-                          try {
-                            const { updateClub } = await import('../lib/firestoreService');
-                            await updateClub(club.id, { instagramLink });
-                            setClub({ ...club, instagramLink });
-                            setIsEditingInstagram(false);
-                          } catch (error) {
-                            console.error('Error saving Instagram link:', error);
-                          } finally {
-                            setInstagramSaving(false);
-                          }
-                        }}
-                        disabled={instagramSaving}
-                        className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {instagramSaving ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Saving...
-                          </>
-                        ) : (
-                          'Save Link'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    {club.instagramLink ? (
-                      <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                        <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate">
-                          <Instagram className="w-4 h-4 flex-shrink-0" />
-                          <span className="text-sm truncate">{club.instagramLink}</span>
-                        </div>
-                        {!isReadOnly && (
-                          <button
-                            onClick={() => setIsEditingInstagram(true)}
-                            className="p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded-full transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg">
-                        <Instagram className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                          Add an Instagram page link
-                        </p>
-                        {!isReadOnly && (
-                          <button
-                            onClick={() => setIsEditingInstagram(true)}
-                            className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline"
-                          >
-                            Add Link
-                          </button>
-                        )}
-                      </div>
+                        Open Link
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
                     )}
                   </div>
-                )}
-              </div>
 
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
-                {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
-                  <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
-                ) : (
-                  <div className="space-y-3">
-                    {posts
-                      .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
-                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                      .slice(0, 3)
-                      .map((post) => (
-                        <div key={post.id} className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
-                          <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                  {isEditingInstagram ? (
+                    <div className="space-y-3">
+                      <input
+                        type="url"
+                        value={instagramLink}
+                        onChange={(e) => setInstagramLink(e.target.value)}
+                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white"
+                        placeholder="https://instagram.com/..."
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setIsEditingInstagram(false);
+                            setInstagramLink(club.instagramLink || '');
+                          }}
+                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!club.id) return;
+                            setInstagramSaving(true);
+                            try {
+                              const { updateClub } = await import('../lib/firestoreService');
+                              await updateClub(club.id, { instagramLink });
+                              setClub({ ...club, instagramLink });
+                              setIsEditingInstagram(false);
+                            } catch (error) {
+                              console.error('Error saving Instagram link:', error);
+                            } finally {
+                              setInstagramSaving(false);
+                            }
+                          }}
+                          disabled={instagramSaving}
+                          className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {instagramSaving ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Link'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      {club.instagramLink ? (
+                        <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate">
+                            <Instagram className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm truncate">{club.instagramLink}</span>
+                          </div>
+                          {!isReadOnly && (
+                            <button
+                              onClick={() => setIsEditingInstagram(true)}
+                              className="p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded-full transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
-                      ))}
-                  </div>
-                )}
+                      ) : (
+                        <div className="text-center py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg">
+                          <Instagram className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                            Add an Instagram page link
+                          </p>
+                          {!isReadOnly && (
+                            <button
+                              onClick={() => setIsEditingInstagram(true)}
+                              className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline"
+                            >
+                              Add Link
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
+                  {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
+                    <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {posts
+                        .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                        .slice(0, 3)
+                        .map((post) => (
+                          <div key={post.id} className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
+                            <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+
           )}
 
           {/* Members Tab */}
@@ -1157,6 +1294,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             </div>
           )}
 
+
+
+          {/* Messages Tab */}
+          {activeTab === 'messages' && user && (
+            <MessageSender club={club} user={user} />
+          )}
+
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <NotificationSender club={club} />
+          )}
 
           {/* Posts Tab */}
           {activeTab === 'posts' && (
@@ -2148,6 +2296,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         onClose={() => setIsModalOpen(false)}
         imageUrl={modalImage || ''}
       />
-    </div>
+    </div >
+
   );
 }

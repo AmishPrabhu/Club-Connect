@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts } from '../lib/firestoreService';
 import { Page } from '../types/page';
-import { FirestorePost } from '../types/auth';
+import { FirestorePost, ClubMessage } from '../types/auth';
 
 interface UserProfileProps {
   onBack: () => void;
@@ -34,6 +34,10 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
     email: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Messages State
+  const [clubMessages, setClubMessages] = useState<Record<string, ClubMessage[]>>({});
+  const [loadingMessages, setLoadingMessages] = useState<Record<string, boolean>>({});
 
   // Event State
   const [eventTab, setEventTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -143,6 +147,29 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
     }
     setIsSaving(false);
   };
+
+  const loadClubMessages = async (clubId: string) => {
+    if (clubMessages[clubId]) return; // Already loaded
+
+    setLoadingMessages(prev => ({ ...prev, [clubId]: true }));
+    try {
+      const { getClubMessages } = await import('../lib/firestoreService');
+      const msgs = await getClubMessages(clubId);
+      setClubMessages(prev => ({ ...prev, [clubId]: msgs }));
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    } finally {
+      setLoadingMessages(prev => ({ ...prev, [clubId]: false }));
+    }
+  };
+
+  // Effect to load messages when tab changes to a club message tab
+  useEffect(() => {
+    if (activeTab.startsWith('messages-')) {
+      const clubId = activeTab.replace('messages-', '');
+      loadClubMessages(clubId);
+    }
+  }, [activeTab]);
 
   const now = new Date();
   const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
@@ -287,6 +314,22 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               >
                 <tab.icon className="w-5 h-5" />
                 <span>{tab.label}</span>
+              </button>
+            ))}
+
+            {memberships.map((membership) => (
+              <button
+                key={`messages-${membership.clubId}`}
+                onClick={() => setActiveTab(`messages-${membership.clubId}` as any)}
+                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === `messages-${membership.clubId}`
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  }`}
+              >
+                <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs overflow-hidden">
+                  {membership.clubImage ? <img src={membership.clubImage} className="w-full h-full object-cover" /> : '💬'}
+                </div>
+                <span>{membership.clubName} Msgs</span>
               </button>
             ))}
           </div>
@@ -478,6 +521,46 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                 )}
               </div>
             )}
+
+            {/* Dynamic Club Message Tabs */}
+            {activeTab.startsWith('messages-') && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
+                  </h3>
+                </div>
+
+                {loadingMessages[activeTab.replace('messages-', '')] ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
+                      clubMessages[activeTab.replace('messages-', '')].map(msg => (
+                        <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
+                              <p className="text-xs text-slate-500 font-medium mt-1">
+                                From {msg.senderName} ({msg.senderRole}) • {new Date(msg.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                            {msg.body}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-500 dark:text-slate-400 italic text-center py-8">No messages from this club yet.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       )}

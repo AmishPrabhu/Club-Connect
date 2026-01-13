@@ -22,7 +22,43 @@ import {
     FirestoreUser,
     ClubMember,
     EventRSVP,
+    ClubMessage,
 } from '../types/auth';
+
+// ==================== MESSAGING ====================
+
+export const createClubMessage = async (
+    clubId: string,
+    messageData: Omit<ClubMessage, 'id' | 'createdAt'>
+): Promise<boolean> => {
+    try {
+        const messagesRef = collection(db, 'clubs', clubId, 'messages');
+        await addDoc(messagesRef, {
+            ...messageData,
+            createdAt: Timestamp.now(),
+        });
+        return true;
+    } catch (error) {
+        console.error('Error sending message:', error);
+        return false;
+    }
+};
+
+export const getClubMessages = async (clubId: string): Promise<ClubMessage[]> => {
+    try {
+        const messagesRef = collection(db, 'clubs', clubId, 'messages');
+        const q = query(messagesRef, orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+        })) as ClubMessage[];
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        return [];
+    }
+};
 
 // ==================== CLUBS ====================
 
