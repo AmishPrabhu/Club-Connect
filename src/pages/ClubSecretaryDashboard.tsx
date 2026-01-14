@@ -1266,11 +1266,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                     {post.rsvps} RSVPs
                                   </span>
                                 )}
-                                {(post as any).eventBudget && (post as any).eventBudget.length > 0 && (
-                                  <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                                    💰 Budget tracked
-                                  </span>
-                                )}
+
                                 {(post as any).eventTasks && (post as any).eventTasks.length > 0 && (
                                   <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                                     ✓ {(post as any).eventTasks.filter((t: any) => t.status === 'completed').length}/{(post as any).eventTasks.length} tasks

@@ -109,20 +109,6 @@ export interface EventTask {
 }
 
 
-// Budget item structure for event expenses
-export interface BudgetItem {
-  id: string;
-  description: string;
-  category: 'venue' | 'catering' | 'equipment' | 'marketing' | 'prizes' | 'transport' | 'misc';
-  estimatedCost: number;
-  actualCost: number;
-  paid: boolean;
-  notes?: string;
-  receiptUrl?: string;      // URL of uploaded receipt image
-  verified?: boolean;        // Verification status (only advisor can set)
-  verifiedAt?: Date;         // When it was verified
-  verifiedBy?: string;       // Advisor who verified
-}
 
 // Firestore post document structure
 export interface FirestorePost {
@@ -154,7 +140,7 @@ export interface FirestorePost {
   relatedEventId?: string;         // For announcements: ID of a related upcoming event
   relatedEventTitle?: string;      // For announcements: Title of the related event
   eventTasks?: EventTask[];        // Tasks assigned to members for this event
-  eventBudget?: BudgetItem[];      // Budget/expense items for this event
+
   createdAt: Date;
   updatedAt: Date;
 }
