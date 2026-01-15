@@ -96,7 +96,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-8">
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147]">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">

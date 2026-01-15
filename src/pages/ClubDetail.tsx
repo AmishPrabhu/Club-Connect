@@ -233,7 +233,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         <div className="absolute inset-0 bg-[#002147] opacity-90"></div>
         <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-40 mix-blend-overlay`}></div>
         <div className="relative z-10 p-6 md:p-12 text-center text-white">
-          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg">
+          <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg">
             {club.image ? (
               <img
                 src={club.image}
@@ -241,11 +241,11 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                 className="w-full h-full object-contain p-2 bg-white rounded-xl"
               />
             ) : (
-              <span className="text-4xl md:text-5xl">{club.icon}</span>
+              <span className="text-3xl md:text-5xl">{club.icon}</span>
             )}
           </div>
           <h1 className="text-2xl md:text-4xl font-serif font-bold mb-2 tracking-wide text-[#DAA520]">{club.name}</h1>
-          <p className="text-white/80 max-w-2xl mx-auto font-light text-base md:text-lg">Igniting Innovation & Excellence at Walchand College of Engineering</p>
+          <p className="text-white/80 max-w-2xl mx-auto font-light text-sm md:text-lg">Igniting Innovation & Excellence at Walchand College of Engineering</p>
         </div>
       </div>
 
@@ -260,7 +260,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
               {club.description}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
               <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
                 <div className="p-3 bg-[#002147] rounded-lg text-white">
                   <Users className="w-6 h-6" />
@@ -281,7 +281,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
+              <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 col-span-2 md:col-span-1">
                 <div className="p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300">
                   <MapPin className="w-6 h-6" />
                 </div>
@@ -512,7 +512,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
 
         {/* Right Side - 30% */}
         <div className="lg:col-span-2" id="tour-member-board">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sticky top-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 lg:sticky lg:top-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
                 {club.image ? (

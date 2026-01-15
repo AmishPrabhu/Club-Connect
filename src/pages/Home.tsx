@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, Info, ChevronRight, ArrowRight, Award, Clock } from 'lucide-react';
+import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, ChevronRight, Award, Clock, ArrowRight } from 'lucide-react';
 import { Page } from '../types/page';
 import { DBPost, DBClub, DBNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/dbService';
@@ -133,42 +133,61 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
 
       {/* Hero Section */}
-      <div className="bg-[#002147] relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32">
+      {/* Hero Section */}
+      <div className="bg-[#002147] relative overflow-hidden pt-6 pb-12 md:pt-20 md:pb-32 transition-all duration-300">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.wce.ac.in/images/WCE_Main_Building.jpg')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#002147]/90"></div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="md:w-3/5 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-xs font-bold uppercase tracking-wider mb-6">
-              <Award className="w-4 h-4 text-[#DAA520]" />
-              <span>Est. 1947 • A Premier Institute</span>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
+          {/* Left Column: Text & Actions */}
+          <div className="w-full md:w-3/5 text-center md:text-left">
+            {/* Mobile-Only App Greeting */}
+            <div className="block md:hidden w-full text-left mb-6">
+              <p className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">
+                {user ? `Welcome Back, ${user.name.split(' ')[0]}` : 'Welcome Guest'}
+              </p>
+              <h1 className="text-3xl font-serif font-bold text-white leading-tight">
+                Campus <span className="text-[#DAA520]">Connect</span>
+              </h1>
             </div>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-white leading-tight mb-6">
-              Walchand College of <span className="text-[#DAA520]">Engineering</span>
-            </h1>
-            <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed">
-              Discover vibrant student communities, participate in exciting events, and lead the future. The official platform for all club activities.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+
+            {/* Desktop-Only Full Branding */}
+            <div className="hidden md:block">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-xs font-bold uppercase tracking-wider mb-6">
+                <Award className="w-4 h-4 text-[#DAA520]" />
+                <span>Est. 1947 • A Premier Institute</span>
+              </div>
+              <h1 className="text-6xl font-serif font-bold text-white leading-tight mb-6">
+                Walchand College of <span className="text-[#DAA520]">Engineering</span>
+              </h1>
+              <p className="text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed">
+                Discover vibrant student communities, participate in exciting events, and lead the future. The official platform for all club activities.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="w-full md:w-auto flex flex-row gap-3 md:gap-4 sm:flex-row justify-center md:justify-start">
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="w-full sm:w-auto px-8 py-3.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
+                className="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group"
               >
-                Explore Clubs
-                <ArrowRight className="w-5 h-5" />
+                <div className="p-1 bg-[#002147]/10 rounded-full md:bg-transparent md:p-0"><Users className="w-5 h-5" /></div>
+                <span>Explore Clubs</span>
+                <ArrowRight className="hidden md:block w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={() => onNavigate('events')}
-                className="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all"
+                className="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl backdrop-blur-sm border border-white/20 transition-all flex items-center justify-center gap-2"
               >
-                Upcoming Events
+                <div className="p-1 bg-white/10 rounded-full md:bg-transparent md:p-0"><Calendar className="w-5 h-5" /></div>
+                <span>Upcoming Events</span>
               </button>
             </div>
           </div>
 
-          {/* Hero Visual/Stats - Decorative */}
-          <div className="md:w-2/5 hidden md:block">
+          {/* Right Column: Hero Visual - Desktop Only */}
+          <div className="hidden md:block md:w-2/5">
             <div className="relative">
               <div className="absolute -inset-4 bg-[#DAA520]/20 rounded-full blur-3xl animate-pulse"></div>
               <img
@@ -181,40 +200,41 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-20 w-full flex-grow">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-16 relative z-20 w-full flex-grow">
 
-        {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" id="tour-stats-grid">
+        {/* Stats Overview - Horizontal Scroll for Mobile (Snap Cards) */}
+        {/* Stats Overview - 3-Column Fit on Mobile */}
+        <div className="flex flex-row md:grid md:grid-cols-3 gap-2 md:gap-6 mb-8 md:mb-12" id="tour-stats-grid">
           {/* Card 1 */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-[#DAA520] p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-[#DAA520] p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
             <div>
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Registered Clubs</p>
-              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-[#002147] transition-colors">{clubs.length || '50+'}</h3>
+              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Clubs</p>
+              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{clubs.length || '50+'}</h3>
             </div>
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
-              <Users className="w-6 h-6 text-[#002147] dark:text-blue-400" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
             </div>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-emerald-500 p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-emerald-500 p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
             <div>
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Students</p>
-              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-emerald-600 transition-colors">{totalStudents || '1000+'}</h3>
+              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Students</p>
+              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{totalStudents || '1000+'}</h3>
             </div>
-            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
-              <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-purple-500 p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-purple-500 p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
             <div>
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Upcoming Events</p>
-              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-purple-600 transition-colors">{upcomingPosts.length || '0'}</h3>
+              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Events</p>
+              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{upcomingPosts.length || '0'}</h3>
             </div>
-            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors">
-              <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -222,8 +242,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         {/* Quick Actions & Search */}
         <div className="mb-12" id="tour-quick-actions">
           <div className="flex flex-col md:flex-row gap-6 items-center">
-            {/* Quick Action Buttons */}
-            <div className="flex gap-4 w-full md:w-auto">
+            {/* Desktop Quick Actions - Hidden on Mobile to save space/redundancy */}
+            <div className="hidden md:flex gap-4 w-full md:w-auto">
               <button
                 onClick={() => onNavigate('dashboard')}
                 className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:border-[#002147]/30 dark:hover:border-blue-500/30 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2 group"

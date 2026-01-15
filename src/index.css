@@ -5,7 +5,14 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* Minimal utilities if needed */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Safe Area Support */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
 }
 
 body {

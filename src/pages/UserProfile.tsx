@@ -177,7 +177,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
   const displayedEvents = eventTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-12">
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-slate-600 hover:text-[#002147] mb-8 transition-colors font-medium"
@@ -194,9 +194,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
       )}
 
       {/* Profile Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
-        <div className="flex items-start gap-6">
-          <div className="w-24 h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-4xl shadow-md border-2 border-[#DAA520]">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+          <div className="w-24 h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0">
             👨‍🎓
           </div>
           <div className="flex-1">
@@ -253,11 +253,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
                   {profileData.bio || 'No bio yet. Click edit to add one!'}
                 </p>
-                <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-sm text-slate-600 dark:text-slate-400">
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     <span>{profileData.email}</span>
                   </div>
+                  <div className="hidden sm:block">•</div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#DAA520]" />
                     <span>Joined {profileData.joinDate}</span>
@@ -279,7 +280,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
         {/* Role Badge */}
         {user?.role && (
           <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-bold ${user.role === 'admin'
                 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
                 : user.role === 'club-secretary'
@@ -298,8 +299,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
 
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
-          <div className="flex border-b border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden">
+          <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
             {[
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'events', label: 'My Events', icon: Calendar },
@@ -307,7 +308,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === tab.id
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === tab.id
                   ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                   : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                   }`}
@@ -321,7 +322,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               <button
                 key={`messages-${membership.clubId}`}
                 onClick={() => setActiveTab(`messages-${membership.clubId}` as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === `messages-${membership.clubId}`
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === `messages-${membership.clubId}`
                   ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                   : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                   }`}
@@ -402,7 +403,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
             {activeTab === 'events' && (
               <div className="space-y-6">
                 {/* Event Tabs */}
-                <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
                   <button
                     onClick={() => setEventTab('upcoming')}
                     className={`pb-3 px-2 font-bold transition-colors relative ${eventTab === 'upcoming'

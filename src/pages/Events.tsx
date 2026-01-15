@@ -10,7 +10,7 @@ interface EventsProps {
     onManageEvent?: (eventId: string) => void;
 }
 
-import ImageModal from '../components/ImageModal';
+
 
 // ... existing imports
 
@@ -23,15 +23,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
     const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
     const [clubFilter, setClubFilter] = useState<string>('all');
 
-    // Image Modal State
-    const [modalImage, setModalImage] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
-        e.stopPropagation();
-        setModalImage(imageUrl);
-        setIsModalOpen(true);
-    };
 
     // ... existing useEffect and helpers
 
@@ -225,95 +217,107 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                 <div
                                     key={post.id}
                                     onClick={() => post.id && onNavigateToPost(post.id)}
-                                    className="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-800 cursor-pointer relative hover:-translate-y-1"
+                                    className="group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-800 cursor-pointer relative hover:-translate-y-1 duration-300"
                                 >
-                                    <div className="flex flex-col md:flex-row h-full">
-                                        {/* Date Badge Column (Left) */}
-                                        <div className="md:w-32 bg-[#002147]/5 dark:bg-blue-900/10 flex flex-row md:flex-col items-center justify-between md:justify-center p-4 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800">
-                                            <div className="flex md:flex-col items-center gap-2 md:gap-0">
-                                                <span className="text-sm font-bold text-[#002147] dark:text-blue-400 uppercase tracking-wider md:mb-1">
-                                                    {new Date(post.date).toLocaleDateString('en-US', { month: 'short' })}
-                                                </span>
-                                                <span className="text-2xl md:text-3xl font-serif font-black text-slate-900 dark:text-white leading-none">
-                                                    {new Date(post.date).getDate()}
-                                                </span>
-                                            </div>
-                                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 md:mt-2 bg-white dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
-                                                {new Date(post.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                                            </span>
-                                        </div>
-
-                                        {/* Content Column (Middle) */}
-                                        <div className="flex-1 p-6">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center gap-2">
-                                                    {club?.image ? (
-                                                        <img src={club.image} alt={club.name} className="w-5 h-5 rounded-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center">
-                                                            <Calendar className="w-3 h-3 text-slate-400" />
-                                                        </div>
-                                                    )}
-                                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{post.clubName}</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    {canManage && onManageEvent && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                post.id && onManageEvent(post.id);
-                                                            }}
-                                                            className="p-1.5 text-slate-400 hover:text-[#002147] transition-colors"
-                                                            title="Manage Event"
-                                                        >
-                                                            <Settings className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    {isUpcoming && (
-                                                        <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                                                            Upcoming
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white mb-4 group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
-                                                {post.title}
-                                            </h3>
-
-                                            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Clock className="w-4 h-4 text-[#DAA520]" />
-                                                    <span>{post.time || 'Time TBA'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <MapPin className="w-4 h-4 text-[#DAA520]" />
-                                                    <span>{post.location || 'Campus Location'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Image/Action Column (Right) */}
-                                        <div className="md:w-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                                            {post.coverImage ? (
-                                                <div className="w-full h-40 md:h-full relative group/image">
-                                                    <img
-                                                        src={post.coverImage}
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-                                                    <div className="absolute inset-0 bg-[#002147]/0 group-hover:bg-[#002147]/20 transition-colors" />
-                                                </div>
+                                    {/* Card Header */}
+                                    <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/50">
+                                        <div className="flex items-center gap-3">
+                                            {club?.image ? (
+                                                <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white dark:bg-slate-700 shadow-sm p-0.5" />
                                             ) : (
-                                                <div className={`w-full h-40 md:h-full flex items-center justify-center bg-gradient-to-br ${getEventColor(post.type)} opacity-10 group-hover:opacity-20 transition-opacity`}>
-                                                    <Calendar className="w-12 h-12 text-[#002147]" />
+                                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                                    <Calendar className="w-4 h-4 text-slate-500" />
                                                 </div>
                                             )}
+                                            <span className="font-bold text-slate-900 dark:text-white font-serif">{post.clubName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {canManage && onManageEvent && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        post.id && onManageEvent(post.id);
+                                                    }}
+                                                    className="p-1.5 text-slate-400 hover:text-[#002147] dark:hover:text-blue-400 transition-colors"
+                                                    title="Manage Event"
+                                                >
+                                                    <Settings className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            {isUpcoming ? (
+                                                <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                                                    Upcoming
+                                                </span>
+                                            ) : (
+                                                <span className="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                                                    Completed
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
 
-                                            {/* Hover Action */}
-                                            <div className="absolute bottom-4 right-4 translate-y-12 group-hover:translate-y-0 transition-transform duration-300">
-                                                <button className="bg-white dark:bg-slate-900 text-[#002147] dark:text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg border border-slate-100">
+                                    <div className="flex flex-col md:flex-row">
+                                        {/* Event Image - Full Width Mobile, 40% Desktop */}
+                                        <div className="w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                                            {post.coverImage ? (
+                                                <img
+                                                    src={post.coverImage}
+                                                    alt={post.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
+                                                    <Calendar className="w-16 h-16 text-white/40" />
+                                                </div>
+                                            )}
+                                            {/* Date Overlay (Mobile & Desktop) */}
+                                            <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center border border-slate-100 dark:border-slate-700">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{new Date(post.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                                                <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{new Date(post.date).getDate()}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Event Details */}
+                                        <div className="flex-1 p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
+                                            <div>
+                                                <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
+                                                    {post.title}
+                                                </h3>
+
+                                                <div className="space-y-4 mb-6">
+                                                    {/* Date Row (Desktop) */}
+                                                    <div className="hidden md:flex items-start gap-4">
+                                                        <div className="mt-1"><Calendar className="w-5 h-5 text-blue-500" /></div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date</p>
+                                                            <p className="font-medium text-slate-700 dark:text-slate-300">
+                                                                {new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Time Row */}
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="mt-1"><Clock className="w-5 h-5 text-blue-500" /></div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Time</p>
+                                                            <p className="font-medium text-slate-700 dark:text-slate-300">{post.time || 'All Day'}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Venue Row */}
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="mt-1"><MapPin className="w-5 h-5 text-blue-500" /></div>
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Venue</p>
+                                                            <p className="font-medium text-slate-700 dark:text-slate-300">{post.location || 'Campus'}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2 mt-auto">
+                                                <button className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                                                     View Details
                                                 </button>
                                             </div>
@@ -346,12 +350,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                         )}
                     </div>
                 )}
-                {/* Image Modal */}
-                <ImageModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    imageUrl={modalImage || ''}
-                />
+
             </div>
         </div>
     );

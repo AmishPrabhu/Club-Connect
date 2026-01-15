@@ -1,4 +1,4 @@
-import { Users, Calendar, ArrowRight, Heart } from 'lucide-react';
+import { Users, Calendar, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { DBClub } from '../types/auth';
 
@@ -17,61 +17,57 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 hover:border-[#002147] dark:hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
+      className="group bg-white dark:bg-slate-900 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-800 hover:border-[#002147] dark:hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col h-full"
     >
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#DAA520] to-[#002147]"></div>
 
-      <div className="flex items-start justify-between mb-4 mt-2">
-        <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shadow-inner`}>
+      {/* Favorite Button - Absolute Top Right */}
+      <button
+        onClick={handleFavoriteClick}
+        className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
+        aria-label="Favorite club"
+      >
+        <Heart
+          className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${isFavorited
+            ? 'text-red-500 fill-red-500'
+            : 'text-slate-400 hover:text-red-400'
+            }`}
+        />
+      </button>
+
+      <div className="flex items-start justify-between mb-3 md:mb-4 mt-1">
+        <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-xl md:text-2xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shadow-inner flex-shrink-0`}>
           {club.image ? (
             <img src={club.image} alt={club.name} className="w-full h-full object-cover rounded-xl" />
           ) : (
-            <span className="text-3xl">{club.icon}</span>
+            <span className="text-2xl md:text-3xl">{club.icon}</span>
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleFavoriteClick}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            aria-label="Favorite club"
-          >
-            <Heart
-              className={`w-5 h-5 transition-colors ${isFavorited
-                ? 'text-red-500 fill-red-500'
-                : 'text-slate-400 hover:text-red-400'
-                }`}
-            />
-          </button>
         </div>
       </div>
 
-      <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white mb-2 group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+      <h3 className="text-base md:text-xl font-serif font-bold text-slate-900 dark:text-white mb-1.5 group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors line-clamp-1">
         {club.name}
       </h3>
-      <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 line-clamp-2 min-h-[40px]">
+      <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-3 md:mb-4 line-clamp-2 md:min-h-[40px] flex-grow">
         {club.description}
       </p>
 
-      <div className="flex items-center gap-2 mb-4">
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 border border-blue-100 dark:border-blue-800">
+      <div className="flex items-center gap-2 mb-3 md:mb-4">
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 border border-blue-100 dark:border-blue-800 truncate">
           {club.category}
         </span>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <Users className="w-4 h-4" />
+      <div className="flex items-center justify-between pt-3 md:pt-4 border-t border-slate-100 dark:border-slate-800 mt-auto">
+        <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 w-full">
+          <div className="flex items-center gap-1 text-[10px] md:text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <Users className="w-3 h-3 md:w-4 md:h-4" />
             <span>{club.members}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <Calendar className="w-4 h-4" />
+          <div className="flex items-center gap-1 text-[10px] md:text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <Calendar className="w-3 h-3 md:w-4 md:h-4" />
             <span>{club.upcomingEvents} Events</span>
           </div>
-        </div>
-
-        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-[#002147] group-hover:text-[#DAA520] transition-colors">
-          <ArrowRight className="w-4 h-4" />
         </div>
       </div>
     </div>

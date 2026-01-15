@@ -158,22 +158,18 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                     {members.map((member) => (
                         <div
                             key={member.id}
-                            className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex items-center justify-between"
+                            className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                         >
                             {editingMember?.id === member.id && editingMember ? (
                                 // Edit mode
                                 <div className="flex-1 flex flex-wrap items-center gap-3">
                                     <input
-                                        type="text"
-                                        value={editingMember.name}
                                         onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                                        className="flex-1 min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                     <input
-                                        type="email"
-                                        value={editingMember.email}
                                         onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                                        className="flex-1 min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                     <select
                                         value={editingMember.role}
@@ -212,12 +208,12 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                             </span>
                                         </div>
                                         <p className="text-sm text-slate-600 dark:text-slate-400">{member.email}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-500">
+                                        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
                                             Joined: {member.joinedAt.toLocaleDateString()}
                                         </p>
                                     </div>
                                     {!isReadOnly && canEditMember(member) && (
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 w-full sm:w-auto justify-end mt-2 sm:mt-0">
                                             <button
                                                 onClick={() => setEditingMember(member)}
                                                 className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"

@@ -216,7 +216,7 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
             <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
               Showing {filteredClubs.length} {filteredClubs.length === 1 ? 'club' : 'clubs'}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {filteredClubs.map((club) => (
                 <ClubCard key={club.id} club={club} onClick={() => onNavigateToClub(club.id!)} />
               ))}

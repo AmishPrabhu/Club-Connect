@@ -827,7 +827,7 @@ export default function AdminDashboard() {
                       <p className="text-slate-400">No posts available.</p>
                     </div>
                   ) : (
-                    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
                       <table className="w-full text-left">
                         <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                           <tr>

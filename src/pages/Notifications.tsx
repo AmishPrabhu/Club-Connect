@@ -81,7 +81,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-6 md:px-6 md:py-12">
       <div className="flex items-center justify-between mb-8">
         <button
           onClick={onBack}
@@ -151,7 +151,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
                     if (!notification.read) handleMarkAsRead(notification.id!);
                     onNavigateToNotification(notification);
                   }}
-                  className={`p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
+                  className={`p-4 md:p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-blue-500' : ''
                     }`}
                 >
                   <div className="flex items-start gap-4">

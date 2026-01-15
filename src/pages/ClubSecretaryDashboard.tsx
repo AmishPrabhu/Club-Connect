@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2, MessageSquare, Menu, X } from 'lucide-react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Settings2, MessageSquare, Menu, X } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
 
@@ -458,89 +458,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isEditingInstagram, setIsEditingInstagram] = useState(false);
   const [instagramSaving, setInstagramSaving] = useState(false);
 
-  // AI Assistant State
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiGeneratedContent, setAiGeneratedContent] = useState('');
-  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
-  const handleGenerateCaption = async () => {
-    if (!import.meta.env.VITE_GROQ_API_KEY) {
-      setFormMessage({ type: 'error', text: 'Groq API Key is missing in .env' });
-      return;
-    }
-
-    setIsGeneratingAi(true);
-    setAiGeneratedContent('');
-
-    try {
-      let promptText = `Write a creative and engaging caption for a club post.
-      context:
-      Title: ${newPost.title}
-      Type: ${newPost.type}
-      Date: ${newPost.date}
-      User Instructions: ${aiPrompt}`;
-
-      if (newPost.type === 'event') {
-        promptText += `\nTime: ${newPost.startHour}:${newPost.startMinute} ${newPost.startPeriod}`;
-        promptText += `\nLocation: ${newPost.location}`;
-      }
-
-      // Dynamic import
-      const { getGroqChatCompletion, generateImageCaption } = await import('../lib/groqService');
-
-      let text = '';
-
-      if (newPost.coverImage) {
-        // Fetch image and convert to base64
-        try {
-          const response = await fetch(newPost.coverImage);
-          const blob = await response.blob();
-          const base64Image = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-              const res = reader.result as string;
-              resolve(res.split(',')[1]);
-            };
-          });
-
-          text = await generateImageCaption(base64Image, promptText);
-        } catch (imgError) {
-          console.error("Error processing image for AI:", imgError);
-          // Fallback to text only
-          // @ts-ignore
-          text = await getGroqChatCompletion([{ role: "user", content: promptText }]);
-        }
-      } else {
-        // @ts-ignore
-        text = await getGroqChatCompletion([{ role: "user", content: promptText }]);
-      }
-
-      setAiGeneratedContent(text);
-    } catch (error: any) {
-      console.error("AI Generation Error Full:", error);
-      let errorMessage = 'Failed to generate content.';
-
-      if (error.message?.includes('API key')) {
-        errorMessage = 'Invalid or missing API Key.';
-      } else if (error.message?.includes('429')) {
-        errorMessage = 'Daily or minute quota exceeded on Groq. Please check console.groq.com.';
-      } else {
-        // Show actual error for debugging
-        errorMessage = `Error: ${error.message}`;
-      }
-
-      setFormMessage({ type: 'error', text: `${errorMessage}` });
-    } finally {
-      setIsGeneratingAi(false);
-    }
-  };
-
-  const useAiCaption = () => {
-    setNewPost({ ...newPost, content: aiGeneratedContent });
-    setAiGeneratedContent('');
-    setAiPrompt('');
-  };
 
   // Ref to prevent duplicate member additions in React Strict Mode
 
@@ -799,7 +717,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {/* Header */}
       <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden">
+          <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden flex-shrink-0">
             {club.image && club.image.startsWith('http') ? (
               <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
             ) : (
@@ -818,51 +736,51 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-6 h-6 text-[#002147] dark:text-blue-400" />
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Members</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Members</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-[#DAA520] dark:text-amber-400" />
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Upcoming Events</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Edit className="w-6 h-6 text-[#002147] dark:text-purple-400" />
+              <Edit className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Published Posts</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Posts</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-[#DAA520] dark:text-slate-400" />
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-slate-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Past Events</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Past Events</p>
             </div>
           </div>
         </div>
@@ -886,7 +804,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         {/* Tab List (Responsive) */}
         <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
-          <div className="flex flex-col md:flex-row border-b border-slate-200 dark:border-slate-700 md:overflow-x-auto">
+          <div className="flex flex-col md:flex-row border-b border-slate-200 dark:border-slate-700 md:overflow-x-auto no-scrollbar">
             {[
               { id: 'overview', label: 'Overview', icon: Settings },
               { id: 'members', label: 'Members', icon: Users },
@@ -1417,12 +1335,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           )
           }
 
-          {/* Notifications Tab */}
-          {
-            activeTab === 'notifications' && (
-              <NotificationSender club={club} />
-            )
-          }
+
         </div >
       </div >
 
@@ -1447,8 +1360,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 </div>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-4">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="w-full space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Title
@@ -1955,71 +1868,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   </div>
                 </div>
 
-                {/* AI Assistant Column */}
-                <div className="lg:col-span-1 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col h-full">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <h4 className="font-bold text-slate-900 dark:text-white">AI Assistant</h4>
-                  </div>
 
-                  <div className="space-y-4 flex-1">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        Instructions (Optional)
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="e.g., Make it funny, mention free food..."
-                      />
-                    </div>
-
-                    <button
-                      onClick={handleGenerateCaption}
-                      disabled={isGeneratingAi || !newPost.title}
-                      className="w-full py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2"
-                    >
-                      {isGeneratingAi ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4" />
-                          Generate Caption
-                        </>
-                      )}
-                    </button>
-
-                    {aiGeneratedContent && (
-                      <div className="mt-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                          Generated Preview
-                        </label>
-                        <div className="bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-900/50 rounded-lg p-3 text-sm text-slate-700 dark:text-slate-300 max-h-60 overflow-y-auto">
-                          {aiGeneratedContent}
-                        </div>
-                        <button
-                          onClick={useAiCaption}
-                          className="w-full mt-2 py-2 border border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg font-medium text-sm transition-all"
-                        >
-                          Use This Caption
-                        </button>
-                      </div>
-                    )}
-
-                    {!aiGeneratedContent && (
-                      <div className="mt-8 text-center text-slate-400 dark:text-slate-500 text-xs">
-                        <p>Enter a title and details, then click Generate to create a caption.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button

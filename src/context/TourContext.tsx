@@ -206,7 +206,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             }
         },
 
-        // --- AI ASSISTANT ---
+
         {
             element: '#tour-ai-assistant',
             popover: {

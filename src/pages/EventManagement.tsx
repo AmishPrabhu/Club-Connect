@@ -255,7 +255,7 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
 
                 {/* Tabs */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
-                    <div className="flex border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('details')}
                             className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'details'

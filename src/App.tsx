@@ -22,7 +22,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import AdvisorDashboard from './pages/AdvisorDashboard';
 import SetupAdmin from './pages/SetupAdmin';
-import StudentAIAssistant from './components/StudentAIAssistant';
+
+import BottomNav from './components/BottomNav';
 
 function AppContent() {
   const {
@@ -49,7 +50,7 @@ function AppContent() {
   const onLogoutClick = () => handleLogout(logout);
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 pb-20 md:pb-0">
       {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
         <Header
           currentPage={currentPage}
@@ -130,11 +131,12 @@ function AppContent() {
         <SetupAdmin onNavigate={navigateToPage} />
       )}
 
-      {/* AI Assistant Widget - Global */}
-      <StudentAIAssistant
-        onNavigateToClub={navigateToClub}
-        onNavigateToEvent={navigateToEvent}
-      />
+
+
+      {/* Mobile Bottom Navigation */}
+      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && (
+        <BottomNav currentPage={currentPage} onNavigate={navigateToPage} />
+      )}
     </div>
   );
 }
