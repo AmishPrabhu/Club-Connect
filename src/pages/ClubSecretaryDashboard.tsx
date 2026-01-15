@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2, MessageSquare } from 'lucide-react';
+import {
+  Users, Calendar, Edit, Bell, MessageSquare, Plus,
+  Settings, Image, Trash2, Settings2, Sparkles, Send,
+  FileSpreadsheet, CheckCircle, Instagram, Link
+} from 'lucide-react';
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
 
 import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs, createClubMessage, getClubMessages } from '../lib/dbService';
 import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
+import MemberManager from '../components/MemberManager';
+import { BudgetManager } from '../components/BudgetManager';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
-import MemberManager from '../components/MemberManager';
 import LocationPickerModal from '../components/LocationPickerModal';
 import ImageModal from '../components/ImageModal';
 import { useNavigation } from '../context/NavigationContext';
@@ -396,7 +401,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setIsModalOpen(true);
     setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'events' | 'posts' | 'notifications' | 'messages' | 'budget'>('overview');
   const { navigateToManagement } = useNavigation();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -541,8 +546,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setAiPrompt('');
   };
 
-  // Ref to prevent duplicate member additions in React Strict Mode
-  const secretaryAddedRef = useRef(false);
+
 
   // Fetch club data from Firestore
   useEffect(() => {
@@ -573,13 +577,13 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         // Check if secretary is already a member, if not add them (only once)
         // Note: syncing members from backend route if available
-        const { getClubMembers, addClubMember, syncClubMemberCount } = await import('../lib/dbService');
+        const { syncClubMemberCount } = await import('../lib/dbService');
 
         // ... member sync logic ...
 
         // Since we already fetched the club with member count, we might rely on that.
         // But to be safe and match original flow:
-        const actualCount = await syncClubMemberCount(user.clubId); // This basically refetches clubs list but okay
+        await syncClubMemberCount(user.clubId); // This basically refetches clubs list but okay
 
 
         // Fetch posts for this club
@@ -876,13 +880,15 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
             { id: 'posts', label: 'Manage Posts', icon: Edit },
             { id: 'notifications', label: 'Send Notifications', icon: Bell },
-            { id: 'messages', label: 'Messages', icon: MessageSquare }
+            { id: 'messages', label: 'Messages', icon: MessageSquare },
+            { id: 'budget', label: 'Budget', icon: FileSpreadsheet, treasurerOnly: false }
           ].filter(tab => {
-            // Treasurer sees: overview, members, events
+            // Treasurer sees: overview, members, events, budget
             if (isReadOnly) {
-              return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly;
+              return tab.id === 'overview' || tab.id === 'members' || tab.id === 'budget' || tab.treasurerOnly;
             }
             // Non-treasurer (secretary/president) sees all except treasurerOnly tabs
+            // But they should also see budget tab
             return !tab.treasurerOnly;
           }).map((tab) => {
             const Icon = tab.icon;
@@ -915,274 +921,176 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Name:</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{club.name}</span>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Total Members:</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">{club.members}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Total Posts:</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">{posts.length}</span>
-                      </div>
                     </div>
-                  </div>
-
-                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                    <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Picture</h4>
-                    {isReadOnly ? (
-                      <div className="relative w-32 h-32 mx-auto">
-                        <img
-                          src={club.image || '/club-default.jpg'}
-                          alt="Club profile"
-                          className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
-                        />
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Total Members:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{club.members}</span>
+                    </div>
+                    {club.category && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">Category:</span>
+                        <span className="capitalize font-semibold text-slate-900 dark:text-white">{club.category}</span>
                       </div>
-                    ) : (
-                      <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
                     )}
                   </div>
                 </div>
 
-
-                {/* WhatsApp Community Link Section */}
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                      </svg>
-                      WhatsApp Community
-                    </h4>
-                    {!isEditingWhatsapp && club.whatsappLink && (
-                      <a
-                        href={club.whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {!isReadOnly && (
+                      <button
+                        onClick={() => setIsCreatePostModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-semibold text-sm transition-all flex flex-col items-center gap-2"
                       >
-                        Open Link
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
+                        <Plus className="w-5 h-5" />
+                        Create Post
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setActiveTab('members')}
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 p-3 rounded-lg font-semibold text-sm transition-all flex flex-col items-center gap-2"
+                    >
+                      <Users className="w-5 h-5" />
+                      Manage Members
+                    </button>
+                    {!isReadOnly && (
+                      <button
+                        onClick={() => setActiveTab('notifications')}
+                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 p-3 rounded-lg font-semibold text-sm transition-all flex flex-col items-center gap-2"
+                      >
+                        <Bell className="w-5 h-5" />
+                        Send Alert
+                      </button>
                     )}
                   </div>
+                </div>
+              </div>
 
-                  {isEditingWhatsapp ? (
-                    <div className="space-y-3">
-                      <input
-                        type="url"
-                        value={whatsappLink}
-                        onChange={(e) => setWhatsappLink(e.target.value)}
-                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 dark:text-white"
-                        placeholder="https://chat.whatsapp.com/... or https://whatsapp.com/channel/..."
+              {/* Club Images & Links */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Image</h4>
+                  {!isReadOnly ? (
+                    <ImageUploader
+                      clubId={club.id!}
+                      currentImage={club.image}
+                      onImageUpdated={(url) => setClub({ ...club, image: url })}
+                    />
+                  ) : (
+                    <div className="relative w-32 h-32 mx-auto">
+                      <img
+                        src={club.image || '/club-default.jpg'}
+                        alt="Club profile"
+                        className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
                       />
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Paste your WhatsApp group or community invite link here.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setIsEditingWhatsapp(false);
-                            setWhatsappLink(club.whatsappLink || '');
-                          }}
-                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (!club.id) return;
-                            setWhatsappSaving(true);
-                            try {
-                              const { updateClub } = await import('../lib/dbService');
-                              await updateClub(club.id, { whatsappLink });
-                              setClub({ ...club, whatsappLink });
-                              setIsEditingWhatsapp(false);
-                            } catch (error) {
-                              console.error('Error saving WhatsApp link:', error);
-                            } finally {
-                              setWhatsappSaving(false);
-                            }
-                          }}
-                          disabled={whatsappSaving}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
-                        >
-                          {whatsappSaving ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Link'
+                      <p className="text-center text-xs text-slate-500 mt-2">Only Secretary can update</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Social Links</h4>
+                  {!isReadOnly ? (
+                    <div className="space-y-4">
+                      {/* WhatsApp Link Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">WhatsApp Community Link</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-600" />
+                            <input
+                              type="url"
+                              value={whatsappLink}
+                              onChange={(e) => {
+                                setWhatsappLink(e.target.value);
+                                setIsEditingWhatsapp(true);
+                              }}
+                              placeholder="https://chat.whatsapp.com/..."
+                              className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                            />
+                          </div>
+                          {isEditingWhatsapp && (
+                            <button
+                              onClick={async () => {
+                                setWhatsappSaving(true);
+                                try {
+                                  // Import dynamically to avoid circular deps if any
+                                  const { updateClub } = await import('../lib/dbService');
+                                  await updateClub(club.id!, { whatsappLink });
+                                  setIsEditingWhatsapp(false);
+                                  setClub({ ...club, whatsappLink });
+                                } finally {
+                                  setWhatsappSaving(false);
+                                }
+                              }}
+                              disabled={whatsappSaving}
+                              className="px-3 py-1 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 disabled:opacity-50"
+                            >
+                              {whatsappSaving ? '...' : 'Save'}
+                            </button>
                           )}
-                        </button>
+                        </div>
+                      </div>
+
+                      {/* Instagram Link Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Instagram Profile Link</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-600" />
+                            <input
+                              type="url"
+                              value={instagramLink}
+                              onChange={(e) => {
+                                setInstagramLink(e.target.value);
+                                setIsEditingInstagram(true);
+                              }}
+                              placeholder="https://instagram.com/..."
+                              className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                            />
+                          </div>
+                          {isEditingInstagram && (
+                            <button
+                              onClick={async () => {
+                                setInstagramSaving(true);
+                                try {
+                                  const { updateClub } = await import('../lib/dbService');
+                                  await updateClub(club.id!, { instagramLink });
+                                  setIsEditingInstagram(false);
+                                  setClub({ ...club, instagramLink });
+                                } finally {
+                                  setInstagramSaving(false);
+                                }
+                              }}
+                              disabled={instagramSaving}
+                              className="px-3 py-1 bg-pink-600 text-white text-xs rounded-lg hover:bg-pink-700 disabled:opacity-50"
+                            >
+                              {instagramSaving ? '...' : 'Save'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <div>
+                    <div className="space-y-3">
                       {club.whatsappLink ? (
-                        <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 truncate">
-                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="text-sm truncate">{club.whatsappLink}</span>
-                          </div>
-                          {!isReadOnly && (
-                            <button
-                              onClick={() => setIsEditingWhatsapp(true)}
-                              className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        !isReadOnly && (
-                          <button
-                            onClick={() => setIsEditingWhatsapp(true)}
-                            className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
-                          >
-                            <Plus className="w-5 h-5" />
-                            Add WhatsApp Community Link
-                          </button>
-                        )
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Instagram Link Section */}
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <Instagram className="w-5 h-5 text-pink-500" />
-                      Instagram Page
-                    </h4>
-                    {!isEditingInstagram && club.instagramLink && (
-                      <a
-                        href={club.instagramLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
-                      >
-                        Open Link
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    )}
-                  </div>
-
-                  {isEditingInstagram ? (
-                    <div className="space-y-3">
-                      <input
-                        type="url"
-                        value={instagramLink}
-                        onChange={(e) => setInstagramLink(e.target.value)}
-                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white"
-                        placeholder="https://instagram.com/..."
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setIsEditingInstagram(false);
-                            setInstagramLink(club.instagramLink || '');
-                          }}
-                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (!club.id) return;
-                            setInstagramSaving(true);
-                            try {
-                              const { updateClub } = await import('../lib/dbService');
-                              await updateClub(club.id, { instagramLink });
-                              setClub({ ...club, instagramLink });
-                              setIsEditingInstagram(false);
-                            } catch (error) {
-                              console.error('Error saving Instagram link:', error);
-                            } finally {
-                              setInstagramSaving(false);
-                            }
-                          }}
-                          disabled={instagramSaving}
-                          className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
-                        >
-                          {instagramSaving ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Link'
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
+                        <a href={club.whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-green-600 hover:underline">
+                          <MessageSquare className="w-4 h-4" /> WhatsApp Community
+                        </a>
+                      ) : <span className="text-sm text-slate-500">No WhatsApp link set</span>}
                       {club.instagramLink ? (
-                        <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                          <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate">
-                            <Instagram className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm truncate">{club.instagramLink}</span>
-                          </div>
-                          {!isReadOnly && (
-                            <button
-                              onClick={() => setIsEditingInstagram(true)}
-                              className="p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded-full transition-colors"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg">
-                          <Instagram className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                            Add an Instagram page link
-                          </p>
-                          {!isReadOnly && (
-                            <button
-                              onClick={() => setIsEditingInstagram(true)}
-                              className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline"
-                            >
-                              Add Link
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
-                  {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
-                    <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {posts
-                        .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
-                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                        .slice(0, 3)
-                        .map((post) => (
-                          <div key={post.id} className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
-                            <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                        ))}
+                        <a href={club.instagramLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-600 hover:underline">
+                          <Instagram className="w-4 h-4" /> Instagram Profile
+                        </a>
+                      ) : <span className="text-sm text-slate-500">No Instagram link set</span>}
                     </div>
                   )}
                 </div>
               </div>
             </div>
-
           )}
+
 
           {/* Members Tab */}
           {activeTab === 'members' && club && (
@@ -1273,7 +1181,15 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             </div>
           )}
 
-
+          {/* Budget Tab */}
+          {activeTab === 'budget' && user && (
+            <BudgetManager
+              key="budget-manager" // Force re-render on re-entry
+              clubId={club.id!}
+              posts={posts.filter(p => p.type === 'event')} // Only pass events
+              userRole={user.role} // Pass role to handle permissions inside
+            />
+          )}
 
           {/* Messages Tab */}
           {activeTab === 'messages' && user && (

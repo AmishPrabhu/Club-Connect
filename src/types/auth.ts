@@ -167,3 +167,19 @@ export interface EventRSVP {
   rsvpedAt: Date;
   attendance?: 'present' | 'absent' | 'pending';  // Attendance status for the event
 }
+
+// Event Budget structure for treasurer budget management
+export interface EventBudget {
+  id?: string;
+  eventId: string;
+  clubId: string;
+  budgetImages: { url: string; publicId: string }[];
+  verified: boolean;
+  verifiedBy?: string;
+  verifiedByName?: string;
+  verifiedAt?: Date;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+

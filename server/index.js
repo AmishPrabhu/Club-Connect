@@ -7,6 +7,7 @@ import clubRoutes from './routes/clubs.js';
 import postRoutes from './routes/posts.js';
 import notificationRoutes from './routes/notifications.js';
 import userRoutes from './routes/users.js';
+import budgetRoutes from './routes/budget.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/clubs', clubRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/budget', budgetRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

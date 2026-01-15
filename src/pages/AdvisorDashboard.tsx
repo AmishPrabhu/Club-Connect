@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2 } from 'lucide-react';
+import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2, FileSpreadsheet } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Page } from '../types/page';
 import { DBPost, DBClub } from '../types/auth';
 import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer } from '../lib/dbService';
+import { BudgetManager } from '../components/BudgetManager';
 
 interface AdvisorDashboardProps {
     onNavigate: (page: Page) => void;
@@ -12,7 +13,7 @@ interface AdvisorDashboardProps {
 
 export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardProps) {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'events' | 'team'>('events');
+    const [activeTab, setActiveTab] = useState<'events' | 'team' | 'budget'>('events');
     const [events, setEvents] = useState<DBPost[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [clubName, setClubName] = useState('');
@@ -228,6 +229,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
                         { id: 'team', label: 'Team Management', icon: Users },
+                        { id: 'budget', label: 'Budget Management', icon: FileSpreadsheet },
                     ].map((tab) => {
                         const Icon = tab.icon;
                         return (
@@ -390,6 +392,15 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* Budget Tab */}
+                    {activeTab === 'budget' && user?.clubId && (
+                        <BudgetManager
+                            clubId={user.clubId}
+                            posts={events}
+                            userRole={user.role}
+                        />
                     )}
                 </div>
             </div>

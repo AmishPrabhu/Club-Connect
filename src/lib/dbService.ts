@@ -7,6 +7,7 @@ import {
     ClubMember,
     EventRSVP,
     ClubMessage,
+    EventBudget,
 } from '../types/auth';
 
 // Helper to map _id to id
@@ -666,3 +667,68 @@ export const deleteEventParticipant = async (
     }
 };
 
+// ==================== EVENT BUDGETS ====================
+
+export const getClubBudgets = async (clubId: string): Promise<EventBudget[]> => {
+    try {
+        const response = await api.get(`/budget/club/${clubId}`);
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching club budgets:', error);
+        return [];
+    }
+};
+
+export const getEventBudget = async (eventId: string): Promise<EventBudget | null> => {
+    try {
+        const response = await api.get(`/budget/event/${eventId}`);
+        return response.data ? mapId(response.data) : null;
+    } catch (error) {
+        console.error('Error fetching event budget:', error);
+        return null;
+    }
+};
+
+export const saveEventBudget = async (
+    eventId: string,
+    clubId: string,
+    budgetImages: { url: string; publicId: string }[],
+    createdBy: string
+): Promise<{ success: boolean; budget?: EventBudget; error?: string }> => {
+    try {
+        const response = await api.post('/budget', {
+            eventId,
+            clubId,
+            budgetImages,
+            createdBy,
+        });
+        return { success: true, budget: mapId(response.data) };
+    } catch (error: any) {
+        console.error('Error saving event budget:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to save budget' };
+    }
+};
+
+export const verifyEventBudget = async (
+    budgetId: string,
+    verifiedBy: string,
+    verifiedByName: string
+): Promise<{ success: boolean; error?: string }> => {
+    try {
+        await api.patch(`/budget/${budgetId}/verify`, { verifiedBy, verifiedByName });
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error verifying budget:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to verify budget' };
+    }
+};
+
+export const deleteEventBudget = async (budgetId: string): Promise<boolean> => {
+    try {
+        await api.delete(`/budget/${budgetId}`);
+        return true;
+    } catch (error) {
+        console.error('Error deleting budget:', error);
+        return false;
+    }
+};
