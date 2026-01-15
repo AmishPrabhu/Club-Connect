@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { TourProvider } from './context/TourContext';
 import Header from './components/Header';
+import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import ClubDetail from './pages/ClubDetail';
@@ -49,10 +50,9 @@ function AppContent() {
   const onLogoutClick = () => handleLogout(logout);
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-200">
+    <div className="min-h-screen text-slate-900 dark:text-slate-200 pt-20 pb-16">
       {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
         <Header
-          currentPage={currentPage}
           onNavigate={navigateToPage}
           onLogout={onLogoutClick}
           user={user}
@@ -135,6 +135,14 @@ function AppContent() {
         onNavigateToClub={navigateToClub}
         onNavigateToEvent={navigateToEvent}
       />
+
+      {/* Bottom Navigation Bar */}
+      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
+        <BottomNav
+          currentPage={currentPage}
+          onNavigate={navigateToPage}
+        />
+      )}
     </div>
   );
 }

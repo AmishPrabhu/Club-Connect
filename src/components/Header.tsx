@@ -2,22 +2,48 @@ import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle } from 'luc
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getNotifications } from '../lib/dbService';
 import { useTour } from '../context/TourContext';
 
 interface HeaderProps {
-  currentPage: Page;
   onNavigate: (page: Page) => void;
   onLogout: () => void;
   user?: UserType | null;
 }
 
-export default function Header({ currentPage, onNavigate, onLogout, user }: HeaderProps) {
+export default function Header({ onNavigate, onLogout, user }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { startTour } = useTour();
+
+  // Scroll direction tracking for auto-hide header
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  // Track scroll direction to show/hide header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollingDown = currentScrollY > lastScrollY.current;
+
+      // Hide header when scrolling up, show when scrolling down
+      // Also always show when near top of page
+      if (currentScrollY < 50) {
+        setIsHeaderVisible(true);
+      } else if (scrollingDown) {
+        setIsHeaderVisible(false);
+      } else {
+        setIsHeaderVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch unread notification count
   useEffect(() => {
@@ -39,74 +65,34 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <header className={`fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')} id="tour-logo">
+            <div className="flex items-center gap-2 md:gap-3 cursor-pointer min-w-0" onClick={() => onNavigate('home')} id="tour-logo">
               <img
                 src="/wce-logo.png"
                 alt="Walchand College of Engineering Logo"
-                className="w-10 h-10 object-contain rounded-md"
+                className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-md flex-shrink-0"
               />
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
-                  Walchand College of Engineering, Sangli
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm md:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                  WCE, Sangli
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
+                <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                   Club & Event Portal
                 </span>
               </div>
             </div>
 
-            <nav className="flex items-center gap-8">
-              <button
-                onClick={() => onNavigate('home')}
-                className={`text-sm font-medium transition-colors ${currentPage === 'home'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() => onNavigate('dashboard')}
-                id="tour-dashboard-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'dashboard'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                All Clubs
-              </button>
-              <button
-                onClick={() => onNavigate('events')}
-                id="tour-events-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'events'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Events
-              </button>
-              <button
-                onClick={() => onNavigate('announcements')}
-                id="tour-announcements-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'announcements'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Announcements
-              </button>
-            </nav>
-
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+              {/* Start Tour - icon only on mobile, with text on desktop */}
               <button
                 onClick={startTour}
-                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-semibold transition-all border border-indigo-600/20"
+                className="flex items-center gap-2 p-2 md:px-3 md:py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-semibold transition-all border border-indigo-600/20"
+                aria-label="Start Tour"
               >
-                <PlayCircle className="w-3.5 h-3.5" />
-                Start Tour
+                <PlayCircle className="w-4 h-4 md:w-3.5 md:h-3.5" />
+                <span className="hidden md:inline">Start Tour</span>
               </button>
 
               <button
@@ -144,7 +130,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                     >
                       <User className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.name}</span>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300 hidden md:block">{user.name}</span>
                     </button>
 
                     {showUserMenu && (

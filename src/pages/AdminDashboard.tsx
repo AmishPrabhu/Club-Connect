@@ -548,68 +548,68 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-12">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl">
-            <Shield className="w-6 h-6 text-white" />
+      <div className="mb-4 md:mb-8">
+        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+          <div className="p-1.5 md:p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg md:rounded-xl">
+            <Shield className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white">
+          <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white">
             Admin Dashboard
           </h1>
         </div>
-        <p className="text-lg text-slate-600 dark:text-slate-300">
+        <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300">
           Welcome back, {user?.name}. Manage your platform from here.
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      {/* Stats Cards - 2 per row on mobile */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6 mb-6 md:mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md md:rounded-lg">
+              <Users className="w-4 h-4 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Total Clubs</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Total Clubs</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-green-100 dark:bg-green-900/20 rounded-md md:rounded-lg">
+              <Calendar className="w-4 h-4 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Active Events</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Active Events</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-purple-100 dark:bg-purple-900/20 rounded-md md:rounded-lg">
+              <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Total Posts</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Total Posts</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-red-100 dark:bg-red-900/20 rounded-md md:rounded-lg">
+              <Bell className="w-4 h-4 md:w-6 md:h-6 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Unread Notifications</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Unread</p>
             </div>
           </div>
         </div>

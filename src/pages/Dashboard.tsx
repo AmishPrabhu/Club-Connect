@@ -88,25 +88,25 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12" id="tour-dashboard-stats">
-      <div className="mb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white">
+    <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-12" id="tour-dashboard-stats">
+      <div className="mb-4 md:mb-12">
+        <div className="flex items-center gap-2 mb-3 md:mb-6">
+          <TrendingUp className="w-5 h-5 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-xl md:text-4xl font-black text-slate-900 dark:text-white">
             All Clubs
           </h1>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 items-center z-20 relative">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center z-20 relative">
           <div className="relative flex-1 w-full" ref={dropdownRef}>
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search clubs, events, or interests..."
+              placeholder="Search clubs..."
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-lg"
+              className="w-full pl-9 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg md:rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-md md:shadow-lg text-sm"
             />
 
             {/* Live Search Dropdown */}
@@ -154,14 +154,14 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-            <Filter className="w-5 h-5 text-slate-600 dark:text-slate-400 ml-2" />
+          <div className="flex items-center gap-1.5 md:gap-2 bg-white dark:bg-slate-800 p-1 md:p-2 rounded-lg md:rounded-xl shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
+            <Filter className="w-3.5 h-3.5 md:w-5 md:h-5 text-slate-600 dark:text-slate-400 ml-1 flex-shrink-0" />
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${selectedCategory === category
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                className={`px-2 md:px-4 py-1 md:py-2 rounded-md md:rounded-lg font-semibold text-[10px] md:text-sm transition-all whitespace-nowrap ${selectedCategory === category
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
               >
@@ -190,10 +190,11 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
         </div>
       ) : (
         <>
-          <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="mb-3 md:mb-4 text-xs md:text-sm text-slate-600 dark:text-slate-400">
             Showing {filteredClubs.length} {filteredClubs.length === 1 ? 'club' : 'clubs'}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Mobile: 2 columns with tight gap, Desktop: 3 columns */}
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6">
             {filteredClubs.map((club) => (
               <ClubCard key={club.id} club={club} onClick={() => onNavigateToClub(club.id!)} />
             ))}
