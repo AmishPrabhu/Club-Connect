@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink, ChevronRight } from 'lucide-react';
 import { Page } from '../types/page';
-import { FirestorePost, FirestoreClub, FirestoreNotification } from '../types/auth';
-import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/firestoreService';
+import { DBPost, DBClub, DBNotification } from '../types/auth';
+import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/dbService';
 
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
@@ -13,7 +13,7 @@ interface HomeProps {
   onNavigateToClub: (clubId: string) => void;
   onNavigateToEvent: (eventId: string) => void;
   onNavigateToPost: (postId: string) => void;
-  onNavigateToNotification: (notification: FirestoreNotification) => void;
+  onNavigateToNotification: (notification: DBNotification) => void;
 }
 import ImageModal from '../components/ImageModal';
 
@@ -22,13 +22,13 @@ import { useAuth } from '../context/AuthContext';
 export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, onNavigateToNotification }: HomeProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [posts, setPosts] = useState<FirestorePost[]>([]);
-  const [clubs, setClubs] = useState<FirestoreClub[]>([]);
-  const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
+  const [posts, setPosts] = useState<DBPost[]>([]);
+  const [clubs, setClubs] = useState<DBClub[]>([]);
+  const [notifications, setNotifications] = useState<DBNotification[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [rsvpEvent, setRsvpEvent] = useState<FirestorePost | null>(null);
+  const [rsvpEvent, setRsvpEvent] = useState<DBPost | null>(null);
   const [totalStudents, setTotalStudents] = useState<number>(0);
 
   // Search Dropdown State
@@ -58,7 +58,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         ]);
 
         // Sync member counts for all clubs
-        const { syncClubMemberCount } = await import('../lib/firestoreService');
+        const { syncClubMemberCount } = await import('../lib/dbService');
         const clubsWithSyncedCounts = await Promise.all(
           clubsData.map(async (club) => {
             if (club.id) {

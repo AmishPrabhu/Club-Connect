@@ -1,9 +1,9 @@
 import { Users, Calendar, ArrowRight, Heart } from 'lucide-react';
 import { useState } from 'react';
-import { FirestoreClub } from '../types/auth';
+import { DBClub } from '../types/auth';
 
 interface ClubCardProps {
-  club: FirestoreClub;
+  club: DBClub;
   onClick: () => void;
 }
 

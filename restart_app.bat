@@ -1,0 +1,9 @@
+@echo off
+echo Stopping Node.js processes...
+taskkill /F /IM node.exe
+echo Starting Server...
+start "Backend" cmd /c "cd server && npm start"
+echo Starting Client...
+start "Frontend" cmd /c "npm run dev"
+echo Servers Restarted!
+pause

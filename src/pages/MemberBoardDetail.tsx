@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Crown, Mail } from 'lucide-react';
 import { ClubMember } from '../types/auth';
-import { getClubMembers } from '../lib/firestoreService';
+import { getClubMembers } from '../lib/dbService';
 
 interface MemberBoardDetailProps {
   club: any;

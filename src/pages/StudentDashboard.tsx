@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, ArrowLeft, CalendarCheck, History, ExternalLink } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
-import { getUserRSVPsByEmail, getPosts } from '../lib/firestoreService';
-import { FirestorePost } from '../types/auth';
+import { getUserRSVPsByEmail, getPosts } from '../lib/dbService';
+import { DBPost } from '../types/auth';
 
 interface StudentDashboardProps {
     onNavigate: (page: Page) => void;
@@ -11,7 +11,7 @@ interface StudentDashboardProps {
 }
 
 interface UserEvent {
-    event: FirestorePost;
+    event: DBPost;
     rsvpDate: Date;
 }
 
@@ -37,8 +37,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
 
                 // Map RSVPs to events
                 const events: UserEvent[] = [];
-                for (const { eventId, rsvp } of userRSVPs) {
-                    const event = allPosts.find(p => p.id === eventId);
+                for (const rsvp of userRSVPs) {
+                    const event = allPosts.find(p => p.id === rsvp.eventId);
                     if (event) {
                         events.push({
                             event,
@@ -118,8 +118,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     <button
                         onClick={() => setActiveTab('upcoming')}
                         className={`pb-3 px-2 font-semibold transition-colors relative ${activeTab === 'upcoming'
-                                ? 'text-blue-600 dark:text-blue-400'
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                             }`}
                     >
                         Upcoming Events ({upcomingEvents.length})
@@ -130,8 +130,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     <button
                         onClick={() => setActiveTab('past')}
                         className={`pb-3 px-2 font-semibold transition-colors relative ${activeTab === 'past'
-                                ? 'text-blue-600 dark:text-blue-400'
-                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                             }`}
                     >
                         Past Events ({pastEvents.length})
@@ -183,8 +183,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span className={`text-xs font-semibold px-2 py-1 rounded-full ${activeTab === 'upcoming'
-                                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                                 }`}>
                                                 {activeTab === 'upcoming' ? 'Upcoming' : 'Completed'}
                                             </span>

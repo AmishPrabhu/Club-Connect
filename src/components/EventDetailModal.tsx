@@ -1,12 +1,12 @@
 import { X, Calendar, Clock, MapPin, Share2, ExternalLink, Plus, Settings } from 'lucide-react';
 import { useState } from 'react';
-import { FirestorePost } from '../types/auth';
+import { DBPost } from '../types/auth';
 import RSVPModal from './RSVPModal';
 
 interface EventDetailModalProps {
     isOpen: boolean;
     onClose: () => void;
-    event: FirestorePost | null;
+    event: DBPost | null;
     onManageEvent?: (eventId: string) => void;
     canManageEvent?: boolean;
 }

@@ -1,6 +1,6 @@
 import { X, Calendar, MapPin, Clock, Users, CheckCircle, AlertCircle, Mail, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { createEventRSVP } from '../lib/firestoreService';
+import { createEventRSVP } from '../lib/dbService';
 import { User as UserType } from '../types/auth';
 
 interface RSVPModalProps {

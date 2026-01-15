@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { X, Send, Mic, StopCircle, Loader2, Sparkles, Trash2, Volume2, VolumeX } from 'lucide-react';
-import { getClubs, getPosts } from '../lib/firestoreService';
-import { FirestoreClub, FirestorePost } from '../types/auth';
+import { getClubs, getPosts } from '../lib/dbService';
+import { DBClub, DBPost } from '../types/auth';
 
 interface Message {
     id: string;
@@ -38,8 +38,8 @@ export default function StudentAIAssistant({ onNavigateToClub, onNavigateToEvent
     const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
     // Context Data
-    const [clubs, setClubs] = useState<FirestoreClub[]>([]);
-    const [events, setEvents] = useState<FirestorePost[]>([]);
+    const [clubs, setClubs] = useState<DBClub[]>([]);
+    const [events, setEvents] = useState<DBPost[]>([]);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);

@@ -1,8 +1,8 @@
 import { ArrowLeft, Bell, Calendar, ExternalLink } from 'lucide-react';
-import { FirestoreNotification } from '../types/auth';
+import { DBNotification } from '../types/auth';
 
 interface NotificationDetailProps {
-    notification: FirestoreNotification;
+    notification: DBNotification;
     onBack: () => void;
     onNavigateToPost?: (postId: string) => void;
 }

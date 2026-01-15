@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+
 import { Shield, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Page } from '../types/page';
 
@@ -22,28 +20,26 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
         setMessage(null);
 
         try {
-            // Create user in Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const uid = userCredential.user.uid;
-
-            // Create admin profile in Firestore
-            await setDoc(doc(db, 'users', uid), {
-                email: email,
-                name: name,
-                role: 'admin',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+            // Create admin via API
+            const { default: api } = await import('../lib/api');
+            const response = await api.post('/auth/signup', {
+                email,
+                password,
+                name,
+                role: 'admin'
             });
+
+            const uid = response.data.user.id;
 
             setMessage({
                 type: 'success',
-                text: `Super Admin created successfully! UID: ${uid}. You can now login with these credentials.`,
+                text: `Super Admin created successfully! ID: ${uid}. You can now login with these credentials.`,
             });
         } catch (error: any) {
             console.error('Error creating admin:', error);
             setMessage({
                 type: 'error',
-                text: error.message || 'Failed to create admin user',
+                text: error.response?.data?.message || error.message || 'Failed to create admin user',
             });
         } finally {
             setIsLoading(false);
@@ -82,12 +78,12 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                     <form onSubmit={handleCreateAdmin} className="space-y-6">
                         {message && (
                             <div className={`p-4 rounded-lg ${message.type === 'success'
-                                    ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                                    : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                                : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                                 }`}>
                                 <p className={`text-sm ${message.type === 'success'
-                                        ? 'text-green-600 dark:text-green-400'
-                                        : 'text-red-600 dark:text-red-400'
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400'
                                     }`}>
                                     {message.text}
                                 </p>

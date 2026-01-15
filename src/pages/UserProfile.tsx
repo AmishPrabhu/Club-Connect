@@ -1,9 +1,9 @@
 import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts } from '../lib/firestoreService';
+import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts } from '../lib/dbService';
 import { Page } from '../types/page';
-import { FirestorePost, ClubMessage } from '../types/auth';
+import { DBPost, ClubMessage } from '../types/auth';
 
 interface UserProfileProps {
   onBack: () => void;
@@ -12,7 +12,7 @@ interface UserProfileProps {
 }
 
 interface UserEvent {
-  event: FirestorePost;
+  event: DBPost;
   rsvpDate: Date;
 }
 
@@ -102,8 +102,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
 
         // Map RSVPs to events
         const events: UserEvent[] = [];
-        for (const { eventId, rsvp } of userRSVPs) {
-          const event = allPosts.find(p => p.id === eventId);
+        for (const rsvp of userRSVPs) {
+          const event = allPosts.find(p => p.id === rsvp.eventId);
           if (event) {
             events.push({
               event,
@@ -153,7 +153,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
 
     setLoadingMessages(prev => ({ ...prev, [clubId]: true }));
     try {
-      const { getClubMessages } = await import('../lib/firestoreService');
+      const { getClubMessages } = await import('../lib/dbService');
       const msgs = await getClubMessages(clubId);
       setClubMessages(prev => ({ ...prev, [clubId]: msgs }));
     } catch (error) {

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { driver, DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useNavigation } from './NavigationContext';
-import { getClubs } from '../lib/firestoreService';
+import { getClubs } from '../lib/dbService';
 
 interface TourContextType {
     startTour: () => void;

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
-import { FirestoreClub, FirestorePost, FirestoreNotification } from '../types/auth';
+import { DBClub, DBPost, DBNotification } from '../types/auth';
 import {
   getClubs,
   createClub,
@@ -17,7 +17,7 @@ import {
   getNotifications,
   createNotification,
   deleteNotification,
-} from '../lib/firestoreService';
+} from '../lib/dbService';
 
 
 
@@ -88,7 +88,7 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
     setIsSaving(true);
 
     try {
-      const { updateClubImage } = await import('../lib/firestoreService');
+      const { updateClubImage } = await import('../lib/dbService');
       const result = await updateClubImage(clubId, url);
 
       if (result.success) {
@@ -158,9 +158,9 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data states
-  const [clubs, setClubs] = useState<FirestoreClub[]>([]);
-  const [posts, setPosts] = useState<FirestorePost[]>([]);
-  const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
+  const [clubs, setClubs] = useState<DBClub[]>([]);
+  const [posts, setPosts] = useState<DBPost[]>([]);
+  const [notifications, setNotifications] = useState<DBNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
   const [showEditAdvisorModal, setShowEditAdvisorModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
-  const [selectedClub, setSelectedClub] = useState<FirestoreClub | null>(null);
+  const [selectedClub, setSelectedClub] = useState<DBClub | null>(null);
 
   // Form states
   const [newClub, setNewClub] = useState({
@@ -421,25 +421,25 @@ export default function AdminDashboard() {
     }
   };
 
-  const openSecretaryModal = (club: FirestoreClub) => {
+  const openSecretaryModal = (club: DBClub) => {
     setSelectedClub(club);
     setNewSecretary({ email: '', password: 'Hello@123', name: '' });
     setShowCreateSecretaryModal(true);
   };
 
-  const openPresidentModal = (club: FirestoreClub) => {
+  const openPresidentModal = (club: DBClub) => {
     setSelectedClub(club);
     setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
     setShowCreatePresidentModal(true);
   };
 
-  const openTreasurerModal = (club: FirestoreClub) => {
+  const openTreasurerModal = (club: DBClub) => {
     setSelectedClub(club);
     setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
     setShowCreateTreasurerModal(true);
   };
 
-  const openAdvisorModal = (club: FirestoreClub) => {
+  const openAdvisorModal = (club: DBClub) => {
     setSelectedClub(club);
     setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
     setShowCreateAdvisorModal(true);
@@ -480,7 +480,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const openEditAdvisorModal = (club: FirestoreClub) => {
+  const openEditAdvisorModal = (club: DBClub) => {
     setSelectedClub(club);
     setNewRoleUser({
       email: club.advisorEmail || '',
@@ -503,7 +503,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Note: We can't delete the old Firebase Auth account from client-side
     // So we just create a new advisor account and update the club reference
     const result = await createClubAdvisor(
       newRoleUser.email,
@@ -527,7 +526,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRemoveAdvisor = async (club: FirestoreClub) => {
+  const handleRemoveAdvisor = async (club: DBClub) => {
     if (!club.id) return;
 
     if (!window.confirm(`Are you sure you want to remove the Advisor from ${club.name}?`)) {
@@ -1258,7 +1257,7 @@ export default function AdminDashboard() {
             </div>
 
             <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-4">
-              ⚠️ This will create a new advisor account. The old advisor will need to be removed manually from Firebase.
+              ⚠️ This will create a new advisor account. The old advisor account will remain inactive or can be removed by an admin.
             </p>
 
             {formMessage && (

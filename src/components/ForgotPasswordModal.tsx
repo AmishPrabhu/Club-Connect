@@ -40,16 +40,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
         setErrorMessage('');
 
         try {
-            // First check if the email exists in Firestore
-            const { checkEmailExists } = await import('../lib/firestoreService');
-            const emailExists = await checkEmailExists(email);
 
-            if (!emailExists) {
-                setStatus('userNotFound');
-                setErrorMessage('No account found with this email address.');
-                setIsLoading(false);
-                return;
-            }
 
             await resetPassword(email);
             setStatus('success');

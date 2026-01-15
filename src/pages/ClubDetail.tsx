@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus, Instagram } from 'lucide-react';
-import { FirestoreClub, FirestorePost, Attachment } from '../types/auth';
-import { getPosts } from '../lib/firestoreService';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { DBClub, DBPost, Attachment } from '../types/auth';
+import { getPosts } from '../lib/dbService';
+
 import RSVPModal from '../components/RSVPModal';
 import ImageModal from '../components/ImageModal';
 
@@ -34,8 +33,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
     isOpen: false,
     event: null
   });
-  const [club, setClub] = useState<FirestoreClub | null>(null);
-  const [posts, setPosts] = useState<FirestorePost[]>([]);
+  const [club, setClub] = useState<DBClub | null>(null);
+  const [posts, setPosts] = useState<DBPost[]>([]);
   const [members, setMembers] = useState<Array<{ id?: string; name: string; email: string; role: string; joinedAt: Date }>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,22 +54,25 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
     const fetchData = async () => {
       try {
         // Fetch club
-        const clubRef = doc(db, 'clubs', clubId);
-        const clubDoc = await getDoc(clubRef);
+        // Fetch club via API
+        const { default: api } = await import('../lib/api');
+        const response = await api.get(`/clubs/${clubId}`);
+        const clubData = response.data;
 
-        if (clubDoc.exists()) {
-          // Sync member count with actual subcollection count
-          const { syncClubMemberCount } = await import('../lib/firestoreService');
-          const actualCount = await syncClubMemberCount(clubId);
+        // Map _id to id
+        const processedClub = {
+          ...clubData,
+          id: clubData._id || clubData.id,
+          createdAt: new Date(clubData.createdAt),
+          updatedAt: new Date(clubData.updatedAt),
+        } as DBClub;
 
-          setClub({
-            id: clubDoc.id,
-            ...clubDoc.data(),
-            members: actualCount, // Use synced count
-            createdAt: clubDoc.data().createdAt?.toDate() || new Date(),
-            updatedAt: clubDoc.data().updatedAt?.toDate() || new Date(),
-          } as FirestoreClub);
-        }
+        // Sync member count (optional as our API returns members count on club object)
+        // keeping logic similar
+        const { syncClubMemberCount } = await import('../lib/dbService');
+        // syncClubMemberCount in new service just returns current count, so we can skip or keep. 
+        // Logic:
+        setClub(processedClub);
 
         // Fetch posts for this club
         const allPosts = await getPosts();
@@ -78,7 +80,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         setPosts(clubPosts);
 
         // Fetch club members
-        const { getClubMembers } = await import('../lib/firestoreService');
+        const { getClubMembers } = await import('../lib/dbService');
         const clubMembers = await getClubMembers(clubId);
         setMembers(clubMembers);
       } catch (error) {

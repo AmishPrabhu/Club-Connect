@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Page } from '../types/page';
-import { markNotificationAsRead } from '../lib/firestoreService';
+import { markNotificationAsRead } from '../lib/dbService';
 
 interface NavigationContextType {
     currentPage: Page;

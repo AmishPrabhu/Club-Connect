@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Filter, TrendingUp, Users, ChevronRight } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
-import { FirestoreClub } from '../types/auth';
-import { getClubs, getPosts } from '../lib/firestoreService';
+import { DBClub } from '../types/auth';
+import { getClubs, getPosts } from '../lib/dbService';
 
 interface DashboardProps {
   onNavigateToClub: (clubId: string) => void;
 }
 
 export default function Dashboard({ onNavigateToClub }: DashboardProps) {
-  const [clubs, setClubs] = useState<FirestoreClub[]>([]);
+  const [clubs, setClubs] = useState<DBClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

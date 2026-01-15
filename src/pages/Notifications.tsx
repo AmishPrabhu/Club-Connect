@@ -1,15 +1,15 @@
 import { ArrowLeft, Bell, Calendar, Users, Shield, Megaphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { FirestoreNotification } from '../types/auth';
-import { getNotifications, markNotificationAsRead } from '../lib/firestoreService';
+import { DBNotification } from '../types/auth';
+import { getNotifications, markNotificationAsRead } from '../lib/dbService';
 
 interface NotificationsProps {
   onBack: () => void;
-  onNavigateToNotification: (notification: FirestoreNotification) => void;
+  onNavigateToNotification: (notification: DBNotification) => void;
 }
 
 export default function Notifications({ onBack, onNavigateToNotification }: NotificationsProps) {
-  const [notifications, setNotifications] = useState<FirestoreNotification[]>([]);
+  const [notifications, setNotifications] = useState<DBNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'event' | 'announcement'>('all');
 
@@ -61,11 +61,11 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
     }
   };
 
-  const getSourceLabel = (notification: FirestoreNotification) => {
+  const getSourceLabel = (notification: DBNotification) => {
     if (notification.clubId) {
       return `From Club`;
     }
-    return 'From Admin';
+    return 'System';
   };
 
   const formatDate = (date: Date) => {

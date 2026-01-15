@@ -1,18 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  User as FirebaseUser
-} from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
-import { AuthContextType, AuthState, User, FirestoreUser } from '../types/auth';
-
+import api from '../lib/api';
+import { AuthContextType, AuthState, User } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -28,97 +16,60 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Fetch user profile from Firestore
-const fetchUserProfile = async (firebaseUser: FirebaseUser): Promise<User | null> => {
-  try {
-    const userDocRef = doc(db, 'users', firebaseUser.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (userDoc.exists()) {
-      const data = userDoc.data() as FirestoreUser;
-      return {
-        id: firebaseUser.uid,
-        email: data.email || firebaseUser.email || '',
-        name: data.name || firebaseUser.displayName || 'User',
-        role: data.role || 'user',
-        clubId: data.clubId,
-        clubName: data.clubName,
-      };
-    } else {
-      // Create a default user profile if it doesn't exist
-      const defaultProfile: FirestoreUser = {
-        email: firebaseUser.email || '',
-        name: firebaseUser.displayName || 'User',
-        role: 'user',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      await setDoc(userDocRef, defaultProfile);
-
-      return {
-        id: firebaseUser.uid,
-        email: defaultProfile.email,
-        name: defaultProfile.name,
-        role: defaultProfile.role,
-      };
-    }
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return null;
-  }
-};
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: true, // Start as loading to check auth state
+    isLoading: true,
   });
 
-  // Listen for authentication state changes
+  // Check for existing token on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // User is signed in, fetch their profile
-        const userProfile = await fetchUserProfile(firebaseUser);
-        setAuthState({
-          user: userProfile,
-          isAuthenticated: userProfile !== null,
-          isLoading: false,
-        });
+    const loadUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await api.get('/auth/me');
+          setAuthState({
+            user: response.data,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
+          console.error('Failed to load user', error);
+          localStorage.removeItem('token');
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
       } else {
-        // User is signed out
         setAuthState({
           user: null,
           isAuthenticated: false,
           isLoading: false,
         });
       }
-    });
+    };
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    loadUser();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userProfile = await fetchUserProfile(userCredential.user);
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user } = response.data;
 
-      if (userProfile) {
-        setAuthState({
-          user: userProfile,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        return true;
-      } else {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        return false;
-      }
+      localStorage.setItem('token', token);
+
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return true;
     } catch (error) {
       console.error('Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -127,42 +78,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await signOut(auth);
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    localStorage.removeItem('token');
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
   };
 
   const signUp = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const response = await api.post('/auth/signup', { email, password, name });
+      const { token, user } = response.data;
 
-      // Create user profile in Firestore
-      const userDocRef = doc(db, 'users', userCredential.user.uid);
-      const userProfile: FirestoreUser = {
-        email: email,
-        name: name,
-        role: 'user',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      await setDoc(userDocRef, userProfile);
+      localStorage.setItem('token', token);
 
       setAuthState({
-        user: {
-          id: userCredential.user.uid,
-          email: email,
-          name: name,
-          role: 'user',
-        },
+        user,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -171,55 +104,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Sign up error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
-
-      // Map Firebase errors to user-friendly messages
-      let errorMessage = 'Failed to create account';
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'An account with this email already exists';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password should be at least 6 characters';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address';
-      }
-
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to create account'
+      };
     }
   };
 
   const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
-
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-
-      // fetchUserProfile will create the profile if it doesn't exist
-      const userProfile = await fetchUserProfile(userCredential.user);
-
-      if (userProfile) {
-        setAuthState({
-          user: userProfile,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        return { success: true };
-      } else {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        return { success: false, error: 'Failed to create user profile' };
-      }
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-
-      let errorMessage = 'Failed to sign in with Google';
-      if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign in cancelled';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = 'Popup was blocked. Please allow popups for this site.';
-      }
-
-      return { success: false, error: errorMessage };
-    }
+    setAuthState(prev => ({ ...prev, isLoading: false }));
+    console.warn("Google Sign In not implemented in MongoDB migration yet.");
+    return { success: false, error: 'Google Sign In not supported currently.' };
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -239,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     updateUser,
     resetPassword: async (email: string) => {
-      await sendPasswordResetEmail(auth, email);
+      console.warn("Reset Password not implemented yet.");
     },
   };
 

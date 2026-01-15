@@ -3,7 +3,7 @@ import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
 import { useState, useEffect } from 'react';
-import { getNotifications } from '../lib/firestoreService';
+import { getNotifications } from '../lib/dbService';
 import { useTour } from '../context/TourContext';
 
 interface HeaderProps {

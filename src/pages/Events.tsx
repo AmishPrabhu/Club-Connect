@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, ArrowLeft, ChevronDown, Sparkles, Bell, Filter, Settings } from 'lucide-react';
-import { FirestorePost, FirestoreClub, User } from '../types/auth';
-import { getPosts, getClubs } from '../lib/firestoreService';
+import { DBPost, DBClub, User } from '../types/auth';
+import { getPosts, getClubs } from '../lib/dbService';
 
 interface EventsProps {
     onBack: () => void;
@@ -16,8 +16,8 @@ import ImageModal from '../components/ImageModal';
 
 export default function Events({ onBack, onNavigateToPost, user, onManageEvent }: EventsProps) {
     // ... existing state
-    const [posts, setPosts] = useState<FirestorePost[]>([]);
-    const [clubs, setClubs] = useState<FirestoreClub[]>([]);
+    const [posts, setPosts] = useState<DBPost[]>([]);
+    const [clubs, setClubs] = useState<DBClub[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(15);
     const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'completed'>('all');

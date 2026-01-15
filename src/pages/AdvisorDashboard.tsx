@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Page } from '../types/page';
-import { FirestorePost, FirestoreClub } from '../types/auth';
-import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer } from '../lib/firestoreService';
+import { DBPost, DBClub } from '../types/auth';
+import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer } from '../lib/dbService';
 
 interface AdvisorDashboardProps {
     onNavigate: (page: Page) => void;
@@ -13,10 +13,10 @@ interface AdvisorDashboardProps {
 export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardProps) {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'events' | 'team'>('events');
-    const [events, setEvents] = useState<FirestorePost[]>([]);
+    const [events, setEvents] = useState<DBPost[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [clubName, setClubName] = useState('');
-    const [club, setClub] = useState<FirestoreClub | null>(null);
+    const [club, setClub] = useState<DBClub | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     // Role edit states
@@ -60,7 +60,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     const openEditRoleModal = (role: 'secretary' | 'president' | 'treasurer') => {
         setEditingRole(role);
         setRoleForm({
-            name: '', // Name not stored in FirestoreClub for these roles
+            name: '', // Name not stored in DBClub for these roles
             email: role === 'secretary' ? (club?.secretaryEmail || '') :
                 role === 'president' ? (club?.presidentEmail || '') :
                     (club?.treasurerEmail || ''),

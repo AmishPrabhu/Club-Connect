@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
-import { FirestorePost, User, ClubMember, EventTask, EventRSVP } from '../types/auth';
-import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant } from '../lib/firestoreService';
+import { DBPost, User, ClubMember, EventTask, EventRSVP } from '../types/auth';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant } from '../lib/dbService';
 
 interface EventManagementProps {
     eventId: string;
@@ -11,7 +11,7 @@ interface EventManagementProps {
 }
 
 export default function EventManagement({ eventId, onBack, user }: EventManagementProps) {
-    const [post, setPost] = useState<FirestorePost | null>(null);
+    const [post, setPost] = useState<DBPost | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);

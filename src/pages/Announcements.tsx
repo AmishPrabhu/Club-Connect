@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, ArrowLeft, ChevronDown, Megaphone, Filter } from 'lucide-react';
-import { FirestorePost, FirestoreClub } from '../types/auth';
-import { getPosts, getClubs } from '../lib/firestoreService';
+import { DBPost, DBClub } from '../types/auth';
+import { getPosts, getClubs } from '../lib/dbService';
 
 interface AnnouncementsProps {
     onBack: () => void;
@@ -14,8 +14,8 @@ import ImageModal from '../components/ImageModal';
 
 export default function Announcements({ onBack, onNavigateToPost }: AnnouncementsProps) {
     // ... existing state
-    const [posts, setPosts] = useState<FirestorePost[]>([]);
-    const [clubs, setClubs] = useState<FirestoreClub[]>([]);
+    const [posts, setPosts] = useState<DBPost[]>([]);
+    const [clubs, setClubs] = useState<DBClub[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(15);
     const [clubFilter, setClubFilter] = useState<string>('all');

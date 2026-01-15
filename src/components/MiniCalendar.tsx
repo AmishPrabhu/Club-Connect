@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { FirestorePost } from '../types/auth';
+import { DBPost } from '../types/auth';
 
 interface MiniCalendarProps {
-    events: FirestorePost[];
+    events: DBPost[];
     selectedDate?: Date | null;
     onDateSelect: (date: Date) => void;
 }

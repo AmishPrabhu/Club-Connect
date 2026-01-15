@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, UserPlus, X, Check, Users } from 'lucide-react';
 import { ClubMember, ClubMemberRole, UserRole } from '../types/auth';
-import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/firestoreService';
+import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/dbService';
 
 interface MemberManagerProps {
     clubId: string;

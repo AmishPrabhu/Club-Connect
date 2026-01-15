@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Share2, Image, Upload, FileImage, Plus, MapPin, Clock, ExternalLink, Settings } from 'lucide-react';
-import { FirestorePost, User, Attachment } from '../types/auth';
-import { getPosts, updatePost } from '../lib/firestoreService';
+import { DBPost, User, Attachment } from '../types/auth';
+import { getPosts, updatePost } from '../lib/dbService';
 import AttachmentGallery from '../components/AttachmentGallery';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import RSVPModal from '../components/RSVPModal';
@@ -16,7 +16,7 @@ interface PostDetailProps {
 }
 
 export default function PostDetail({ postId, onBack, onNavigateToPost, user, onManageEvent }: PostDetailProps) {
-    const [post, setPost] = useState<FirestorePost | null>(null);
+    const [post, setPost] = useState<DBPost | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isShared, setIsShared] = useState(false);
     const [isEditingPhotos, setIsEditingPhotos] = useState(false);

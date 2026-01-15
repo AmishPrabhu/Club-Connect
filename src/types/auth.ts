@@ -52,7 +52,7 @@ export interface AuthContextType extends AuthState {
 }
 
 // Firestore user document structure (stored in 'users' collection)
-export interface FirestoreUser {
+export interface DBUser {
   email: string;
   name: string;
   role: UserRole;
@@ -63,7 +63,7 @@ export interface FirestoreUser {
 }
 
 // Firestore club document structure
-export interface FirestoreClub {
+export interface DBClub {
   id?: string;
   name: string;
   description: string;
@@ -111,7 +111,7 @@ export interface EventTask {
 
 
 // Firestore post document structure
-export interface FirestorePost {
+export interface DBPost {
   id?: string;
   title: string;
   content: string;
@@ -146,7 +146,7 @@ export interface FirestorePost {
 }
 
 // Firestore notification document structure
-export interface FirestoreNotification {
+export interface DBNotification {
   id?: string;
   title: string;
   message: string;

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
-import { FirestorePost } from '../types/auth';
+import { DBPost } from '../types/auth';
 
 interface WeeklyEventsProps {
-    events: FirestorePost[];
+    events: DBPost[];
     onNavigateToPost: (postId: string) => void;
     selectedDate?: Date | null;
 }
