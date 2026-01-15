@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Users, Calendar, Edit, Bell, MessageSquare, Plus,
   Settings, Image, Trash2, Settings2, Sparkles, Send,
-  FileSpreadsheet, CheckCircle, Instagram, Link
+  FileSpreadsheet, CheckCircle, Instagram, Link,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
@@ -390,6 +391,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [club, setClub] = useState<DBClub | null>(null);
   const [posts, setPosts] = useState<DBPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
 
   // Image Modal State
   const [modalImage, setModalImage] = useState<string | null>(null);
@@ -798,74 +800,72 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-12">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
+      <div className="mb-4 md:mb-8">
+        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+          <div className={`w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br ${club.color} flex items-center justify-center overflow-hidden`}>
             {club.image && club.image.startsWith('http') ? (
               <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
             ) : (
-              club.icon
+              <span className="text-sm md:text-2xl">{club.icon}</span>
             )}
           </div>
-          <div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-              {club.name} Management
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              Welcome back, {user?.name}. Manage your club from here.
-            </p>
-          </div>
+          <h1 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white line-clamp-1">
+            {club.name} Management
+          </h1>
         </div>
+        <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300">
+          Welcome back, {user?.name}. Manage your club from here.
+        </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6 mb-6 md:mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md md:rounded-lg">
+              <Users className="w-4 h-4 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Members</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Members</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-green-100 dark:bg-green-900/20 rounded-md md:rounded-lg">
+              <Calendar className="w-4 h-4 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Upcoming Events</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <Edit className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-purple-100 dark:bg-purple-900/20 rounded-md md:rounded-lg">
+              <Edit className="w-4 h-4 md:w-6 md:h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Published Posts</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Published</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-slate-100 dark:bg-slate-700 rounded-md md:rounded-lg">
+              <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-slate-600 dark:text-slate-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Past Events</p>
+              <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Past</p>
             </div>
           </div>
         </div>
@@ -878,9 +878,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             { id: 'overview', label: 'Overview', icon: Settings },
             { id: 'members', label: 'Members', icon: Users },
             { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
-            { id: 'posts', label: 'Manage Posts', icon: Edit },
-            { id: 'notifications', label: 'Send Notifications', icon: Bell },
-            { id: 'messages', label: 'Messages', icon: MessageSquare },
+            { id: 'posts', label: 'Posts', icon: Edit },
+            { id: 'notifications', label: 'Alerts', icon: Bell },
+            { id: 'messages', label: 'Chat', icon: MessageSquare },
             { id: 'budget', label: 'Budget', icon: FileSpreadsheet, treasurerOnly: false }
           ].filter(tab => {
             // Treasurer sees: overview, members, events, budget
@@ -896,12 +896,12 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
+                className={`flex-1 min-w-fit md:min-w-0 flex items-center justify-center gap-2 px-3 py-3 md:px-6 md:py-4 font-semibold text-xs md:text-base transition-all whitespace-nowrap ${activeTab === tab.id
                   ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4 md:w-5 md:h-5" />
                 {tab.label}
               </button>
             );
@@ -1165,13 +1165,15 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                 )}
                               </div>
                             </div>
-                            <button
-                              onClick={() => post.id && navigateToManagement(post.id)}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
-                            >
-                              <Settings2 className="w-4 h-4" />
-                              Manage
-                            </button>
+                            {!isReadOnly && (
+                              <button
+                                onClick={() => post.id && navigateToManagement(post.id)}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
+                              >
+                                <Settings2 className="w-4 h-4" />
+                                Manage
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -1222,95 +1224,118 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {posts.map((post) => (
-                    <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between">
-                        <div
-                          className="flex-1 cursor-pointer"
-                          onClick={() => post.id && onNavigateToPost(post.id)}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                              }`}>
-                              {post.type}
-                            </span>
-                            <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
-                          </div>
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.title}</h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{post.content}</p>
-                          {post.rsvps && post.rsvps > 0 && (
-                            <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
-                          )}
-                          {post.attachments && post.attachments.length > 0 && (
-                            <div className="mt-3">
-                              <AttachmentGallery attachments={post.attachments} />
+                  {posts.map((post) => {
+                    const isExpanded = expandedPostId === post.id;
+                    return (
+                      <div
+                        key={post.id}
+                        className={`bg-slate-50 dark:bg-slate-700/50 rounded-xl transition-all hover:shadow-md cursor-pointer ${isExpanded ? 'p-6' : 'p-4'}`}
+                        onClick={() => setExpandedPostId(isExpanded ? null : post.id!)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                                }`}>
+                                {post.type}
+                              </span>
+                              <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
                             </div>
-                          )}
-                        </div>
-                        <div className="flex gap-2 flex-col">
-                          {post.type === 'event' && new Date(post.date) < new Date() && (
-                            <button
-                              onClick={() => handleEditPhotos(post)}
-                              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
-                              title="Add Event Photos"
-                            >
-                              <Image className="w-4 h-4" />
-                              Add Photos ({post.eventPhotos?.length || 0})
-                            </button>
-                          )}
-                          {post.type === 'event' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingRegistrationLink({ postId: post.id!, currentLink: post.registrationLink || '' });
-                                setNewRegistrationLink(post.registrationLink || '');
-                              }}
-                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.registrationLink
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
-                                }`}
-                              title={post.registrationLink ? 'Edit Registration Link' : 'Add Registration Link'}
-                            >
-                              <Link className="w-4 h-4" />
-                              {post.registrationLink ? 'Edit Link' : 'Add Link'}
-                            </button>
-                          )}
-                          {post.type === 'event' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingEventWhatsapp({ postId: post.id!, currentLink: post.eventWhatsappLink || '' });
-                                setNewEventWhatsappLink(post.eventWhatsappLink || '');
-                              }}
-                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.eventWhatsappLink
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
-                                }`}
-                              title={post.eventWhatsappLink ? 'Edit WhatsApp Group' : 'Add WhatsApp Group'}
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                              </svg>
-                              {post.eventWhatsappLink ? 'Edit Group' : 'Add Group'}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeletePost(post.id!)}
-                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">{post.title}</h4>
+
+                            {/* Summary Content */}
+                            {!isExpanded && (
+                              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{post.content}</p>
+                            )}
+
+                            {/* Expanded Details */}
+                            {isExpanded && (
+                              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 whitespace-pre-wrap">{post.content}</p>
+
+                                {post.rsvps !== undefined && post.rsvps > 0 && (
+                                  <p className="text-sm text-green-600 dark:text-green-400 mb-2">{post.rsvps} RSVPs</p>
+                                )}
+
+                                {post.attachments && post.attachments.length > 0 && (
+                                  <div className="mt-3 mb-4">
+                                    <AttachmentGallery attachments={post.attachments} />
+                                  </div>
+                                )}
+
+                                {/* Action Buttons inside Expanded View */}
+                                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); post.id && onNavigateToPost(post.id); }}
+                                    className="px-3 py-2 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
+                                  >
+                                    View Public Page
+                                  </button>
+
+                                  {post.type === 'event' && new Date(post.date) < new Date() && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleEditPhotos(post); }}
+                                      className="px-3 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                    >
+                                      <Image className="w-4 h-4" />
+                                      Photos ({post.eventPhotos?.length || 0})
+                                    </button>
+                                  )}
+
+                                  {post.type === 'event' && (
+                                    <>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingRegistrationLink({ postId: post.id!, currentLink: post.registrationLink || '' });
+                                          setNewRegistrationLink(post.registrationLink || '');
+                                        }}
+                                        className="px-3 py-2 bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                      >
+                                        <Link className="w-4 h-4" />
+                                        {post.registrationLink ? 'Edit Link' : 'Add Link'}
+                                      </button>
+
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingEventWhatsapp({ postId: post.id!, currentLink: post.eventWhatsappLink || '' });
+                                          setNewEventWhatsappLink(post.eventWhatsappLink || '');
+                                        }}
+                                        className="px-3 py-2 bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                      >
+                                        <MessageSquare className="w-4 h-4" />
+                                        {post.eventWhatsappLink ? 'Edit Group' : 'Add Group'}
+                                      </button>
+                                    </>
+                                  )}
+
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id!); }}
+                                    className="px-3 py-2 bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ml-auto"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Chevron Icon */}
+                          <div className="ml-4 text-slate-400">
+                            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
-          )
-          }
+          )}
 
           {/* Notifications Tab */}
           {

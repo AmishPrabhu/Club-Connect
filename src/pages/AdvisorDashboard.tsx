@@ -165,59 +165,59 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     const pastEvents = events.filter(e => new Date(e.date) < new Date()).length;
 
     return (
-        <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-12">
             {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-xl">
-                        <Shield className="w-6 h-6 text-white" />
+            <div className="mb-4 md:mb-8">
+                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+                    <div className="p-1.5 md:p-2 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg md:rounded-xl">
+                        <Shield className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white">
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white line-clamp-1">
                             Advisor Dashboard
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400">{clubName}</p>
+                        <p className="text-xs md:text-base text-slate-600 dark:text-slate-400">{clubName}</p>
                     </div>
                 </div>
-                <p className="text-lg text-slate-600 dark:text-slate-300">
+                <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300">
                     Welcome, {user?.name}. Manage your club's events and team.
                 </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                            <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-6 mb-6 md:mb-8">
+                <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="p-1.5 md:p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md md:rounded-lg">
+                            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{events.length}</p>
-                            <p className="text-sm text-slate-600 dark:text-slate-300">Total Events</p>
+                            <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{events.length}</p>
+                            <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Total Events</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                            <Clock className="w-6 h-6 text-green-600 dark:text-green-400" />
+                <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="p-1.5 md:p-2 bg-green-100 dark:bg-green-900/20 rounded-md md:rounded-lg">
+                            <Clock className="w-4 h-4 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{upcomingEvents}</p>
-                            <p className="text-sm text-slate-600 dark:text-slate-300">Upcoming Events</p>
+                            <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{upcomingEvents}</p>
+                            <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
-                            <Calendar className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+                <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-md md:shadow-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="p-1.5 md:p-2 bg-slate-100 dark:bg-slate-700 rounded-md md:rounded-lg">
+                            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-slate-600 dark:text-slate-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{pastEvents}</p>
-                            <p className="text-sm text-slate-600 dark:text-slate-300">Past Events</p>
+                            <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{pastEvents}</p>
+                            <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Past</p>
                         </div>
                     </div>
                 </div>
@@ -228,20 +228,20 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                 <div className="flex border-b border-slate-200 dark:border-slate-700">
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
-                        { id: 'team', label: 'Team Management', icon: Users },
-                        { id: 'budget', label: 'Budget Management', icon: FileSpreadsheet },
+                        { id: 'team', label: 'Team', icon: Users },
+                        { id: 'budget', label: 'Budget', icon: FileSpreadsheet },
                     ].map((tab) => {
                         const Icon = tab.icon;
                         return (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
+                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 md:px-6 md:py-4 font-semibold text-xs md:text-base transition-all whitespace-nowrap ${activeTab === tab.id
                                     ? 'text-cyan-600 dark:text-cyan-400 border-b-2 border-cyan-600'
                                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                                     }`}
                             >
-                                <Icon className="w-5 h-5" />
+                                <Icon className="w-4 h-4 md:w-5 md:h-5" />
                                 {tab.label}
                             </button>
                         );
