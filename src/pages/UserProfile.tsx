@@ -180,7 +180,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
     <div className="max-w-4xl mx-auto px-6 py-12">
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-8 transition-colors"
+        className="flex items-center gap-2 text-slate-600 hover:text-[#002147] mb-8 transition-colors font-medium"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="font-semibold">Back to Home</span>
@@ -194,9 +194,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
       )}
 
       {/* Profile Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 mb-8">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
         <div className="flex items-start gap-6">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+          <div className="w-24 h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-4xl shadow-md border-2 border-[#DAA520]">
             👨‍🎓
           </div>
           <div className="flex-1">
@@ -226,9 +226,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-semibold transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-lg font-bold transition-colors uppercase tracking-wide text-sm"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-4 h-4 text-[#DAA520]" />
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
                   <button
@@ -249,7 +249,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               </div>
             ) : (
               <>
-                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{profileData.name || 'User'}</h1>
+                <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2">{profileData.name || 'User'}</h1>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
                   {profileData.bio || 'No bio yet. Click edit to add one!'}
                 </p>
@@ -259,7 +259,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                     <span>{profileData.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="w-4 h-4 text-[#DAA520]" />
                     <span>Joined {profileData.joinDate}</span>
                   </div>
                 </div>
@@ -281,9 +281,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
           <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-bold ${user.role === 'admin'
-                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
                 : user.role === 'club-secretary'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  ? 'bg-blue-100 text-[#002147] dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200'
                   : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                 }`}>
                 {user.role === 'club-secretary' ? 'Club Secretary' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
@@ -298,7 +298,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
 
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
           <div className="flex border-b border-slate-200 dark:border-slate-700">
             {[
               { id: 'overview', label: 'Overview', icon: User },
@@ -307,12 +307,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === tab.id
+                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                   }`}
               >
-                <tab.icon className="w-5 h-5" />
+                <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
                 <span>{tab.label}</span>
               </button>
             ))}
@@ -321,9 +321,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
               <button
                 key={`messages-${membership.clubId}`}
                 onClick={() => setActiveTab(`messages-${membership.clubId}` as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === `messages-${membership.clubId}`
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400'
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === `messages-${membership.clubId}`
+                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                   }`}
               >
                 <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs overflow-hidden">
@@ -338,7 +338,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Club Memberships</h3>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">Club Memberships</h3>
                   {memberships.length > 0 ? (
                     <div className="grid gap-4">
                       {memberships.map((membership, index) => (
@@ -374,7 +374,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">Recent Activity</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
@@ -405,26 +405,26 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                 <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700">
                   <button
                     onClick={() => setEventTab('upcoming')}
-                    className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'upcoming'
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    className={`pb-3 px-2 font-bold transition-colors relative ${eventTab === 'upcoming'
+                      ? 'text-[#002147] dark:text-blue-400'
+                      : 'text-slate-500 hover:text-[#002147] dark:hover:text-slate-300'
                       }`}
                   >
                     Upcoming ({upcomingEvents.length})
                     {eventTab === 'upcoming' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#002147]" />
                     )}
                   </button>
                   <button
                     onClick={() => setEventTab('past')}
-                    className={`pb-3 px-2 font-semibold transition-colors relative ${eventTab === 'past'
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    className={`pb-3 px-2 font-bold transition-colors relative ${eventTab === 'past'
+                      ? 'text-[#002147] dark:text-blue-400'
+                      : 'text-slate-500 hover:text-[#002147] dark:hover:text-slate-300'
                       }`}
                   >
                     Past ({pastEvents.length})
                     {eventTab === 'past' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#002147]" />
                     )}
                   </button>
                 </div>
@@ -442,7 +442,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                         <p className="text-slate-500 dark:text-slate-400 mb-4">No upcoming events found.</p>
                         <button
                           onClick={() => onNavigate('events')}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-sm"
+                          className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold transition-colors text-sm uppercase tracking-wide"
                         >
                           Browse Events
                         </button>
@@ -464,8 +464,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${eventTab === 'upcoming'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${eventTab === 'upcoming'
+                                ? 'bg-blue-100 text-[#002147] dark:bg-blue-900/30 dark:text-blue-400'
                                 : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                 }`}>
                                 {eventTab === 'upcoming' ? 'Upcoming' : 'Completed'}
@@ -473,7 +473,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                               <span className="text-xs text-slate-500 font-medium">by {event.clubName}</span>
                             </div>
 
-                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">
+                            <h4 className="font-serif font-bold text-[#002147] dark:text-white mb-2">
                               {event.title}
                             </h4>
 
@@ -526,7 +526,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
             {activeTab.startsWith('messages-') && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
                     Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
                   </h3>
                 </div>

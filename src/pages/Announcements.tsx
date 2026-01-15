@@ -80,22 +80,22 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
     return (
         <div className="max-w-5xl mx-auto px-6 py-12">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-6"
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors mb-6 font-medium"
                 >
                     <ArrowLeft className="w-5 h-5" />
-                    <span className="font-medium">Back</span>
+                    <span>Back</span>
                 </button>
 
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-                        <Megaphone className="w-7 h-7 text-white" />
+                    <div className="w-14 h-14 bg-[#002147] rounded-2xl flex items-center justify-center border-2 border-[#DAA520] shadow-md">
+                        <Megaphone className="w-7 h-7 text-[#DAA520]" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">All Announcements</h1>
-                        <p className="text-slate-600 dark:text-slate-400">Stay updated with notifications from all clubs</p>
+                        <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">All Announcements</h1>
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">Stay updated with notifications from all clubs</p>
                     </div>
                 </div>
             </div>
@@ -172,18 +172,18 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="sm:w-1/4 h-40 sm:h-auto flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 min-h-[120px]">
+                                        <div className="sm:w-1/4 h-40 sm:h-auto flex flex-col justify-center items-center relative overflow-hidden bg-[#002147] flex-shrink-0 min-h-[120px] border-r border-[#DAA520]">
                                             {/* Decorative floating circles */}
-                                            <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full blur-sm" />
+                                            <div className="absolute top-4 right-4 w-16 h-16 bg-[#DAA520]/20 rounded-full blur-sm" />
                                             <div className="absolute bottom-4 left-4 w-10 h-10 bg-white/10 rounded-full blur-sm" />
 
                                             {/* Icon */}
-                                            <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                <Megaphone className="w-7 h-7 text-white" />
+                                            <div className="relative z-10 w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border border-[#DAA520]/50">
+                                                <Megaphone className="w-7 h-7 text-[#DAA520]" />
                                             </div>
 
                                             {/* Type label */}
-                                            <span className="relative z-10 text-xs font-bold text-white/90 uppercase tracking-widest">
+                                            <span className="relative z-10 text-xs font-serif font-bold text-[#DAA520] uppercase tracking-widest">
                                                 Announcement
                                             </span>
                                         </div>
@@ -193,7 +193,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                     <div className="sm:w-3/4 p-6 flex flex-col justify-center">
                                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                                <h3 className="text-xl font-bold font-serif text-[#002147] dark:text-white mb-2 group-hover:text-[#DAA520] transition-colors">
                                                     {post.title}
                                                 </h3>
 
@@ -202,7 +202,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                 </p>
 
                                                 <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                                    <span className="font-medium text-purple-600 dark:text-purple-400">{post.clubName}</span>
+                                                    <span className="font-bold text-[#002147] dark:text-blue-400">{post.clubName}</span>
                                                     <span>•</span>
                                                     <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                                 </div>
@@ -215,9 +215,9 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                         e.stopPropagation();
                                                         onNavigateToPost(post.relatedEventId!);
                                                     }}
-                                                    className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                                                    className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-[#002147] hover:bg-[#00152e] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] border border-[#00152e]"
                                                 >
-                                                    <Calendar className="w-5 h-5" />
+                                                    <Calendar className="w-5 h-5 text-[#DAA520]" />
                                                     <span>View Related Event</span>
                                                 </button>
                                             )}
@@ -233,9 +233,9 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                         <div className="text-center mt-8">
                             <button
                                 onClick={loadMore}
-                                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto"
+                                className="px-6 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold transition-colors flex items-center gap-2 mx-auto uppercase tracking-wide shadow-md"
                             >
-                                <ChevronDown className="w-5 h-5" />
+                                <ChevronDown className="w-5 h-5 text-[#DAA520]" />
                                 Load More Announcements
                             </button>
                         </div>

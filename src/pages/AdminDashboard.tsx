@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send } from 'lucide-react';
+import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send, Image as ImageIcon } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
 import { DBClub, DBPost, DBNotification } from '../types/auth';
@@ -11,7 +11,7 @@ import {
   createClubPresident,
   createClubTreasurer,
   createClubAdvisor,
-  removeClubOfficer,
+
   getPosts,
   deletePost,
   getNotifications,
@@ -55,6 +55,23 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
         resourceType: 'image',
         clientAllowedFormats: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
         maxFileSize: 5000000, // 5MB
+        styles: {
+          palette: {
+            window: "#FFFFFF",
+            windowBorder: "#90A0B3",
+            tabIcon: "#003366",
+            menuIcons: "#5A616A",
+            textDark: "#000000",
+            textLight: "#FFFFFF",
+            link: "#003366",
+            action: "#FFCC00",
+            inactiveTabIcon: "#0E2F5A",
+            error: "#F44235",
+            inProgress: "#0078FF",
+            complete: "#20B832",
+            sourceBg: "#E4EBF1"
+          }
+        }
       },
       (error: any, result: any) => {
         if (error) {
@@ -104,37 +121,42 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative w-40 h-40 mx-auto">
+    <div className="space-y-6">
+      <div className="relative w-48 h-48 mx-auto group">
         <img
           src={previewUrl || currentImage || '/club-default.jpg'}
           alt="Club profile"
-          className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+          className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg group-hover:shadow-xl transition-all"
           onError={(e) => { (e.target as HTMLImageElement).src = '/club-default.jpg'; }}
         />
         {(isUploading || isSaving) && (
-          <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <div className="w-8 h-8 border-4 border-white border-t-[#DAA520] rounded-full animate-spin"></div>
           </div>
         )}
+        <div className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-md">
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg text-center border border-red-200">
+          {error}
+        </div>
       )}
 
       <button
         onClick={openUploadWidget}
         disabled={isUploading || isSaving}
-        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+        className="w-full bg-[#002147] hover:bg-[#00152e] disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-bold tracking-wide transition-all flex items-center justify-center gap-3 shadow-md hover:shadow-lg"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        {isUploading ? 'Uploading...' : isSaving ? 'Saving...' : 'Upload from Device'}
+        {isUploading ? 'UPLOADING...' : isSaving ? 'SAVING...' : 'CHANGE CLUB BADGE'}
       </button>
-      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-        Supports JPG, PNG, GIF, WebP (max 5MB)
+      <p className="text-xs text-slate-500 dark:text-slate-400 text-center uppercase tracking-wider font-semibold">
+        Max Size: 5MB • JPG/PNG
       </p>
     </div>
   );
@@ -526,21 +548,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRemoveAdvisor = async (club: DBClub) => {
-    if (!club.id) return;
 
-    if (!window.confirm(`Are you sure you want to remove the Advisor from ${club.name}?`)) {
-      return;
-    }
-
-    const result = await removeClubOfficer(club.id, 'advisor');
-    if (result.success) {
-      alert('Advisor removed successfully');
-      loadData();
-    } else {
-      alert('Failed to remove advisor: ' + result.error);
-    }
-  };
 
   const filteredClubs = clubs.filter(club =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -548,120 +556,142 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl">
-            <Shield className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-            Admin Dashboard
-          </h1>
-        </div>
-        <p className="text-lg text-slate-600 dark:text-slate-300">
-          Welcome back, {user?.name}. Manage your platform from here.
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Total Clubs</p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-12">
+      {/* Official University Header for Dashboard */}
+      <div className="bg-[#002147] text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+            <img src="/wce-logo.png" alt="WCE Logo" className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg p-1 flex-shrink-0" />
+            <div className="min-w-0 flex-1 hidden md:block">
+              <h1 className="text-xl font-serif font-bold tracking-wide truncate">
+                Walchand College of Engineering, Sangli
+              </h1>
+              <p className="text-xs text-[#DAA520] uppercase tracking-wider font-semibold truncate">
+                Administrative Control Center
+              </p>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div className="flex items-center gap-3 md:gap-4 flex-shrink-0 ml-2">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-semibold">{user?.name}</p>
+              <p className="text-xs text-blue-200 uppercase">{user?.role}</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Active Events</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Total Posts</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
-              <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Unread Notifications</p>
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-[#002147] flex items-center justify-center font-bold text-sm md:text-lg border-2 border-[#DAA520]">
+              {user?.name?.charAt(0) || 'A'}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
-        <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: TrendingUp },
-            { id: 'clubs', label: 'Manage Clubs', icon: Users },
-            { id: 'posts', label: 'Manage Posts', icon: Edit },
-            { id: 'notifications', label: 'Notifications', icon: Bell }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-              >
-                <Icon className="w-5 h-5" />
-                {tab.label}
-              </button>
-            );
-          })}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147] hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-[#002147]">
+                <Users className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Clubs</span>
+            </div>
+            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{clubs.length}</p>
+            <div className="mt-2 text-xs text-slate-500">Registered Organizations</div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520] hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-[#DAA520]">
+                <Calendar className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Events</span>
+            </div>
+            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
+            <div className="mt-2 text-xs text-slate-500">Upcoming Campus Activities</div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-purple-500 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Posts</span>
+            </div>
+            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{posts.length}</p>
+            <div className="mt-2 text-xs text-slate-500">Announcements & Updates</div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-red-500 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600">
+                <Bell className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Alerts</span>
+            </div>
+            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
+            <div className="mt-2 text-xs text-slate-500">Unread System Messages</div>
+          </div>
         </div>
 
-        <div className="p-6">
+        {/* Navigation Tabs */}
+        <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8">
+          <div className="flex overflow-x-auto">
+            {[
+              { id: 'overview', label: 'Overview', icon: TrendingUp },
+              { id: 'clubs', label: 'Manage Clubs', icon: Users },
+              { id: 'posts', label: 'Manage Posts', icon: Edit },
+              { id: 'notifications', label: 'Notifications', icon: Bell }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-8 py-5 font-semibold transition-all whitespace-nowrap border-b-2 ${isActive
+                    ? 'text-[#002147] border-[#002147] bg-blue-50/50 dark:bg-blue-900/10'
+                    : 'text-slate-500 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''}`} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-8 min-h-[500px]">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex items-center justify-center py-20">
+              <div className="w-10 h-10 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
             </div>
           ) : (
             <>
               {/* Overview Tab */}
               {activeTab === 'overview' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+                <div className="space-y-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white border-l-4 border-[#DAA520] pl-3">Recent Campus Activity</h3>
+                    <button onClick={() => setActiveTab('posts')} className="text-sm font-semibold text-[#002147] hover:underline whitespace-nowrap">View All Activity &rarr;</button>
+                  </div>
+
                   {posts.length === 0 && clubs.length === 0 ? (
-                    <p className="text-slate-600 dark:text-slate-400">No recent activity. Start by creating a club!</p>
+                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-300">
+                      <p className="text-slate-500">No activity yet. Get started by creating a club!</p>
+                    </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {posts.slice(0, 5).map((post) => (
-                        <div key={post.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                          <div className={`w-2 h-2 ${post.type === 'event' ? 'bg-blue-500' : 'bg-purple-500'} rounded-full`}></div>
-                          <div>
-                            <p className="font-semibold text-slate-900 dark:text-white">{post.title}</p>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">{post.clubName} • {post.date}</p>
+                        <div key={post.id} className="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
+                          <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                            {post.type === 'event' ? <Calendar className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-slate-800 dark:text-white text-lg">{post.title}</h4>
+                            <p className="text-sm text-slate-500">Posted by <span className="font-semibold text-[#002147]">{post.clubName}</span> • {post.date}</p>
+                          </div>
+                          <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold uppercase text-slate-500">
+                            {post.type}
                           </div>
                         </div>
                       ))}
@@ -673,182 +703,105 @@ export default function AdminDashboard() {
               {/* Clubs Tab */}
               {activeTab === 'clubs' && (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex items-center gap-4 flex-wrap bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="relative flex-1 min-w-[200px]">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Search clubs..."
+                        placeholder="Search clubs by name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]"
                       />
                     </div>
                     <button
                       onClick={() => setShowCreateClubModal(true)}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
+                      className="bg-[#002147] hover:bg-[#00152e] text-white px-6 py-3 rounded-lg font-bold uppercase tracking-wide text-sm transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
                     >
                       <Plus className="w-5 h-5" />
-                      Create Club
+                      Register New Club
                     </button>
                   </div>
 
                   {filteredClubs.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-600 dark:text-slate-400">No clubs found. Create your first club!</p>
+                    <div className="text-center py-20">
+                      <Users className="w-20 h-20 text-slate-200 dark:text-slate-700 mx-auto mb-6" />
+                      <h3 className="text-xl font-bold text-slate-400 dark:text-slate-500">No clubs found</h3>
+                      <p className="text-slate-400 dark:text-slate-500 mt-2">Start by registering a new student organization.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {filteredClubs.map((club) => (
-                        <div key={club.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
-                              {club.image ? (
-                                <img
-                                  src={club.image}
-                                  alt={club.name}
-                                  className="w-full h-full object-contain p-2 bg-white"
-                                />
-                              ) : (
-                                club.icon
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-slate-900 dark:text-white">{club.name}</h4>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 capitalize">{club.category}</p>
-                            </div>
-                          </div>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">{club.description}</p>
-                          <div className="space-y-1 mb-4">
-                            <p className="text-sm text-slate-600 dark:text-slate-400">{club.members} members</p>
-                            {club.secretaryEmail && (
-                              <p className="text-sm text-green-600 dark:text-green-400">Sec: {club.secretaryEmail}</p>
-                            )}
-                            {club.presidentEmail && (
-                              <p className="text-sm text-purple-600 dark:text-purple-400">Pres: {club.presidentEmail}</p>
-                            )}
-                            {club.treasurerEmail && (
-                              <p className="text-sm text-amber-600 dark:text-amber-400">Treas: {club.treasurerEmail}</p>
-                            )}
-                            {club.advisorEmail && (
-                              <p className="text-sm text-cyan-600 dark:text-cyan-400">Advisor: {club.advisorName || club.advisorEmail}</p>
-                            )}
-                          </div>
-                          <div className="flex flex-col gap-2 mb-4">
-                            {!club.secretaryEmail && (
-                              <button
-                                onClick={() => openSecretaryModal(club)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
-                              >
-                                <UserPlus className="w-4 h-4" />
-                                Add Secretary
-                              </button>
-                            )}
-                            {!club.presidentEmail && (
-                              <button
-                                onClick={() => openPresidentModal(club)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
-                              >
-                                <UserPlus className="w-4 h-4" />
-                                Add President
-                              </button>
-                            )}
-                            {!club.treasurerEmail && (
-                              <button
-                                onClick={() => openTreasurerModal(club)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
-                              >
-                                <UserPlus className="w-4 h-4" />
-                                Add Treasurer
-                              </button>
-                            )}
-                            {!club.advisorEmail ? (
-                              <button
-                                onClick={() => openAdvisorModal(club)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2"
-                              >
-                                <UserPlus className="w-4 h-4" />
-                                Add Advisor
-                              </button>
-                            ) : (
-                              <div className="flex gap-2 w-full">
-                                <button
-                                  onClick={() => openEditAdvisorModal(club)}
-                                  className="flex-1 text-left px-3 py-2 rounded-lg text-sm text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 hover:text-cyan-700 dark:hover:text-cyan-300 border border-cyan-200 dark:border-cyan-800 transition-all flex items-center gap-2"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                  Edit Advisor
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveAdvisor(club)}
-                                  className="px-3 py-2 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 transition-all"
-                                  title="Remove Advisor"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                        <div key={club.id} className="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 group">
+                          {/* Decorative Top Border */}
+                          <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'}`}></div>
+
+                          <div className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-3xl shadow-inner border border-slate-100 dark:border-slate-600 overflow-hidden">
+                                {club.image ? (
+                                  <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
+                                ) : (
+                                  club.icon
+                                )}
                               </div>
-                            )}
-                          </div>
-
-                          <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                            <button
-                              onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
-                              className="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                            >
-                              <Edit className="w-4 h-4" />
-                              Edit Image
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClub(club.id!)}
-                              className="bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 px-3 py-2 rounded-lg text-sm font-semibold transition-all"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Posts Tab */}
-              {activeTab === 'posts' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
-                  </div>
-
-                  {posts.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-600 dark:text-slate-400">No posts yet. Club secretaries can create posts.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {posts.map((post) => (
-                        <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
-                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                  : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                                  }`}>
-                                  {post.type}
-                                </span>
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
-                                  {post.clubName} • {post.authorName}
-                                </span>
+                              <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-wider text-slate-500">
+                                {club.category}
                               </div>
-                              <h4 className="font-bold text-slate-900 dark:text-white mb-2">{post.title}</h4>
-                              <p className="text-sm text-slate-600 dark:text-slate-400">{post.date}</p>
                             </div>
-                            <div className="flex gap-2">
+
+                            <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white mb-2 group-hover:text-[#002147] transition-colors">{club.name}</h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
+
+                            {/* Officers Grid */}
+                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 mb-6 space-y-2 border border-slate-100 dark:border-slate-700">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-400 uppercase">Secretary</span>
+                                {club.secretaryEmail ? (
+                                  <span className="text-green-600 font-semibold truncate max-w-[120px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                ) : (
+                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                )}
+                              </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-400 uppercase">President</span>
+                                {club.presidentEmail ? (
+                                  <span className="text-purple-600 font-semibold truncate max-w-[120px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                ) : (
+                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                )}
+                              </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-400 uppercase">Treasurer</span>
+                                {club.treasurerEmail ? (
+                                  <span className="text-amber-600 font-semibold truncate max-w-[120px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                ) : (
+                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                )}
+                              </div>
+                              <div className="flex justify-between items-center text-xs border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
+                                <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
+                                {club.advisorEmail ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-cyan-600 font-semibold truncate max-w-[100px]" title={club.advisorName}>{club.advisorName}</span>
+                                    <button onClick={() => openEditAdvisorModal(club)} className="text-slate-400 hover:text-blue-500"><Edit className="w-3 h-3" /></button>
+                                  </div>
+                                ) : (
+                                  <button onClick={() => openAdvisorModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex gap-3">
                               <button
-                                onClick={() => handleDeletePost(post.id!)}
-                                className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
+                                className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                              >
+                                EDIT IMAGE
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClub(club.id!)}
+                                className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -861,50 +814,107 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* Posts Tab */}
+              {activeTab === 'posts' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-700">
+                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">All Posts & Announcements</h3>
+                  </div>
+
+                  {posts.length === 0 ? (
+                    <div className="text-center py-20">
+                      <Edit className="w-16 h-16 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
+                      <p className="text-slate-400">No posts available.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                          <tr>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Title / Club</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                          {posts.map((post) => (
+                            <tr key={post.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.type === 'event'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-purple-100 text-purple-800'
+                                  }`}>
+                                  {post.type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="font-bold text-slate-900 dark:text-white">{post.title}</p>
+                                <p className="text-xs text-slate-500">{post.clubName}</p>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                                {post.date}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  onClick={() => handleDeletePost(post.id!)}
+                                  className="text-slate-400 hover:text-red-600 transition-colors p-2"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Notifications</h3>
+                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">System Broadcasts</h3>
                     <button
                       onClick={() => setShowNotificationModal(true)}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                      className="bg-[#002147] hover:bg-[#00152e] text-white px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-md"
                     >
                       <Send className="w-4 h-4" />
-                      Send Notification
+                      NEW BROADCAST
                     </button>
                   </div>
 
                   {notifications.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Bell className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-600 dark:text-slate-400">No notifications yet.</p>
+                    <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200">
+                      <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-500 font-medium">No previous broadcasts.</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className={`p-4 rounded-xl border ${notification.read
-                            ? 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
-                            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                          className={`p-5 rounded-xl border-l-4 ${notification.read
+                            ? 'bg-white dark:bg-slate-800 border-slate-300'
+                            : 'bg-blue-50 dark:bg-blue-900/10 border-[#002147] shadow-sm'
                             }`}
                         >
                           <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{notification.title}</h4>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{notification.message}</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-500">
-                                {notification.createdAt instanceof Date
-                                  ? notification.createdAt.toLocaleString()
-                                  : new Date(notification.createdAt).toLocaleString()}
-                              </p>
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-bold text-[#DAA520] uppercase tracking-widest">{notification.type || 'SYSTEM'}</span>
+                                <span className="text-xs text-slate-400">• {new Date(notification.createdAt).toLocaleDateString()}</span>
+                              </div>
+                              <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{notification.title}</h4>
+                              <p className="text-slate-600 dark:text-slate-300">{notification.message}</p>
                             </div>
                             <button
                               onClick={() => handleDeleteNotification(notification.id!)}
-                              className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                              className="text-slate-300 hover:text-red-500 transition-colors"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
                         </div>
@@ -916,499 +926,546 @@ export default function AdminDashboard() {
             </>
           )}
         </div>
+
+        {/* Create Club Modal */}
+        {showCreateClubModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Register Organization</h3>
+                  <p className="text-sm text-slate-500">Add a new student club to the system</p>
+                </div>
+                <button onClick={() => { setShowCreateClubModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <div className={`mt-0.5 p-1 rounded-full ${formMessage.type === 'success' ? 'bg-green-200' : 'bg-red-200'}`}>
+                    {formMessage.type === 'success' ? <UserPlus className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                  </div>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Club Name</label>
+                  <input
+                    type="text"
+                    value={newClub.name}
+                    onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g., Google Developer Student Club"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Description</label>
+                  <textarea
+                    rows={3}
+                    value={newClub.description}
+                    onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
+                    placeholder="Brief description of the club's purpose and activities..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Category</label>
+                    <select
+                      value={newClub.category}
+                      onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
+                    >
+                      {CLUB_CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Icon (Emoji)</label>
+                    <input
+                      type="text"
+                      value={newClub.icon}
+                      onChange={(e) => setNewClub({ ...newClub, icon: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium text-center"
+                      placeholder="🎯"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleCreateClub}
+                    className="w-full bg-[#002147] hover:bg-[#00152e] text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-5 h-5 text-[#DAA520]" />
+                    REGISTER CLUB
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Secretary Modal */}
+        {showCreateSecretaryModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Secretary</h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                </div>
+                <button onClick={() => { setShowCreateSecretaryModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={newSecretary.name}
+                    onChange={(e) => setNewSecretary({ ...newSecretary, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g. Amish Prabhu"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Official Email</label>
+                  <input
+                    type="email"
+                    value={newSecretary.email}
+                    onChange={(e) => setNewSecretary({ ...newSecretary, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="secretary@wce.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
+                  <input
+                    type="password"
+                    value={newSecretary.password}
+                    onChange={(e) => setNewSecretary({ ...newSecretary, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCreateSecretary}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2 mt-4"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  CREATE ACCOUNT
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create President Modal */}
+        {showCreatePresidentModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign President</h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                </div>
+                <button onClick={() => { setShowCreatePresidentModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={newRoleUser.name}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g. Amish Prabhu"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Official Email</label>
+                  <input
+                    type="email"
+                    value={newRoleUser.email}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="president@wce.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
+                  <input
+                    type="password"
+                    value={newRoleUser.password}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCreatePresident}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-purple-500/30 flex items-center justify-center gap-2 mt-4"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  CREATE ACCOUNT
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Treasurer Modal */}
+        {showCreateTreasurerModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Treasurer</h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                </div>
+                <button onClick={() => { setShowCreateTreasurerModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={newRoleUser.name}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g. Amish Prabhu"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Official Email</label>
+                  <input
+                    type="email"
+                    value={newRoleUser.email}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="treasurer@wce.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
+                  <input
+                    type="password"
+                    value={newRoleUser.password}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCreateTreasurer}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-500/30 flex items-center justify-center gap-2 mt-4"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  CREATE ACCOUNT
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Advisor Modal */}
+        {showCreateAdvisorModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Faculty Advisor</h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                </div>
+                <button onClick={() => { setShowCreateAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Faculty Name</label>
+                  <input
+                    type="text"
+                    value={newRoleUser.name}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g. Amish Prabhu"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Official Email</label>
+                  <input
+                    type="email"
+                    value={newRoleUser.email}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="advisor@wce.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
+                  <input
+                    type="password"
+                    value={newRoleUser.password}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCreateAdvisor}
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-cyan-500/30 flex items-center justify-center gap-2 mt-4"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  CREATE ACCOUNT
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Advisor Modal */}
+        {showEditAdvisorModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Edit Advisor</h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                </div>
+                <button onClick={() => { setShowEditAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="text-xs bg-amber-50 text-amber-800 border-l-4 border-amber-500 p-3 rounded mb-6 font-medium">
+                ⚠️ This will create a new advisor account. The old account will remain inactive until removed.
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">New Advisor Name</label>
+                  <input
+                    type="text"
+                    value={newRoleUser.name}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="Advisor Name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">New Official Email</label>
+                  <input
+                    type="email"
+                    value={newRoleUser.email}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="advisor@wce.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
+                  <input
+                    type="password"
+                    value={newRoleUser.password}
+                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={handleReplaceAdvisor}
+                    className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Edit className="w-5 h-5 text-[#DAA520]" />
+                    UPDATE ADVISOR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Send Notification Modal */}
+        {showNotificationModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">New Broadcast</h3>
+                  <p className="text-xs text-slate-500">Send a system-wide notification</p>
+                </div>
+                <button onClick={() => { setShowNotificationModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Title</label>
+                  <input
+                    type="text"
+                    value={newNotification.title}
+                    onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="Broadcast Headline"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Message</label>
+                  <textarea
+                    rows={4}
+                    value={newNotification.message}
+                    onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium resize-none"
+                    placeholder="Type your message here..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Broadcast Type</label>
+                  <div className="relative">
+                    <select
+                      value={newNotification.type}
+                      onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value as any })}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium appearance-none"
+                    >
+                      <option value="system">System Update</option>
+                      <option value="announcement">General Announcement</option>
+                      <option value="event">Event Alert</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleCreateNotification}
+                    className="w-full bg-college-blue-primary hover:bg-college-blue-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    <Send className="w-5 h-5 text-college-gold" />
+                    SEND BROADCAST
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Image Upload Modal */}
+        {showImageUploadModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-college-blue-primary dark:text-white">
+                    Update Branding
+                  </h3>
+                  <p className="text-xs text-slate-500">For <span className="font-semibold text-college-gold">{selectedClub.name}</span></p>
+                </div>
+                <button
+                  onClick={() => { setShowImageUploadModal(false); setSelectedClub(null); }}
+                  className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 mb-6 flex gap-3">
+                <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg h-fit">
+                  <ImageIcon className="w-5 h-5 text-college-blue-primary dark:text-blue-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-college-blue-primary dark:text-blue-300">Club Logo / Banner</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Upload a high-quality image (PNG/JPG) to be displayed on the club card and details page.</p>
+                </div>
+              </div>
+
+              <AdminImageUploader
+                clubId={selectedClub.id!}
+                currentImage={selectedClub.image}
+                onSuccess={(url) => {
+                  setClubs(prev => prev.map(c => c.id === selectedClub.id ? { ...c, image: url } : c));
+                  setShowImageUploadModal(false);
+                  setSelectedClub(null);
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Create Club Modal */}
-      {showCreateClubModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create New Club</h3>
-              <button onClick={() => { setShowCreateClubModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Club Name *</label>
-                <input
-                  type="text"
-                  value={newClub.name}
-                  onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., GDSC"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description *</label>
-                <textarea
-                  rows={3}
-                  value={newClub.description}
-                  onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Brief description of the club"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Category</label>
-                <select
-                  value={newClub.category}
-                  onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {CLUB_CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Icon (emoji)</label>
-                <input
-                  type="text"
-                  value={newClub.icon}
-                  onChange={(e) => setNewClub({ ...newClub, icon: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="🎯"
-                />
-              </div>
-
-              <button
-                onClick={handleCreateClub}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition-all"
-              >
-                Create Club
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Secretary Modal */}
-      {showCreateSecretaryModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Secretary for {selectedClub.name}</h3>
-              <button onClick={() => { setShowCreateSecretaryModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
-                <input
-                  type="text"
-                  value={newSecretary.name}
-                  onChange={(e) => setNewSecretary({ ...newSecretary, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Secretary Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={newSecretary.email}
-                  onChange={(e) => setNewSecretary({ ...newSecretary, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="secretary@club.wce.ac.in"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
-                <input
-                  type="password"
-                  value={newSecretary.password}
-                  onChange={(e) => setNewSecretary({ ...newSecretary, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Minimum 6 characters"
-                />
-              </div>
-
-              <button
-                onClick={handleCreateSecretary}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <UserPlus className="w-5 h-5" />
-                Create Secretary Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create President Modal */}
-      {showCreatePresidentModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create President for {selectedClub.name}</h3>
-              <button onClick={() => { setShowCreatePresidentModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
-                <input
-                  type="text"
-                  value={newRoleUser.name}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="President Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={newRoleUser.email}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="president@club.wce.ac.in"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
-                <input
-                  type="password"
-                  value={newRoleUser.password}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Minimum 6 characters"
-                />
-              </div>
-
-              <button
-                onClick={handleCreatePresident}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <UserPlus className="w-5 h-5" />
-                Create President Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Treasurer Modal */}
-      {showCreateTreasurerModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Treasurer for {selectedClub.name}</h3>
-              <button onClick={() => { setShowCreateTreasurerModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
-                <input
-                  type="text"
-                  value={newRoleUser.name}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Treasurer Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={newRoleUser.email}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="treasurer@club.wce.ac.in"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
-                <input
-                  type="password"
-                  value={newRoleUser.password}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Minimum 6 characters"
-                />
-              </div>
-
-              <button
-                onClick={handleCreateTreasurer}
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <UserPlus className="w-5 h-5" />
-                Create Treasurer Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Advisor Modal */}
-      {showCreateAdvisorModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Advisor for {selectedClub.name}</h3>
-              <button onClick={() => { setShowCreateAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Advisor Name *</label>
-                <input
-                  type="text"
-                  value={newRoleUser.name}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Advisor Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={newRoleUser.email}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="advisor@wce.ac.in"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
-                <input
-                  type="password"
-                  value={newRoleUser.password}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Minimum 6 characters"
-                />
-              </div>
-
-              <button
-                onClick={handleCreateAdvisor}
-                className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <UserPlus className="w-5 h-5" />
-                Create Advisor Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Advisor Modal */}
-      {showEditAdvisorModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Advisor for {selectedClub.name}</h3>
-              <button onClick={() => { setShowEditAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-4">
-              ⚠️ This will create a new advisor account. The old advisor account will remain inactive or can be removed by an admin.
-            </p>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Advisor Name *</label>
-                <input
-                  type="text"
-                  value={newRoleUser.name}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Advisor Name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Email *</label>
-                <input
-                  type="email"
-                  value={newRoleUser.email}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="advisor@wce.ac.in"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Password *</label>
-                <input
-                  type="password"
-                  value={newRoleUser.password}
-                  onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Minimum 6 characters"
-                />
-              </div>
-
-              <button
-                onClick={handleReplaceAdvisor}
-                className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <Edit className="w-5 h-5" />
-                Update Advisor Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Send Notification Modal */}
-      {showNotificationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Send Notification</h3>
-              <button onClick={() => { setShowNotificationModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {formMessage && (
-              <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {formMessage.text}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Title *</label>
-                <input
-                  type="text"
-                  value={newNotification.title}
-                  onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Notification title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message *</label>
-                <textarea
-                  rows={4}
-                  value={newNotification.message}
-                  onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Notification message..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Type</label>
-                <select
-                  value={newNotification.type}
-                  onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value as any })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="system">System</option>
-                  <option value="announcement">Announcement</option>
-                  <option value="event">Event</option>
-                </select>
-              </div>
-
-              <button
-                onClick={handleCreateNotification}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <Send className="w-5 h-5" />
-                Send Notification
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Image Upload Modal */}
-      {showImageUploadModal && selectedClub && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Update Club Image
-              </h3>
-              <button
-                onClick={() => { setShowImageUploadModal(false); setSelectedClub(null); }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Change profile picture for <span className="font-semibold">{selectedClub.name}</span>
-            </p>
-
-            <AdminImageUploader
-              clubId={selectedClub.id!}
-              currentImage={selectedClub.image}
-              onSuccess={(url) => {
-                setClubs(prev => prev.map(c => c.id === selectedClub.id ? { ...c, image: url } : c));
-                setShowImageUploadModal(false);
-                setSelectedClub(null);
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </div>
+    </div >
   );
 }

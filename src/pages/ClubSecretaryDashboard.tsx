@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link, CheckCircle, Instagram, Sparkles, Settings2, MessageSquare, Menu, X } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
 
@@ -400,6 +400,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const { navigateToManagement } = useNavigation();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
   const isReadOnly = user?.role === 'treasurer';
 
@@ -542,7 +543,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   };
 
   // Ref to prevent duplicate member additions in React Strict Mode
-  const secretaryAddedRef = useRef(false);
+
 
   // Fetch club data from Firestore
   useEffect(() => {
@@ -573,13 +574,13 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         // Check if secretary is already a member, if not add them (only once)
         // Note: syncing members from backend route if available
-        const { getClubMembers, addClubMember, syncClubMemberCount } = await import('../lib/dbService');
+        const { syncClubMemberCount } = await import('../lib/dbService');
 
         // ... member sync logic ...
 
         // Since we already fetched the club with member count, we might rely on that.
         // But to be safe and match original flow:
-        const actualCount = await syncClubMemberCount(user.clubId); // This basically refetches clubs list but okay
+        await syncClubMemberCount(user.clubId); // This basically refetches clubs list but okay
 
 
         // Fetch posts for this club
@@ -796,21 +797,21 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${club.color} flex items-center justify-center text-2xl overflow-hidden`}>
+      <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden">
             {club.image && club.image.startsWith('http') ? (
               <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
             ) : (
-              club.icon
+              <span className="text-3xl">{club.icon}</span>
             )}
           </div>
           <div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-              {club.name} Management
+            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
+              {club.name}
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">
-              Welcome back, {user?.name}. Manage your club from here.
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              Secretary Dashboard • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
             </p>
           </div>
         </div>
@@ -820,8 +821,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <Users className="w-6 h-6 text-[#002147] dark:text-blue-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
@@ -832,8 +833,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <Calendar className="w-6 h-6 text-[#DAA520] dark:text-amber-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
@@ -844,8 +845,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <Edit className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <Edit className="w-6 h-6 text-[#002147] dark:text-purple-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
@@ -856,8 +857,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-[#DAA520] dark:text-slate-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
@@ -868,49 +869,69 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
-        <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: Settings },
-            { id: 'members', label: 'Members', icon: Users },
-            { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
-            { id: 'posts', label: 'Manage Posts', icon: Edit },
-            { id: 'notifications', label: 'Send Notifications', icon: Bell },
-            { id: 'messages', label: 'Messages', icon: MessageSquare }
-          ].filter(tab => {
-            // Treasurer sees: overview, members, events
-            if (isReadOnly) {
-              return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly;
-            }
-            // Non-treasurer (secretary/president) sees all except treasurerOnly tabs
-            return !tab.treasurerOnly;
-          }).map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-              >
-                <Icon className="w-5 h-5" />
-                {tab.label}
-              </button>
-            );
-          })}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8 relative z-30">
+        {/* Mobile Header for Tabs */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+          <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Settings2 className="w-5 h-5 text-[#DAA520]" />
+            Menu
+          </span>
+          <button
+            onClick={() => setIsMobileTabOpen(!isMobileTabOpen)}
+            className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+          >
+            {isMobileTabOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Tab List (Responsive) */}
+        <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
+          <div className="flex flex-col md:flex-row border-b border-slate-200 dark:border-slate-700 md:overflow-x-auto">
+            {[
+              { id: 'overview', label: 'Overview', icon: Settings },
+              { id: 'members', label: 'Members', icon: Users },
+              { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
+              { id: 'posts', label: 'Manage Posts', icon: Edit },
+              { id: 'notifications', label: 'Send Notifications', icon: Bell },
+              { id: 'messages', label: 'Messages', icon: MessageSquare }
+            ].filter(tab => {
+              // Treasurer sees: overview, members, events
+              if (isReadOnly) {
+                return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly;
+              }
+              // Non-treasurer (secretary/president) sees all except treasurerOnly tabs
+              return !tab.treasurerOnly;
+            }).map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as any);
+                    setIsMobileTabOpen(false);
+                  }}
+                  className={`flex items-center gap-3 px-6 py-4 font-semibold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-4 text-left md:text-center ${activeTab === tab.id
+                    ? 'text-[#002147] dark:text-blue-400 border-[#DAA520] bg-blue-50 dark:bg-blue-900/10 md:bg-transparent'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                >
+                  <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="p-6">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Club Overview</h3>
+              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">Club Overview</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Information</h4>
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 border-l-4 border-[#002147]">
+                  <h4 className="font-serif font-bold text-[#002147] dark:text-white mb-4">Club Information</h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">Name:</span>

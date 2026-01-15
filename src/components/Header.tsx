@@ -1,4 +1,4 @@
-import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle } from 'lucide-react';
+import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle, Menu, X } from 'lucide-react';
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
@@ -16,8 +16,16 @@ interface HeaderProps {
 export default function Header({ currentPage, onNavigate, onLogout, user }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { startTour } = useTour();
+
+  const navItems = [
+    { id: 'home', label: 'Home' },
+    { id: 'dashboard', label: 'Clubs' },
+    { id: 'events', label: 'Events' },
+    { id: 'announcements', label: 'Announcements' },
+  ];
 
   // Fetch unread notification count
   useEffect(() => {
@@ -38,206 +46,206 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
   }, []);
 
   return (
-    <>
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')} id="tour-logo">
+    <header className="sticky top-0 z-50 bg-[#002147] text-white shadow-lg border-b border-[#00152e]">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-[4.5rem] flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 -ml-2 text-blue-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+
+          {/* Logo Section */}
+          <div
+            className="flex items-center gap-4 cursor-pointer group"
+            onClick={() => onNavigate('home')}
+            id="tour-logo"
+          >
+            <div className="bg-white p-1.5 rounded-lg shadow-md group-hover:scale-105 transition-transform duration-300">
               <img
                 src="/wce-logo.png"
                 alt="Walchand College of Engineering Logo"
-                className="w-10 h-10 object-contain rounded-md"
+                className="w-8 h-8 md:w-9 md:h-9 object-contain"
               />
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
-                  Walchand College of Engineering, Sangli
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  Club & Event Portal
-                </span>
-              </div>
             </div>
-
-            <nav className="flex items-center gap-8">
-              <button
-                onClick={() => onNavigate('home')}
-                className={`text-sm font-medium transition-colors ${currentPage === 'home'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() => onNavigate('dashboard')}
-                id="tour-dashboard-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'dashboard'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                All Clubs
-              </button>
-              <button
-                onClick={() => onNavigate('events')}
-                id="tour-events-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'events'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Events
-              </button>
-              <button
-                onClick={() => onNavigate('announcements')}
-                id="tour-announcements-nav"
-                className={`text-sm font-medium transition-colors ${currentPage === 'announcements'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'
-                  }`}
-              >
-                Announcements
-              </button>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={startTour}
-                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-semibold transition-all border border-indigo-600/20"
-              >
-                <PlayCircle className="w-3.5 h-3.5" />
-                Start Tour
-              </button>
-
-              <button
-                onClick={toggleDarkMode}
-                id="tour-dark-mode-toggle"
-                className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
-                aria-label="Toggle Dark Mode"
-              >
-                {isDarkMode ? <Sun className="w-4 h-4 text-slate-600 dark:text-slate-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-              </button>
-
-              {/* Notifications for all users */}
-              <button
-                onClick={() => onNavigate('notifications')}
-                id="tour-notifications"
-                className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative border border-slate-200 dark:border-slate-700"
-                aria-label="Notifications"
-              >
-                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] bg-red-600 rounded-full text-[10px] flex items-center justify-center text-white font-medium px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {user ? (
-                <>
-
-
-                  {/* User Menu */}
-                  <div className="relative" id="tour-profile">
-                    <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-                    >
-                      <User className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.name}</span>
-                    </button>
-
-                    {showUserMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2">
-                        <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{user.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role.replace('-', ' ')}</p>
-                          {user.clubName && (
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{user.clubName}</p>
-                          )}
-                        </div>
-                        {/* Club Management Link */}
-                        {['club-secretary', 'president', 'treasurer'].includes(user.role) && (
-                          <button
-                            onClick={() => {
-                              onNavigate('clubSecretaryDashboard');
-                              setShowUserMenu(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                          >
-                            <Settings className="w-4 h-4" />
-                            Club Management
-                          </button>
-                        )}
-
-                        {/* Admin Dashboard Link */}
-                        {user.role === 'admin' && (
-                          <button
-                            onClick={() => {
-                              onNavigate('adminDashboard');
-                              setShowUserMenu(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                          >
-                            <Shield className="w-4 h-4" />
-                            Admin Dashboard
-                          </button>
-                        )}
-
-                        {/* Advisor Dashboard Link */}
-                        {user.role === 'advisor' && (
-                          <button
-                            onClick={() => {
-                              onNavigate('advisorDashboard');
-                              setShowUserMenu(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                          >
-                            <Shield className="w-4 h-4" />
-                            Advisor Dashboard
-                          </button>
-                        )}
-
-                        {/* My Dashboard Link - Merged with Profile */}
-                        <button
-                          onClick={() => {
-                            onNavigate('userProfile');
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                        >
-                          <User className="w-4 h-4" />
-                          My Dashboard
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            onLogout();
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                /* Login Button for Club Secretaries and Admins */
-                <button
-                  onClick={() => onNavigate('login')}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Login</span>
-                </button>
-              )}
+            <div className="hidden md:flex flex-col">
+              <span className="text-lg font-serif font-bold tracking-tight leading-none text-white group-hover:text-[#DAA520] transition-colors">
+                Walchand College of Engineering
+              </span>
+              <span className="text-[11px] font-medium text-blue-200 tracking-widest uppercase mt-0.5 ml-0.5">
+                Club & Event Portal
+              </span>
             </div>
           </div>
         </div>
-      </header>
-    </>
+
+        {/* Navigation - Desktop */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id as Page)}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${currentPage === item.id
+                ? 'bg-white/10 text-[#DAA520] shadow-sm backdrop-blur-sm'
+                : 'text-blue-100 hover:text-white hover:bg-white/5'
+                }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Tour Button - Subtle (Desktop Only) */}
+          <button
+            onClick={startTour}
+            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-200 hover:text-white hover:bg-blue-500/20 text-xs font-semibold transition-all"
+          >
+            <PlayCircle className="w-3.5 h-3.5" />
+            <span>Tour</span>
+          </button>
+
+          <div className="h-6 w-px bg-blue-700/50 hidden md:block"></div>
+
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors"
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
+          {/* Notifications */}
+          <button
+            onClick={() => onNavigate('notifications')}
+            className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors relative"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#002147]"></span>
+            )}
+          </button>
+
+          {/* User Profile */}
+          {user ? (
+            <div className="relative ml-1 md:ml-2" id="tour-profile">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-3 p-1 pl-2 pr-1 rounded-full bg-blue-800/50 hover:bg-blue-800 transition-colors border border-blue-700 hover:border-blue-600 group"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-white leading-tight group-hover:text-[#DAA520] transition-colors">{user.name.split(' ')[0]}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-blue-300 font-bold">{user.role.replace('-', ' ')}</p>
+                </div>
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-[#DAA520] to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-[#002147] group-hover:ring-[#DAA520]/50 transition-all">
+                  {user.name.charAt(0)}
+                </div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50 transform origin-top-right transition-all animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                    <p className="font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 capitalize">{user.role.replace('-', ' ')}</p>
+                    {user.clubName && (
+                      <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        {user.clubName}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-1.5 space-y-0.5">
+                    {user.role === 'admin' && (
+                      <button onClick={() => { onNavigate('adminDashboard'); setShowUserMenu(false); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors">
+                        <div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"><Shield className="w-4 h-4" /></div>
+                        <span>Admin Dashboard</span>
+                      </button>
+                    )}
+
+                    {['club-secretary', 'president', 'treasurer'].includes(user.role) && (
+                      <button
+                        onClick={() => { onNavigate('clubSecretaryDashboard'); setShowUserMenu(false); }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
+                      >
+                        <div className="p-1.5 rounded-md bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400"><Settings className="w-4 h-4" /></div>
+                        <span>Club Management</span>
+                      </button>
+                    )}
+
+                    {user.role === 'advisor' && (
+                      <button
+                        onClick={() => { onNavigate('advisorDashboard'); setShowUserMenu(false); }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
+                      >
+                        <div className="p-1.5 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"><Shield className="w-4 h-4" /></div>
+                        <span>Advisor Dashboard</span>
+                      </button>
+                    )}
+
+                    <button onClick={() => { onNavigate('userProfile'); setShowUserMenu(false); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors">
+                      <div className="p-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"><User className="w-4 h-4" /></div>
+                      <span>My Profile</span>
+                    </button>
+                  </div>
+
+                  <div className="border-t border-slate-100 dark:border-slate-700 p-1.5 mt-1">
+                    <button onClick={() => { onLogout(); setShowUserMenu(false); }} className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 font-medium transition-colors">
+                      <div className="p-1.5 rounded-md bg-red-100 dark:bg-red-900/20 text-red-500"><LogOut className="w-4 h-4" /></div>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => onNavigate('login')}
+              className="ml-2 px-5 py-2.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-lg shadow-md hover:shadow-lg transition-all text-sm flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              <span>Login</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden absolute top-[4.5rem] left-0 right-0 bg-[#002147] border-t border-blue-900/50 shadow-xl animate-in slide-in-from-top-2 duration-200">
+          <div className="p-4 space-y-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onNavigate(item.id as Page);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-lg text-base font-bold transition-all ${currentPage === item.id
+                  ? 'bg-white/10 text-[#DAA520]'
+                  : 'text-blue-100 hover:bg-white/5 hover:text-white'
+                  }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            {/* Mobile Tour Button */}
+            <button
+              onClick={() => {
+                startTour();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-3 rounded-lg text-base font-bold text-blue-200 hover:bg-white/5 hover:text-white transition-all flex items-center gap-2"
+            >
+              <PlayCircle className="w-5 h-5" />
+              Start Tour
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }

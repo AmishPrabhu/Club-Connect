@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, Bell, Users, Search, Edit, MapPin, Clock, Shield, Megaphone, Info, Plus, ExternalLink, ChevronRight } from 'lucide-react';
+import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, Info, ChevronRight, ArrowRight, Award, Clock } from 'lucide-react';
 import { Page } from '../types/page';
 import { DBPost, DBClub, DBNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/dbService';
@@ -15,7 +15,7 @@ interface HomeProps {
   onNavigateToPost: (postId: string) => void;
   onNavigateToNotification: (notification: DBNotification) => void;
 }
-import ImageModal from '../components/ImageModal';
+
 
 import { useAuth } from '../context/AuthContext';
 
@@ -35,15 +35,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Image Modal State
-  const [modalImage, setModalImage] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openImageModal = (e: React.MouseEvent, imageUrl: string) => {
-    e.stopPropagation();
-    setModalImage(imageUrl);
-    setIsModalOpen(true);
-  };
+
+
 
 
   // Fetch data on mount
@@ -136,67 +130,136 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const upcomingPosts = posts.filter(post => new Date(post.date) >= new Date() && post.type === 'event');
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col min-h-[calc(100vh-80px)]">
-      <div className="flex-grow">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
 
+      {/* Hero Section */}
+      <div className="bg-[#002147] relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.wce.ac.in/images/WCE_Main_Building.jpg')] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#002147]/90"></div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="tour-stats-grid">
-          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800 p-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Clubs</span>
-              <Users className="w-5 h-5 text-blue-600" />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="md:w-3/5 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-xs font-bold uppercase tracking-wider mb-6">
+              <Award className="w-4 h-4 text-[#DAA520]" />
+              <span>Est. 1947 • A Premier Institute</span>
             </div>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white">{clubs.length || '50'}</div>
+            <h1 className="text-4xl md:text-6xl font-serif font-bold text-white leading-tight mb-6">
+              Walchand College of <span className="text-[#DAA520]">Engineering</span>
+            </h1>
+            <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed">
+              Discover vibrant student communities, participate in exciting events, and lead the future. The official platform for all club activities.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
+              >
+                Explore Clubs
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => onNavigate('events')}
+                className="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all"
+              >
+                Upcoming Events
+              </button>
+            </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800 p-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Students</span>
-              <Users className="w-5 h-5 text-green-600" />
+
+          {/* Hero Visual/Stats - Decorative */}
+          <div className="md:w-2/5 hidden md:block">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-[#DAA520]/20 rounded-full blur-3xl animate-pulse"></div>
+              <img
+                src="/wce-logo.png"
+                alt="WCE Emblem"
+                className="w-64 h-64 object-contain mx-auto relative z-10 drop-shadow-2xl opacity-90"
+              />
             </div>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white">{totalStudents || '0'}</div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-800 p-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Upcoming Events</span>
-              <Calendar className="w-5 h-5 text-purple-600" />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-20 w-full flex-grow">
+
+        {/* Stats Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" id="tour-stats-grid">
+          {/* Card 1 */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-[#DAA520] p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+            <div>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Registered Clubs</p>
+              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-[#002147] transition-colors">{clubs.length || '50+'}</h3>
             </div>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white">{upcomingPosts.length || '0'}</div>
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
+              <Users className="w-6 h-6 text-[#002147] dark:text-blue-400" />
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-emerald-500 p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+            <div>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Students</p>
+              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-emerald-600 transition-colors">{totalStudents || '1000+'}</h3>
+            </div>
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
+              <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border-t-4 border-purple-500 p-6 flex items-center justify-between group hover:-translate-y-1 transition-transform duration-300">
+            <div>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Upcoming Events</p>
+              <h3 className="text-4xl font-black text-slate-800 dark:text-white mt-1 group-hover:text-purple-600 transition-colors">{upcomingPosts.length || '0'}</h3>
+            </div>
+            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors">
+              <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
           </div>
         </div>
 
         {/* Quick Actions & Search */}
-        {/* Quick Actions & Search */}
-        <div className="mb-8" id="tour-quick-actions">
-          {/* Navigation Buttons */}
-          <div className="flex justify-center gap-6 mb-8">
-            <button
-              onClick={() => onNavigate('dashboard')}
-              className="px-8 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
-            >
-              <Users className="w-5 h-5" />
-              View All Clubs
-            </button>
-            <button
-              onClick={() => onNavigate('notifications')}
-              className="px-8 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex items-center gap-3 shadow-sm hover:shadow-md"
-            >
-              <Bell className="w-5 h-5" />
-              Notifications
-            </button>
-          </div>
+        <div className="mb-12" id="tour-quick-actions">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            {/* Quick Action Buttons */}
+            <div className="flex gap-4 w-full md:w-auto">
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:border-[#002147]/30 dark:hover:border-blue-500/30 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+              >
+                <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-400 group-hover:scale-110 transition-transform">
+                  <Users className="w-4 h-4" />
+                </div>
+                All Clubs
+              </button>
+              <button
+                onClick={() => onNavigate('notifications')}
+                className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:border-[#002147]/30 dark:hover:border-blue-500/30 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+              >
+                <div className="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-500 group-hover:scale-110 transition-transform">
+                  <Bell className="w-4 h-4" />
+                </div>
+                Alerts
+              </button>
+            </div>
 
-          <div className="flex flex-col md:flex-row gap-4 relative z-20">
-            <div className="flex-1 relative" ref={dropdownRef}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search clubs, events..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+            {/* Modern Search Bar */}
+            <div className="flex-1 relative w-full" ref={dropdownRef}>
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-[#002147] transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Search for clubs, events, or announcements..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
+                  className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#002147] dark:focus:border-blue-500 shadow-sm focus:shadow-lg transition-all"
+                />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1">
+                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">CMD + K</span>
+                </div>
+              </div>
 
               {/* Live Search Dropdown */}
               {showDropdown && searchQuery.length > 0 && (
@@ -284,26 +347,30 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         <div className="mb-16" id="tour-upcoming-events">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                  Upcoming Events
-                </h2>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">
+                    Upcoming Events
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Don't miss out on what's happening on campus</p>
+                </div>
                 <button
                   onClick={() => onNavigate('events')}
-                  className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                  className="px-4 py-2 text-sm font-bold text-[#002147] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                 >
-                  View All Events
+                  View Full Calendar
                 </button>
               </div>
 
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : upcomingPosts.length === 0 ? (
-                <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                  <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-600 dark:text-slate-400">No upcoming events. Check back soon!</p>
+                <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                  <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">No upcoming events</h3>
+                  <p className="text-slate-500 dark:text-slate-400">Check back later for new activities!</p>
                 </div>
               ) : (
                 upcomingPosts.slice(0, 5).map((post) => {
@@ -312,181 +379,89 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700 cursor-pointer"
+                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
                     >
-                      {/* Card Header: Club Info & Date */}
-                      <div className="bg-slate-50 dark:bg-slate-700/30 px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700">
+                      {/* Card Header for Desktop/Mobile Consistency */}
+                      <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold bg-gradient-to-br ${getEventColor(post.type)} text-white`}>
-                            {club?.image ? (
-                              <img src={club.image} alt={club.name} className="w-full h-full object-cover rounded-lg" />
-                            ) : (
-                              <Calendar className="w-5 h-5" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-slate-900 dark:text-white leading-tight">{post.clubName}</h4>
-                          </div>
+                          {club?.image ? (
+                            <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white dark:bg-slate-700 shadow-sm p-0.5" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Users className="w-4 h-4 text-slate-500" /></div>
+                          )}
+                          <span className="font-bold text-slate-900 dark:text-white font-serif">{post.clubName}</span>
                         </div>
-                        {new Date(post.date) >= new Date() && (
-                          <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                            Upcoming
-                          </span>
-                        )}
+                        <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                          Upcoming
+                        </span>
                       </div>
 
-                      {/* Card Body: Split Layout */}
-                      <div className="p-0 flex flex-col sm:flex-row">
-                        {/* Left: Cover Image OR Styled Event Title (when no image) */}
-                        {post.coverImage ? (
-                          <div className="sm:w-2/5 h-48 sm:h-auto relative bg-slate-200 dark:bg-slate-700 group/image overflow-hidden"
-                            onClick={(e) => openImageModal(e, post.coverImage!)}>
+                      <div className="flex flex-col md:flex-row">
+                        {/* Event Image - Full Width Mobile, 40% Desktop */}
+                        <div className="w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                          {post.coverImage ? (
                             <img
                               src={post.coverImage}
                               alt={post.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
+                              className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
-                              <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
-                            </div>
-                          </div>
-
-                        ) : (
-                          <div className={`sm:w-1/3 p-5 flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br ${getEventColor(post.type)}`}>
-                            {/* Decorative floating circles */}
-                            <div className="absolute top-2 right-2 w-16 h-16 bg-white/10 rounded-full blur-sm" />
-                            <div className="absolute bottom-4 left-2 w-10 h-10 bg-white/10 rounded-full blur-sm" />
-                            <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-white/15 rounded-full" />
-
-                            {/* Event type icon */}
-                            <div className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                              {post.type === 'event' ? (
-                                <Calendar className="w-7 h-7 text-white" />
-                              ) : post.type === 'announcement' ? (
-                                <Bell className="w-7 h-7 text-white" />
-                              ) : (
-                                <Info className="w-7 h-7 text-white" />
-                              )}
-                            </div>
-
-                            {/* Event type label */}
-                            <span className="relative z-10 text-xs font-bold text-white/90 uppercase tracking-widest">
-                              {post.type}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Right: Details */}
-                        <div className={`${post.coverImage ? 'sm:w-3/5' : 'sm:w-2/3'} p-6 flex flex-col justify-center`}>
-                          {/* Always show title on the right now */}
-                          <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
-                            {post.title}
-                          </h3>
-
-
-                          {/* Related Event Badge for Announcements */}
-                          {post.type === 'announcement' && post.relatedEventTitle && post.relatedEventId && (
-                            <div className="mb-3">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onNavigateToPost(post.relatedEventId!);
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer"
-                              >
-                                <Calendar className="w-3 h-3" />
-                                View Related Event: {post.relatedEventTitle}
-                              </button>
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
+                              <Calendar className="w-16 h-16 text-white/40" />
                             </div>
                           )}
+                          {/* Mobile Date Overlay */}
+                          <div className="md:hidden absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{new Date(post.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{new Date(post.date).getDate()}</span>
+                          </div>
+                        </div>
 
-                          <div className="space-y-3 mb-4">
-                            {/* Date */}
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
-                                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Date</p>
-                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                  {new Date(post.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </p>
-                              </div>
-                            </div>
+                        {/* Event Details */}
+                        <div className="flex-1 p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
+                          <div>
+                            <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
+                              {post.title}
+                            </h3>
 
-                            {/* Time */}
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
-                                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Time</p>
-                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                  {post.time || 'All Day'}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Location */}
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
-                                <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Venue</p>
-                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
-                                  {post.location || 'Campus'}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Registration */}
-                            {(post.registrationStart || post.registrationEnd) && (
-                              <div className="flex items-start gap-3">
-                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full shrink-0">
-                                  <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                </div>
+                            <div className="space-y-4 mb-6">
+                              {/* Date Row (Desktop) */}
+                              <div className="hidden md:flex items-start gap-4">
+                                <div className="mt-1"><Calendar className="w-5 h-5 text-blue-500" /></div>
                                 <div>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Registration</p>
-                                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                    {post.registrationStart && new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                    {post.registrationStartTime && ` ${post.registrationStartTime}`}
-                                    {(post.registrationStart || post.registrationStartTime) && (post.registrationEnd || post.registrationEndTime) && ' - '}
-                                    {post.registrationEnd && new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                    {post.registrationEndTime && ` ${post.registrationEndTime}`}
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date</p>
+                                  <p className="font-medium text-slate-700 dark:text-slate-300">
+                                    {new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                                   </p>
                                 </div>
                               </div>
-                            )}
+
+                              {/* Time Row */}
+                              <div className="flex items-start gap-4">
+                                <div className="mt-1"><Clock className="w-5 h-5 text-blue-500" /></div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Time</p>
+                                  <p className="font-medium text-slate-700 dark:text-slate-300">{post.time || 'All Day'}</p>
+                                </div>
+                              </div>
+
+                              {/* Venue Row */}
+                              <div className="flex items-start gap-4">
+                                <div className="mt-1"><MapPin className="w-5 h-5 text-blue-500" /></div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Venue</p>
+                                  <p className="font-medium text-slate-700 dark:text-slate-300">{post.location || 'Campus'}</p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          {/* Action Buttons */}
-                          {post.type === 'event' && (
-                            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setRsvpEvent(post);
-                                }}
-                                className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold text-sm transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
-                              >
-                                <Plus className="w-4 h-4" />
-                                RSVP
-                              </button>
-                              {post.registrationLink && (
-                                <a
-                                  href={post.registrationLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold text-sm transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                  Register
-                                </a>
-                              )}
-                            </div>
-                          )}
+                          <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            RSVP Now
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -496,41 +471,51 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             </div>
 
             <div className="lg:col-span-1" id="tour-notifications-panel">
-              <div className="sticky top-24 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 mb-6">
-                  <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-pulse" />
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Notifications</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 h-full">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div>
+                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Announcements</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Latest announcements</p>
+                  </div>
+                  <Bell className="w-5 h-5 text-[#DAA520] animate-pulse" />
                 </div>
 
                 {notifications.length === 0 ? (
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">No notifications yet.</p>
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Bell className="w-6 h-6 text-slate-400" />
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">No new notices to display.</p>
+                  </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                     {notifications.slice(0, 5).map((notif) => (
                       <div
                         key={notif.id}
-                        className={`p-4 rounded-xl transition-all hover:scale-105 cursor-pointer ${!notif.read
-                          ? 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-l-4 border-red-500'
-                          : 'bg-slate-50 dark:bg-slate-700/50'
+                        className={`p-4 rounded-xl transition-all hover:scale-[1.02] cursor-pointer border ${!notif.read
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                          : 'bg-slate-50 dark:bg-slate-700/30 border-slate-100 dark:border-slate-700'
                           }`}
                         onClick={() => onNavigateToNotification(notif)}
                       >
-                        <div className="flex gap-3 items-center">
-                          {notif.type === 'system' ? (
-                            <Shield className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-yellow-500' : 'text-slate-600 dark:text-slate-400'}`} />
-                          ) : notif.type === 'announcement' ? (
-                            <Megaphone className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-purple-600' : 'text-slate-600 dark:text-slate-400'}`} />
-                          ) : notif.type === 'event' ? (
-                            <Calendar className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`} />
-                          ) : (
-                            <Bell className={`w-5 h-5 flex-shrink-0 ${!notif.read ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}`} />
-                          )}
+                        <div className="flex gap-3 items-start">
+                          <div className={`mt-0.5 p-1.5 rounded-md flex-shrink-0 ${notif.type === 'system' ? 'bg-amber-100 text-amber-600' :
+                            notif.type === 'announcement' ? 'bg-purple-100 text-purple-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                            {notif.type === 'system' ? <Shield className="w-3.5 h-3.5" /> :
+                              notif.type === 'announcement' ? <Megaphone className="w-3.5 h-3.5" /> :
+                                <Calendar className="w-3.5 h-3.5" />}
+                          </div>
                           <div>
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
+                            <p className={`text-sm font-bold mb-1 leading-tight ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                               {notif.title}
                             </p>
                             <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
                               {notif.message}
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-2 font-medium">
+                              {new Date(notif.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -538,18 +523,29 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     ))}
                   </div>
                 )}
+
+                <button
+                  onClick={() => onNavigate('notifications')}
+                  className="w-full mt-6 py-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  View All Notices
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Campus Calendar & Weekly Events Section */}
-        <div className="mb-16" id="tour-calendar-section">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Campus Calendar</h2>
-          <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[460px]">
-            {/* Left: MiniCalendar - Fixed Content Width */}
+        <div className="mb-8" id="tour-calendar-section">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-[#002147] dark:text-blue-400" />
+            <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[500px]">
+            {/* Left: MiniCalendar - Styled */}
             <div className="w-full lg:w-auto flex-none">
-              <div className="w-full lg:w-[350px] h-full">
+              <div className="w-full lg:w-[350px] h-full bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-6">
                 <MiniCalendar
                   events={posts}
                   selectedDate={selectedDate}
@@ -558,8 +554,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               </div>
             </div>
 
-            {/* Right: Weekly Events - Takes Remaining Space */}
-            <div className="flex-1 h-full min-w-0">
+            {/* Right: Weekly Events - Styled */}
+            <div className="flex-1 h-full min-w-0 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
               <WeeklyEvents
                 events={posts}
                 onNavigateToPost={onNavigateToPost}
@@ -571,13 +567,15 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
       </div>
 
       {/* Setup Admin Link (remove after initial setup) */}
-      <div className="mt-auto text-center py-4 border-t border-slate-200 dark:border-slate-700">
+      <div className="mt-12 text-center py-6 border-t border-slate-200 dark:border-slate-700">
         <button
           onClick={() => onNavigate('setupAdmin')}
-          className="text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+          className="text-xs font-medium text-slate-400 hover:text-[#002147] dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2 mx-auto"
         >
-          ⚙️ Initial Setup (Create Super Admin)
+          <Shield className="w-3 h-3" />
+          System Administration
         </button>
+        <p className="text-[10px] text-slate-400 mt-2">© 2024 Walchand College of Engineering, Sangli. All rights reserved.</p>
       </div>
 
       {/* RSVP Modal */}
@@ -598,11 +596,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         />
       )}
       {/* Image Modal */}
-      <ImageModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        imageUrl={modalImage || ''}
-      />
+
     </div>
   );
 }

@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Filter, TrendingUp, Users, ChevronRight } from 'lucide-react';
+import { Search, TrendingUp, Users, ChevronRight, ArrowLeft } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
 import { getClubs, getPosts } from '../lib/dbService';
 
 interface DashboardProps {
   onNavigateToClub: (clubId: string) => void;
+  onBack?: () => void;
 }
 
-export default function Dashboard({ onNavigateToClub }: DashboardProps) {
+export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) {
   const [clubs, setClubs] = useState<DBClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,25 +89,48 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12" id="tour-dashboard-stats">
-      <div className="mb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-            All Clubs
-          </h1>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20" id="tour-dashboard-stats">
+      {/* Page Header */}
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12 mb-8">
+        <div className="max-w-7xl mx-auto">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 mb-4 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium text-sm md:text-base"
+            >
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+              Back to Home
+            </button>
+          )}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-[#002147]/5 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-[#002147] dark:text-blue-400" />
+                </div>
+                <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white">
+                  Discover Clubs
+                </h1>
+              </div>
+              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl">
+                Explore the diverse range of student organizations at Walchand College of Engineering. Find your community and get involved.
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="flex flex-col md:flex-row gap-4 items-center z-20 relative">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start z-20 relative mb-10">
           <div className="relative flex-1 w-full" ref={dropdownRef}>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search clubs, events, or interests..."
+              placeholder="Search clubs by name, category, or description..."
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-lg"
+              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147] dark:focus:ring-blue-500 focus:border-transparent transition-all shadow-sm focus:shadow-lg"
             />
 
             {/* Live Search Dropdown */}
@@ -114,7 +138,7 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
               <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {searchResults.length > 0 ? (
                   <div className="py-2">
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
                       Clubs
                     </div>
                     {searchResults.map((club) => (
@@ -132,7 +156,7 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
                             )}
                           </div>
                           <div>
-                            <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
                               {club.name}
                             </h4>
                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-md">
@@ -140,7 +164,7 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
                             </p>
                           </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#002147] opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
                       </button>
                     ))}
                   </div>
@@ -154,15 +178,15 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-            <Filter className="w-5 h-5 text-slate-600 dark:text-slate-400 ml-2" />
+          <div className="flex flex-wrap items-center gap-2">
+
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${selectedCategory === category
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                className={`px-4 py-2.5 rounded-lg font-bold text-sm transition-all border ${selectedCategory === category
+                  ? 'bg-[#002147] text-white border-[#002147] shadow-md'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
               >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -170,36 +194,36 @@ export default function Dashboard({ onNavigateToClub }: DashboardProps) {
             ))}
           </div>
         </div>
-      </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : filteredClubs.length === 0 ? (
-        <div className="text-center py-16">
-          <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-2">
-            {clubs.length === 0 ? 'No clubs yet' : 'No clubs found matching your criteria'}
-          </p>
-          {clubs.length === 0 && (
-            <p className="text-sm text-slate-500 dark:text-slate-500">
-              Clubs will appear here once an admin creates them.
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filteredClubs.length === 0 ? (
+          <div className="text-center py-16">
+            <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <p className="text-xl text-slate-600 dark:text-slate-400 mb-2">
+              {clubs.length === 0 ? 'No clubs yet' : 'No clubs found matching your criteria'}
             </p>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
-            Showing {filteredClubs.length} {filteredClubs.length === 1 ? 'club' : 'clubs'}
+            {clubs.length === 0 && (
+              <p className="text-sm text-slate-500 dark:text-slate-500">
+                Clubs will appear here once an admin creates them.
+              </p>
+            )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredClubs.map((club) => (
-              <ClubCard key={club.id} club={club} onClick={() => onNavigateToClub(club.id!)} />
-            ))}
-          </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+              Showing {filteredClubs.length} {filteredClubs.length === 1 ? 'club' : 'clubs'}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredClubs.map((club) => (
+                <ClubCard key={club.id} club={club} onClick={() => onNavigateToClub(club.id!)} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

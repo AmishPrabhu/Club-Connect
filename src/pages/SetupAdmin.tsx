@@ -47,34 +47,34 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
             <div className="max-w-md w-full">
                 {/* Back Button */}
                 <button
                     onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-8 transition-colors"
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white mb-8 transition-colors font-medium"
                 >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-5 h-5" />
                     Back to Home
                 </button>
 
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 rounded-full mb-6">
-                        <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">Initial Setup</span>
+                    <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-full mb-6 border border-blue-100 dark:border-blue-800">
+                        <Shield className="w-4 h-4 text-[#002147] dark:text-blue-400" />
+                        <span className="text-sm font-bold text-[#002147] dark:text-blue-300">Initial Setup</span>
                     </div>
 
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-4">
-                        Create <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Super Admin</span>
+                    <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white mb-4">
+                        Create <span className="text-[#DAA520]">Super Admin</span>
                     </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-300">
+                    <p className="text-lg text-slate-600 dark:text-slate-300 font-medium">
                         Set up the initial administrator account
                     </p>
                 </div>
 
                 {/* Form */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border-l-4 border-[#DAA520]">
                     <form onSubmit={handleCreateAdmin} className="space-y-6">
                         {message && (
                             <div className={`p-4 rounded-lg ${message.type === 'success'
@@ -148,7 +148,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 disabled:from-amber-400 disabled:to-orange-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                            className="w-full bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:scale-100 shadow-md uppercase tracking-wide flex items-center justify-center gap-2"
                         >
                             {isLoading ? (
                                 <>
@@ -157,7 +157,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                 </>
                             ) : (
                                 <>
-                                    <Shield className="w-5 h-5" />
+                                    <Shield className="w-5 h-5 text-[#DAA520]" />
                                     Create Super Admin
                                 </>
                             )}

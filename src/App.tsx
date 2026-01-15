@@ -49,7 +49,7 @@ function AppContent() {
   const onLogoutClick = () => handleLogout(logout);
 
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-200">
+    <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900">
       {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
         <Header
           currentPage={currentPage}
@@ -61,7 +61,7 @@ function AppContent() {
 
       {/* Main Pages */}
       {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} onNavigateToNotification={navigateToNotification} />}
-      {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} />}
+      {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} onBack={() => navigateToPage('home')} />}
       {currentPage === 'club' && selectedClub && (
         <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
       )}

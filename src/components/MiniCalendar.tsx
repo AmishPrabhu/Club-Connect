@@ -103,24 +103,20 @@ export default function MiniCalendar({ events, selectedDate, onDateSelect }: Min
                                     ? 'bg-blue-600 text-white shadow-md'
                                     : isToday
                                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        : hasEventOnDay
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 font-bold'
+                                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }
               `}
                         >
                             {day}
-                            {hasEventOnDay && !isSelected && (
-                                <div className={`w-1 h-1 rounded-full mt-1 ${isToday ? 'bg-blue-500' : 'bg-blue-500'}`} />
-                            )}
-                            {hasEventOnDay && isSelected && (
-                                <div className="w-1 h-1 rounded-full bg-white mt-1" />
-                            )}
                         </div>
                     );
                 })}
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 text-center">
-                Events are marked with dots
+                Events are marked with green
             </div>
         </div>
     );

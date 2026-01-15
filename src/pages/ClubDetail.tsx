@@ -69,8 +69,6 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
 
         // Sync member count (optional as our API returns members count on club object)
         // keeping logic similar
-        const { syncClubMemberCount } = await import('../lib/dbService');
-        // syncClubMemberCount in new service just returns current count, so we can skip or keep. 
         // Logic:
         setClub(processedClub);
 
@@ -221,32 +219,33 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12">
       <button
         onClick={onBack}
-        className="flex items-center gap-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+        className="flex items-center gap-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium text-sm md:text-base"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
         Back to Dashboard
       </button>
 
       {/* Club Header */}
-      <div className={`h-48 bg-gradient-to-r ${club.color} rounded-2xl relative mb-8 overflow-hidden`}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white">
-            <div className="w-20 h-20 mx-auto mb-3 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center">
-              {club.image ? (
-                <img
-                  src={club.image}
-                  alt={club.name}
-                  className="w-full h-full object-contain p-2 bg-white rounded-xl"
-                />
-              ) : (
-                <span className="text-5xl">{club.icon}</span>
-              )}
-            </div>
-            <h1 className="text-3xl font-black">{club.name}</h1>
+      <div className="relative mb-8 rounded-2xl overflow-hidden shadow-xl border-t-4 border-[#DAA520]">
+        <div className="absolute inset-0 bg-[#002147] opacity-90"></div>
+        <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-40 mix-blend-overlay`}></div>
+        <div className="relative z-10 p-6 md:p-12 text-center text-white">
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg">
+            {club.image ? (
+              <img
+                src={club.image}
+                alt={club.name}
+                className="w-full h-full object-contain p-2 bg-white rounded-xl"
+              />
+            ) : (
+              <span className="text-4xl md:text-5xl">{club.icon}</span>
+            )}
           </div>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold mb-2 tracking-wide text-[#DAA520]">{club.name}</h1>
+          <p className="text-white/80 max-w-2xl mx-auto font-light text-base md:text-lg">Igniting Innovation & Excellence at Walchand College of Engineering</p>
         </div>
       </div>
 
@@ -255,33 +254,40 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         {/* Left Side - 70% */}
         <div className="lg:col-span-5 space-y-8">
           {/* Club Info */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
-            <p className="text-lg text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 md:p-8 border-l-4 border-[#002147]">
+            <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">About the Club</h3>
+            <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed font-serif">
               {club.description}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
+                <div className="p-3 bg-[#002147] rounded-lg text-white">
+                  <Users className="w-6 h-6" />
+                </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Members</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white">{club.members}</p>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Members</p>
+                  <p className="text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                <Calendar className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/20">
+                <div className="p-3 bg-[#DAA520] rounded-lg text-white">
+                  <Calendar className="w-6 h-6" />
+                </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Posts</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Posts</p>
+                  <p className="text-2xl font-bold text-[#DAA520] dark:text-white">{posts.length}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                <MapPin className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                <div className="p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300">
+                  <MapPin className="w-6 h-6" />
+                </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Category</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white capitalize">{club.category}</p>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white capitalize">{club.category}</p>
                 </div>
               </div>
             </div>
@@ -320,27 +326,30 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           </div>
 
           {/* Posts Timeline */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
               <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Posts & Events</h2>
+                <h2 className="text-2xl font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
+                  <Calendar className="w-6 h-6 text-[#DAA520]" />
+                  Posts & Events
+                </h2>
 
                 <div className="flex items-center gap-2">
-                  <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                  <div className="flex bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600 shadow-sm">
                     <button
                       onClick={() => setActiveTab('upcoming')}
-                      className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'upcoming'
-                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'upcoming'
+                        ? 'bg-[#002147] text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                         }`}
                     >
                       Upcoming
                     </button>
                     <button
                       onClick={() => setActiveTab('past')}
-                      className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'past'
-                        ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'past'
+                        ? 'bg-[#002147] text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                         }`}
                     >
                       Past Events
@@ -437,7 +446,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                             <div className="sm:w-3/4 p-4 flex flex-col justify-center">
                               {/* Header with status */}
                               <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                                <h3 className="text-lg font-bold font-serif text-[#002147] dark:text-white group-hover:text-[#DAA520] dark:group-hover:text-blue-400 transition-colors line-clamp-1">
                                   {event.title}
                                 </h3>
                                 {isUpcoming ? (
@@ -482,9 +491,9 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                                 {isUpcoming && (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); handleRSVP(event); }}
-                                    className="ml-auto px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg text-xs font-semibold transition-all transform hover:scale-105 shadow flex items-center gap-1"
+                                    className="ml-auto px-4 py-1.5 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg text-xs font-bold transition-all transform hover:scale-105 shadow flex items-center gap-2 uppercase tracking-wide"
                                   >
-                                    <Plus className="w-3 h-3" />
+                                    <Plus className="w-3 h-3 text-[#DAA520]" />
                                     RSVP
                                   </button>
                                 )}
@@ -516,7 +525,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   <span className="text-3xl">{club.icon}</span>
                 )}
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              <h2 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
                 {club.name} - Member Board
               </h2>
             </div>
@@ -552,7 +561,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
 
             <button
               onClick={() => onNavigateToMember(club)}
-              className="w-full mt-6 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              className="w-full mt-6 px-4 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold uppercase tracking-wider transition-all transform hover:scale-[1.02] shadow-md border-b-4 border-[#00152e]"
             >
               View Full Board
             </button>

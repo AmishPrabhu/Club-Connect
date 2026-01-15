@@ -164,58 +164,57 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     const pastEvents = events.filter(e => new Date(e.date) < new Date()).length;
 
     return (
-        <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12">
             {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-xl">
-                        <Shield className="w-6 h-6 text-white" />
+            <div className="mb-6 md:mb-8 p-4 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-[#002147]">
+                        <Shield className="w-8 h-8 text-[#002147]" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white">
+                        <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white break-words">
                             Advisor Dashboard
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400">{clubName}</p>
+                        <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium">
+                            <span className="text-[#DAA520]">{clubName}</span> • Manage events and team
+                        </p>
                     </div>
                 </div>
-                <p className="text-lg text-slate-600 dark:text-slate-300">
-                    Welcome, {user?.name}. Manage your club's events and team.
-                </p>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147]">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                            <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <Calendar className="w-6 h-6 text-[#002147] dark:text-blue-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{events.length}</p>
+                            <p className="text-2xl font-bold text-[#002147] dark:text-white">{events.length}</p>
                             <p className="text-sm text-slate-600 dark:text-slate-300">Total Events</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520]">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                            <Clock className="w-6 h-6 text-green-600 dark:text-green-400" />
+                        <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                            <Clock className="w-6 h-6 text-[#DAA520] dark:text-green-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{upcomingEvents}</p>
+                            <p className="text-2xl font-bold text-[#DAA520] dark:text-white">{upcomingEvents}</p>
                             <p className="text-sm text-slate-600 dark:text-slate-300">Upcoming Events</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-slate-400">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
                             <Calendar className="w-6 h-6 text-slate-600 dark:text-slate-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{pastEvents}</p>
+                            <p className="text-2xl font-bold text-slate-700 dark:text-white">{pastEvents}</p>
                             <p className="text-sm text-slate-600 dark:text-slate-300">Past Events</p>
                         </div>
                     </div>
@@ -234,12 +233,12 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === tab.id
-                                    ? 'text-cyan-600 dark:text-cyan-400 border-b-2 border-cyan-600'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all border-b-2 ${activeTab === tab.id
+                                    ? 'text-[#002147] dark:text-cyan-400 border-[#002147]'
+                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent'
                                     }`}
                             >
-                                <Icon className="w-5 h-5" />
+                                <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
                                 {tab.label}
                             </button>
                         );
@@ -456,9 +455,9 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                             <button
                                 onClick={handleUpdateRole}
                                 disabled={isSaving}
-                                className="w-full bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                                className="w-full bg-[#002147] hover:bg-[#00152e] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
                             >
-                                <UserPlus className="w-5 h-5" />
+                                <UserPlus className="w-5 h-5 text-[#DAA520]" />
                                 {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>

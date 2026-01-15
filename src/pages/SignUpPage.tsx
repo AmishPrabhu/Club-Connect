@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Sparkles, ArrowLeft, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { UserPlus, ArrowLeft, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +13,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
     const [error, setError] = useState('');
     const { signUp, signInWithGoogle, isLoading, user, isAuthenticated } = useAuth();
 
@@ -63,168 +64,188 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6">
-            <div className="max-w-md w-full">
-                {/* Back to Home Button */}
-                <button
-                    onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-8 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Home
-                </button>
+        <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
+            {/* Left Split - Inspiration Side */}
+            <div className="hidden lg:flex w-1/2 bg-college-blue-900 relative overflow-hidden flex-col justify-between p-12 text-white">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 z-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+                <div className="absolute inset-0 z-0 bg-[#002147]">
+                    <img
+                        src="/wce-campus.png"
+                        alt="Walchand College Campus"
+                        className="w-full h-full object-cover opacity-40 mix-blend-overlay grayscale"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#002147]/90 to-[#002147]/70" />
+                </div>
 
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 px-4 py-2 rounded-full mb-6">
-                        <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        <span className="text-sm font-semibold text-green-700 dark:text-green-300">Create Account</span>
+                <div className="relative z-10 w-full">
+                    <div className="flex items-center gap-3">
+                        <img src="/wce-logo.png" alt="WCE Logo" className="w-10 h-10 bg-white rounded-full p-1" />
+                        <span className="font-serif font-bold tracking-widest text-sm uppercase">Walchand College</span>
                     </div>
+                </div>
 
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">
-                        Join <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Club-Connect</span>
+                <div className="relative z-10 mb-8">
+                    <h1 className="text-5xl font-serif font-bold mb-4 leading-tight">
+                        Start Your Journey<br />
+                        <span className="text-college-gold">Create an Account</span>
                     </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-300">
-                        Create your account to explore and participate in club events
+                    <p className="text-lg font-light text-blue-100 max-w-sm">
+                        Join thousands of students involved in over 30+ technical and cultural clubs.
                     </p>
                 </div>
 
-                {/* Sign Up Form */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700">
-                    {/* Google Sign In Button */}
-                    <button
-                        onClick={handleGoogleSignIn}
-                        disabled={isLoading}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-50 dark:hover:bg-slate-600 transition-all mb-6 disabled:opacity-50"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                        Continue with Google
-                    </button>
+                <div className="relative z-10 flex gap-4">
+                    <div className="flex -space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-college-blue-900"></div>
+                        <div className="w-10 h-10 rounded-full bg-slate-300 border-2 border-college-blue-900"></div>
+                        <div className="w-10 h-10 rounded-full bg-slate-400 border-2 border-college-blue-900"></div>
+                    </div>
+                    <div className="text-sm font-medium pt-2">
+                        Join 2,500+ Peers
+                    </div>
+                </div>
+            </div>
 
-                    {/* Divider */}
-                    <div className="relative mb-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200 dark:border-slate-600"></div>
+
+            {/* Right Split - Functionality */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative overflow-y-auto">
+                <button
+                    onClick={() => onNavigate('home')}
+                    className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-college-blue-primary transition-all font-medium text-sm group"
+                >
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Back
+                </button>
+
+                <div className="w-full max-w-md">
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 transform -rotate-3">
+                            <GraduationCap className="w-8 h-8 text-green-600 dark:text-green-400" />
                         </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white dark:bg-slate-800 text-slate-500">or sign up with email</span>
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student Registration</h2>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Please fill in your details to get started</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-1">
+                        <button
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                            className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all rounded-xl disabled:opacity-50 group"
+                        >
+                            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                </svg>
+                            </div>
+                            Continue with Google
+                        </button>
+                    </div>
+
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+                            <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-400">Or Register Manually</span>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                            <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-md">
+                                <p className="text-sm font-medium text-red-700 dark:text-red-300">⚠️ {error}</p>
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                Full Name
-                            </label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 gap-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Your full name"
+                                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
+                                    placeholder="e.g. Amish Prabhu"
                                     required
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                Email Address
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <div className="grid grid-cols-1 gap-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email</label>
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="your.email@example.com"
+                                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
+                                    placeholder="your.name@wce.ac.in"
                                     required
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-12 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Create a password"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                Confirm Password
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Confirm your password"
-                                    required
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
+                                            placeholder="••••••"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Confirm</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
+                                            placeholder="••••••"
+                                            required
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-green-400 disabled:to-emerald-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                            className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
                         >
                             {isLoading ? (
-                                <>
-                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Creating account...
-                                </>
+                                <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
                             ) : (
                                 <>
                                     <UserPlus className="w-5 h-5" />
-                                    Create Account
+                                    <span>Create Account</span>
                                 </>
                             )}
                         </button>
                     </form>
 
-                    {/* Login Link */}
-                    <p className="mt-6 text-center text-slate-600 dark:text-slate-400">
+                    <p className="mt-8 text-center text-slate-500 text-sm">
                         Already have an account?{' '}
                         <button
                             onClick={() => onNavigate('login')}
-                            className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                            className="text-college-blue-primary font-bold hover:underline"
                         >
-                            Sign in
+                            Sign In
                         </button>
                     </p>
                 </div>

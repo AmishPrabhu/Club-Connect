@@ -75,41 +75,45 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
     }
 
     return (
-        <div className="min-h-screen p-6">
+        <div className="min-h-screen p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-6 md:mb-8 p-4 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                     <button
                         onClick={() => onNavigate('home')}
-                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 mb-4"
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] mb-4 font-medium transition-colors text-sm md:text-base"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Home
                     </button>
 
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                        Welcome back, <span className="text-blue-600">{user?.name || 'Student'}</span>!
+                    <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2 break-words">
+                        Welcome back, <span className="text-[#DAA520]">{user?.name || 'Student'}</span>!
                     </h1>
-                    <p className="text-slate-600 dark:text-slate-400">
+                    <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">
                         View and manage your event registrations
                     </p>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-6 text-white">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147]">
                         <div className="flex items-center gap-3 mb-2">
-                            <CalendarCheck className="w-6 h-6" />
-                            <span className="text-lg font-semibold">Upcoming Events</span>
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <CalendarCheck className="w-6 h-6 text-[#002147]" />
+                            </div>
+                            <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">Upcoming Events</span>
                         </div>
-                        <p className="text-4xl font-bold">{upcomingEvents.length}</p>
+                        <p className="text-4xl font-bold text-[#002147] dark:text-white">{upcomingEvents.length}</p>
                     </div>
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520]">
                         <div className="flex items-center gap-3 mb-2">
-                            <History className="w-6 h-6" />
-                            <span className="text-lg font-semibold">Past Events</span>
+                            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                                <History className="w-6 h-6 text-[#DAA520]" />
+                            </div>
+                            <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">Past Events</span>
                         </div>
-                        <p className="text-4xl font-bold">{pastEvents.length}</p>
+                        <p className="text-4xl font-bold text-[#DAA520] dark:text-white">{pastEvents.length}</p>
                     </div>
                 </div>
 
@@ -118,25 +122,25 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     <button
                         onClick={() => setActiveTab('upcoming')}
                         className={`pb-3 px-2 font-semibold transition-colors relative ${activeTab === 'upcoming'
-                            ? 'text-blue-600 dark:text-blue-400'
+                            ? 'text-[#002147] dark:text-blue-400'
                             : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                             }`}
                     >
                         Upcoming Events ({upcomingEvents.length})
                         {activeTab === 'upcoming' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#002147]" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('past')}
                         className={`pb-3 px-2 font-semibold transition-colors relative ${activeTab === 'past'
-                            ? 'text-blue-600 dark:text-blue-400'
+                            ? 'text-[#002147] dark:text-blue-400'
                             : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                             }`}
                     >
                         Past Events ({pastEvents.length})
                         {activeTab === 'past' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#002147]" />
                         )}
                     </button>
                 </div>
@@ -155,7 +159,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                 </p>
                                 <button
                                     onClick={() => onNavigate('events')}
-                                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+                                    className="px-6 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-semibold transition-colors"
                                 >
                                     Browse Events
                                 </button>
@@ -226,7 +230,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => event.id && onNavigateToPost(event.id)}
-                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                                            className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                                         >
                                             View Details
                                             <ExternalLink className="w-4 h-4" />

@@ -221,27 +221,27 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                     <div className="flex items-center gap-4">
                         {onBack && (
-                            <button onClick={onBack} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
-                                <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+                            <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white">
+                                <ArrowLeft className="w-6 h-6" />
                             </button>
                         )}
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Event Management</h1>
-                            <p className="text-slate-600 dark:text-slate-400">{post.title}</p>
+                            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">Event Management</h1>
+                            <p className="text-slate-600 dark:text-slate-400 font-medium">{post.title}</p>
                         </div>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl font-semibold transition-all shadow-lg"
+                        className="flex items-center gap-2 px-6 py-3 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-xl font-bold transition-all shadow-md uppercase tracking-wide"
                     >
                         {isSaving ? (
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <Save className="w-5 h-5" />
+                            <Save className="w-5 h-5 text-[#DAA520]" />
                         )}
                         {isSaving ? 'Saving...' : 'Save All'}
                     </button>
@@ -258,40 +258,40 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                     <div className="flex border-b border-slate-200 dark:border-slate-700">
                         <button
                             onClick={() => setActiveTab('details')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'details'
-                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'details'
+                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                 }`}
                         >
-                            <AlignLeft className="w-5 h-5" />
+                            <AlignLeft className={`w-5 h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
                             Details
                         </button>
                         <button
                             onClick={() => setActiveTab('roles')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'roles'
-                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'roles'
+                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                 }`}
                         >
-                            <Users className="w-5 h-5" />
+                            <Users className={`w-5 h-5 ${activeTab === 'roles' ? 'text-[#DAA520]' : ''}`} />
                             Roles & Tasks
                             {tasks.length > 0 && (
-                                <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded-full">
+                                <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 text-xs rounded-full font-bold">
                                     {tasks.length}
                                 </span>
                             )}
                         </button>
                         <button
                             onClick={() => setActiveTab('participants')}
-                            className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all ${activeTab === 'participants'
-                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'participants'
+                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                 }`}
                         >
-                            <Users className="w-5 h-5" />
+                            <Users className={`w-5 h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
                             Participants
                             {(post?.rsvps || 0) > 0 && (
-                                <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs rounded-full">
+                                <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full font-bold">
                                     {post?.rsvps || 0}
                                 </span>
                             )}
@@ -303,10 +303,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                         {activeTab === 'details' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-2 space-y-6">
-                                    {/* Basic Info */}
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                            <AlignLeft className="w-5 h-5 text-blue-500" />
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                        <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                            <AlignLeft className="w-5 h-5 text-[#DAA520]" />
                                             Basic Information
                                         </h2>
                                         <div className="space-y-4">
@@ -331,10 +330,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                         </div>
                                     </div>
 
-                                    {/* Date & Time */}
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                            <Calendar className="w-5 h-5 text-green-500" />
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                        <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                            <Calendar className="w-5 h-5 text-[#DAA520]" />
                                             Date & Time
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -360,10 +358,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                         </div>
                                     </div>
 
-                                    {/* Location */}
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                            <MapPin className="w-5 h-5 text-red-500" />
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                        <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                            <MapPin className="w-5 h-5 text-[#DAA520]" />
                                             Location
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -391,9 +388,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
 
                                 {/* Sidebar */}
                                 <div className="space-y-6">
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                            <LinkIcon className="w-5 h-5 text-purple-500" />
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                        <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                            <LinkIcon className="w-5 h-5 text-[#DAA520]" />
                                             Links
                                         </h2>
                                         <div className="space-y-4">
@@ -452,10 +449,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                         {/* Roles Tab */}
                         {activeTab === 'roles' && (
                             <div className="space-y-6">
-                                {/* Add Task */}
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                    <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                        <UserPlus className="w-5 h-5 text-blue-500" />
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                        <UserPlus className="w-5 h-5 text-[#DAA520]" />
                                         Create New Task
                                     </h2>
                                     <div className="space-y-4">
@@ -513,9 +509,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                     <button
                                         onClick={addTask}
                                         disabled={!newTaskTitle.trim()}
-                                        className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg font-semibold transition-all"
+                                        className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-lg font-bold transition-all uppercase tracking-wide"
                                     >
-                                        <Plus className="w-4 h-4" />
+                                        <Plus className="w-4 h-4 text-[#DAA520]" />
                                         Add Task
                                     </button>
                                 </div>
@@ -622,9 +618,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                             </div>
 
                             {/* Add Participant Form */}
-                            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                    <UserPlus className="w-5 h-5 text-purple-500" />
+                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                    <UserPlus className="w-5 h-5 text-[#DAA520]" />
                                     Add Participant (from Google Form)
                                 </h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
@@ -674,9 +670,9 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                                     setMessage({ type: 'error', text: result.error || 'Failed to add participant' });
                                                 }
                                             }}
-                                            className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                            className="w-full px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
                                         >
-                                            <Plus className="w-4 h-4" />
+                                            <Plus className="w-4 h-4 text-[#DAA520]" />
                                             Add Participant
                                         </button>
                                     </div>
