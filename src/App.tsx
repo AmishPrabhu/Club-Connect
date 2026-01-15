@@ -23,7 +23,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import AdvisorDashboard from './pages/AdvisorDashboard';
 import SetupAdmin from './pages/SetupAdmin';
-import StudentAIAssistant from './components/StudentAIAssistant';
+
 
 function AppContent() {
   const {
@@ -130,11 +130,7 @@ function AppContent() {
         <SetupAdmin onNavigate={navigateToPage} />
       )}
 
-      {/* AI Assistant Widget - Global */}
-      <StudentAIAssistant
-        onNavigateToClub={navigateToClub}
-        onNavigateToEvent={navigateToEvent}
-      />
+
 
       {/* Bottom Navigation Bar */}
       {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
