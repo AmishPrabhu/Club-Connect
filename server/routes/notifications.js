@@ -7,13 +7,14 @@ const router = express.Router();
 // Get notifications for user or global
 router.get('/', verifyTokenOptional, async (req, res) => {
     try {
-        // Get global notifications OR notifications for this specific user
-        let query = { userId: null };
+        let query = { userId: null }; // Default: global only for unauthenticated
         if (req.user) {
+            // Show: global, personal, AND all club notifications
             query = {
                 $or: [
-                    { userId: null },
-                    { userId: req.user.id }
+                    { userId: null, clubId: null },  // Global (no club-specific)
+                    { userId: req.user.id },          // Personal
+                    { clubId: { $ne: null } },        // ALL club notifications
                 ]
             };
         }
@@ -21,6 +22,7 @@ router.get('/', verifyTokenOptional, async (req, res) => {
         const notifications = await Notification.find(query).sort({ createdAt: -1 });
         res.json(notifications);
     } catch (error) {
+        console.error("Error fetching notifications:", error);
         res.status(500).json({ message: 'Server error' });
     }
 });

@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -25,10 +26,17 @@ router.post('/signup', async (req, res) => {
             email,
             password: hashedPassword,
             name,
-            role: role || 'user',
+            role: 'user', // Force user role to prevent privilege escalation
         });
 
         await newUser.save();
+
+        // Link any existing club memberships to this new user
+        // We use a case-insensitive regex to match email since ClubMember might not match exact case
+        await ClubMember.updateMany(
+            { email: { $regex: new RegExp(`^${email}$`, 'i') } },
+            { $set: { userId: newUser._id } }
+        );
 
         // Create token
         const token = jwt.sign(
@@ -44,6 +52,7 @@ router.post('/signup', async (req, res) => {
                 email: newUser.email,
                 name: newUser.name,
                 role: newUser.role,
+                likedClubs: newUser.likedClubs || [],
             },
         });
     } catch (error) {
@@ -87,6 +96,7 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 clubId: user.clubId,
                 clubName: user.clubName,
+                likedClubs: user.likedClubs || [],
             },
         });
     } catch (error) {
@@ -102,7 +112,18 @@ router.get('/me', verifyToken, async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.json(user);
+        // Map to frontend-compatible format
+        res.json({
+            id: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            clubId: user.clubId,
+            clubName: user.clubName,
+            likedClubs: user.likedClubs || [],
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        });
     } catch (error) {
         console.error('Me error:', error);
         res.status(500).json({ message: 'Server error' });

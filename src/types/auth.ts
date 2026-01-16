@@ -36,6 +36,7 @@ export interface User {
   clubName?: string; // For club secretaries
   createdAt?: Date;
   updatedAt?: Date;
+  likedClubs?: string[]; // Array of club IDs
 }
 
 export interface AuthState {

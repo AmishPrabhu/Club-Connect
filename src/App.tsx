@@ -77,6 +77,7 @@ function AppContent() {
           onBack={() => navigateToPage('home')}
           onNavigate={navigateToPage}
           onNavigateToPost={navigateToPost}
+          onNavigateToClub={navigateToClub}
         />
       )}
       {currentPage === 'event' && selectedEvent && (

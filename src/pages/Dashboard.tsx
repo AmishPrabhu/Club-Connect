@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, TrendingUp, Users, ChevronRight, ArrowLeft } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
-import { getClubs, getPosts } from '../lib/dbService';
+import { getClubs, getPosts, toggleClubLike } from '../lib/dbService';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
   onNavigateToClub: (clubId: string) => void;
@@ -10,6 +11,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) {
+  const { user, updateUser } = useAuth();
   const [clubs, setClubs] = useState<DBClub[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +66,25 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleToggleLike = async (clubId: string, isLiked: boolean) => {
+    if (!user) return; // Should prompt login?
+
+    // Optimistically update global user state so Profile reflects it immediately
+    // isLiked is the OLD state (before toggle) passed from ClubCard
+    // If it WAS liked, we are removing it.
+    let newLikedClubs = user.likedClubs || [];
+    if (isLiked) {
+      newLikedClubs = newLikedClubs.filter(id => id !== clubId);
+    } else {
+      newLikedClubs = [...newLikedClubs, clubId];
+    }
+
+    updateUser({ likedClubs: newLikedClubs });
+
+    // API Call
+    await toggleClubLike(user.id, clubId, isLiked);
+  };
 
   const filteredClubs = clubs.filter((club) => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -218,7 +239,13 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
             </div>
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {filteredClubs.map((club) => (
-                <ClubCard key={club.id} club={club} onClick={() => onNavigateToClub(club.id!)} />
+                <ClubCard
+                  key={club.id}
+                  club={club}
+                  onClick={() => onNavigateToClub(club.id!)}
+                  isLiked={user?.likedClubs?.includes(club.id!)}
+                  onToggleLike={handleToggleLike}
+                />
               ))}
             </div>
           </>

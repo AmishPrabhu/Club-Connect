@@ -1,19 +1,41 @@
 import { Users, Calendar, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DBClub } from '../types/auth';
 
 interface ClubCardProps {
   club: DBClub;
   onClick: () => void;
+  isLiked?: boolean;
+  onToggleLike?: (clubId: string, isLiked: boolean) => void;
 }
 
-export default function ClubCard({ club, onClick }: ClubCardProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
+export default function ClubCard({ club, onClick, isLiked = false, onToggleLike }: ClubCardProps) {
+  const [isFavorited, setIsFavorited] = useState(isLiked);
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the card click
-    setIsFavorited(!isFavorited);
+  // Sync with prop if it changes (e.g. initial load)
+  // But we want local Optimistic UI too, so we bias towards local state after interaction?
+  // Actually, better to just use local state initialized by prop, and update on prop change.
+  useEffect(() => {
+    setIsFavorited(isLiked);
+  }, [isLiked]);
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newState = !isFavorited;
+    setIsFavorited(newState); // Optimistic update
+
+    if (onToggleLike) {
+      onToggleLike(club.id!, isFavorited); // Pass CURRENT state (before toggle) or new state? 
+      // Best to pass the INTENT or the NEW state. 
+      // Let's pass the OLD state so parent knows what to do? Or just "toggle".
+      // impl: toggleClubLike(userId, clubId, isLiked) <- isLiked here means "is it currently liked before toggle" based on my dbService
+    }
   };
+
+  // ... imports need React useEffect
+
+  // Fix: Need to import useEffect
+
   return (
     <div
       onClick={onClick}
@@ -25,7 +47,7 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
       <button
         onClick={handleFavoriteClick}
         className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
-        aria-label="Favorite club"
+        aria-label={isFavorited ? "Unlike club" : "Like club"}
       >
         <Heart
           className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${isFavorited

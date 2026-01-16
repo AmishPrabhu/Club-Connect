@@ -33,6 +33,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    likedClubs: [{
+        type: String, // Club IDs
+    }],
     createdAt: {
         type: Date,
         default: Date.now,

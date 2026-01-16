@@ -305,6 +305,23 @@ export const getUserProfile = async (userId: string): Promise<DBUser | null> => 
     }
 };
 
+// Toggle club like
+export const toggleClubLike = async (userId: string, clubId: string, isLiked: boolean): Promise<boolean> => {
+    try {
+        if (isLiked) {
+            // If currently liked, we want to unlike (delete)
+            await api.delete(`/users/${userId}/like/${clubId}`);
+        } else {
+            // If not liked, we want to like (post)
+            await api.post(`/users/${userId}/like/${clubId}`);
+        }
+        return true;
+    } catch (error) {
+        console.error('Error toggling club like:', error);
+        return false;
+    }
+};
+
 // ==================== POSTS ====================
 
 export const getPosts = async (): Promise<DBPost[]> => {
@@ -539,10 +556,24 @@ export const checkEmailExists = async (email: string): Promise<boolean> => {
 
 export const getUserMemberships = async (email: string): Promise<any[]> => {
     try {
-        const clubs = await getClubs();
         const memberships: any[] = [];
 
+        // 1. Fetch regular memberships from backend (ClubMember collection)
+        try {
+            const response = await api.get('/users/memberships');
+            if (response.data && Array.isArray(response.data)) {
+                memberships.push(...response.data);
+            }
+        } catch (err) {
+            console.warn("Failed to fetch remote memberships:", err);
+        }
+
+        // 2. Check for officer roles (legacy/direct Club association)
+        const clubs = await getClubs();
         clubs.forEach(club => {
+            // Check if already added (avoid duplicates)
+            if (memberships.find(m => m.clubId === club.id)) return;
+
             if (club.secretaryEmail === email) {
                 memberships.push({
                     clubId: club.id,
@@ -550,37 +581,34 @@ export const getUserMemberships = async (email: string): Promise<any[]> => {
                     clubImage: club.image,
                     clubIcon: '🏛️',
                     role: 'secretary',
-                    joinedAt: club.updatedAt // approx
+                    joinedAt: club.updatedAt
                 });
-            }
-            if (club.presidentEmail === email) {
+            } else if (club.presidentEmail === email) {
                 memberships.push({
                     clubId: club.id,
                     clubName: club.name,
                     clubImage: club.image,
                     clubIcon: '🏛️',
                     role: 'president',
-                    joinedAt: club.updatedAt // approx
+                    joinedAt: club.updatedAt
                 });
-            }
-            if (club.treasurerEmail === email) {
+            } else if (club.treasurerEmail === email) {
                 memberships.push({
                     clubId: club.id,
                     clubName: club.name,
                     clubImage: club.image,
                     clubIcon: '🏛️',
                     role: 'treasurer',
-                    joinedAt: club.updatedAt // approx
+                    joinedAt: club.updatedAt
                 });
-            }
-            if (club.advisorEmail === email) {
+            } else if (club.advisorEmail === email) {
                 memberships.push({
                     clubId: club.id,
                     clubName: club.name,
                     clubImage: club.image,
                     clubIcon: '🏛️',
                     role: 'advisor',
-                    joinedAt: club.updatedAt // approx
+                    joinedAt: club.updatedAt
                 });
             }
         });

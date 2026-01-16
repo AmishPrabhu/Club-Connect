@@ -1,14 +1,15 @@
 import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts } from '../lib/dbService';
+import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications } from '../lib/dbService';
 import { Page } from '../types/page';
-import { DBPost, ClubMessage } from '../types/auth';
+import { DBPost, ClubMessage, DBClub, DBNotification } from '../types/auth';
 
 interface UserProfileProps {
   onBack: () => void;
   onNavigate: (page: Page) => void;
   onNavigateToPost: (postId: string) => void;
+  onNavigateToClub?: (clubId: string) => void;
 }
 
 interface UserEvent {
@@ -16,9 +17,11 @@ interface UserEvent {
   rsvpDate: Date;
 }
 
-export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: UserProfileProps) {
+export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNavigateToClub }: UserProfileProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'events'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'following'>('overview');
+  const [likedClubsList, setLikedClubsList] = useState<DBClub[]>([]);
+  const [likedClubNotifications, setLikedClubNotifications] = useState<DBNotification[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -171,6 +174,32 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
     }
   }, [activeTab]);
 
+  // Load Liked Clubs and their notifications
+  useEffect(() => {
+    const fetchLikedClubsAndNotifications = async () => {
+      if (user?.likedClubs && user.likedClubs.length > 0) {
+        try {
+          const allClubs = await getClubs();
+          const liked = allClubs.filter(c => user.likedClubs?.includes(c.id!));
+          setLikedClubsList(liked);
+
+          // Fetch all notifications and filter for liked clubs
+          const allNotifications = await getNotifications();
+          const likedClubNotifs = allNotifications.filter(n =>
+            n.clubId && user.likedClubs?.includes(n.clubId)
+          );
+          setLikedClubNotifications(likedClubNotifs);
+        } catch (err) {
+          console.error("Error loading liked clubs", err);
+        }
+      } else {
+        setLikedClubsList([]);
+        setLikedClubNotifications([]);
+      }
+    };
+    fetchLikedClubsAndNotifications();
+  }, [user?.likedClubs]);
+
   const now = new Date();
   const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
   const pastEvents = userEvents.filter(e => new Date(e.event.date) < now);
@@ -304,6 +333,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
             {[
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'events', label: 'My Events', icon: Calendar },
+              { id: 'following', label: 'Following', icon: Heart },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -397,6 +427,73 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost }: Us
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'following' && (
+              <div className="space-y-8">
+                {/* Liked Clubs Section */}
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">Clubs You Follow</h3>
+                  {likedClubsList.length > 0 ? (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {likedClubsList.map((club) => (
+                        <div
+                          key={club.id}
+                          className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all cursor-pointer"
+                          onClick={() => onNavigateToClub ? onNavigateToClub(club.id!) : onNavigate('dashboard')}
+                        >
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-600 flex items-center justify-center text-xl shadow-sm border border-slate-100 dark:border-slate-500 overflow-hidden">
+                            {club.image ? <img src={club.image} alt={club.name} className="w-full h-full object-cover" /> : <Heart className="w-6 h-6 text-red-500" />}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-slate-900 dark:text-white">{club.name}</h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{club.description}</p>
+                          </div>
+                          <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                      <Heart className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">You haven't liked any clubs yet.</p>
+                      <button onClick={() => onNavigate('dashboard')} className="px-4 py-2 bg-[#002147] text-white rounded-lg font-bold text-sm">Explore Clubs</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Liked Club Notifications Section */}
+                {likedClubsList.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">Updates from Followed Clubs</h3>
+                    {likedClubNotifications.length > 0 ? (
+                      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                        {likedClubNotifications.slice(0, 10).map((notif) => (
+                          <div
+                            key={notif.id}
+                            className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg flex-shrink-0">
+                                <Heart className="w-4 h-4 text-red-500" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-slate-900 dark:text-white text-sm">{notif.title}</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1">{notif.message}</p>
+                                <p className="text-[10px] text-slate-400 mt-2">{new Date(notif.createdAt).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">No updates from your followed clubs yet.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
