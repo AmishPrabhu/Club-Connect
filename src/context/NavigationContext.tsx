@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Page } from '../types/page';
+import { ClubMembership } from '../types/auth';
 import { markNotificationAsRead } from '../lib/dbService';
 
 interface NavigationContextType {
@@ -11,6 +12,8 @@ interface NavigationContextType {
     selectedPost: string | null;
     selectedManagementEventId: string | null;
     isOpenedFromUrl: boolean;
+    selectedMembership: ClubMembership | null;
+    setSelectedMembership: (membership: ClubMembership | null) => void;
     navigateToPage: (page: Page) => void;
     navigateToClub: (clubId: string) => void;
     navigateToMemberBoard: (member: any) => void;
@@ -41,6 +44,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedPost, setSelectedPost] = useState<string | null>(null);
     const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
     const [isOpenedFromUrl, setIsOpenedFromUrl] = useState(false);
+    const [selectedMembership, setSelectedMembership] = useState<ClubMembership | null>(null);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -120,6 +124,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const handleLogout = async (logoutFn: () => Promise<void>) => {
         await logoutFn();
+        setSelectedMembership(null); // Clear membership on logout
         setCurrentPage('home');
     };
 
@@ -134,6 +139,8 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 selectedPost,
                 selectedManagementEventId,
                 isOpenedFromUrl,
+                selectedMembership,
+                setSelectedMembership,
                 navigateToPage,
                 navigateToClub,
                 navigateToMemberBoard,

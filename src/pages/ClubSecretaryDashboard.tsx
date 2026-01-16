@@ -397,12 +397,16 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setIsModalOpen(true);
   };
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget'>('overview');
-  const { navigateToManagement } = useNavigation();
+  const { navigateToManagement, selectedMembership } = useNavigation();
+
+  // Use selectedMembership.clubId for multi-club support, fallback to user.clubId
+  const activeClubId = selectedMembership?.clubId || user?.clubId;
+  const activeRole = selectedMembership?.role?.toLowerCase() || user?.role;
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
-  const isReadOnly = user?.role === 'treasurer';
+  const isReadOnly = activeRole === 'treasurer';
 
   const [newPost, setNewPost] = useState({
     title: '',
@@ -466,7 +470,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   // Fetch club data from Firestore
   useEffect(() => {
     const fetchClubData = async () => {
-      if (!user?.clubId) {
+      if (!activeClubId) {
         setIsLoading(false);
         return;
       }
@@ -474,7 +478,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       try {
         // Fetch club document via API
         const { default: api } = await import('../lib/api');
-        const response = await api.get(`/clubs/${user.clubId}`);
+        const response = await api.get(`/clubs/${activeClubId}`);
         const clubData = response.data;
 
         // Map _id to id if needed (our API client in dbService handles posts, but we are manually fetching here)
@@ -498,12 +502,12 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         // Since we already fetched the club with member count, we might rely on that.
         // But to be safe and match original flow:
-        await syncClubMemberCount(user.clubId); // This basically refetches clubs list but okay
+        await syncClubMemberCount(activeClubId); // This basically refetches clubs list but okay
 
 
         // Fetch posts for this club
         const allPosts = await getPosts();
-        const clubPosts = allPosts.filter(p => p.clubId === user.clubId);
+        const clubPosts = allPosts.filter(p => p.clubId === activeClubId);
         setPosts(clubPosts);
       } catch (error) {
         console.error('Error fetching club data:', error);
@@ -513,7 +517,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     };
 
     fetchClubData();
-  }, [user?.clubId]);
+  }, [activeClubId]);
 
   const handleCreatePost = async (forceCreate: boolean = false) => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
@@ -608,7 +612,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
       // Refresh posts
       const allPosts = await getPosts();
-      setPosts(allPosts.filter(p => p.clubId === user.clubId));
+      setPosts(allPosts.filter(p => p.clubId === activeClubId));
 
       // Create a notification for the new post
       await createNotification({
@@ -669,7 +673,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     const success = await deletePost(postId);
     if (success && user?.clubId) {
       const allPosts = await getPosts();
-      setPosts(allPosts.filter(p => p.clubId === user.clubId));
+      setPosts(allPosts.filter(p => p.clubId === activeClubId));
     }
   };
 
@@ -684,7 +688,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     const success = await updatePost(editingPostId, { eventPhotos: editAttachments });  // Save to eventPhotos
     if (success && user?.clubId) {
       const allPosts = await getPosts();
-      setPosts(allPosts.filter(p => p.clubId === user.clubId));
+      setPosts(allPosts.filter(p => p.clubId === activeClubId));
       setEditingPostId(null);
       setEditAttachments([]);
     }

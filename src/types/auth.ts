@@ -27,6 +27,17 @@ export interface ClubMember {
   joinedAt: Date;
 }
 
+// Club membership for multi-club support (used in UI for club switching)
+export interface ClubMembership {
+  clubId: string;
+  clubName: string;
+  clubImage?: string;
+  clubIcon?: string;
+  clubColor?: string;
+  role: string; // 'Secretary', 'President', 'Treasurer', 'Advisor', 'Member', etc.
+  joinedAt: Date;
+}
+
 export interface User {
   id: string;
   email: string;

@@ -117,6 +117,81 @@ export const updateClubImage = async (
 
 // ==================== CLUB SECRETARIES ====================
 
+// Helper function to assign an officer role to a club
+// Handles both new users and existing users (for multi-club support)
+const assignOfficerRole = async (
+    email: string,
+    password: string,
+    name: string,
+    clubId: string,
+    clubName: string,
+    role: 'club-secretary' | 'president' | 'treasurer' | 'advisor',
+    roleLabel: string,
+    clubUpdateField: 'secretary' | 'president' | 'treasurer' | 'advisor'
+): Promise<{ success: boolean; error?: string; userId?: string }> => {
+    try {
+        let userId: string;
+
+        // First, try to create a new user
+        try {
+            const response = await api.post('/auth/signup', {
+                email,
+                password,
+                name,
+                role,
+            });
+            userId = response.data.user.id;
+        } catch (signupError: any) {
+            // If user already exists, that's fine - we'll just add them as an officer
+            if (signupError.response?.data?.message === 'User already exists') {
+                // User exists, we need to find them and add club membership
+                // For now, we'll just add the ClubMember entry (which uses email)
+                userId = 'existing-user'; // Placeholder, actual ID not needed for club update by email
+            } else {
+                throw signupError;
+            }
+        }
+
+        // Update the club with officer info
+        const clubUpdates: any = {};
+        if (clubUpdateField === 'secretary') {
+            clubUpdates.secretaryId = userId === 'existing-user' ? null : userId;
+            clubUpdates.secretaryEmail = email;
+        } else if (clubUpdateField === 'president') {
+            clubUpdates.presidentId = userId === 'existing-user' ? null : userId;
+            clubUpdates.presidentEmail = email;
+        } else if (clubUpdateField === 'treasurer') {
+            clubUpdates.treasurerId = userId === 'existing-user' ? null : userId;
+            clubUpdates.treasurerEmail = email;
+        } else if (clubUpdateField === 'advisor') {
+            clubUpdates.advisorId = userId === 'existing-user' ? null : userId;
+            clubUpdates.advisorEmail = email;
+            clubUpdates.advisorName = name;
+        }
+        await updateClub(clubId, clubUpdates);
+
+        // Add ClubMember entry for multi-club support (this will work for both new and existing users)
+        // The backend will handle duplicates (same email in same club)
+        try {
+            await addClubMember(clubId, {
+                name,
+                email,
+                role: roleLabel,
+                boardType: 'main',
+                joinedAt: new Date(),
+            });
+        } catch (memberError: any) {
+            // If member already exists in this club, that's fine (might be updating role)
+            console.log('ClubMember entry might already exist:', memberError.message);
+        }
+
+        return { success: true, userId: userId === 'existing-user' ? undefined : userId };
+    } catch (error: any) {
+        console.error(`Error assigning ${roleLabel}:`, error);
+        return { success: false, error: error.response?.data?.message || `Failed to assign ${roleLabel}` };
+    }
+};
+
 export const createClubSecretary = async (
     email: string,
     password: string,
@@ -124,35 +199,7 @@ export const createClubSecretary = async (
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    try {
-        // We create a user via signup endpoint, but since we are admin, we might need a special endpoint
-        // or just use signup with role 'club-secretary'. 
-        // NOTE: The current backend auth/signup allows passing 'role'.
-        // In a real app we'd want admin-only creation, but for migration parity we rely on the implementation.
-
-        const response = await api.post('/auth/signup', {
-            email,
-            password,
-            name,
-            role: 'club-secretary',
-        });
-
-        const userId = response.data.user.id;
-
-        // Update the club with secretary info
-        await updateClub(clubId, {
-            secretaryId: userId,
-            secretaryEmail: email,
-        });
-
-        // Also update user profile with club info (if not handled by signup)
-        await updateUserProfile(userId, { clubId, clubName } as any);
-
-        return { success: true, userId };
-    } catch (error: any) {
-        console.error('Error creating club secretary:', error);
-        return { success: false, error: error.response?.data?.message || 'Failed to create secretary' };
-    }
+    return assignOfficerRole(email, password, name, clubId, clubName, 'club-secretary', 'Secretary', 'secretary');
 };
 
 export const createClubPresident = async (
@@ -162,28 +209,7 @@ export const createClubPresident = async (
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    try {
-        const response = await api.post('/auth/signup', {
-            email,
-            password,
-            name,
-            role: 'president',
-        });
-
-        const userId = response.data.user.id;
-
-        await updateClub(clubId, {
-            presidentId: userId,
-            presidentEmail: email,
-        });
-
-        await updateUserProfile(userId, { clubId, clubName } as any);
-
-        return { success: true, userId };
-    } catch (error: any) {
-        console.error('Error creating club president:', error);
-        return { success: false, error: error.response?.data?.message || 'Failed to create president' };
-    }
+    return assignOfficerRole(email, password, name, clubId, clubName, 'president', 'President', 'president');
 };
 
 export const createClubTreasurer = async (
@@ -193,28 +219,7 @@ export const createClubTreasurer = async (
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    try {
-        const response = await api.post('/auth/signup', {
-            email,
-            password,
-            name,
-            role: 'treasurer',
-        });
-
-        const userId = response.data.user.id;
-
-        await updateClub(clubId, {
-            treasurerId: userId,
-            treasurerEmail: email,
-        });
-
-        await updateUserProfile(userId, { clubId, clubName } as any);
-
-        return { success: true, userId };
-    } catch (error: any) {
-        console.error('Error creating club treasurer:', error);
-        return { success: false, error: error.response?.data?.message || 'Failed to create treasurer' };
-    }
+    return assignOfficerRole(email, password, name, clubId, clubName, 'treasurer', 'Treasurer', 'treasurer');
 };
 
 export const createClubAdvisor = async (
@@ -224,29 +229,7 @@ export const createClubAdvisor = async (
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    try {
-        const response = await api.post('/auth/signup', {
-            email,
-            password,
-            name,
-            role: 'advisor',
-        });
-
-        const userId = response.data.user.id;
-
-        await updateClub(clubId, {
-            advisorId: userId,
-            advisorEmail: email,
-            advisorName: name,
-        });
-
-        await updateUserProfile(userId, { clubId, clubName } as any);
-
-        return { success: true, userId };
-    } catch (error: any) {
-        console.error('Error creating club advisor:', error);
-        return { success: false, error: error.response?.data?.message || 'Failed to create advisor' };
-    }
+    return assignOfficerRole(email, password, name, clubId, clubName, 'advisor', 'Advisor', 'advisor');
 };
 
 export const removeClubOfficer = async (

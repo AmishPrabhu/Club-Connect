@@ -5,6 +5,8 @@ import { User as UserType } from '../types/auth';
 import { useState, useEffect } from 'react';
 import { getNotifications } from '../lib/dbService';
 import { useTour } from '../context/TourContext';
+import { useNavigation } from '../context/NavigationContext';
+import ClubSwitcher from './ClubSwitcher';
 
 interface HeaderProps {
   currentPage: Page;
@@ -19,6 +21,11 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { startTour } = useTour();
+  const { selectedMembership } = useNavigation();
+
+  // Use selectedMembership role if available, otherwise fallback to user role
+  const displayRole = selectedMembership?.role || user?.role?.replace('-', ' ') || '';
+  const displayClubName = selectedMembership?.clubName || user?.clubName || '';
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -107,6 +114,11 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           <div className="h-6 w-px bg-blue-700/50 hidden md:block"></div>
 
+          {/* Club Switcher - For officers with multiple clubs */}
+          {user && ['club-secretary', 'president', 'treasurer', 'advisor'].includes(user.role) && (
+            <ClubSwitcher className="hidden md:flex" />
+          )}
+
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors"
@@ -135,7 +147,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
               >
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold text-white leading-tight group-hover:text-[#DAA520] transition-colors">{user.name.split(' ')[0]}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-blue-300 font-bold">{user.role.replace('-', ' ')}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-blue-300 font-bold">{displayRole}</p>
                 </div>
                 <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-[#DAA520] to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-[#002147] group-hover:ring-[#DAA520]/50 transition-all">
                   {user.name.charAt(0)}
@@ -147,10 +159,10 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50 transform origin-top-right transition-all animate-in fade-in zoom-in-95 duration-200">
                   <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                     <p className="font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 capitalize">{user.role.replace('-', ' ')}</p>
-                    {user.clubName && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 capitalize">{displayRole}</p>
+                    {displayClubName && (
                       <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        {user.clubName}
+                        {displayClubName}
                       </span>
                     )}
                   </div>
