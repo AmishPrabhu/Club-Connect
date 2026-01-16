@@ -10,6 +10,16 @@ interface MemberManagerProps {
     userRole?: UserRole;
 }
 
+// Helper to sort members by board priority: Main > Executive > Member
+const sortMembers = (members: ClubMember[]) => {
+    const priority = { main: 0, executive: 1, member: 2 };
+    return [...members].sort((a, b) => {
+        const pA = priority[a.boardType || 'member'] ?? 2;
+        const pB = priority[b.boardType || 'member'] ?? 2;
+        return pA - pB;
+    });
+};
+
 // Board type options
 const BOARD_TYPE_OPTIONS: { value: 'main' | 'executive' | 'member'; label: string }[] = [
     { value: 'main', label: 'Main Board (TY)' },
@@ -126,14 +136,16 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             ? members.filter(m => String(m.joinedAt).includes(yearFilter))
             : members;
 
+        const sortedMembers = sortMembers(filteredMembers);
+
         const headers = ['Name', 'Email', 'Role', 'Board Type', 'Academic Year', 'Year Joined'];
-        const rows = filteredMembers.map(m => [
+        const rows = sortedMembers.map(m => [
             m.name,
             m.email,
             m.role,
             m.boardType || 'member',
             m.academicYear || '',
-            String(m.joinedAt)
+            String(m.joinedAt).substring(0, 4) // Extract just the year from ISO string or Date
         ]);
 
         const csvContent = [
@@ -195,7 +207,9 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                     ? members.filter(m => String(m.joinedAt).includes(yearFilter))
                     : members;
 
-                return filteredMembers.length === 0 ? (
+                const sortedMembers = sortMembers(filteredMembers);
+
+                return sortedMembers.length === 0 ? (
                     <div className="text-center py-12">
                         <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                         <p className="text-slate-600 dark:text-slate-400">
@@ -204,7 +218,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                     </div>
                 ) : (
                     <div className="grid gap-4">
-                        {filteredMembers.map((member) => (
+                        {sortedMembers.map((member) => (
                             <div
                                 key={member.id}
                                 className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
