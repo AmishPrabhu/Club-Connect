@@ -1125,7 +1125,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
           {/* Members Tab */}
           {activeTab === 'members' && club && (
-            <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} />
+            <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} userRole={user?.role} />
           )}
 
           {/* Events Tab - For Treasurer */}

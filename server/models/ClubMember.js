@@ -19,9 +19,17 @@ const clubMemberSchema = new mongoose.Schema({
         required: true,
     },
     role: {
+        type: String, // Custom role (e.g., "President", "App Executive", "Member")
+        default: 'Member',
+    },
+    boardType: {
         type: String,
-        enum: ['president', 'vice-president', 'treasurer', 'secretary', 'coordinator', 'member'],
+        enum: ['main', 'executive', 'member'], // Main Board (TY), Executive Board (SY), Member Board (FY)
         default: 'member',
+    },
+    academicYear: {
+        type: String, // e.g. "FY", "SY", "TY", "Final Year"
+        default: '',
     },
     joinedAt: {
         type: Date,

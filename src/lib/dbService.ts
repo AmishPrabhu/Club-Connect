@@ -489,7 +489,7 @@ export const syncClubMemberCount = async (clubId: string): Promise<number> => {
 
 export const addClubMember = async (
     clubId: string,
-    memberData: Omit<ClubMember, 'id' | 'joinedAt'>
+    memberData: Omit<ClubMember, 'id'>
 ): Promise<{ success: boolean; error?: string; memberId?: string }> => {
     try {
         const response = await api.post(`/clubs/${clubId}/members`, memberData);

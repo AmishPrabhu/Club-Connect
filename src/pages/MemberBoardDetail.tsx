@@ -8,11 +8,25 @@ interface MemberBoardDetailProps {
   onBack: () => void;
 }
 
+const BOARD_ORDER: ('main' | 'executive' | 'member')[] = ['main', 'executive', 'member'];
+
+const BOARD_LABELS: Record<string, string> = {
+  main: 'Main Board (TY)',
+  executive: 'Executive Board (SY)',
+  member: 'Member Board (FY)',
+};
+
+const BOARD_COLORS: Record<string, string> = {
+  main: 'border-amber-500 bg-amber-50 dark:bg-amber-900/20',
+  executive: 'border-purple-500 bg-purple-50 dark:bg-purple-900/20',
+  member: 'border-slate-400 bg-slate-50 dark:bg-slate-800',
+};
+
 export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailProps) {
   const [members, setMembers] = useState<ClubMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [yearFilter, setYearFilter] = useState<string>('');
 
-  // Fetch members from Firestore
   useEffect(() => {
     const loadMembers = async () => {
       if (club?.id) {
@@ -39,11 +53,16 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
     return <Users className="w-5 h-5 text-[#002147]" />;
   };
 
-  const formatRole = (role: string) => {
-    return role.split('-').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
+  // Filter members by year
+  const filteredMembers = yearFilter
+    ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+    : members;
+
+  // Group members by board type
+  const groupedMembers = BOARD_ORDER.reduce((acc, boardType) => {
+    acc[boardType] = filteredMembers.filter(m => (m.boardType || 'member') === boardType);
+    return acc;
+  }, {} as Record<string, ClubMember[]>);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -79,6 +98,27 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         </div>
       </div>
 
+      {/* Year Filter */}
+      <div className="mb-6 flex items-center gap-3">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Filter by Year:</label>
+        <select
+          value={yearFilter}
+          onChange={(e) => setYearFilter(e.target.value)}
+          className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">All Years</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+        </select>
+        {yearFilter && (
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            Showing {filteredMembers.length} member{filteredMembers.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -89,40 +129,55 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
           <p className="text-slate-600 dark:text-slate-400">No members found for this club.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow hover:border-[#DAA520]"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-[#DAA520]">
-                  {member.name.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white">
-                    {member.name}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {getRoleIcon(member.role)}
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      {formatRole(member.role)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+        <div className="space-y-8">
+          {BOARD_ORDER.map((boardType) => {
+            const boardMembers = groupedMembers[boardType];
+            if (boardMembers.length === 0) return null;
 
-              <div className="flex items-center gap-2 text-sm pt-4 border-t border-slate-100 dark:border-slate-700">
-                <Mail className="w-4 h-4 text-[#DAA520]" />
-                <a
-                  href={`mailto:${member.email}`}
-                  className="text-[#002147] dark:text-blue-400 hover:underline font-medium"
-                >
-                  {member.email}
-                </a>
+            return (
+              <div key={boardType} className={`rounded-xl border-l-4 p-6 ${BOARD_COLORS[boardType]}`}>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                  {BOARD_LABELS[boardType]} ({boardMembers.length})
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {boardMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-[#DAA520]">
+                          {member.name.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-[#002147] dark:text-white truncate">
+                            {member.name}
+                          </h3>
+                          {boardType !== 'member' && (
+                            <div className="flex items-center gap-1">
+                              {getRoleIcon(member.role)}
+                              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">
+                                {member.role}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <Mail className="w-3 h-3 text-[#DAA520]" />
+                        <a
+                          href={`mailto:${member.email}`}
+                          className="text-[#002147] dark:text-blue-400 hover:underline truncate"
+                        >
+                          {member.email}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

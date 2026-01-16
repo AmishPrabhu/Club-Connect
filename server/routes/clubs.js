@@ -116,7 +116,7 @@ router.get('/:id/members', async (req, res) => {
 // Add member to club
 router.post('/:id/members', verifyToken, async (req, res) => {
     try {
-        const { name, email, role, userId } = req.body;
+        const { name, email, role, userId, boardType, academicYear, joinedAt } = req.body;
         const clubId = req.params.id;
 
         const existing = await ClubMember.findOne({ clubId, email });
@@ -128,8 +128,11 @@ router.post('/:id/members', verifyToken, async (req, res) => {
             clubId,
             name,
             email,
-            role: role || 'member',
-            userId: userId || null, // Optional connection to real user
+            role: role || 'Member',
+            boardType: boardType || 'member',
+            userId: userId || null,
+            academicYear: academicYear || '',
+            joinedAt: joinedAt || Date.now()
         });
 
         await newMember.save();
@@ -147,12 +150,17 @@ router.post('/:id/members', verifyToken, async (req, res) => {
 // Update member
 router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
     try {
-        const { name, email, role } = req.body;
+        const { name, email, role, academicYear, joinedAt, boardType } = req.body;
         // Basic validation/permission check could go here
+
+        const updateData = { name, email, role };
+        if (academicYear !== undefined) updateData.academicYear = academicYear;
+        if (joinedAt !== undefined) updateData.joinedAt = joinedAt;
+        if (boardType !== undefined) updateData.boardType = boardType;
 
         const updatedMember = await ClubMember.findByIdAndUpdate(
             req.params.memberId,
-            { name, email, role },
+            updateData,
             { new: true }
         );
         res.json(updatedMember);

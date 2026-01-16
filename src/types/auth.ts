@@ -21,7 +21,9 @@ export interface ClubMember {
   id?: string;
   name: string;
   email: string;
-  role: ClubMemberRole;
+  role: string; // Custom role (e.g., "President", "App Executive", "Member")
+  boardType: 'main' | 'executive' | 'member'; // Main Board (TY), Executive Board (SY), Member Board (FY)
+  academicYear?: string;
   joinedAt: Date;
 }
 

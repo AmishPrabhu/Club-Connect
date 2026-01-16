@@ -1,33 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, UserPlus, X, Check, Users } from 'lucide-react';
-import { ClubMember, ClubMemberRole, UserRole } from '../types/auth';
+import { Plus, Edit2, Trash2, UserPlus, X, Check, Users, Download } from 'lucide-react';
+import { ClubMember, UserRole } from '../types/auth';
 import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/dbService';
 
 interface MemberManagerProps {
     clubId: string;
     clubName: string;
     isReadOnly?: boolean;
-    userRole?: UserRole; // Add user role to check permissions
+    userRole?: UserRole;
 }
 
-// Roles that only admin/advisor can assign or edit
-const PROTECTED_ROLES: ClubMemberRole[] = ['president', 'secretary', 'treasurer'];
-
-const ROLE_OPTIONS: { value: ClubMemberRole; label: string }[] = [
-    { value: 'president', label: 'President' },
-    { value: 'vice-president', label: 'Vice President' },
-    { value: 'treasurer', label: 'Treasurer' },
-    { value: 'secretary', label: 'Secretary' },
-    { value: 'coordinator', label: 'Coordinator' },
-    { value: 'member', label: 'Member' },
+// Board type options
+const BOARD_TYPE_OPTIONS: { value: 'main' | 'executive' | 'member'; label: string }[] = [
+    { value: 'main', label: 'Main Board (TY)' },
+    { value: 'executive', label: 'Executive Board (SY)' },
+    { value: 'member', label: 'Member Board (FY)' },
 ];
 
-const ROLE_COLORS: Record<ClubMemberRole, string> = {
-    'president': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    'vice-president': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    'treasurer': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    'secretary': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    'coordinator': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+const BOARD_TYPE_COLORS: Record<string, string> = {
+    'main': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    'executive': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     'member': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
 };
 
@@ -37,26 +29,16 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<ClubMember | null>(null);
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    // Check if user can manage protected roles
-    const canManageProtectedRoles = userRole === 'admin' || userRole === 'advisor';
-
-    // Filter role options based on permissions
-    const availableRoleOptions = canManageProtectedRoles
-        ? ROLE_OPTIONS
-        : ROLE_OPTIONS.filter(role => !PROTECTED_ROLES.includes(role.value));
-
-    // Check if a member can be edited/deleted by current user
-    const canEditMember = (member: ClubMember) => {
-        if (canManageProtectedRoles) return true;
-        return !PROTECTED_ROLES.includes(member.role);
-    };
+    const [yearFilter, setYearFilter] = useState<string>('');
 
     // Form state
     const [newMember, setNewMember] = useState({
         name: '',
         email: '',
-        role: 'member' as ClubMemberRole,
+        role: 'Member' as string,
+        boardType: 'member' as 'main' | 'executive' | 'member',
+        academicYear: '' as string,
+        joinedAt: new Date().getFullYear().toString(),
     });
 
     // Fetch members on mount
@@ -82,10 +64,14 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             return;
         }
 
-        const result = await addClubMember(clubId, newMember);
+        const result = await addClubMember(clubId, {
+            ...newMember,
+            role: newMember.boardType === 'member' ? 'Member' : newMember.role,
+            joinedAt: new Date(newMember.joinedAt)
+        });
         if (result.success) {
             setFormMessage({ type: 'success', text: 'Member added successfully!' });
-            setNewMember({ name: '', email: '', role: 'member' });
+            setNewMember({ name: '', email: '', role: 'Member', boardType: 'member', academicYear: '', joinedAt: new Date().getFullYear().toString() });
             await fetchMembers();
             setTimeout(() => {
                 setIsAddModalOpen(false);
@@ -103,6 +89,8 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             name: editingMember.name,
             email: editingMember.email,
             role: editingMember.role,
+            academicYear: editingMember.academicYear,
+            joinedAt: editingMember.joinedAt
         });
 
         if (success) {
@@ -120,8 +108,8 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         }
     };
 
-    const getRoleLabel = (role: ClubMemberRole) => {
-        return ROLE_OPTIONS.find(r => r.value === role)?.label || role;
+    const getBoardTypeLabel = (boardType: string) => {
+        return BOARD_TYPE_OPTIONS.find(b => b.value === boardType)?.label || boardType;
     };
 
     if (isLoading) {
@@ -132,110 +120,210 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         );
     }
 
+    // Export members to CSV
+    const exportToCSV = () => {
+        const filteredMembers = yearFilter
+            ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+            : members;
+
+        const headers = ['Name', 'Email', 'Role', 'Board Type', 'Academic Year', 'Year Joined'];
+        const rows = filteredMembers.map(m => [
+            m.name,
+            m.email,
+            m.role,
+            m.boardType || 'member',
+            m.academicYear || '',
+            String(m.joinedAt)
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${clubName}_members${yearFilter ? `_${yearFilter}` : ''}.csv`;
+        link.click();
+    };
+
+    // Check if user can export (secretary or president)
+    const canExport = userRole === 'club-secretary' || userRole === 'president';
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{clubName} Members</h3>
-                {!isReadOnly && (
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                <div className="flex items-center gap-3">
+                    <select
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <UserPlus className="w-4 h-4" />
-                        Add Member
-                    </button>
-                )}
+                        <option value="">All Years</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                    {canExport && (
+                        <button
+                            onClick={exportToCSV}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                            title="Export to CSV"
+                        >
+                            <Download className="w-4 h-4" />
+                            Export
+                        </button>
+                    )}
+                    {!isReadOnly && (
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            Add Member
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Members List */}
-            {members.length === 0 ? (
-                <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                    <p className="text-slate-600 dark:text-slate-400">No members yet. Add your first club member!</p>
-                </div>
-            ) : (
-                <div className="grid gap-4">
-                    {members.map((member) => (
-                        <div
-                            key={member.id}
-                            className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                        >
-                            {editingMember?.id === member.id && editingMember ? (
-                                // Edit mode
-                                <div className="flex-1 flex flex-wrap items-center gap-3">
-                                    <input
-                                        onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                                        className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <input
-                                        onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                                        className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <select
-                                        value={editingMember.role}
-                                        onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value as ClubMemberRole })}
-                                        className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        {availableRoleOptions.map((role) => (
-                                            <option key={role.value} value={role.value}>
-                                                {role.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={handleUpdateMember}
-                                            className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
+            {(() => {
+                const filteredMembers = yearFilter
+                    ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+                    : members;
+
+                return filteredMembers.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                        <p className="text-slate-600 dark:text-slate-400">
+                            {yearFilter ? `No members found for ${yearFilter}` : 'No members yet. Add your first club member!'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid gap-4">
+                        {filteredMembers.map((member) => (
+                            <div
+                                key={member.id}
+                                className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                            >
+                                {editingMember?.id === member.id && editingMember ? (
+                                    // Edit mode
+                                    <div className="flex-1 flex flex-wrap items-center gap-3">
+                                        <input
+                                            onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                                            className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <input
+                                            onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
+                                            className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <select
+                                            value={editingMember.academicYear || ''}
+                                            onChange={(e) => setEditingMember({ ...editingMember, academicYear: e.target.value })}
+                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            <Check className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => setEditingMember(null)}
-                                            className="p-2 bg-slate-400 hover:bg-slate-500 text-white rounded-lg transition-all"
+                                            <option value="">Year</option>
+                                            <option value="FY">FY</option>
+                                            <option value="SY">SY</option>
+                                            <option value="TY">TY</option>
+                                            <option value="Final Year">Final Year</option>
+                                        </select>
+                                        <input
+                                            type="date"
+                                            value={editingMember.joinedAt instanceof Date ? editingMember.joinedAt.toISOString().split('T')[0] : new Date(editingMember.joinedAt).toISOString().split('T')[0]}
+                                            onChange={(e) => setEditingMember({ ...editingMember, joinedAt: new Date(e.target.value) })}
+                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <select
+                                            value={editingMember.boardType || 'member'}
+                                            onChange={(e) => {
+                                                const bt = e.target.value as 'main' | 'executive' | 'member';
+                                                setEditingMember({
+                                                    ...editingMember,
+                                                    boardType: bt,
+                                                    role: bt === 'member' ? 'Member' : editingMember.role
+                                                });
+                                            }}
+                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                // View mode
-                                <>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h4 className="font-semibold text-slate-900 dark:text-white">{member.name}</h4>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${ROLE_COLORS[member.role]}`}>
-                                                {getRoleLabel(member.role)}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">{member.email}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                                            Joined: {member.joinedAt.toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    {!isReadOnly && canEditMember(member) && (
-                                        <div className="flex gap-2 w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                                            {BOARD_TYPE_OPTIONS.map((bt) => (
+                                                <option key={bt.value} value={bt.value}>
+                                                    {bt.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {editingMember.boardType !== 'member' && (
+                                            <input
+                                                type="text"
+                                                value={editingMember.role}
+                                                onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
+                                                className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter role (e.g. App Executive)"
+                                            />
+                                        )}
+                                        <div className="flex gap-2">
                                             <button
-                                                onClick={() => setEditingMember(member)}
-                                                className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"
-                                                title="Edit member"
+                                                onClick={handleUpdateMember}
+                                                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
                                             >
-                                                <Edit2 className="w-4 h-4" />
+                                                <Check className="w-4 h-4" />
                                             </button>
                                             <button
-                                                onClick={() => handleRemoveMember(member.id!)}
-                                                className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                                title="Remove member"
+                                                onClick={() => setEditingMember(null)}
+                                                className="p-2 bg-slate-400 hover:bg-slate-500 text-white rounded-lg transition-all"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <X className="w-4 h-4" />
                                             </button>
                                         </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
+                                    </div>
+                                ) : (
+                                    // View mode
+                                    <>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                                <h4 className="font-semibold text-slate-900 dark:text-white">{member.name}</h4>
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${BOARD_TYPE_COLORS[member.boardType || 'member']}`}>
+                                                    {getBoardTypeLabel(member.boardType || 'member')}
+                                                </span>
+                                                {member.boardType !== 'member' && (
+                                                    <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-semibold">
+                                                        {member.role}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400">{member.email}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                                                {member.academicYear ? `${member.academicYear} • ` : ''}Joined: {new Date(member.joinedAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        {!isReadOnly && (
+                                            <div className="flex gap-2 w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                                                <button
+                                                    onClick={() => setEditingMember(member)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                                    title="Edit member"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemoveMember(member.id!)}
+                                                    className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                    title="Remove member"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                );
+            })()}
 
             {/* Add Member Modal */}
             {isAddModalOpen && (
@@ -286,19 +374,76 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Role
+                                    Board Type
                                 </label>
                                 <select
-                                    value={newMember.role}
-                                    onChange={(e) => setNewMember({ ...newMember, role: e.target.value as ClubMemberRole })}
+                                    value={newMember.boardType}
+                                    onChange={(e) => {
+                                        const bt = e.target.value as 'main' | 'executive' | 'member';
+                                        setNewMember({
+                                            ...newMember,
+                                            boardType: bt,
+                                            role: bt === 'member' ? 'Member' : newMember.role
+                                        });
+                                    }}
                                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {availableRoleOptions.map((role) => (
-                                        <option key={role.value} value={role.value}>
-                                            {role.label}
+                                    {BOARD_TYPE_OPTIONS.map((bt) => (
+                                        <option key={bt.value} value={bt.value}>
+                                            {bt.label}
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            {newMember.boardType !== 'member' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Role
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newMember.role}
+                                        onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="e.g. President, App Executive"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Academic Year
+                                    </label>
+                                    <select
+                                        value={newMember.academicYear}
+                                        onChange={(e) => setNewMember({ ...newMember, academicYear: e.target.value })}
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select Year</option>
+                                        <option value="FY">FY</option>
+                                        <option value="SY">SY</option>
+                                        <option value="TY">TY</option>
+                                        <option value="Final Year">Final Year</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Year Joined
+                                    </label>
+                                    <select
+                                        value={newMember.joinedAt}
+                                        onChange={(e) => setNewMember({ ...newMember, joinedAt: e.target.value })}
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select Year</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
