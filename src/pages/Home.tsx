@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, ChevronRight, Award, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, ChevronRight, Award, Clock } from 'lucide-react';
 import { Page } from '../types/page';
 import { DBPost, DBClub, DBNotification } from '../types/auth';
-import { getPosts, getNotifications, getClubs, getTotalStudentCount } from '../lib/dbService';
+import { getPosts, getNotifications, getClubs } from '../lib/dbService';
 
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
@@ -29,7 +29,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [rsvpEvent, setRsvpEvent] = useState<DBPost | null>(null);
-  const [totalStudents, setTotalStudents] = useState<number>(0);
+
 
   // Search Dropdown State
   const [showDropdown, setShowDropdown] = useState(false);
@@ -44,11 +44,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [postsData, clubsData, notificationsData, studentCount] = await Promise.all([
+        const [postsData, clubsData, notificationsData] = await Promise.all([
           getPosts(),
           getClubs(),
-          getNotifications(),
-          getTotalStudentCount()
+          getNotifications()
         ]);
 
         // Sync member counts for all clubs
@@ -66,7 +65,6 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         setPosts(postsData);
         setClubs(clubsWithSyncedCounts);
         setNotifications(notificationsData);
-        setTotalStudents(studentCount);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -166,24 +164,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <div className="w-full md:w-auto flex flex-row gap-3 md:gap-4 sm:flex-row justify-center md:justify-start">
-              <button
-                onClick={() => onNavigate('dashboard')}
-                className="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group"
-              >
-                <div className="p-1 bg-[#002147]/10 rounded-full md:bg-transparent md:p-0"><Users className="w-5 h-5" /></div>
-                <span>Explore Clubs</span>
-                <ArrowRight className="hidden md:block w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => onNavigate('events')}
-                className="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl backdrop-blur-sm border border-white/20 transition-all flex items-center justify-center gap-2"
-              >
-                <div className="p-1 bg-white/10 rounded-full md:bg-transparent md:p-0"><Calendar className="w-5 h-5" /></div>
-                <span>Upcoming Events</span>
-              </button>
-            </div>
+
           </div>
 
           {/* Right Column: Hero Visual - Desktop Only */}
@@ -202,41 +183,41 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-16 relative z-20 w-full flex-grow">
 
-        {/* Stats Overview - Horizontal Scroll for Mobile (Snap Cards) */}
-        {/* Stats Overview - 3-Column Fit on Mobile */}
-        <div className="flex flex-row md:grid md:grid-cols-3 gap-2 md:gap-6 mb-8 md:mb-12" id="tour-stats-grid">
-          {/* Card 1 */}
-          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-[#DAA520] p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
-            <div>
-              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Clubs</p>
-              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{clubs.length || '50+'}</h3>
+        {/* Stats Overview - 2 Large Action Cards */}
+        <div className="grid grid-cols-2 gap-3 md:gap-6 mb-8 md:mb-12 -mt-6 md:-mt-16 relative z-20 px-4 md:px-0" id="tour-stats-grid">
+          {/* Explore Clubs Card */}
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
+          >
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
+                <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{clubs.length || '50+'}</span>
+                <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Clubs</span>
+              </div>
             </div>
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
+            <div className="w-8 h-8 md:w-14 md:h-14 bg-[#002147]/5 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <Users className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-[#DAA520]" />
             </div>
-          </div>
+          </button>
 
-          {/* Card 2 */}
-          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-emerald-500 p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
-            <div>
-              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Students</p>
-              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{totalStudents || '1000+'}</h3>
+          {/* Upcoming Events Card */}
+          <button
+            onClick={() => onNavigate('events')}
+            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#002147] text-left gap-2 md:gap-0"
+          >
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
+                <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{upcomingPosts.length || '0'}</span>
+                <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Events</span>
+              </div>
             </div>
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-8 h-8 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <Calendar className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-blue-400" />
             </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-lg md:shadow-xl border-t-4 border-purple-500 p-3 md:p-5 flex flex-col md:flex-row items-center md:items-center justify-center md:justify-between text-center md:text-left group gap-2">
-            <div>
-              <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">Events</p>
-              <h3 className="text-xl md:text-3xl font-black text-slate-800 dark:text-white mt-0.5 md:mt-1">{upcomingPosts.length || '0'}</h3>
-            </div>
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
+          </button>
         </div>
 
         {/* Quick Actions & Search */}
