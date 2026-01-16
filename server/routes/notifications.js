@@ -1,19 +1,24 @@
 import express from 'express';
 import Notification from '../models/Notification.js';
-import { verifyToken } from '../middleware/auth.js';
+import { verifyToken, verifyTokenOptional } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Get notifications for user or global
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyTokenOptional, async (req, res) => {
     try {
         // Get global notifications OR notifications for this specific user
-        const notifications = await Notification.find({
-            $or: [
-                { userId: null },
-                { userId: req.user.id }
-            ]
-        }).sort({ createdAt: -1 });
+        let query = { userId: null };
+        if (req.user) {
+            query = {
+                $or: [
+                    { userId: null },
+                    { userId: req.user.id }
+                ]
+            };
+        }
+
+        const notifications = await Notification.find(query).sort({ createdAt: -1 });
         res.json(notifications);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
