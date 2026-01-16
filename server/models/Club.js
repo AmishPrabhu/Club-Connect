@@ -14,6 +14,11 @@ const clubSchema = new mongoose.Schema({
         type: String, // URL
         default: '',
     },
+    category: {
+        type: String,
+        default: 'technical', // Default to technical for existing clubs
+        enum: ['technical', 'cultural', 'sports', 'academic', 'other'],
+    },
     // Officers
     secretaryId: { type: String },
     secretaryEmail: { type: String },

@@ -1,7 +1,7 @@
 import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications } from '../lib/dbService';
+import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications, getClubMessages } from '../lib/dbService';
 import { Page } from '../types/page';
 import { DBPost, ClubMessage, DBClub, DBNotification } from '../types/auth';
 
@@ -41,6 +41,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   // Messages State
   const [clubMessages, setClubMessages] = useState<Record<string, ClubMessage[]>>({});
   const [loadingMessages, setLoadingMessages] = useState<Record<string, boolean>>({});
+  const [unreadState, setUnreadState] = useState<Record<string, boolean>>({});
 
   // Event State
   const [eventTab, setEventTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -87,6 +88,36 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
     };
     loadProfile();
   }, [user]);
+
+  // Check for unread messages when memberships load
+  useEffect(() => {
+    const checkUnreadMessages = async () => {
+      if (memberships.length === 0) return;
+
+      const newUnreadState: Record<string, boolean> = {};
+
+      await Promise.all(memberships.map(async (m) => {
+        try {
+          // We fetch messages to check the latest one
+          const msgs = await getClubMessages(m.clubId);
+          if (msgs && msgs.length > 0) {
+            const latestMsg = msgs[0]; // Assumes sorted by createdAt desc
+            const lastRead = localStorage.getItem(`read_msgs_${m.clubId}`);
+
+            if (!lastRead || new Date(latestMsg.createdAt) > new Date(lastRead)) {
+              newUnreadState[m.clubId] = true;
+            }
+          }
+        } catch (error) {
+          console.error(`Error checking messages for club ${m.clubId}`, error);
+        }
+      }));
+
+      setUnreadState(newUnreadState);
+    };
+
+    checkUnreadMessages();
+  }, [memberships]);
 
   // Fetch Events
   useEffect(() => {
@@ -156,8 +187,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
     setLoadingMessages(prev => ({ ...prev, [clubId]: true }));
     try {
-      const { getClubMessages } = await import('../lib/dbService');
-      const msgs = await getClubMessages(clubId);
+      const msgs = await getClubMessages(clubId); // Static import
       setClubMessages(prev => ({ ...prev, [clubId]: msgs }));
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -171,6 +201,10 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
     if (activeTab.startsWith('messages-')) {
       const clubId = activeTab.replace('messages-', '');
       loadClubMessages(clubId);
+
+      // Mark as read when opening the tab
+      localStorage.setItem(`read_msgs_${clubId}`, new Date().toISOString());
+      setUnreadState(prev => ({ ...prev, [clubId]: false }));
     }
   }, [activeTab]);
 
@@ -352,7 +386,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
               <button
                 key={`messages-${membership.clubId}`}
                 onClick={() => setActiveTab(`messages-${membership.clubId}` as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === `messages-${membership.clubId}`
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap relative ${activeTab === `messages-${membership.clubId}`
                   ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                   : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                   }`}
@@ -361,6 +395,11 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                   {membership.clubImage ? <img src={membership.clubImage} className="w-full h-full object-cover" /> : '💬'}
                 </div>
                 <span>{membership.clubName} Msgs</span>
+
+                {/* Unread Indicator */}
+                {unreadState[membership.clubId] && (
+                  <span className="absolute top-3 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+                )}
               </button>
             ))}
           </div>

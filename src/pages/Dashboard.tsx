@@ -89,7 +89,12 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   const filteredClubs = clubs.filter((club) => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       club.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || club.category === selectedCategory;
+
+    // Case-insensitive category check
+    const clubCategory = (club.category || '').toLowerCase();
+    const targetCategory = selectedCategory.toLowerCase();
+
+    const matchesCategory = selectedCategory === 'all' || clubCategory === targetCategory;
     return matchesSearch && matchesCategory;
   });
 

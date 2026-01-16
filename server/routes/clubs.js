@@ -12,7 +12,15 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const clubs = await Club.find().sort({ name: 1 });
-        res.json(clubs);
+        // Return clubs with default category if missing
+        const clubsWithCategory = clubs.map(club => {
+            const clubObj = club.toObject();
+            return {
+                ...clubObj,
+                category: clubObj.category || 'technical'
+            };
+        });
+        res.json(clubsWithCategory);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }

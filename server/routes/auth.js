@@ -80,9 +80,35 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
+        // Check for officer memberships if role is 'user'
+        let effectiveRole = user.role;
+        let effectiveClubId = user.clubId;
+        let effectiveClubName = user.clubName;
+
+        if (effectiveRole === 'user') {
+            const officerMembership = await ClubMember.findOne({
+                $or: [{ userId: user._id }, { email: user.email }],
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+
+            if (officerMembership) {
+                const roleMap = {
+                    'Secretary': 'club-secretary',
+                    'President': 'president',
+                    'Treasurer': 'treasurer',
+                    'Advisor': 'advisor'
+                };
+                effectiveRole = roleMap[officerMembership.role] || 'club-secretary';
+
+                if (!effectiveClubId) {
+                    effectiveClubId = officerMembership.clubId;
+                }
+            }
+        }
+
         // Create token
         const token = jwt.sign(
-            { id: user._id, email: user.email, role: user.role },
+            { id: user._id, email: user.email, role: effectiveRole },
             process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_In_production',
             { expiresIn: '7d' }
         );
@@ -93,9 +119,9 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 email: user.email,
                 name: user.name,
-                role: user.role,
-                clubId: user.clubId,
-                clubName: user.clubName,
+                role: effectiveRole,
+                clubId: effectiveClubId,
+                clubName: effectiveClubName,
                 likedClubs: user.likedClubs || [],
             },
         });
@@ -112,14 +138,46 @@ router.get('/me', verifyToken, async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        let effectiveRole = user.role;
+        let effectiveClubId = user.clubId;
+        let effectiveClubName = user.clubName;
+
+        // If role is 'user', check if they have any officer memberships
+        // this handles cases where admin created them as 'user' but assigned officer role
+        if (effectiveRole === 'user') {
+            const officerMembership = await ClubMember.findOne({
+                $or: [{ userId: user._id }, { email: user.email }],
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+
+            if (officerMembership) {
+                // Map ClubMember role to User role
+                const roleMap = {
+                    'Secretary': 'club-secretary',
+                    'President': 'president',
+                    'Treasurer': 'treasurer',
+                    'Advisor': 'advisor'
+                };
+                effectiveRole = roleMap[officerMembership.role] || 'club-secretary';
+
+                // Also provide a default club context if missing
+                if (!effectiveClubId) {
+                    effectiveClubId = officerMembership.clubId;
+                    // We don't have clubName here without a join, but that's okay
+                    // The frontend will fetch memberships via getUserMemberships for full details
+                }
+            }
+        }
+
         // Map to frontend-compatible format
         res.json({
             id: user._id,
             email: user.email,
             name: user.name,
-            role: user.role,
-            clubId: user.clubId,
-            clubName: user.clubName,
+            role: effectiveRole,
+            clubId: effectiveClubId,
+            clubName: effectiveClubName,
             likedClubs: user.likedClubs || [],
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
