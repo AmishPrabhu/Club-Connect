@@ -40,6 +40,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     const [editingMember, setEditingMember] = useState<ClubMember | null>(null);
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [yearFilter, setYearFilter] = useState<string>('');
+    const [boardTypeFilter, setBoardTypeFilter] = useState<string>('');
 
     // Form state
     const [newMember, setNewMember] = useState({
@@ -132,9 +133,14 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
     // Export members to CSV
     const exportToCSV = () => {
-        const filteredMembers = yearFilter
+        let filteredMembers = yearFilter
             ? members.filter(m => String(m.joinedAt).includes(yearFilter))
             : members;
+
+        // Apply board type filter
+        if (boardTypeFilter) {
+            filteredMembers = filteredMembers.filter(m => (m.boardType || 'member') === boardTypeFilter);
+        }
 
         const sortedMembers = sortMembers(filteredMembers);
 
@@ -156,7 +162,8 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `${clubName}_members${yearFilter ? `_${yearFilter}` : ''}.csv`;
+        const boardLabel = boardTypeFilter ? `_${boardTypeFilter}` : '';
+        link.download = `${clubName}_members${boardLabel}${yearFilter ? `_${yearFilter}` : ''}.csv`;
         link.click();
     };
 
@@ -180,14 +187,26 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                         <option value="2027">2027</option>
                     </select>
                     {canExport && (
-                        <button
-                            onClick={exportToCSV}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
-                            title="Export to CSV"
-                        >
-                            <Download className="w-4 h-4" />
-                            Export
-                        </button>
+                        <>
+                            <select
+                                value={boardTypeFilter}
+                                onChange={(e) => setBoardTypeFilter(e.target.value)}
+                                className="px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">All Boards</option>
+                                <option value="main">Main Board</option>
+                                <option value="executive">Executive Board</option>
+                                <option value="member">Member Board</option>
+                            </select>
+                            <button
+                                onClick={exportToCSV}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                                title="Export to CSV"
+                            >
+                                <Download className="w-4 h-4" />
+                                Export
+                            </button>
+                        </>
                     )}
                     {!isReadOnly && (
                         <button
@@ -203,9 +222,14 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
             {/* Members List */}
             {(() => {
-                const filteredMembers = yearFilter
+                let filteredMembers = yearFilter
                     ? members.filter(m => String(m.joinedAt).includes(yearFilter))
                     : members;
+
+                // Apply board type filter to displayed list
+                if (boardTypeFilter) {
+                    filteredMembers = filteredMembers.filter(m => (m.boardType || 'member') === boardTypeFilter);
+                }
 
                 const sortedMembers = sortMembers(filteredMembers);
 

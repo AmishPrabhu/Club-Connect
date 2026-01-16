@@ -29,6 +29,8 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
   // Fetch unread notification count
   useEffect(() => {
+    if (!user) return; // Don't fetch if no user
+
     const fetchNotificationCount = async () => {
       try {
         const notifications = await getNotifications();
@@ -43,7 +45,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
     // Refresh every 30 seconds
     const interval = setInterval(fetchNotificationCount, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   return (
     <header className="sticky top-0 z-50 bg-[#002147] text-white shadow-lg border-b border-[#00152e]">

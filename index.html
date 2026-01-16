@@ -17,29 +17,6 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs }
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyClq5Px1uZOtbKOyE7XG4v_dobC_l7c-mg",
-      authDomain: "club-dashboard-d19a2.firebaseapp.com",
-      projectId: "club-dashboard-d19a2",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function loadClubs() {
-      const snapshot = await getDocs(collection(db, "clubs"));
-      snapshot.forEach(doc => {
-        console.log(doc.id, doc.data());
-      });
-    }
-
-    loadClubs();
-  </script>
   <!-- Cloudinary Upload Widget -->
   <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 </body>
