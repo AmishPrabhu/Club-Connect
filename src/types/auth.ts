@@ -144,6 +144,12 @@ export interface DBPost {
   relatedEventTitle?: string;      // For announcements: Title of the related event
   eventTasks?: EventTask[];        // Tasks assigned to members for this event
 
+  // Budget fields
+  budgetImage?: string;            // URL of uploaded budget file/image
+  budgetVerified?: boolean;        // Whether budget has been verified by advisor
+  budgetVerifiedBy?: string;       // User ID of advisor who verified
+  budgetVerifiedAt?: Date;         // When budget was verified
+
   createdAt: Date;
   updatedAt: Date;
 }

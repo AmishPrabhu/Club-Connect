@@ -3,7 +3,7 @@ import { Settings, Users, Calendar, Bell, Edit, Plus, Trash2, Send, Image, Link,
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
 
-import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs, createClubMessage, getClubMessages } from '../lib/dbService';
+import { getPosts, createPost, deletePost, createNotification, updatePost, checkEventTimeCollision, EventCollision, getEventRSVPs, createClubMessage, getClubMessages, updateEventBudget } from '../lib/dbService';
 import { sendEventUpdateEmails, isEmailConfigured } from '../lib/emailService';
 import CloudinaryUpload from '../components/CloudinaryUpload';
 import AttachmentGallery from '../components/AttachmentGallery';
@@ -396,7 +396,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setIsModalOpen(true);
     setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget'>('overview');
   const { navigateToManagement } = useNavigation();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -808,16 +808,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             {[
               { id: 'overview', label: 'Overview', icon: Settings },
               { id: 'members', label: 'Members', icon: Users },
-              { id: 'events', label: 'Events', icon: Calendar, treasurerOnly: true },
-              { id: 'posts', label: 'Manage Posts', icon: Edit },
-              { id: 'notifications', label: 'Send Notifications', icon: Bell },
+              { id: 'events', label: 'Events', icon: Calendar, secretaryOnly: true },
+              { id: 'budget', label: 'Budgets', icon: Edit, treasurerOnly: true },
+              { id: 'posts', label: 'Manage Posts', icon: Edit, secretaryOnly: true },
+              { id: 'notifications', label: 'Send Notifications', icon: Bell, secretaryOnly: true },
               { id: 'messages', label: 'Messages', icon: MessageSquare }
             ].filter(tab => {
-              // Treasurer sees: overview, members, events
+              // Treasurer sees: overview, members, budget, messages
               if (isReadOnly) {
-                return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly;
+                return tab.id === 'overview' || tab.id === 'members' || tab.treasurerOnly || tab.id === 'messages';
               }
-              // Non-treasurer (secretary/president) sees all except treasurerOnly tabs
+              // Secretary/President sees: overview, members, events, posts, notifications, messages (NOT budget edit)
               return !tab.treasurerOnly;
             }).map((tab) => {
               const Icon = tab.icon;
@@ -1213,6 +1214,132 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           )}
 
 
+
+          {/* Budget Tab */}
+          {activeTab === 'budget' && (
+            <div className="space-y-6">
+              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">
+                Event Budgets
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {isReadOnly
+                  ? 'Upload budget documents for each event. Your advisor can verify them.'
+                  : 'View submitted budgets for club events (read-only access).'}
+              </p>
+
+              {posts.filter(p => p.type === 'event').length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                  <Calendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-500 dark:text-slate-400">No events yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {posts
+                    .filter(p => p.type === 'event')
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((post) => {
+                      const isPast = new Date(post.date) < new Date();
+                      return (
+                        <div
+                          key={post.id}
+                          className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
+                        >
+                          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
+                                  ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                  }`}>
+                                  {isPast ? 'Past Event' : 'Upcoming'}
+                                </span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                                  {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{post.title}</h4>
+
+                              {/* Budget Status */}
+                              <div className="flex items-center gap-2 mt-3">
+                                {post.budgetImage ? (
+                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.budgetVerified
+                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                    }`}>
+                                    {post.budgetVerified ? '✓ Verified' : '⏳ Pending Verification'}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                    No Budget Uploaded
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Budget Actions */}
+                            <div className="flex flex-col gap-3 min-w-[200px]">
+                              {/* View Budget Button */}
+                              {post.budgetImage && (
+                                <a
+                                  href={post.budgetImage}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm text-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                >
+                                  View Budget
+                                </a>
+                              )}
+
+                              {/* Upload Button (Treasurer Only) */}
+                              {isReadOnly && (
+                                <button
+                                  onClick={() => {
+                                    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                                    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+                                    if (!cloudName || !uploadPreset || !window.cloudinary) {
+                                      alert('Upload not available');
+                                      return;
+                                    }
+
+                                    const widget = window.cloudinary.createUploadWidget({
+                                      cloudName,
+                                      uploadPreset,
+                                      folder: `budgets/${post.clubId}/${post.id}`,
+                                      sources: ['local', 'camera', 'url'],
+                                      multiple: false,
+                                      maxFiles: 1,
+                                      resourceType: 'auto',
+                                      clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf', 'webp'],
+                                      maxFileSize: 10000000,
+                                    }, async (error: any, result: any) => {
+                                      if (result.event === 'success') {
+                                        const budgetUrl = result.info.secure_url;
+                                        const success = await updateEventBudget(post.id!, budgetUrl);
+                                        if (success) {
+                                          // Refresh posts
+                                          const allPosts = await getPosts();
+                                          setPosts(allPosts.filter(p => p.clubId === user?.clubId));
+                                        }
+                                      }
+                                    });
+                                    widget.open();
+                                  }}
+                                  className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  {post.budgetImage ? 'Update Budget' : 'Upload Budget'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Messages Tab */}
           {activeTab === 'messages' && user && (

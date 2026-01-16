@@ -430,6 +430,28 @@ export const updatePost = async (postId: string, postData: Partial<DBPost>): Pro
     }
 };
 
+// Upload/update event budget image (Treasurer only)
+export const updateEventBudget = async (eventId: string, budgetImage: string): Promise<boolean> => {
+    try {
+        await api.put(`/posts/${eventId}/budget`, { budgetImage });
+        return true;
+    } catch (error) {
+        console.error('Error updating event budget:', error);
+        return false;
+    }
+};
+
+// Verify event budget (Advisor only)
+export const verifyEventBudget = async (eventId: string): Promise<boolean> => {
+    try {
+        await api.put(`/posts/${eventId}/budget/verify`);
+        return true;
+    } catch (error) {
+        console.error('Error verifying event budget:', error);
+        return false;
+    }
+};
+
 // ==================== NOTIFICATIONS ====================
 
 export const getNotifications = async (userId?: string): Promise<DBNotification[]> => {

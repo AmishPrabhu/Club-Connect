@@ -184,4 +184,75 @@ router.delete('/:id', verifyToken, async (req, res) => {
     }
 });
 
+// Upload/Update budget image (Treasurer only)
+router.put('/:id/budget', verifyToken, async (req, res) => {
+    try {
+        // Check if user is treasurer
+        if (req.user.role !== 'treasurer') {
+            return res.status(403).json({ message: 'Only treasurers can upload budgets' });
+        }
+
+        const { budgetImage } = req.body;
+        if (!budgetImage) {
+            return res.status(400).json({ message: 'Budget image URL is required' });
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.id,
+            {
+                budgetImage,
+                budgetVerified: false, // Reset verification when budget is updated
+                budgetVerifiedBy: null,
+                budgetVerifiedAt: null,
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.json(updatedPost);
+    } catch (error) {
+        console.error('Error uploading budget:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Verify budget (Advisor only)
+router.put('/:id/budget/verify', verifyToken, async (req, res) => {
+    try {
+        // Check if user is advisor
+        if (req.user.role !== 'advisor') {
+            return res.status(403).json({ message: 'Only advisors can verify budgets' });
+        }
+
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        if (!post.budgetImage) {
+            return res.status(400).json({ message: 'No budget uploaded for this event' });
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.id,
+            {
+                budgetVerified: true,
+                budgetVerifiedBy: req.user.id,
+                budgetVerifiedAt: new Date(),
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        res.json(updatedPost);
+    } catch (error) {
+        console.error('Error verifying budget:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 export default router;

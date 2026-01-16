@@ -3,7 +3,7 @@ import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2 } from '
 import { useAuth } from '../context/AuthContext';
 import { Page } from '../types/page';
 import { DBPost, DBClub } from '../types/auth';
-import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer } from '../lib/dbService';
+import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer, verifyEventBudget } from '../lib/dbService';
 
 interface AdvisorDashboardProps {
     onNavigate: (page: Page) => void;
@@ -12,7 +12,7 @@ interface AdvisorDashboardProps {
 
 export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardProps) {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'events' | 'team'>('events');
+    const [activeTab, setActiveTab] = useState<'events' | 'team' | 'budgets'>('events');
     const [events, setEvents] = useState<DBPost[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [clubName, setClubName] = useState('');
@@ -226,6 +226,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                 <div className="flex border-b border-slate-200 dark:border-slate-700">
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
+                        { id: 'budgets', label: 'Budgets', icon: Edit },
                         { id: 'team', label: 'Team Management', icon: Users },
                     ].map((tab) => {
                         const Icon = tab.icon;
@@ -285,6 +286,100 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                         </div>
                                     </div>
                                 ))
+                            )}
+                        </div>
+                    )}
+
+                    {/* Budgets Tab */}
+                    {activeTab === 'budgets' && (
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-2">Event Budgets</h3>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                    Review and verify budgets submitted by the club treasurer.
+                                </p>
+                            </div>
+
+                            {events.filter(e => e.budgetImage).length === 0 ? (
+                                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                    <Edit className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                                    <p className="text-slate-500 dark:text-slate-400">No budgets have been submitted yet.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {events
+                                        .filter(e => e.budgetImage)
+                                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                        .map((event) => {
+                                            const isPast = new Date(event.date) < new Date();
+                                            return (
+                                                <div
+                                                    key={event.id}
+                                                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                >
+                                                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
+                                                                    ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                                                    }`}>
+                                                                    {isPast ? 'Past Event' : 'Upcoming'}
+                                                                </span>
+                                                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                                                                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                </span>
+                                                            </div>
+                                                            <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{event.title}</h4>
+
+                                                            {/* Budget Status */}
+                                                            <div className="flex items-center gap-2 mt-3">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${event.budgetVerified
+                                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                                    }`}>
+                                                                    {event.budgetVerified ? '✓ Verified' : '⏳ Awaiting Verification'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Budget Actions */}
+                                                        <div className="flex flex-col gap-3 min-w-[180px]">
+                                                            {/* View Budget Button */}
+                                                            <a
+                                                                href={event.budgetImage}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm text-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                                            >
+                                                                View Budget
+                                                            </a>
+
+                                                            {/* Verify Button */}
+                                                            {!event.budgetVerified && (
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        const success = await verifyEventBudget(event.id!);
+                                                                        if (success) {
+                                                                            // Refresh events
+                                                                            const allPosts = await getPosts();
+                                                                            const clubEvents = allPosts.filter(
+                                                                                p => p.clubId === user?.clubId && p.type === 'event'
+                                                                            );
+                                                                            setEvents(clubEvents);
+                                                                        }
+                                                                    }}
+                                                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                                                                >
+                                                                    ✓ Verify Budget
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
                             )}
                         </div>
                     )}

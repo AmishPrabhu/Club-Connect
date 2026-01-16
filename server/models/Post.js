@@ -51,6 +51,24 @@ const postSchema = new mongoose.Schema({
         default: 0,
     },
 
+    // Budget fields (for events)
+    budgetImage: {
+        type: String, // URL of uploaded budget file/image
+        default: null,
+    },
+    budgetVerified: {
+        type: Boolean,
+        default: false,
+    },
+    budgetVerifiedBy: {
+        type: String, // User ID of advisor who verified
+        default: null,
+    },
+    budgetVerifiedAt: {
+        type: Date,
+        default: null,
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,

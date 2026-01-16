@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { DBPost, User, ClubMember, EventTask, EventRSVP } from '../types/auth';
-import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant } from '../lib/dbService';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget } from '../lib/dbService';
 
 interface EventManagementProps {
     eventId: string;
@@ -15,7 +15,10 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget'>(
+        user?.role === 'treasurer' ? 'budget' : 'details'
+    );
+    const isTreasurer = user?.role === 'treasurer';
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
     const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
     const [isImporting, setIsImporting] = useState(false);
@@ -256,46 +259,72 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                 {/* Tabs */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
                     <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
-                        <button
-                            onClick={() => setActiveTab('details')}
-                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'details'
-                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
-                                }`}
-                        >
-                            <AlignLeft className={`w-5 h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
-                            Details
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('roles')}
-                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'roles'
-                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
-                                }`}
-                        >
-                            <Users className={`w-5 h-5 ${activeTab === 'roles' ? 'text-[#DAA520]' : ''}`} />
-                            Roles & Tasks
-                            {tasks.length > 0 && (
-                                <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 text-xs rounded-full font-bold">
-                                    {tasks.length}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('participants')}
-                            className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'participants'
-                                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
-                                }`}
-                        >
-                            <Users className={`w-5 h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
-                            Participants
-                            {(post?.rsvps || 0) > 0 && (
-                                <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full font-bold">
-                                    {post?.rsvps || 0}
-                                </span>
-                            )}
-                        </button>
+                        {/* Treasurer only sees Budget tab */}
+                        {isTreasurer ? (
+                            <button
+                                onClick={() => setActiveTab('budget')}
+                                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'budget'
+                                    ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                    : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                    }`}
+                            >
+                                <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
+                                Budget
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setActiveTab('details')}
+                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'details'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <AlignLeft className={`w-5 h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
+                                    Details
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('roles')}
+                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'roles'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <Users className={`w-5 h-5 ${activeTab === 'roles' ? 'text-[#DAA520]' : ''}`} />
+                                    Roles & Tasks
+                                    {tasks.length > 0 && (
+                                        <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 text-xs rounded-full font-bold">
+                                            {tasks.length}
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('participants')}
+                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'participants'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <Users className={`w-5 h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
+                                    Participants
+                                    {(post?.rsvps || 0) > 0 && (
+                                        <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full font-bold">
+                                            {post?.rsvps || 0}
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('budget')}
+                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'budget'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
+                                    Budget
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     <div className="p-6">
@@ -935,6 +964,110 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                                             </tbody>
                                         </table>
                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Budget Tab - For Treasurer */}
+                    {activeTab === 'budget' && (
+                        <div className="space-y-6">
+                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                    <Save className="w-5 h-5 text-[#DAA520]" />
+                                    Event Budget
+                                </h2>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                                    Upload the budget document for this event. Your advisor can review and verify it.
+                                </p>
+
+                                {/* Current Budget Status */}
+                                <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current Status</p>
+                                            {post.budgetImage ? (
+                                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${post.budgetVerified
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                    }`}>
+                                                    {post.budgetVerified ? '✓ Verified by Advisor' : '⏳ Pending Verification'}
+                                                </span>
+                                            ) : (
+                                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                                    No Budget Uploaded
+                                                </span>
+                                            )}
+                                        </div>
+                                        {post.budgetImage && (
+                                            <a
+                                                href={post.budgetImage}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                            >
+                                                View Current Budget
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Upload Button - Only for Treasurer */}
+                                {isTreasurer ? (
+                                    <>
+                                        <button
+                                            onClick={() => {
+                                                const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                                                const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+                                                if (!cloudName || !uploadPreset || !(window as any).cloudinary) {
+                                                    setMessage({ type: 'error', text: 'Upload not available. Please check Cloudinary configuration.' });
+                                                    return;
+                                                }
+
+                                                const widget = (window as any).cloudinary.createUploadWidget({
+                                                    cloudName,
+                                                    uploadPreset,
+                                                    folder: `budgets/${post.clubId}/${post.id}`,
+                                                    sources: ['local', 'camera', 'url'],
+                                                    multiple: false,
+                                                    maxFiles: 1,
+                                                    resourceType: 'auto',
+                                                    clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf', 'webp'],
+                                                    maxFileSize: 10000000,
+                                                }, async (_error: any, result: any) => {
+                                                    if (result.event === 'success') {
+                                                        const budgetUrl = result.info.secure_url;
+                                                        const success = await updateEventBudget(post.id!, budgetUrl);
+                                                        if (success) {
+                                                            setMessage({ type: 'success', text: 'Budget uploaded successfully! Awaiting advisor verification.' });
+                                                            // Refresh post data
+                                                            const posts = await getPosts();
+                                                            const updatedPost = posts.find(p => p.id === eventId);
+                                                            if (updatedPost) {
+                                                                setPost(updatedPost);
+                                                            }
+                                                        } else {
+                                                            setMessage({ type: 'error', text: 'Failed to save budget.' });
+                                                        }
+                                                    }
+                                                });
+                                                widget.open();
+                                            }}
+                                            className="w-full px-6 py-4 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
+                                        >
+                                            <Plus className="w-5 h-5 text-[#DAA520]" />
+                                            {post.budgetImage ? 'Update Budget Document' : 'Upload Budget Document'}
+                                        </button>
+
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
+                                            Supported formats: PNG, JPG, PDF, WebP (Max 10MB)
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
+                                        Only the Treasurer can upload or update the budget document.
+                                    </p>
                                 )}
                             </div>
                         </div>
