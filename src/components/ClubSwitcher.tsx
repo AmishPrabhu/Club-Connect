@@ -32,8 +32,21 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                 );
                 setMemberships(officerMemberships);
 
-                // Auto-select first membership if none selected
-                if (!selectedMembership && officerMemberships.length > 0) {
+                // Validate saved membership and auto-select if needed
+                if (selectedMembership) {
+                    // Check if saved membership is still valid
+                    const savedMembershipValid = officerMemberships.find(
+                        (m: any) => m.clubId === selectedMembership.clubId
+                    );
+                    if (!savedMembershipValid && officerMemberships.length > 0) {
+                        // Saved membership no longer valid, select first available
+                        setSelectedMembership(officerMemberships[0]);
+                    } else if (savedMembershipValid) {
+                        // Update saved membership with fresh data (role, name might have changed)
+                        setSelectedMembership(savedMembershipValid);
+                    }
+                } else if (officerMemberships.length > 0) {
+                    // No saved membership, auto-select first
                     setSelectedMembership(officerMemberships[0]);
                 }
             } catch (error) {

@@ -44,7 +44,26 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedPost, setSelectedPost] = useState<string | null>(null);
     const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
     const [isOpenedFromUrl, setIsOpenedFromUrl] = useState(false);
-    const [selectedMembership, setSelectedMembership] = useState<ClubMembership | null>(null);
+
+    // Initialize selectedMembership from localStorage if available
+    const [selectedMembership, setSelectedMembershipState] = useState<ClubMembership | null>(() => {
+        try {
+            const saved = localStorage.getItem('selectedMembership');
+            return saved ? JSON.parse(saved) : null;
+        } catch {
+            return null;
+        }
+    });
+
+    // Wrapper to persist selectedMembership to localStorage
+    const setSelectedMembership = (membership: ClubMembership | null) => {
+        setSelectedMembershipState(membership);
+        if (membership) {
+            localStorage.setItem('selectedMembership', JSON.stringify(membership));
+        } else {
+            localStorage.removeItem('selectedMembership');
+        }
+    };
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);

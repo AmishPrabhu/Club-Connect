@@ -170,19 +170,20 @@ const assignOfficerRole = async (
         }
         await updateClub(clubId, clubUpdates);
 
-        // Add ClubMember entry for multi-club support (this will work for both new and existing users)
-        // The backend will handle duplicates (same email in same club)
-        try {
-            await addClubMember(clubId, {
-                name,
-                email,
-                role: roleLabel,
-                boardType: 'main',
-                joinedAt: new Date(),
-            });
-        } catch (memberError: any) {
-            // If member already exists in this club, that's fine (might be updating role)
-            console.log('ClubMember entry might already exist:', memberError.message);
+        // Add ClubMember entry for multi-club support (skip for advisors as they verify via club fields)
+        if (role !== 'advisor') {
+            try {
+                await addClubMember(clubId, {
+                    name,
+                    email,
+                    role: roleLabel,
+                    boardType: 'main',
+                    joinedAt: new Date(),
+                });
+            } catch (memberError: any) {
+                // If member already exists in this club, that's fine (might be updating role)
+                console.log('ClubMember entry might already exist:', memberError.message);
+            }
         }
 
         return { success: true, userId: userId === 'existing-user' ? undefined : userId };

@@ -1,5 +1,23 @@
 import mongoose from 'mongoose';
 
+const attachmentSchema = new mongoose.Schema({
+    url: { type: String, required: true },
+    publicId: { type: String },
+    type: { type: String, enum: ['image', 'video', 'pdf', 'link'], default: 'image' },
+    label: { type: String },
+}, { _id: false });
+
+const eventTaskSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    title: { type: String, required: true },
+    assignedTo: [{ type: String }],
+    assignedToEmails: [{ type: String }],
+    deadline: { type: String },
+    status: { type: String, enum: ['pending', 'in-progress', 'completed'], default: 'pending' },
+    createdBy: { type: String },
+    createdAt: { type: String },
+}, { _id: false });
+
 const postSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -22,6 +40,11 @@ const postSchema = new mongoose.Schema({
         enum: ['event', 'announcement', 'post'],
         default: 'post',
     },
+    status: {
+        type: String,
+        enum: ['draft', 'published'],
+        default: 'published',
+    },
     // Relating to Club
     clubId: {
         type: String, // Can be ObjectId if strictly relational, but keeping string to match existing logic
@@ -35,18 +58,77 @@ const postSchema = new mongoose.Schema({
         type: String,
     },
 
+    // Author info
+    authorId: {
+        type: String,
+    },
+    authorName: {
+        type: String,
+    },
+
     // Event specific fields
     date: {
-        type: String, // Storing as string YYYY-MM-DD or similar based on frontend usage, or Date object
+        type: String, // Storing as string YYYY-MM-DD or similar based on frontend usage
     },
     time: {
-        type: String, // "2:30 PM"
+        type: String, // "2:30 PM - 5:00 PM"
     },
     location: {
         type: String,
     },
+    locationType: {
+        type: String,
+        enum: ['campus', 'external'],
+        default: 'campus',
+    },
+    locationUrl: {
+        type: String, // Google Maps URL for external locations
+    },
 
+    // Registration fields
+    registrationStart: {
+        type: String, // YYYY-MM-DD
+    },
+    registrationStartTime: {
+        type: String, // "10:00 AM"
+    },
+    registrationEnd: {
+        type: String, // YYYY-MM-DD
+    },
+    registrationEndTime: {
+        type: String, // "5:00 PM"
+    },
+    registrationLink: {
+        type: String, // URL to registration form (Google Forms, etc.)
+    },
+    responseSpreadsheetUrl: {
+        type: String, // Google Sheets URL for form responses
+    },
+    eventWhatsappLink: {
+        type: String, // WhatsApp group link for the event
+    },
+
+    // Related event for announcements
+    relatedEventId: {
+        type: String,
+    },
+    relatedEventTitle: {
+        type: String,
+    },
+
+    // Attachments
+    attachments: [attachmentSchema], // Description images (uploaded when creating post)
+    eventPhotos: [attachmentSchema], // Event photos/videos (uploaded after event by secretary)
+
+    // Event tasks
+    eventTasks: [eventTaskSchema],
+
+    // Stats
     likes: {
+        type: Number,
+        default: 0,
+    },
+    rsvps: {
         type: Number,
         default: 0,
     },
@@ -80,3 +162,4 @@ const postSchema = new mongoose.Schema({
 });
 
 export default mongoose.model('Post', postSchema);
+

@@ -142,6 +142,9 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             filteredMembers = filteredMembers.filter(m => (m.boardType || 'member') === boardTypeFilter);
         }
 
+        // Filter out advisors
+        filteredMembers = filteredMembers.filter(m => !m.role.toLowerCase().includes('advisor'));
+
         const sortedMembers = sortMembers(filteredMembers);
 
         const headers = ['Name', 'Email', 'Role', 'Board Type', 'Academic Year', 'Year Joined'];
@@ -231,6 +234,9 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                 if (boardTypeFilter) {
                     filteredMembers = filteredMembers.filter(m => (m.boardType || 'member') === boardTypeFilter);
                 }
+
+                // Filter out advisors from the list
+                filteredMembers = filteredMembers.filter(m => !m.role.toLowerCase().includes('advisor'));
 
                 const sortedMembers = sortMembers(filteredMembers);
 

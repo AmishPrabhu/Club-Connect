@@ -2,26 +2,41 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { DBPost, User, ClubMember, EventTask, EventRSVP } from '../types/auth';
-import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget } from '../lib/dbService';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs } from '../lib/dbService';
+import { useAuth } from '../context/AuthContext';
 
 interface EventManagementProps {
     eventId: string;
     onBack?: () => void;
-    user?: User | null;
+    user?: User | null; // Keep for backward compatibility but prefer useAuth
 }
 
-export default function EventManagement({ eventId, onBack, user }: EventManagementProps) {
+export default function EventManagement({ eventId, onBack, user: propUser }: EventManagementProps) {
+    // Get user from auth context (more reliable, especially in new tabs)
+    const { user: authUser, isLoading: authLoading } = useAuth();
+    const user = authUser || propUser; // Prefer context user, fallback to prop
     const [post, setPost] = useState<DBPost | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget'>(
-        user?.role === 'treasurer' ? 'budget' : 'details'
-    );
-    const isTreasurer = user?.role === 'treasurer';
+    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget'>('details');
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
     const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
     const [isImporting, setIsImporting] = useState(false);
+    // User's role in this specific club (for multi-club members)
+    const [userClubRole, setUserClubRole] = useState<string | null>(null);
+
+    // Compute isTreasurer from userClubRole (club-specific) or fallback to user.role (for single-club users)
+    const isTreasurer = userClubRole
+        ? userClubRole.includes('treasurer') && !userClubRole.includes('secretary') && !userClubRole.includes('president')
+        : user?.role === 'treasurer';
+
+    // Set default tab to 'budget' for treasurers once their club role is known
+    useEffect(() => {
+        if (isTreasurer && !isLoading) {
+            setActiveTab('budget');
+        }
+    }, [isTreasurer, isLoading]);
 
     // Form State for Details
     const [formData, setFormData] = useState({
@@ -69,6 +84,34 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
                     if (foundPost.clubId) {
                         const members = await getClubMembers(foundPost.clubId);
                         setClubMembers(members);
+
+                        // Check user's role in THIS club (for multi-club support)
+                        // First check: Look in club member list
+                        if (user?.email) {
+                            const userMembership = members.find(
+                                m => m.email.toLowerCase() === user.email.toLowerCase()
+                            );
+                            if (userMembership) {
+                                setUserClubRole(userMembership.role.toLowerCase());
+                            }
+
+                            // Second check: Check club's officer fields directly
+                            // This is more reliable for officers who may not be in the member list
+                            const clubs = await getClubs();
+                            const club = clubs.find(c => c.id === foundPost.clubId);
+                            if (club) {
+                                const userEmailLower = user.email.toLowerCase();
+                                if (club.secretaryEmail?.toLowerCase() === userEmailLower) {
+                                    setUserClubRole('secretary');
+                                } else if (club.presidentEmail?.toLowerCase() === userEmailLower) {
+                                    setUserClubRole('president');
+                                } else if (club.treasurerEmail?.toLowerCase() === userEmailLower) {
+                                    setUserClubRole('treasurer');
+                                } else if (club.advisorEmail?.toLowerCase() === userEmailLower) {
+                                    setUserClubRole('advisor');
+                                }
+                            }
+                        }
                     }
 
                     // Fetch RSVPs for attendees tab
@@ -84,8 +127,14 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
             }
         };
 
-        fetchData();
-    }, [eventId]);
+        // Only fetch data when we have a user (auth has finished loading)
+        if (user?.email) {
+            fetchData();
+        } else if (!authLoading) {
+            // Auth is done loading but no user - still fetch post data but skip role check
+            fetchData();
+        }
+    }, [eventId, user?.email, authLoading]);
 
     const handleSave = async () => {
         if (!post?.id) return;
@@ -178,13 +227,22 @@ export default function EventManagement({ eventId, onBack, user }: EventManageme
         setTasks(tasks.filter(t => t.id !== taskId));
     };
 
-    // Access Control Check
+    // Access Control Check - supports multi-club members by checking their role in THIS specific club
+    // userClubRole is fetched from the club's member list based on user's email
+    const canManageByClubMembership = userClubRole && (
+        userClubRole.includes('secretary') ||
+        userClubRole.includes('president') ||
+        userClubRole.includes('treasurer')
+    );
+
     const hasAccess = user && post && (
         user.role === 'admin' ||
+        canManageByClubMembership ||
         ((user.role === 'club-secretary' || user.role === 'president' || user.role === 'treasurer') && user.clubId === post.clubId)
     );
 
-    if (isLoading) {
+    // Wait for both auth and data to finish loading before making access decision
+    if (isLoading || authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
