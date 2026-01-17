@@ -205,7 +205,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           {/* Upcoming Events Card */}
           <button
             onClick={() => onNavigate('events')}
-            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#002147] text-left gap-2 md:gap-0"
+            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
           >
             <div className="flex flex-col items-start">
               <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
@@ -380,7 +380,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
+                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 border-l-4 border-l-[#002147] dark:border-l-blue-500 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
                     >
                       {/* Card Header for Desktop/Mobile Consistency */}
                       <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">

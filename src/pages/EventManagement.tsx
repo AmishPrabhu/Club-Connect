@@ -954,11 +954,14 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             </a>
                                                         </td>
                                                         <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                                                            {participant.rsvpedAt.toLocaleDateString('en-IN', {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                            })}
+                                                            {participant.rsvpedAt
+                                                                ? new Date(participant.rsvpedAt).toLocaleDateString('en-IN', {
+                                                                    day: 'numeric',
+                                                                    month: 'short',
+                                                                    year: 'numeric',
+                                                                })
+                                                                : 'N/A'
+                                                            }
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <div className="flex items-center justify-center gap-2">
