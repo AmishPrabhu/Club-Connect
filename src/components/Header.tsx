@@ -74,6 +74,11 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 className="w-8 h-8 md:w-9 md:h-9 object-contain"
               />
             </div>
+            <div className="md:hidden">
+              <span className="text-lg font-serif font-bold tracking-tight text-white">
+                WCE, Sangli
+              </span>
+            </div>
             <div className="hidden md:flex flex-col">
               <span className="text-lg font-serif font-bold tracking-tight leading-none text-white group-hover:text-[#DAA520] transition-colors">
                 Walchand College of Engineering
@@ -116,7 +121,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           {/* Club Switcher - For officers with multiple clubs */}
           {user && ['club-secretary', 'president', 'treasurer', 'advisor'].includes(user.role) && (
-            <ClubSwitcher className="hidden md:flex" />
+            <ClubSwitcher className="flex" />
           )}
 
           <button
@@ -140,7 +145,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           {/* User Profile */}
           {user ? (
-            <div className="relative ml-1 md:ml-2" id="tour-profile">
+            <div className="relative ml-1 md:ml-2 hidden md:block" id="tour-profile">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 p-1 pl-2 pr-1 rounded-full bg-blue-800/50 hover:bg-blue-800 transition-colors border border-blue-700 hover:border-blue-600 group"

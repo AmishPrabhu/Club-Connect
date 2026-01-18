@@ -223,27 +223,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         {/* Quick Actions & Search */}
         <div className="mb-12" id="tour-quick-actions">
           <div className="flex flex-col md:flex-row gap-6 items-center">
-            {/* Desktop Quick Actions - Hidden on Mobile to save space/redundancy */}
-            <div className="hidden md:flex gap-4 w-full md:w-auto">
-              <button
-                onClick={() => onNavigate('dashboard')}
-                className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:border-[#002147]/30 dark:hover:border-blue-500/30 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
-              >
-                <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-400 group-hover:scale-110 transition-transform">
-                  <Users className="w-4 h-4" />
-                </div>
-                All Clubs
-              </button>
-              <button
-                onClick={() => onNavigate('notifications')}
-                className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:border-[#002147]/30 dark:hover:border-blue-500/30 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
-              >
-                <div className="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-500 group-hover:scale-110 transition-transform">
-                  <Bell className="w-4 h-4" />
-                </div>
-                Alerts
-              </button>
-            </div>
+
 
             {/* Modern Search Bar */}
             <div className="flex-1 relative w-full" ref={dropdownRef}>
@@ -257,9 +237,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
                   className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#002147] dark:focus:border-blue-500 shadow-sm focus:shadow-lg transition-all"
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1">
-                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">CMD + K</span>
-                </div>
+
               </div>
 
               {/* Live Search Dropdown */}
@@ -380,7 +358,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 border-l-4 border-l-[#002147] dark:border-l-blue-500 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
+                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
                     >
                       {/* Card Header for Desktop/Mobile Consistency */}
                       <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
@@ -497,7 +475,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               )}
             </div>
 
-            <div className="lg:col-span-1" id="tour-notifications-panel">
+            <div className="hidden md:block lg:col-span-1" id="tour-notifications-panel">
               <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 h-full">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
                   <div>
