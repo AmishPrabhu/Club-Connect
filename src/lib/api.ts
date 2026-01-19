@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+console.log('%c🚀 CLUB CONNECT API LOADING 🚀', 'background: #002147; color: #DAA520; font-size: 20px; font-weight: bold; padding: 10px;');
+console.log('Build Environment:', import.meta.env.MODE);
+console.log('VITE_API_URL Value:', import.meta.env.VITE_API_URL);
 const envApiUrl = import.meta.env.VITE_API_URL;
 console.log('--- API CONFIG DEBUG ---');
 console.log('Raw VITE_API_URL from env:', envApiUrl);
