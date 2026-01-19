@@ -33,6 +33,7 @@ function AppContent() {
     selectedMember,
     selectedEvent,
     selectedPost,
+    selectedNotification,
     selectedManagementEventId,
     navigateToPage,
     navigateToClub,
@@ -94,8 +95,8 @@ function AppContent() {
       )}
 
 
-      {currentPage === 'notification' && selectedPost && (
-        <NotificationDetail notification={selectedPost as any} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+      {currentPage === 'notification' && selectedNotification && (
+        <NotificationDetail notification={selectedNotification as any} onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
       )}
 
       {currentPage === 'adminDashboard' && (

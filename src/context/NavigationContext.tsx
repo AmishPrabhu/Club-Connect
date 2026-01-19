@@ -10,6 +10,7 @@ interface NavigationContextType {
     selectedMember: any;
     selectedEvent: string | null;
     selectedPost: string | null;
+    selectedNotification: any | null;
     selectedManagementEventId: string | null;
     isOpenedFromUrl: boolean;
     selectedMembership: ClubMembership | null;
@@ -42,6 +43,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedMember, setSelectedMember] = useState<any>(null);
     const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
     const [selectedPost, setSelectedPost] = useState<string | null>(null);
+    const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
     const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
     const [isOpenedFromUrl, setIsOpenedFromUrl] = useState(false);
 
@@ -80,21 +82,24 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const navigateToPage = (page: Page) => {
         setPreviousPage(currentPage);
         setCurrentPage(page);
-        if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post' && page !== 'eventManagement') {
+        if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post' && page !== 'eventManagement' && page !== 'notification') {
             setSelectedClub(null);
             setSelectedMember(null);
             setSelectedEvent(null);
             setSelectedPost(null);
+            setSelectedNotification(null);
             setSelectedManagementEventId(null);
         }
     };
 
     const navigateToClub = (clubId: string) => {
+        setPreviousPage(currentPage);
         setSelectedClub(clubId);
         setCurrentPage('club');
     };
 
     const navigateToMemberBoard = (member: any) => {
+        setPreviousPage(currentPage);
         setSelectedMember(member);
         setCurrentPage('memberBoard');
     };
@@ -134,10 +139,11 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     };
 
     const navigateToNotification = async (notification: any) => {
+        setPreviousPage(currentPage);
         if (notification.id && !notification.read) {
             await markNotificationAsRead(notification.id);
         }
-        setSelectedPost(notification);
+        setSelectedNotification(notification);
         setCurrentPage('notification');
     };
 
@@ -156,6 +162,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 selectedMember,
                 selectedEvent,
                 selectedPost,
+                selectedNotification,
                 selectedManagementEventId,
                 isOpenedFromUrl,
                 selectedMembership,
