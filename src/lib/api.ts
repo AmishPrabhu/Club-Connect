@@ -1,13 +1,23 @@
 import axios from 'axios';
 
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+const envApiUrl = import.meta.env.VITE_API_URL;
+console.log('--- API CONFIG DEBUG ---');
+console.log('Raw VITE_API_URL from env:', envApiUrl);
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
+    baseURL: envApiUrl || 'http://localhost:5001/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
-console.log('API Base URL:', api.defaults.baseURL);
+
+if (!envApiUrl) {
+    console.warn('⚠️ VITE_API_URL is NOT defined. Falling back to localhost.');
+    console.log('Current baseURL:', api.defaults.baseURL);
+} else {
+    console.log('✅ Connected to API at:', envApiUrl);
+}
+console.log('------------------------');
 
 // Add a request interceptor to add the auth token to every request
 api.interceptors.request.use(
