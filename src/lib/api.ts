@@ -1,11 +1,13 @@
 import axios from 'axios';
 
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
+console.log('API Base URL:', api.defaults.baseURL);
 
 // Add a request interceptor to add the auth token to every request
 api.interceptors.request.use(
