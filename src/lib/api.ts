@@ -1,26 +1,11 @@
 import axios from 'axios';
 
-console.log('%c🚀 CLUB CONNECT API LOADING 🚀', 'background: #002147; color: #DAA520; font-size: 20px; font-weight: bold; padding: 10px;');
-console.log('Build Environment:', import.meta.env.MODE);
-console.log('VITE_API_URL Value:', import.meta.env.VITE_API_URL);
-const envApiUrl = import.meta.env.VITE_API_URL;
-console.log('--- API CONFIG DEBUG ---');
-console.log('Raw VITE_API_URL from env:', envApiUrl);
-
 const api = axios.create({
-    baseURL: envApiUrl || 'http://localhost:5001/api',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
-
-if (!envApiUrl) {
-    console.warn('⚠️ VITE_API_URL is NOT defined. Falling back to localhost.');
-    console.log('Current baseURL:', api.defaults.baseURL);
-} else {
-    console.log('✅ Connected to API at:', envApiUrl);
-}
-console.log('------------------------');
 
 // Add a request interceptor to add the auth token to every request
 api.interceptors.request.use(
