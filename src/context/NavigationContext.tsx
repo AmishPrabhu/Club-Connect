@@ -76,6 +76,10 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             setSelectedManagementEventId(eventIdParam);
             setCurrentPage('eventManagement');
             setIsOpenedFromUrl(true);
+        } else if (pageParam === 'resetPassword') {
+            // Handle password reset page from email link
+            setCurrentPage('resetPassword');
+            setIsOpenedFromUrl(true);
         }
     }, []);
 

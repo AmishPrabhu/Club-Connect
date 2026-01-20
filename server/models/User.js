@@ -10,11 +10,16 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: false, // Optional for Google OAuth users
     },
     name: {
         type: String,
         required: true,
+    },
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local',
     },
     role: {
         type: String,
@@ -43,6 +48,14 @@ const userSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now,
+    },
+    resetPasswordToken: {
+        type: String,
+        default: null,
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: null,
     },
 });
 

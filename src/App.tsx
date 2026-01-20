@@ -22,6 +22,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import AdvisorDashboard from './pages/AdvisorDashboard';
 import SetupAdmin from './pages/SetupAdmin';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 import BottomNav from './components/BottomNav';
 
@@ -52,7 +53,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 pb-20 md:pb-0">
-      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && (
+      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'eventManagement' && currentPage !== 'resetPassword' && (
         <Header
           currentPage={currentPage}
           onNavigate={navigateToPage}
@@ -128,15 +129,19 @@ function AppContent() {
         <SignUpPage onNavigate={navigateToPage} />
       )}
 
-      {/* Setup Admin Page */}
       {currentPage === 'setupAdmin' && (
         <SetupAdmin onNavigate={navigateToPage} />
+      )}
+
+      {/* Reset Password Page */}
+      {currentPage === 'resetPassword' && (
+        <ResetPasswordPage onNavigate={navigateToPage} />
       )}
 
 
 
       {/* Mobile Bottom Navigation */}
-      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && (
+      {currentPage !== 'login' && currentPage !== 'signUp' && currentPage !== 'adminLogin' && currentPage !== 'setupAdmin' && currentPage !== 'resetPassword' && (
         <BottomNav currentPage={currentPage} onNavigate={navigateToPage} />
       )}
     </div>

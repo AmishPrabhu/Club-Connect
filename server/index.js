@@ -2,13 +2,15 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// Load environment variables BEFORE importing routes
+dotenv.config();
+
 import authRoutes from './routes/auth.js';
 import clubRoutes from './routes/clubs.js';
 import postRoutes from './routes/posts.js';
 import notificationRoutes from './routes/notifications.js';
 import userRoutes from './routes/users.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = (process.env.PORT && process.env.PORT != 5000) ? process.env.PORT : 5001;

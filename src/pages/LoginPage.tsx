@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
@@ -14,7 +15,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [error, setError] = useState('');
-  const { login, isLoading, user, isAuthenticated } = useAuth();
+  const { login, signInWithGoogle, isLoading, user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -42,6 +43,20 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     const success = await login(email, password);
     if (!success) {
       setError('Invalid email or password. Please check your credentials.');
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setError('');
+    const result = await signInWithGoogle(credentialResponse.credential);
+    if (!result.success) {
+      if (result.needsSignup && result.googleData) {
+        // Store Google data for signup and redirect
+        localStorage.setItem('googleSignupData', JSON.stringify(result.googleData));
+        onNavigate('signUp');
+      } else {
+        setError(result.error || 'Google sign-in failed. Please try again.');
+      }
     }
   };
 
@@ -178,6 +193,32 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Sign-In Button */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google sign-in failed. Please try again.')}
+              theme="outline"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              logo_alignment="left"
+            />
+          </div>
+          <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
+            Only @walchandsangli.ac.in emails are allowed
+          </p>
 
           <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
             <p className="text-slate-500 dark:text-slate-400 mb-4">New to the platform?</p>

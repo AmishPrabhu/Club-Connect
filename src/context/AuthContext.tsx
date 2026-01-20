@@ -126,10 +126,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
-    setAuthState(prev => ({ ...prev, isLoading: false }));
-    console.warn("Google Sign In not implemented in MongoDB migration yet.");
-    return { success: false, error: 'Google Sign In not supported currently.' };
+  const signInWithGoogle = async (credential?: string): Promise<{ success: boolean; error?: string; needsSignup?: boolean; googleData?: { email: string; name: string; credential: string } }> => {
+    if (!credential) {
+      return { success: false, error: 'No Google credential provided' };
+    }
+
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const response = await api.post('/auth/google', { credential });
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Google Sign In error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+
+      // Check if user needs to sign up
+      if (error.response?.status === 404 && error.response?.data?.code === 'USER_NOT_FOUND') {
+        return {
+          success: false,
+          needsSignup: true,
+          googleData: error.response.data.googleData,
+          error: error.response.data.message
+        };
+      }
+
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Google authentication failed'
+      };
+    }
+  };
+
+  const signUpWithGoogle = async (credential: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const response = await api.post('/auth/google/signup', { credential, password });
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Google Sign Up error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Google signup failed'
+      };
+    }
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -146,10 +205,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signUp,
     signInWithGoogle,
+    signUpWithGoogle,
     logout,
     updateUser,
     resetPassword: async (email: string) => {
-      console.warn("Reset Password not implemented yet.");
+      const response = await api.post('/auth/forgot-password', { email });
+      return response.data;
     },
   };
 
