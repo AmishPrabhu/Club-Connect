@@ -15,7 +15,11 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 let transporter = null;
 function getTransporter() {
     if (!transporter) {
-        console.log('Creating email transporter for:', process.env.EMAIL_USER);
+        console.log('=== EMAIL DEBUG ===');
+        console.log('EMAIL_USER:', process.env.EMAIL_USER);
+        console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : 'MISSING');
+        console.log('==================');
+
         transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,
@@ -488,4 +492,6 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+export { getTransporter };
 export default router;
+

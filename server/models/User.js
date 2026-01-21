@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin', 'secretary', 'president', 'treasurer', 'advisor', 'club-secretary', 'student', 'cabinet-member'], // Added observed roles from Firebase logic
+        enum: ['user', 'club-member', 'admin', 'secretary', 'president', 'treasurer', 'advisor', 'club-secretary', 'student', 'cabinet-member'],
         default: 'user',
     },
     clubId: {

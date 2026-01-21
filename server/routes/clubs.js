@@ -5,6 +5,7 @@ import Post from '../models/Post.js';
 import ClubMember from '../models/ClubMember.js';
 import ClubMessage from '../models/ClubMessage.js';
 import { verifyToken, verifyAdmin } from '../middleware/auth.js';
+import { getTransporter } from './auth.js';
 
 const router = express.Router();
 
@@ -145,6 +146,65 @@ router.post('/:id/members', verifyToken, async (req, res) => {
 
         await newMember.save();
 
+        // Check if user exists and auto-assign club-member role
+        let existingUser = null;
+        if (userId) {
+            existingUser = await User.findById(userId);
+            if (existingUser && existingUser.role === 'user') {
+                existingUser.role = 'club-member';
+                await existingUser.save();
+            }
+        } else if (email) {
+            existingUser = await User.findOne({ email });
+            if (existingUser && existingUser.role === 'user') {
+                existingUser.role = 'club-member';
+                await existingUser.save();
+            }
+        }
+
+        // Send invitation email if user doesn't exist
+        if (!existingUser) {
+            try {
+                const club = await Club.findById(clubId);
+                const mailOptions = {
+                    from: `"Club Connect" <${process.env.EMAIL_USER}>`,
+                    to: email,
+                    subject: `You've been added to ${club?.name || 'a club'} - Create Your Account`,
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                            <div style="background: #002147; padding: 20px; text-align: center;">
+                                <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
+                            </div>
+                            <div style="padding: 30px; background: #f9f9f9;">
+                                <h2 style="color: #002147;">Welcome to ${club?.name || 'the club'}!</h2>
+                                <p>Hello ${name},</p>
+                                <p>You've been added as a <strong>${role || 'Member'}</strong> to ${club?.name || 'a club'} on Club Connect!</p>
+                                <p>To get started, please create your account:</p>
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}" 
+                                       style="background: #DAA520; color: #002147; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                                        Create Account
+                                    </a>
+                                </div>
+                                <p style="color: #666; font-size: 14px;">Your registered email: ${email}</p>
+                                <p style="color: #666; font-size: 14px;">Club: ${club?.name || 'N/A'}</p>
+                                <p style="color: #666; font-size: 14px;">Role: ${role || 'Member'}</p>
+                            </div>
+                            <div style="background: #002147; padding: 15px; text-align: center;">
+                                <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
+                            </div>
+                        </div>
+                    `,
+                };
+
+                await getTransporter().sendMail(mailOptions);
+                console.log(`✅ Invitation email sent to ${email}`);
+            } catch (emailError) {
+                console.error('Error sending invitation email:', emailError);
+                // Don't fail the member addition if email fails
+            }
+        }
+
         // Update member count in Club
         const count = await ClubMember.countDocuments({ clubId });
         await Club.findByIdAndUpdate(clubId, { members: count });
@@ -180,7 +240,26 @@ router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
 // Remove member
 router.delete('/:id/members/:memberId', verifyToken, async (req, res) => {
     try {
+        const memberToDelete = await ClubMember.findById(req.params.memberId);
+        if (!memberToDelete) {
+            return res.status(404).json({ message: 'Member not found' });
+        }
+
+        const memberEmail = memberToDelete.email;
         await ClubMember.findByIdAndDelete(req.params.memberId);
+
+        // Auto-downgrade role if user is no longer in any clubs
+        const user = await User.findOne({ email: memberEmail });
+        if (user && user.role === 'club-member') {
+            // Check if user is still in any other clubs
+            const otherMemberships = await ClubMember.countDocuments({ email: memberEmail });
+
+            if (otherMemberships === 0) {
+                // No longer in any clubs, downgrade to 'user'
+                user.role = 'user';
+                await user.save();
+            }
+        }
 
         // Update member count
         const count = await ClubMember.countDocuments({ clubId: req.params.id });

@@ -583,10 +583,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147] hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-[#002147] hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-[#002147]">
                 <Users className="w-6 h-6" />
@@ -597,7 +597,7 @@ export default function AdminDashboard() {
             <div className="mt-2 text-xs text-slate-500">Registered Organizations</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520] hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-[#DAA520] hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-[#DAA520]">
                 <Calendar className="w-6 h-6" />
@@ -608,7 +608,7 @@ export default function AdminDashboard() {
             <div className="mt-2 text-xs text-slate-500">Upcoming Campus Activities</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-purple-500 hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-purple-500 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600">
                 <TrendingUp className="w-6 h-6" />
@@ -619,7 +619,7 @@ export default function AdminDashboard() {
             <div className="mt-2 text-xs text-slate-500">Announcements & Updates</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-red-500 hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-red-500 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600">
                 <Bell className="w-6 h-6" />
@@ -646,7 +646,7 @@ export default function AdminDashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-8 py-5 font-semibold transition-all whitespace-nowrap border-b-2 ${isActive
+                  className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-b-2 ${isActive
                     ? 'text-[#002147] border-[#002147] bg-blue-50/50 dark:bg-blue-900/10'
                     : 'text-slate-500 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
@@ -660,7 +660,7 @@ export default function AdminDashboard() {
 
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-8 min-h-[500px]">
+        <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-4 sm:p-8 min-h-[500px]">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-10 h-10 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>

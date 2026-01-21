@@ -246,7 +246,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                     })}
                 </div>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                     {/* Events Tab */}
                     {activeTab === 'events' && (
                         <div className="space-y-4">
@@ -335,8 +335,8 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                                             {/* Budget Status */}
                                                             <div className="flex items-center gap-2 mt-3">
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${event.budgetVerified
-                                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
                                                                     }`}>
                                                                     {event.budgetVerified ? '✓ Verified' : '⏳ Awaiting Verification'}
                                                                 </span>
@@ -394,19 +394,19 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
 
                             <div className="grid gap-4">
                                 {/* Secretary */}
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex items-center justify-between">
-                                    <div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
                                         <h4 className="font-semibold text-slate-900 dark:text-white">Secretary</h4>
                                         {club?.secretaryEmail ? (
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{club.secretaryEmail}</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate tracking-tight">{club.secretaryEmail}</p>
                                         ) : (
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button
                                             onClick={() => openEditRoleModal('secretary')}
-                                            className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
+                                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
                                         >
                                             <Edit className="w-4 h-4" />
                                             {club?.secretaryEmail ? 'Edit' : 'Add'}
@@ -414,7 +414,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                         {club?.secretaryEmail && (
                                             <button
                                                 onClick={() => handleRemoveRole('secretary')}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
                                                 title="Remove Secretary"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -424,19 +424,19 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                 </div>
 
                                 {/* President */}
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex items-center justify-between">
-                                    <div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
                                         <h4 className="font-semibold text-slate-900 dark:text-white">President</h4>
                                         {club?.presidentEmail ? (
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{club.presidentEmail}</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate tracking-tight">{club.presidentEmail}</p>
                                         ) : (
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button
                                             onClick={() => openEditRoleModal('president')}
-                                            className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/40 transition-colors"
+                                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/40 transition-colors"
                                         >
                                             <Edit className="w-4 h-4" />
                                             {club?.presidentEmail ? 'Edit' : 'Add'}
@@ -444,7 +444,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                         {club?.presidentEmail && (
                                             <button
                                                 onClick={() => handleRemoveRole('president')}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
                                                 title="Remove President"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -454,19 +454,19 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                 </div>
 
                                 {/* Treasurer */}
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex items-center justify-between">
-                                    <div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
                                         <h4 className="font-semibold text-slate-900 dark:text-white">Treasurer</h4>
                                         {club?.treasurerEmail ? (
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{club.treasurerEmail}</p>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate tracking-tight">{club.treasurerEmail}</p>
                                         ) : (
                                             <p className="text-sm text-slate-400 italic">Not assigned</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button
                                             onClick={() => openEditRoleModal('treasurer')}
-                                            className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors"
+                                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors"
                                         >
                                             <Edit className="w-4 h-4" />
                                             {club?.treasurerEmail ? 'Edit' : 'Add'}
@@ -474,7 +474,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                         {club?.treasurerEmail && (
                                             <button
                                                 onClick={() => handleRemoveRole('treasurer')}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
+                                                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors"
                                                 title="Remove Treasurer"
                                             >
                                                 <Trash2 className="w-4 h-4" />

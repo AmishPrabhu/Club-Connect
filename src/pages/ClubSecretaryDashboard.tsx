@@ -309,8 +309,8 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
             <button
               onClick={() => setRecipientGroup('members')}
               className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${recipientGroup === 'members'
-                  ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
             >
               Members
@@ -318,8 +318,8 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
             <button
               onClick={() => setRecipientGroup('presidents')}
               className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${recipientGroup === 'presidents'
-                  ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
             >
               Presidents
@@ -728,7 +728,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-12 flex items-center justify-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -736,7 +736,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
   if (!club) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-12 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 text-center">
         <h1 className="text-2xl font-bold text-red-600 mb-4">Club not found</h1>
         <p className="text-slate-600 dark:text-slate-400 mb-4">
           Your account is not linked to any club. Please contact the administrator.
@@ -749,9 +749,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Header */}
-      <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+      <div className="mb-8 p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden flex-shrink-0">
             {club.image && club.image.startsWith('http') ? (
@@ -878,7 +878,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-8">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
@@ -1348,7 +1348,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                       resourceType: 'auto',
                                       clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf', 'webp'],
                                       maxFileSize: 10000000,
-                                    }, async (error: any, result: any) => {
+                                    }, async (_error: any, result: any) => {
                                       if (result.event === 'success') {
                                         const budgetUrl = result.info.secure_url;
                                         const success = await updateEventBudget(post.id!, budgetUrl);
@@ -1425,7 +1425,6 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
                           </div>
                           <h4 className="font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.title}</h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{post.content}</p>
                           {post.rsvps && post.rsvps > 0 && (
                             <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
                           )}

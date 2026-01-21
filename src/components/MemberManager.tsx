@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, UserPlus, X, Check, Users, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, UserPlus, X, Check, Users, Download, Upload } from 'lucide-react';
 import { ClubMember, UserRole } from '../types/auth';
 import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/dbService';
+import BulkImportModal from './BulkImportModal';
 
 interface MemberManagerProps {
     clubId: string;
@@ -37,6 +38,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     const [members, setMembers] = useState<ClubMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<ClubMember | null>(null);
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [yearFilter, setYearFilter] = useState<string>('');
@@ -176,51 +178,64 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{clubName} Members</h3>
-                <div className="flex items-center gap-3">
-                    <select
-                        value={yearFilter}
-                        onChange={(e) => setYearFilter(e.target.value)}
-                        className="px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="">All Years</option>
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                    </select>
-                    {canExport && (
-                        <>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <select
+                            value={yearFilter}
+                            onChange={(e) => setYearFilter(e.target.value)}
+                            className="flex-1 sm:flex-none px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">All Years</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                        {canExport && (
                             <select
                                 value={boardTypeFilter}
                                 onChange={(e) => setBoardTypeFilter(e.target.value)}
-                                className="px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="flex-1 sm:flex-none px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="">All Boards</option>
                                 <option value="main">Main Board</option>
                                 <option value="executive">Executive Board</option>
                                 <option value="member">Member Board</option>
                             </select>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        {canExport && (
                             <button
                                 onClick={exportToCSV}
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                                className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-2 sm:px-4 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
                                 title="Export to CSV"
                             >
                                 <Download className="w-4 h-4" />
-                                Export
+                                <span className="text-xs sm:text-base">Export</span>
                             </button>
-                        </>
-                    )}
-                    {!isReadOnly && (
-                        <button
-                            onClick={() => setIsAddModalOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
-                        >
-                            <UserPlus className="w-4 h-4" />
-                            Add Member
-                        </button>
-                    )}
+                        )}
+                        {!isReadOnly && (
+                            <>
+                                <button
+                                    onClick={() => setIsBulkImportOpen(true)}
+                                    className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-4 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Upload className="w-4 h-4" />
+                                    <span className="text-xs sm:text-base">Auto Import</span>
+                                </button>
+                                <button
+                                    onClick={() => setIsAddModalOpen(true)}
+                                    className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                                >
+                                    <UserPlus className="w-4 h-4" />
+                                    <span className="text-xs sm:text-base">Add Member</span>
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -252,113 +267,151 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                         {sortedMembers.map((member) => (
                             <div
                                 key={member.id}
-                                className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                                className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 dark:border-slate-700"
                             >
                                 {editingMember?.id === member.id && editingMember ? (
                                     // Edit mode
-                                    <div className="flex-1 flex flex-wrap items-center gap-3">
-                                        <input
-                                            onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                                            className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <input
-                                            onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                                            className="flex-1 min-w-full sm:min-w-[150px] px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <select
-                                            value={editingMember.academicYear || ''}
-                                            onChange={(e) => setEditingMember({ ...editingMember, academicYear: e.target.value })}
-                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="">Year</option>
-                                            <option value="FY">FY</option>
-                                            <option value="SY">SY</option>
-                                            <option value="TY">TY</option>
-                                            <option value="Final Year">Final Year</option>
-                                        </select>
-                                        <input
-                                            type="date"
-                                            value={editingMember.joinedAt instanceof Date ? editingMember.joinedAt.toISOString().split('T')[0] : new Date(editingMember.joinedAt).toISOString().split('T')[0]}
-                                            onChange={(e) => setEditingMember({ ...editingMember, joinedAt: new Date(e.target.value) })}
-                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <select
-                                            value={editingMember.boardType || 'member'}
-                                            onChange={(e) => {
-                                                const bt = e.target.value as 'main' | 'executive' | 'member';
-                                                setEditingMember({
-                                                    ...editingMember,
-                                                    boardType: bt,
-                                                    role: bt === 'member' ? 'Member' : editingMember.role
-                                                });
-                                            }}
-                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            {BOARD_TYPE_OPTIONS.map((bt) => (
-                                                <option key={bt.value} value={bt.value}>
-                                                    {bt.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {editingMember.boardType !== 'member' && (
-                                            <input
-                                                type="text"
-                                                value={editingMember.role}
-                                                onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
-                                                className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Enter role (e.g. App Executive)"
-                                            />
-                                        )}
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={handleUpdateMember}
-                                                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
-                                            >
-                                                <Check className="w-4 h-4" />
-                                            </button>
+                                    <div className="flex-1 space-y-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Name</label>
+                                                <input
+                                                    value={editingMember.name}
+                                                    onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Email</label>
+                                                <input
+                                                    value={editingMember.email}
+                                                    onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Academic Year</label>
+                                                <select
+                                                    value={editingMember.academicYear || ''}
+                                                    onChange={(e) => setEditingMember({ ...editingMember, academicYear: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                >
+                                                    <option value="">Year</option>
+                                                    <option value="FY">FY</option>
+                                                    <option value="SY">SY</option>
+                                                    <option value="TY">TY</option>
+                                                    <option value="Final Year">Final Year</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Joined At</label>
+                                                <input
+                                                    type="date"
+                                                    value={editingMember.joinedAt instanceof Date ? editingMember.joinedAt.toISOString().split('T')[0] : new Date(editingMember.joinedAt).toISOString().split('T')[0]}
+                                                    onChange={(e) => setEditingMember({ ...editingMember, joinedAt: new Date(e.target.value) })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Board</label>
+                                                <select
+                                                    value={editingMember.boardType || 'member'}
+                                                    onChange={(e) => {
+                                                        const bt = e.target.value as 'main' | 'executive' | 'member';
+                                                        setEditingMember({
+                                                            ...editingMember,
+                                                            boardType: bt,
+                                                            role: bt === 'member' ? 'Member' : editingMember.role
+                                                        });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                >
+                                                    {BOARD_TYPE_OPTIONS.map((bt) => (
+                                                        <option key={bt.value} value={bt.value}>
+                                                            {bt.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {editingMember.boardType !== 'member' && (
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Custom Role</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editingMember.role}
+                                                        onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        placeholder="App Executive"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-600">
                                             <button
                                                 onClick={() => setEditingMember(null)}
-                                                className="p-2 bg-slate-400 hover:bg-slate-500 text-white rounded-lg transition-all"
+                                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg transition-all text-sm font-semibold"
                                             >
-                                                <X className="w-4 h-4" />
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleUpdateMember}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all text-sm font-semibold flex items-center gap-2"
+                                            >
+                                                <Check className="w-4 h-4" />
+                                                Save Changes
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
                                     // View mode
                                     <>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                                <h4 className="font-semibold text-slate-900 dark:text-white">{member.name}</h4>
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${BOARD_TYPE_COLORS[member.boardType || 'member']}`}>
-                                                    {getBoardTypeLabel(member.boardType || 'member')}
-                                                </span>
-                                                {member.boardType !== 'member' && (
-                                                    <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-semibold">
-                                                        {member.role}
+                                        <div className="flex-1 w-full">
+                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                <h4 className="font-bold text-slate-900 dark:text-white text-lg">{member.name}</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${BOARD_TYPE_COLORS[member.boardType || 'member']}`}>
+                                                        {getBoardTypeLabel(member.boardType || 'member')}
                                                     </span>
-                                                )}
+                                                    {member.boardType !== 'member' && (
+                                                        <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                                                            {member.role}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{member.email}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                                                {member.academicYear ? `${member.academicYear} • ` : ''}Joined: {new Date(member.joinedAt).toLocaleDateString()}
-                                            </p>
+                                            <div className="space-y-1">
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                                                    <span className="opacity-60">✉</span> {member.email}
+                                                </p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-500 flex items-center gap-4">
+                                                    {member.academicYear && (
+                                                        <span className="flex items-center gap-1">
+                                                            <span className="opacity-60">🎓</span> {member.academicYear}
+                                                        </span>
+                                                    )}
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="opacity-60">📅</span> Joined: {new Date(member.joinedAt).toLocaleDateString()}
+                                                    </span>
+                                                </p>
+                                            </div>
                                         </div>
                                         {!isReadOnly && (
-                                            <div className="flex gap-2 w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                                            <div className="flex sm:flex-col gap-2 w-full sm:w-auto justify-end sm:justify-center pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700">
                                                 <button
                                                     onClick={() => setEditingMember(member)}
-                                                    className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                                    className="flex-1 sm:flex-none p-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all border border-blue-100 dark:border-blue-900/30 sm:border-0"
                                                     title="Edit member"
                                                 >
-                                                    <Edit2 className="w-4 h-4" />
+                                                    <Edit2 className="w-4 h-4 mx-auto" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleRemoveMember(member.id!)}
-                                                    className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                    className="flex-1 sm:flex-none p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all border border-red-100 dark:border-red-900/30 sm:border-0"
                                                     title="Remove member"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-4 h-4 mx-auto" />
                                                 </button>
                                             </div>
                                         )}
@@ -510,6 +563,18 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                     </div>
                 </div>
             )}
+
+            {/* Auto Import Modal */}
+            <BulkImportModal
+                isOpen={isBulkImportOpen}
+                onClose={() => setIsBulkImportOpen(false)}
+                clubId={clubId}
+                clubName={clubName}
+                onSuccess={() => {
+                    setIsBulkImportOpen(false);
+                    fetchMembers();
+                }}
+            />
         </div>
     );
 }
