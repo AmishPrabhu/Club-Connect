@@ -242,17 +242,19 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
 function MessageSender({ club, user }: { club: DBClub; user: User }) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [recipientGroup, setRecipientGroup] = useState<'members' | 'presidents'>('members');
   const [isSending, setIsSending] = useState(false);
   const [result, setResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [pastMessages, setPastMessages] = useState<ClubMessage[]>([]);
 
   useEffect(() => {
     loadMessages();
-  }, [club.id]);
+  }, [club.id, recipientGroup]);
 
   const loadMessages = async () => {
     if (club.id) {
-      const msgs = await getClubMessages(club.id);
+      const targetId = recipientGroup === 'members' ? club.id : 'GLOBAL_PRESIDENTS';
+      const msgs = await getClubMessages(targetId);
       setPastMessages(msgs);
     }
   };
@@ -269,9 +271,12 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
     setResult(null);
 
     try {
-      const success = await createClubMessage(club.id, {
-        clubId: club.id,
-        clubName: club.name,
+      const targetId = recipientGroup === 'members' ? club.id : 'GLOBAL_PRESIDENTS';
+      const targetClubName = recipientGroup === 'members' ? club.name : 'Global Presidents';
+
+      const success = await createClubMessage(targetId, {
+        clubId: targetId,
+        clubName: targetClubName,
         senderId: user.id,
         senderName: user.name,
         senderRole: user.role,
@@ -297,10 +302,35 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Club Messages</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Club Messages</h3>
+
+          <div className="flex bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg">
+            <button
+              onClick={() => setRecipientGroup('members')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${recipientGroup === 'members'
+                  ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+            >
+              Members
+            </button>
+            <button
+              onClick={() => setRecipientGroup('presidents')}
+              className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${recipientGroup === 'presidents'
+                  ? 'bg-white dark:bg-slate-600 text-[#002147] dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+            >
+              Presidents
+            </button>
+          </div>
+        </div>
 
         <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mb-8">
-          <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Send New Message to Members</h4>
+          <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
+            Send New Message to {recipientGroup === 'members' ? 'Members' : 'All Presidents'}
+          </h4>
 
           {result && (
             <div className={`p-3 rounded-lg mb-4 ${result.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
@@ -351,7 +381,9 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
       </div>
 
       <div>
-        <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Sent Messages History</h4>
+        <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
+          {recipientGroup === 'members' ? 'Sent Messages History' : 'Global Presidents Chat History'}
+        </h4>
         {pastMessages.length === 0 ? (
           <p className="text-slate-500 dark:text-slate-400 italic">No messages sent yet.</p>
         ) : (
@@ -364,7 +396,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap">{msg.body}</p>
                 <div className="mt-2 text-xs text-slate-400">
-                  Sent by {msg.senderName} ({msg.senderRole})
+                  Sent by {msg.senderName} ({msg.senderRole}) {recipientGroup === 'presidents' && msg.clubName !== 'Global Presidents' ? `from ${msg.clubName}` : ''}
                 </div>
               </div>
             ))}
