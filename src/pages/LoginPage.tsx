@@ -100,134 +100,138 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       </div>
 
       {/* Right Split - Functional Side */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative">
-        <button
-          onClick={() => onNavigate('home')}
-          className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-college-blue-primary transition-all font-medium text-sm group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Campus Home
-        </button>
+      <div className="w-full lg:w-1/2 flex flex-col h-full">
+        <div className="p-6 lg:p-8 w-full flex-none z-10">
+          <button
+            onClick={() => onNavigate('home')}
+            className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary transition-all font-medium text-sm group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Campus Home
+          </button>
+        </div>
 
-        <div className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
-              <ShieldCheck className="w-8 h-8 text-college-blue-primary" />
-            </div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student & Faculty Login</h2>
-            <p className="text-slate-500 dark:text-slate-400">Please sign in to continue to your dashboard</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-md animate-in fade-in slide-in-from-top-2">
-                <p className="text-sm font-medium text-red-700 dark:text-red-300 flex items-center gap-2">
-                  <span className="text-xl">⚠️</span> {error}
-                </p>
+        <div className="flex-1 flex flex-col justify-center items-center w-full px-6 lg:px-16 pb-12">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-10">
+              <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
+                <ShieldCheck className="w-8 h-8 text-college-blue-primary" />
               </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
-                Official Email ID
-              </label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
-                  placeholder="name@wce.ac.in"
-                  required
-                />
-              </div>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student & Faculty Login</h2>
+              <p className="text-slate-500 dark:text-slate-400">Please sign in to continue to your dashboard</p>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
-                Password
-              </label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
-                  placeholder="••••••••"
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-md animate-in fade-in slide-in-from-top-2">
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300 flex items-center gap-2">
+                    <span className="text-xl">⚠️</span> {error}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
+                  Official Email ID
+                </label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
+                    placeholder="name@wce.ac.in"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
+                  Password
+                </label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                  onClick={() => setIsForgotPasswordOpen(true)}
+                  className="text-sm font-semibold text-college-blue-primary hover:text-college-blue-700 hover:underline transition-all"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  Forgot Credentials?
                 </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  <div className="w-6 h-6 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Access Dashboard</span>
+                    <ArrowLeft className="w-5 h-5 rotate-180" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            {/* Google Sign-In Button */}
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google sign-in failed. Please try again.')}
+                theme="outline"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+                logo_alignment="left"
+              />
+            </div>
+            <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
+              Only @walchandsangli.ac.in emails are allowed
+            </p>
+
+            <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+              <p className="text-slate-500 dark:text-slate-400 mb-4">New to the platform?</p>
               <button
-                type="button"
-                onClick={() => setIsForgotPasswordOpen(true)}
-                className="text-sm font-semibold text-college-blue-primary hover:text-college-blue-700 hover:underline transition-all"
+                onClick={() => onNavigate('signUp')}
+                className="px-8 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:border-college-gold hover:text-college-blue-primary transition-colors"
               >
-                Forgot Credentials?
+                Create Student Account
               </button>
             </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3"
-            >
-              {isLoading ? (
-                <div className="w-6 h-6 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Access Dashboard</span>
-                  <ArrowLeft className="w-5 h-5 rotate-180" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
-            </div>
-          </div>
-
-          {/* Google Sign-In Button */}
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError('Google sign-in failed. Please try again.')}
-              theme="outline"
-              size="large"
-              text="signin_with"
-              shape="rectangular"
-              logo_alignment="left"
-            />
-          </div>
-          <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
-            Only @walchandsangli.ac.in emails are allowed
-          </p>
-
-          <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
-            <p className="text-slate-500 dark:text-slate-400 mb-4">New to the platform?</p>
-            <button
-              onClick={() => onNavigate('signUp')}
-              className="px-8 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:border-college-gold hover:text-college-blue-primary transition-colors"
-            >
-              Create Student Account
-            </button>
           </div>
         </div>
       </div>
