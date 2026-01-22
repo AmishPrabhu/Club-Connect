@@ -363,7 +363,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden">
-          <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
+          <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
             {[
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'events', label: 'My Events', icon: Calendar },
@@ -539,7 +539,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             {activeTab === 'events' && (
               <div className="space-y-6">
                 {/* Event Tabs */}
-                <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
+                <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
                   <button
                     onClick={() => setEventTab('upcoming')}
                     className={`pb-3 px-2 font-bold transition-colors relative ${eventTab === 'upcoming'

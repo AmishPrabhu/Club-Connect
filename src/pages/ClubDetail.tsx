@@ -281,7 +281,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 col-span-2 md:col-span-1">
+              <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
                 <div className="p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300">
                   <MapPin className="w-6 h-6" />
                 </div>
@@ -328,7 +328,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           {/* Posts Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-              <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                 <h2 className="text-2xl font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
                   <Calendar className="w-6 h-6 text-[#DAA520]" />
                   Posts & Events
@@ -408,11 +408,11 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                           onClick={() => onNavigateToPost(event.id)}
                           className="group bg-slate-50 dark:bg-slate-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
                         >
-                          <div className="flex flex-col sm:flex-row sm:h-32">
+                          <div className="flex flex-col md:flex-row md:h-32">
                             {/* Left: Cover Image or Styled Icon */}
                             {post?.coverImage ? (
                               <div
-                                className="sm:w-1/4 h-32 sm:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0 group/image overflow-hidden"
+                                className="md:w-1/4 h-40 md:h-full relative bg-slate-200 dark:bg-slate-700 flex-shrink-0 group/image overflow-hidden"
                                 onClick={(e) => openImageModal(e, post.coverImage!)}
                               >
                                 <img
@@ -425,7 +425,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                                 </div>
                               </div>
                             ) : (
-                              <div className="sm:w-1/4 h-32 sm:h-full flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-500 flex-shrink-0">
+                              <div className="md:w-1/4 h-40 md:h-full flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-500 flex-shrink-0">
                                 {/* Decorative floating circles */}
                                 <div className="absolute top-2 right-2 w-10 h-10 bg-white/10 rounded-full blur-sm" />
                                 <div className="absolute bottom-2 left-2 w-6 h-6 bg-white/10 rounded-full blur-sm" />
@@ -443,7 +443,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                             )}
 
                             {/* Right: Details */}
-                            <div className="sm:w-3/4 p-4 flex flex-col justify-center">
+                            <div className="md:w-3/4 p-4 flex flex-col justify-center">
                               {/* Header with status */}
                               <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-lg font-bold font-serif text-[#002147] dark:text-white group-hover:text-[#DAA520] dark:group-hover:text-blue-400 transition-colors line-clamp-1">
