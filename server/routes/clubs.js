@@ -127,6 +127,7 @@ router.post('/:id/members', verifyToken, async (req, res) => {
     try {
         const { name, email, role, userId, boardType, academicYear, joinedAt } = req.body;
         const clubId = req.params.id;
+        console.log("clubId", clubId);
 
         const existing = await ClubMember.findOne({ clubId, email });
         if (existing) {
@@ -197,7 +198,7 @@ router.post('/:id/members', verifyToken, async (req, res) => {
                     `,
                 };
 
-                await getTransporter().sendMail(mailOptions);
+                // await getTransporter().sendMail(mailOptions);
                 console.log(`✅ Invitation email sent to ${email}`);
             } catch (emailError) {
                 console.error('Error sending invitation email:', emailError);
