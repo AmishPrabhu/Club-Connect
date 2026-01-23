@@ -63,6 +63,7 @@ router.post('/:id/rsvp', async (req, res) => {
             name,
             email,
             userId: userId || null, // Optional
+            source: 'rsvp', // Self-RSVP
         });
 
         await newRSVP.save();
@@ -117,7 +118,7 @@ router.delete('/:id/rsvps/:rsvpId', verifyToken, async (req, res) => {
 // Add Manual Participant (Secretary/Admin only)
 router.post('/:id/rsvps/add', verifyToken, async (req, res) => {
     try {
-        const { name, email } = req.body;
+        const { name, email, source } = req.body;
         const eventId = req.params.id;
 
         // Check for duplicate
@@ -130,7 +131,8 @@ router.post('/:id/rsvps/add', verifyToken, async (req, res) => {
             eventId,
             name,
             email,
-            attendance: 'pending' // Default manual add is pending or present? Let's say pending.
+            attendance: 'pending',
+            source: source || 'manual', // Use provided source or default to manual
         });
 
         await newRSVP.save();
@@ -329,11 +331,22 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
     }
 });
 
-// Get user RSVPs by email (for viewing certificates)
+// Get user RSVPs by email (for viewing registered events and certificates)
 router.get('/user/rsvps', verifyToken, async (req, res) => {
     try {
         const userEmail = req.user.email;
-        const rsvps = await EventRSVP.find({ email: userEmail }).sort({ rsvpedAt: -1 });
+
+        // Only show events where user was imported/manually added (registered participants)
+        // Self-RSVPs (source: 'rsvp') are not shown - only actual registrations
+        const rsvps = await EventRSVP.find({
+            email: { $regex: new RegExp(`^${userEmail}$`, 'i') },
+            $or: [
+                { source: { $in: ['import', 'manual'] } },
+                { source: { $exists: false } },
+                { source: null }
+            ]
+        }).sort({ rsvpedAt: -1 });
+
         res.json(rsvps);
     } catch (error) {
         console.error('Error fetching user RSVPs:', error);

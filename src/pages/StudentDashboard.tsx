@@ -44,7 +44,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     if (event) {
                         events.push({
                             event,
-                            rsvpDate: rsvp.rsvpedAt,
+                            rsvpDate: new Date(rsvp.rsvpedAt),
                             certificateUrl: rsvp.certificateUrl,
                             rsvp,
                         });

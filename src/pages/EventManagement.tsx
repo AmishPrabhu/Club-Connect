@@ -875,7 +875,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             if (existingEmails.includes(email.toLowerCase())) {
                                                                 skipped++;
                                                             } else {
-                                                                const result = await addEventParticipant(eventId, name, email);
+                                                                const result = await addEventParticipant(eventId, name, email, 'import');
                                                                 if (result.success) {
                                                                     imported++;
                                                                     existingEmails.push(email.toLowerCase());

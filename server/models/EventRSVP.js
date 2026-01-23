@@ -31,6 +31,11 @@ const eventRSVPSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    source: {
+        type: String,
+        enum: ['rsvp', 'import', 'manual'],
+        default: 'rsvp',
+    },
 
 });
 

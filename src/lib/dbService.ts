@@ -680,10 +680,11 @@ export const updateParticipantAttendance = async (
 export const addEventParticipant = async (
     eventId: string,
     name: string,
-    email: string
+    email: string,
+    source: 'manual' | 'import' = 'manual'  // Default to manual if not specified
 ): Promise<{ success: boolean; error?: string }> => {
     try {
-        await api.post(`/posts/${eventId}/rsvps/add`, { name, email });
+        await api.post(`/posts/${eventId}/rsvps/add`, { name, email, source });
         return { success: true };
     } catch (error: any) {
         console.error('Error adding participant:', error);
