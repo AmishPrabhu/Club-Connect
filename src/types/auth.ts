@@ -162,6 +162,18 @@ export interface DBPost {
   budgetVerifiedBy?: string;       // User ID of advisor who verified
   budgetVerifiedAt?: Date;         // When budget was verified
 
+  // Certificate generation fields
+  certificateTemplate?: {
+    templateUrl: string;
+    namePosition: {
+      x: number;
+      y: number;
+      fontSize: number;
+      fontFamily: string;
+      color: string;
+    };
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -187,4 +199,14 @@ export interface EventRSVP {
   email: string;
   rsvpedAt: Date;
   attendance?: 'present' | 'absent' | 'pending';  // Attendance status for the event
+  certificateUrl?: string;  // URL of generated certificate for this participant
+}
+
+// Certificate configuration for name positioning
+export interface CertificateNamePosition {
+  x: number;      // X position (percentage)
+  y: number;      // Y position (percentage)
+  fontSize: number;
+  fontFamily: string;
+  color: string;
 }

@@ -23,10 +23,15 @@ const eventRSVPSchema = new mongoose.Schema({
         enum: ['present', 'absent', 'pending'],
         default: 'pending',
     },
+    certificateUrl: {
+        type: String, // URL of generated certificate for this participant
+        default: null,
+    },
     rsvpedAt: {
         type: Date,
         default: Date.now,
     },
+
 });
 
 // Compound index to prevent duplicate RSVPs for same email on same event

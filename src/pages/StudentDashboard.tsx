@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, ArrowLeft, CalendarCheck, History, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, MapPin, ArrowLeft, CalendarCheck, History, ExternalLink, Award } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 import { getUserRSVPsByEmail, getPosts } from '../lib/dbService';
-import { DBPost } from '../types/auth';
+import { DBPost, EventRSVP } from '../types/auth';
 
 interface StudentDashboardProps {
     onNavigate: (page: Page) => void;
@@ -13,6 +13,8 @@ interface StudentDashboardProps {
 interface UserEvent {
     event: DBPost;
     rsvpDate: Date;
+    certificateUrl?: string;  // Certificate URL if available
+    rsvp?: EventRSVP;  // Full RSVP data
 }
 
 export default function StudentDashboard({ onNavigate, onNavigateToPost }: StudentDashboardProps) {
@@ -43,6 +45,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                         events.push({
                             event,
                             rsvpDate: rsvp.rsvpedAt,
+                            certificateUrl: rsvp.certificateUrl,
+                            rsvp,
                         });
                     }
                 }
@@ -178,7 +182,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {displayedEvents.map(({ event, rsvpDate }) => (
+                        {displayedEvents.map(({ event, rsvpDate, certificateUrl }) => (
                             <div
                                 key={event.id}
                                 className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow"
@@ -192,6 +196,12 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                                 }`}>
                                                 {activeTab === 'upcoming' ? 'Upcoming' : 'Completed'}
                                             </span>
+                                            {certificateUrl && activeTab === 'past' && (
+                                                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 flex items-center gap-1">
+                                                    <Award className="w-3 h-3" />
+                                                    Certificate Available
+                                                </span>
+                                            )}
                                             <span className="text-sm text-slate-500">by {event.clubName}</span>
                                         </div>
 
@@ -227,7 +237,18 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                         </p>
                                     </div>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap">
+                                        {certificateUrl && activeTab === 'past' && (
+                                            <a
+                                                href={certificateUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                                            >
+                                                <Award className="w-4 h-4" />
+                                                View Certificate
+                                            </a>
+                                        )}
                                         <button
                                             onClick={() => event.id && onNavigateToPost(event.id)}
                                             className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium transition-colors flex items-center gap-2"

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle, Award, Upload, Download } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
-import { DBPost, User, ClubMember, EventTask, EventRSVP } from '../types/auth';
-import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs } from '../lib/dbService';
+import { DBPost, User, ClubMember, EventTask, EventRSVP, CertificateNamePosition } from '../types/auth';
+import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs, saveCertificateTemplate, updateParticipantCertificate } from '../lib/dbService';
 import { useAuth } from '../context/AuthContext';
 
 interface EventManagementProps {
@@ -19,10 +19,19 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget' | 'certificates'>('details');
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
     const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
     const [isImporting, setIsImporting] = useState(false);
+
+    // Certificate-related state
+    const [certificateTemplateUrl, setCertificateTemplateUrl] = useState<string | null>(null);
+    const [namePosition, setNamePosition] = useState<CertificateNamePosition>({
+        x: 50, y: 50, fontSize: 48, fontFamily: 'Arial', color: '#000000'
+    });
+    const [isGeneratingCertificates, setIsGeneratingCertificates] = useState(false);
+    const [certificateProgress, setCertificateProgress] = useState({ current: 0, total: 0 });
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     // User's role in this specific club (for multi-club members)
     const [userClubRole, setUserClubRole] = useState<string | null>(null);
 
@@ -118,6 +127,14 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     if (foundPost.id) {
                         const rsvps = await getEventRSVPs(foundPost.id);
                         setEventRsvps(rsvps);
+                    }
+
+                    // Load certificate template settings if they exist
+                    if (foundPost.certificateTemplate?.templateUrl) {
+                        setCertificateTemplateUrl(foundPost.certificateTemplate.templateUrl);
+                        setNamePosition(foundPost.certificateTemplate.namePosition || {
+                            x: 50, y: 50, fontSize: 48, fontFamily: 'Arial', color: '#000000'
+                        });
                     }
                 }
             } catch (error) {
@@ -380,6 +397,21 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 >
                                     <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
                                     Budget
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('certificates')}
+                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'certificates'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <Award className={`w-5 h-5 ${activeTab === 'certificates' ? 'text-[#DAA520]' : ''}`} />
+                                    Certificates
+                                    {eventRsvps.filter(r => r.certificateUrl).length > 0 && (
+                                        <span className="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-bold">
+                                            {eventRsvps.filter(r => r.certificateUrl).length}
+                                        </span>
+                                    )}
                                 </button>
                             </>
                         )}
@@ -1131,6 +1163,370 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     </p>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* Certificates Tab */}
+                    {activeTab === 'certificates' && (
+                        <div className="space-y-6">
+                            {/* Certificate Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">Present Participants</p>
+                                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                                        {eventRsvps.filter(r => r.attendance === 'present').length}
+                                    </p>
+                                </div>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Certificates Generated</p>
+                                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                                        {eventRsvps.filter(r => r.certificateUrl).length}
+                                    </p>
+                                </div>
+                                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
+                                    <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">Pending Certificates</p>
+                                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                                        {eventRsvps.filter(r => r.attendance === 'present' && !r.certificateUrl).length}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Certificate Template Section */}
+                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                    <Award className="w-5 h-5 text-[#DAA520]" />
+                                    Certificate Template
+                                </h2>
+
+                                {/* Template Preview */}
+                                {certificateTemplateUrl ? (
+                                    <div className="mb-6">
+                                        <div className="relative bg-slate-100 dark:bg-slate-700 rounded-xl p-4">
+                                            <img
+                                                src={certificateTemplateUrl}
+                                                alt="Certificate template"
+                                                className="max-w-full h-auto rounded-lg mx-auto"
+                                                style={{ maxHeight: '400px' }}
+                                            />
+                                            <div
+                                                className="absolute bg-red-500/30 border-2 border-dashed border-red-500 rounded px-4 py-2 text-center pointer-events-none"
+                                                style={{
+                                                    left: `${namePosition.x}%`,
+                                                    top: `${namePosition.y}%`,
+                                                    transform: 'translate(-50%, -50%)',
+                                                    fontSize: `${Math.max(12, namePosition.fontSize / 4)}px`,
+                                                    color: namePosition.color,
+                                                    fontFamily: namePosition.fontFamily,
+                                                }}
+                                            >
+                                                [Participant Name]
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+                                            Red dashed box shows where participant names will appear
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="mb-6 p-8 bg-slate-50 dark:bg-slate-700/30 rounded-xl text-center">
+                                        <Upload className="w-12 h-12 mx-auto mb-3 text-slate-400" />
+                                        <p className="text-slate-600 dark:text-slate-400">No certificate template uploaded yet</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Upload a template image to get started</p>
+                                    </div>
+                                )}
+
+                                {/* Upload Template Button */}
+                                <button
+                                    onClick={() => {
+                                        if (!window.cloudinary) {
+                                            setMessage({ type: 'error', text: 'Cloudinary not loaded. Please refresh.' });
+                                            return;
+                                        }
+                                        const widget = window.cloudinary.createUploadWidget(
+                                            {
+                                                cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+                                                uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
+                                                folder: `club-connect/certificates/${post?.clubId || 'general'}`,
+                                                sources: ['local', 'url'],
+                                                multiple: false,
+                                                maxFiles: 1,
+                                                clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+                                                maxFileSize: 10000000,
+                                            },
+                                            async (error: any, result: any) => {
+                                                if (error) {
+                                                    setMessage({ type: 'error', text: 'Upload failed.' });
+                                                    return;
+                                                }
+                                                if (result.event === 'success') {
+                                                    const templateUrl = result.info.secure_url;
+                                                    setCertificateTemplateUrl(templateUrl);
+                                                    // Save to database
+                                                    const success = await saveCertificateTemplate(eventId, templateUrl, namePosition);
+                                                    if (success) {
+                                                        setMessage({ type: 'success', text: 'Certificate template uploaded successfully!' });
+                                                    } else {
+                                                        setMessage({ type: 'error', text: 'Failed to save template settings.' });
+                                                    }
+                                                }
+                                            }
+                                        );
+                                        widget.open();
+                                    }}
+                                    className="w-full px-4 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
+                                >
+                                    <Upload className="w-5 h-5 text-[#DAA520]" />
+                                    {certificateTemplateUrl ? 'Change Template' : 'Upload Certificate Template'}
+                                </button>
+                            </div>
+
+                            {/* Name Position Settings */}
+                            {certificateTemplateUrl && (
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4">
+                                        Name Position Settings
+                                    </h2>
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">X Position (%)</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                value={namePosition.x}
+                                                onChange={(e) => setNamePosition({ ...namePosition, x: Number(e.target.value) })}
+                                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Y Position (%)</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                value={namePosition.y}
+                                                onChange={(e) => setNamePosition({ ...namePosition, y: Number(e.target.value) })}
+                                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Font Size</label>
+                                            <input
+                                                type="number"
+                                                min="12"
+                                                max="120"
+                                                value={namePosition.fontSize}
+                                                onChange={(e) => setNamePosition({ ...namePosition, fontSize: Number(e.target.value) })}
+                                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Font</label>
+                                            <select
+                                                value={namePosition.fontFamily}
+                                                onChange={(e) => setNamePosition({ ...namePosition, fontFamily: e.target.value })}
+                                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            >
+                                                <option value="Arial">Arial</option>
+                                                <option value="Times New Roman">Times New Roman</option>
+                                                <option value="Georgia">Georgia</option>
+                                                <option value="Verdana">Verdana</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Color</label>
+                                            <input
+                                                type="color"
+                                                value={namePosition.color}
+                                                onChange={(e) => setNamePosition({ ...namePosition, color: e.target.value })}
+                                                className="w-full h-10 px-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            const success = await saveCertificateTemplate(eventId, certificateTemplateUrl, namePosition);
+                                            if (success) {
+                                                setMessage({ type: 'success', text: 'Position settings saved!' });
+                                            } else {
+                                                setMessage({ type: 'error', text: 'Failed to save settings.' });
+                                            }
+                                        }}
+                                        className="mt-4 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg font-medium transition-all"
+                                    >
+                                        Save Position Settings
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Generate Certificates Section */}
+                            {certificateTemplateUrl && (
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4">
+                                        Generate Certificates
+                                    </h2>
+
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                                        Generate certificates for all participants marked as "present".
+                                        Each certificate will have the participant's name added at the specified position.
+                                    </p>
+
+                                    {isGeneratingCertificates && (
+                                        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                                <span className="text-blue-700 dark:text-blue-300 font-medium">
+                                                    Generating... {certificateProgress.current} / {certificateProgress.total}
+                                                </span>
+                                            </div>
+                                            <div className="mt-2 w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+                                                <div
+                                                    className="bg-blue-600 h-2 rounded-full transition-all"
+                                                    style={{ width: `${(certificateProgress.current / certificateProgress.total) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        onClick={async () => {
+                                            const presentParticipants = eventRsvps.filter(r => r.attendance === 'present' && !r.certificateUrl);
+                                            if (presentParticipants.length === 0) {
+                                                setMessage({ type: 'error', text: 'No participants need certificates. Either none are marked present or all already have certificates.' });
+                                                return;
+                                            }
+
+                                            setIsGeneratingCertificates(true);
+                                            setCertificateProgress({ current: 0, total: presentParticipants.length });
+
+                                            try {
+                                                // Create canvas for certificate generation
+                                                const canvas = document.createElement('canvas');
+                                                const ctx = canvas.getContext('2d');
+                                                if (!ctx) {
+                                                    throw new Error('Could not get canvas context');
+                                                }
+
+                                                // Load template image
+                                                const templateImg = new Image();
+                                                templateImg.crossOrigin = 'anonymous';
+                                                await new Promise<void>((resolve, reject) => {
+                                                    templateImg.onload = () => resolve();
+                                                    templateImg.onerror = () => reject(new Error('Failed to load template'));
+                                                    templateImg.src = certificateTemplateUrl;
+                                                });
+
+                                                canvas.width = templateImg.width;
+                                                canvas.height = templateImg.height;
+
+                                                let successCount = 0;
+                                                for (let i = 0; i < presentParticipants.length; i++) {
+                                                    const participant = presentParticipants[i];
+                                                    setCertificateProgress({ current: i + 1, total: presentParticipants.length });
+
+                                                    // Draw template
+                                                    ctx.drawImage(templateImg, 0, 0);
+
+                                                    // Add name
+                                                    ctx.font = `${namePosition.fontSize}px ${namePosition.fontFamily}`;
+                                                    ctx.fillStyle = namePosition.color;
+                                                    ctx.textAlign = 'center';
+                                                    ctx.textBaseline = 'middle';
+                                                    const x = (namePosition.x / 100) * canvas.width;
+                                                    const y = (namePosition.y / 100) * canvas.height;
+                                                    ctx.fillText(participant.name, x, y);
+
+                                                    // Convert to blob and upload
+                                                    const blob = await new Promise<Blob>((resolve) => {
+                                                        canvas.toBlob((b) => resolve(b!), 'image/png');
+                                                    });
+
+                                                    // Upload to Cloudinary
+                                                    const formData = new FormData();
+                                                    formData.append('file', blob, `${participant.name.replace(/\s+/g, '_')}_certificate.png`);
+                                                    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+                                                    formData.append('folder', `club-connect/certificates/${post?.clubId || 'general'}/generated`);
+
+                                                    const response = await fetch(
+                                                        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                                                        { method: 'POST', body: formData }
+                                                    );
+                                                    const data = await response.json();
+
+                                                    if (data.secure_url && participant.id) {
+                                                        // Save certificate URL to participant
+                                                        const saved = await updateParticipantCertificate(eventId, participant.id, data.secure_url);
+                                                        if (saved) successCount++;
+                                                    }
+                                                }
+
+                                                // Refresh RSVPs
+                                                const updatedRsvps = await getEventRSVPs(eventId);
+                                                setEventRsvps(updatedRsvps);
+
+                                                setMessage({ type: 'success', text: `Generated ${successCount} certificates successfully!` });
+                                            } catch (error) {
+                                                console.error('Certificate generation error:', error);
+                                                setMessage({ type: 'error', text: 'Failed to generate certificates. Please try again.' });
+                                            } finally {
+                                                setIsGeneratingCertificates(false);
+                                            }
+                                        }}
+                                        disabled={isGeneratingCertificates || eventRsvps.filter(r => r.attendance === 'present').length === 0}
+                                        className="w-full px-6 py-4 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
+                                    >
+                                        {isGeneratingCertificates ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                Generating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Award className="w-5 h-5" />
+                                                Generate Certificates for Present Participants
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Generated Certificates List */}
+                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                                    <h3 className="font-bold text-slate-900 dark:text-white">Generated Certificates ({eventRsvps.filter(r => r.certificateUrl).length})</h3>
+                                </div>
+                                {eventRsvps.filter(r => r.certificateUrl).length === 0 ? (
+                                    <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                                        <Award className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                        <p>No certificates generated yet.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-slate-200 dark:divide-slate-700 max-h-96 overflow-y-auto">
+                                        {eventRsvps.filter(r => r.certificateUrl).map(rsvp => (
+                                            <div key={rsvp.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                <div className="flex items-center gap-3">
+                                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                                    <div>
+                                                        <p className="font-medium text-slate-900 dark:text-white">{rsvp.name}</p>
+                                                        <p className="text-sm text-slate-500">{rsvp.email}</p>
+                                                    </div>
+                                                </div>
+                                                <a
+                                                    href={rsvp.certificateUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors flex items-center gap-1"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    View
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Hidden canvas for certificate generation */}
+                            <canvas ref={canvasRef} style={{ display: 'none' }} />
                         </div>
                     )}
                 </div>

@@ -627,9 +627,13 @@ export const getUserMemberships = async (email: string): Promise<any[]> => {
 };
 
 export const getUserRSVPsByEmail = async (email: string): Promise<EventRSVP[]> => {
-    // RSVPs not currently stored in Post model in this migration.
-    // Returning empty list.
-    return [];
+    try {
+        const response = await api.get('/posts/user/rsvps');
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching user RSVPs:', error);
+        return [];
+    }
 };
 
 
@@ -700,3 +704,40 @@ export const deleteEventParticipant = async (
     }
 };
 
+// ==================== CERTIFICATE FUNCTIONS ====================
+
+// Save certificate template URL and name position settings
+export const saveCertificateTemplate = async (
+    eventId: string,
+    templateUrl: string,
+    namePosition: {
+        x: number;
+        y: number;
+        fontSize: number;
+        fontFamily: string;
+        color: string;
+    }
+): Promise<boolean> => {
+    try {
+        await api.put(`/posts/${eventId}/certificate-template`, { templateUrl, namePosition });
+        return true;
+    } catch (error) {
+        console.error('Error saving certificate template:', error);
+        return false;
+    }
+};
+
+// Update participant's certificate URL after generation
+export const updateParticipantCertificate = async (
+    eventId: string,
+    rsvpId: string,
+    certificateUrl: string
+): Promise<boolean> => {
+    try {
+        await api.patch(`/posts/${eventId}/rsvps/${rsvpId}/certificate`, { certificateUrl });
+        return true;
+    } catch (error) {
+        console.error('Error updating participant certificate:', error);
+        return false;
+    }
+};

@@ -151,6 +151,18 @@ const postSchema = new mongoose.Schema({
         default: null,
     },
 
+    // Certificate generation fields (for events)
+    certificateTemplate: {
+        templateUrl: { type: String, default: null }, // Cloudinary URL of certificate template
+        namePosition: {
+            x: { type: Number, default: 50 }, // X position (percentage)
+            y: { type: Number, default: 50 }, // Y position (percentage)
+            fontSize: { type: Number, default: 48 },
+            fontFamily: { type: String, default: 'Arial' },
+            color: { type: String, default: '#000000' },
+        },
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,

@@ -255,4 +255,90 @@ router.put('/:id/budget/verify', verifyToken, async (req, res) => {
     }
 });
 
+// ==================== CERTIFICATE ROUTES ====================
+
+// Save certificate template configuration (President/Secretary only)
+router.put('/:id/certificate-template', verifyToken, async (req, res) => {
+    try {
+        const userRole = req.user.role;
+        if (!['admin', 'club-secretary', 'president', 'secretary'].includes(userRole)) {
+            return res.status(403).json({ message: 'Only presidents and secretaries can manage certificates' });
+        }
+
+        const { templateUrl, namePosition } = req.body;
+        if (!templateUrl) {
+            return res.status(400).json({ message: 'Template URL is required' });
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.id,
+            {
+                certificateTemplate: {
+                    templateUrl,
+                    namePosition: namePosition || {
+                        x: 50,
+                        y: 50,
+                        fontSize: 48,
+                        fontFamily: 'Arial',
+                        color: '#000000'
+                    }
+                },
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.json(updatedPost);
+    } catch (error) {
+        console.error('Error saving certificate template:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update participant certificate URL (President/Secretary only)
+router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => {
+    try {
+        const userRole = req.user.role;
+        if (!['admin', 'club-secretary', 'president', 'secretary'].includes(userRole)) {
+            return res.status(403).json({ message: 'Only presidents and secretaries can update certificates' });
+        }
+
+        const { certificateUrl } = req.body;
+        if (!certificateUrl) {
+            return res.status(400).json({ message: 'Certificate URL is required' });
+        }
+
+        const rsvp = await EventRSVP.findByIdAndUpdate(
+            req.params.rsvpId,
+            { certificateUrl },
+            { new: true }
+        );
+
+        if (!rsvp) {
+            return res.status(404).json({ message: 'RSVP not found' });
+        }
+
+        res.json(rsvp);
+    } catch (error) {
+        console.error('Error updating certificate:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get user RSVPs by email (for viewing certificates)
+router.get('/user/rsvps', verifyToken, async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+        const rsvps = await EventRSVP.find({ email: userEmail }).sort({ rsvpedAt: -1 });
+        res.json(rsvps);
+    } catch (error) {
+        console.error('Error fetching user RSVPs:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 export default router;
