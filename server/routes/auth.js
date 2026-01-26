@@ -2,36 +2,14 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// Email transporter - created lazily to ensure env vars are loaded
-let transporter = null;
-function getTransporter() {
-    if (!transporter) {
-        console.log('=== EMAIL DEBUG ===');
-        console.log('EMAIL_USER:', process.env.EMAIL_USER);
-        console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : 'MISSING');
-        console.log('==================');
-
-        transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-    }
-    return transporter;
-}
 
 // Signup
 router.post('/signup', async (req, res) => {
@@ -414,36 +392,13 @@ router.post('/forgot-password', async (req, res) => {
         // Create reset URL
         const resetUrl = `${process.env.FRONTEND_URL}?page=resetPassword&token=${resetToken}&email=${encodeURIComponent(email)}`;
 
-        // Send email
-        const mailOptions = {
-            from: `"Club Connect" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Password Reset - Club Connect',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="background: #002147; padding: 20px; text-align: center;">
-                        <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
-                    </div>
-                    <div style="padding: 30px; background: #f9f9f9;">
-                        <h2 style="color: #002147;">Password Reset Request</h2>
-                        <p>Hello ${user.name},</p>
-                        <p>We received a request to reset your password. Click the button below to create a new password:</p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="${resetUrl}" style="background: #DAA520; color: #002147; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                                Reset Password
-                            </a>
-                        </div>
-                        <p style="color: #666; font-size: 14px;">This link will expire in 1 hour.</p>
-                        <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
-                    </div>
-                    <div style="background: #002147; padding: 15px; text-align: center;">
-                        <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
-                    </div>
-                </div>
-            `,
-        };
+        // Send email using Resend
+        const result = await sendPasswordResetEmail(user, resetUrl);
 
-        await getTransporter().sendMail(mailOptions);
+        if (!result.success) {
+            console.error('Failed to send password reset email:', result.error);
+            return res.status(500).json({ message: 'Failed to send reset email. Please try again.' });
+        }
 
         res.json({ message: 'Password reset email sent successfully' });
     } catch (error) {
@@ -492,6 +447,4 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-export { getTransporter };
 export default router;
-

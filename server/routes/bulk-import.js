@@ -4,7 +4,7 @@ import xlsx from 'xlsx';
 import ClubMember from '../models/ClubMember.js';
 import User from '../models/User.js';
 import { verifyToken } from '../middleware/auth.js';
-import { getTransporter } from './auth.js';
+import { sendClubInvitationEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -156,40 +156,21 @@ router.post('/:clubId/members/bulk-import', verifyToken, upload.single('file'), 
                         try {
                             const { default: Club } = await import('../models/Club.js');
                             const club = await Club.findById(clubId);
+                            const signUpUrl = `${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}`;
 
-                            const mailOptions = {
-                                from: `"Club Connect" <${process.env.EMAIL_USER}>`,
-                                to: email,
-                                subject: `You've been added to ${club?.name || 'a club'} - Create Your Account`,
-                                html: `
-                                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                        <div style="background: #002147; padding: 20px; text-align: center;">
-                                            <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
-                                        </div>
-                                        <div style="padding: 30px; background: #f9f9f9;">
-                                            <h2 style="color: #002147;">Welcome to ${club?.name || 'the club'}!</h2>
-                                            <p>Hello ${name},</p>
-                                            <p>You've been added as a <strong>${memberRole}</strong> to ${club?.name || 'a club'} on Club Connect!</p>
-                                            <p>To get started, please create your account:</p>
-                                            <div style="text-align: center; margin: 30px 0;">
-                                                <a href="${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}" 
-                                                   style="background: #DAA520; color: #002147; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                                                    Create Account
-                                                </a>
-                                            </div>
-                                            <p style="color: #666; font-size: 14px;">Your registered email: ${email}</p>
-                                            <p style="color: #666; font-size: 14px;">Club: ${club?.name || 'N/A'}</p>
-                                            <p style="color: #666; font-size: 14px;">Role: ${memberRole}</p>
-                                        </div>
-                                        <div style="background: #002147; padding: 15px; text-align: center;">
-                                            <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
-                                        </div>
-                                    </div>
-                                `,
-                            };
+                            const result = await sendClubInvitationEmail({
+                                name,
+                                email,
+                                role: memberRole,
+                                clubName: club?.name || 'a club',
+                                signUpUrl
+                            });
 
-                            await getTransporter().sendMail(mailOptions);
-                            results.emailsSent++;
+                            if (result.success) {
+                                results.emailsSent++;
+                            } else {
+                                console.error('Failed to send invitation email:', result.error);
+                            }
                         } catch (emailError) {
                             console.error('Error sending invitation email:', emailError);
                             // Don't fail the import if email fails
