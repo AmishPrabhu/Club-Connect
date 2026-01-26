@@ -147,7 +147,7 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
       </div>
 
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-6 items-start z-20 relative mb-10">
+        <div className="flex flex-col md:flex-row gap-6 items-start z-20 relative mb-10">
           <div className="relative flex-1 w-full" ref={dropdownRef}>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input

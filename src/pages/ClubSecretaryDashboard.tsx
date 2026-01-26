@@ -409,7 +409,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
 
 interface ClubSecretaryDashboardProps {
   onNavigate: (page: Page) => void;
-  onNavigateToPost: (postId: string) => void;
+  onNavigateToPost: (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
   user?: User | null;
 }
 
@@ -428,8 +428,23 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setIsModalOpen(true);
     setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('tab') as any) || 'overview';
+  });
+
   const { navigateToManagement, selectedMembership } = useNavigation();
+
+  // Sync tab to URL
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (activeTab === 'overview') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', activeTab);
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, [activeTab]);
 
   // Use selectedMembership.clubId for multi-club support, fallback to user.clubId
   const activeClubId = selectedMembership?.clubId || user?.clubId;
@@ -772,7 +787,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -1187,7 +1202,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                           key={post.id}
                           className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow"
                         >
-                          <div className="flex items-start justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
                                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
@@ -1234,7 +1249,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                               </div>
                             </div>
                             <button
-                              onClick={() => post.id && navigateToManagement(post.id)}
+                              onClick={() => post.id && navigateToManagement(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'events' } })}
                               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
                             >
                               <Settings2 className="w-4 h-4" />
@@ -1410,10 +1425,10 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 <div className="space-y-4">
                   {posts.map((post) => (
                     <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div
                           className="flex-1 cursor-pointer"
-                          onClick={() => post.id && onNavigateToPost(post.id)}
+                          onClick={() => post.id && onNavigateToPost(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'posts' } })}
                         >
                           <div className="flex items-center gap-3 mb-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'

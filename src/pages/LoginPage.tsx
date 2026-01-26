@@ -104,7 +104,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         <div className="p-6 lg:p-8 w-full flex-none z-10">
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary transition-all font-medium text-sm group"
+            className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary dark:hover:text-blue-400 transition-all font-medium text-sm group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Campus Home
@@ -115,7 +115,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           <div className="w-full max-w-md">
             <div className="text-center mb-10">
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
-                <ShieldCheck className="w-8 h-8 text-college-blue-primary" />
+                <ShieldCheck className="w-8 h-8 text-college-blue-primary dark:text-blue-400" />
               </div>
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student & Faculty Login</h2>
               <p className="text-slate-500 dark:text-slate-400">Please sign in to continue to your dashboard</p>
@@ -175,7 +175,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 <button
                   type="button"
                   onClick={() => setIsForgotPasswordOpen(true)}
-                  className="text-sm font-semibold text-college-blue-primary hover:text-college-blue-700 hover:underline transition-all"
+                  className="text-sm font-semibold text-college-blue-primary dark:text-blue-400 hover:text-college-blue-700 dark:hover:text-blue-300 hover:underline transition-all"
                 >
                   Forgot Credentials?
                 </button>

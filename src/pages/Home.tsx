@@ -547,10 +547,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8 h-auto lg:h-[500px]">
+          <div className="flex flex-col md:flex-row gap-6 lg:gap-8 h-auto md:h-[500px]">
             {/* Left: MiniCalendar - Styled */}
-            <div className="w-full lg:w-auto flex-none">
-              <div className="w-full lg:w-[350px] h-full bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-6">
+            <div className="w-full md:w-auto flex-none">
+              <div className="w-full md:w-[320px] lg:w-[350px] h-full bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-6 text-sm">
                 <MiniCalendar
                   events={posts}
                   selectedDate={selectedDate}

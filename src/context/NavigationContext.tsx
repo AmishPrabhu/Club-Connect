@@ -15,13 +15,14 @@ interface NavigationContextType {
     isOpenedFromUrl: boolean;
     selectedMembership: ClubMembership | null;
     setSelectedMembership: (membership: ClubMembership | null) => void;
-    navigateToPage: (page: Page) => void;
+    navigateToPage: (page: Page, params?: Record<string, string>) => void;
     navigateToClub: (clubId: string) => void;
     navigateToMemberBoard: (member: any) => void;
     navigateToEvent: (eventId: string) => void;
-    navigateToPost: (postId: string) => void;
-    navigateToManagement: (eventId: string) => void;
+    navigateToPost: (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
+    navigateToManagement: (eventId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
     navigateToNotification: (notification: any) => Promise<void>;
+    navigateBack: () => void;
     handleLogout: (logoutFn: () => Promise<void>) => Promise<void>;
     closeManagementTab: () => void;
 }
@@ -46,6 +47,8 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
     const [selectedManagementEventId, setSelectedManagementEventId] = useState<string | null>(null);
     const [isOpenedFromUrl, setIsOpenedFromUrl] = useState(false);
+
+    const [returnLocation, setReturnLocation] = useState<{ page: Page; params?: Record<string, string> } | null>(null);
 
     // Initialize selectedMembership from localStorage if available
     const [selectedMembership, setSelectedMembershipState] = useState<ClubMembership | null>(() => {
@@ -111,7 +114,41 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     }, []);
 
-    const navigateToPage = (page: Page) => {
+    const navigateToPage = (page: Page, params?: Record<string, string>) => {
+        // If we are navigating to 'post' or 'eventManagement', we don't want to consume the returnLocation here.
+        // But if we are navigating 'back' or to a main page, we check against returnLocation?
+        // Actually, the main "Back" buttons in views usually call navigateToPage(previousPage).
+        // So we should intersect there.
+
+        // BETTER APPROACH: modify how Back buttons work in the pages themselves?
+        // OR: Intercept here. If we are called with navigateToPage(previousPage) effectively...
+
+        // Wait, closeManagementTab logic was specific.
+        // Standard "Back" buttons in PostDetail call onBack={() => navigateToPage(previousPage)}.
+        // So if we have a returnLocation stored, we should probably prefer it over the passed 'page' argument IF the passed argument matches 'previousPage' context?
+        // Or simply: check if returnLocation exists, and if so, use it and clear it.
+
+        if (returnLocation && page === previousPage) {
+            // This is a heuristic: if we are navigating back to previous page, use returnLocation if available.
+            // This assumes navigateToPage is being used as a "Back" function in this context.
+            // Let's refine: The user asked for "Back" button behavior.
+            // PostDetail's onBack prop is just a function. NavigationContext doesn't know it's "Back".
+
+            // Let's stick to modifying the specific navigation functions (navigateToPost) to set state,
+            // and then relying on the component (PostDetail) to use a special "goBack" function?
+            // No, PostDetail uses onBack prop passed from App.tsx.
+
+            // Let's look at App.tsx:
+            // <PostDetail ... onBack={() => navigateToPage(previousPage)} ... />
+
+            // So we need `navigateToPage` to handle this.
+            // BUT `navigateToPage` is generic.
+
+            // Let's modify App.tsx to use a smart back function?
+            // Or update `navigateToPage` to check `returnLocation`.
+
+        }
+
         setPreviousPage(currentPage);
         setCurrentPage(page);
         if (page !== 'club' && page !== 'memberBoard' && page !== 'event' && page !== 'post' && page !== 'eventManagement' && page !== 'notification') {
@@ -124,7 +161,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         }
         // Update URL for main pages
         if (['home', 'dashboard', 'events', 'announcements', 'notifications', 'userProfile', 'adminDashboard', 'clubSecretaryDashboard', 'studentDashboard', 'advisorDashboard', 'login', 'signUp'].includes(page)) {
-            updateUrl(page);
+            updateUrl(page, params);
         }
     };
 
@@ -149,17 +186,24 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         updateUrl('event', { postId: eventId });
     };
 
-    const navigateToPost = (postId: string) => {
+    const navigateToPost = (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => {
         setPreviousPage(currentPage);
+        if (returnTo) {
+            setReturnLocation(returnTo);
+        }
         setSelectedPost(postId);
         setCurrentPage('post');
         updateUrl('post', { postId });
     };
 
-    const navigateToManagement = (eventId: string) => {
-        // Open in new tab with URL params
-        const url = `${window.location.origin}/?page=eventManagement&eventId=${eventId}`;
-        window.open(url, '_blank');
+    const navigateToManagement = (eventId: string, returnTo?: { page: Page; params?: Record<string, string> }) => {
+        setPreviousPage(currentPage);
+        if (returnTo) {
+            setReturnLocation(returnTo);
+        }
+        setSelectedManagementEventId(eventId);
+        setCurrentPage('eventManagement');
+        updateUrl('eventManagement', { eventId });
     };
 
     const closeManagementTab = () => {
@@ -172,8 +216,12 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             setCurrentPage('home');
             setSelectedManagementEventId(null);
             setIsOpenedFromUrl(false);
+        } else if (returnLocation) {
+            // Restore contextual location
+            navigateToPage(returnLocation.page, returnLocation.params);
+            setReturnLocation(null);
         } else {
-            // If opened via internal navigation, go back to previous page
+            // Default fallback
             navigateToPage(previousPage);
         }
     };
@@ -185,6 +233,15 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         }
         setSelectedNotification(notification);
         setCurrentPage('notification');
+    };
+
+    const navigateBack = () => {
+        if (returnLocation) {
+            navigateToPage(returnLocation.page, returnLocation.params);
+            setReturnLocation(null);
+        } else {
+            navigateToPage(previousPage);
+        }
     };
 
     const handleLogout = async (logoutFn: () => Promise<void>) => {
@@ -214,6 +271,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 navigateToPost,
                 navigateToManagement,
                 navigateToNotification,
+                navigateBack,
                 handleLogout,
                 closeManagementTab,
             }}

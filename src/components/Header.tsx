@@ -91,7 +91,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
         </div>
 
         {/* Navigation - Desktop */}
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden xl:flex items-center gap-1">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -111,7 +111,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
           {/* Tour Button - Subtle (Desktop Only) */}
           <button
             onClick={startTour}
-            className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-200 hover:text-white hover:bg-blue-500/20 text-xs font-semibold transition-all"
+            className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-200 hover:text-white hover:bg-blue-500/20 text-xs font-semibold transition-all"
           >
             <PlayCircle className="w-3.5 h-3.5" />
             <span>Tour</span>

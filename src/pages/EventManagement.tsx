@@ -296,25 +296,25 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 px-4 md:py-12 md:px-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
-                    <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+                    <div className="flex items-start md:items-center gap-3 md:gap-4">
                         {onBack && (
-                            <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white">
-                                <ArrowLeft className="w-6 h-6" />
+                            <button onClick={onBack} className="mt-1 md:mt-0 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white flex-shrink-0">
+                                <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
                             </button>
                         )}
-                        <div>
-                            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">Event Management</h1>
-                            <p className="text-slate-600 dark:text-slate-400 font-medium">{post.title}</p>
+                        <div className="min-w-0">
+                            <h1 className="text-xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white leading-tight truncate">Event Management</h1>
+                            <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium truncate">{post.title}</p>
                         </div>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-6 py-3 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-xl font-bold transition-all shadow-md uppercase tracking-wide"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-xl font-bold transition-all shadow-md uppercase tracking-wide text-sm md:text-base"
                     >
                         {isSaving ? (
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -350,65 +350,65 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                             <>
                                 <button
                                     onClick={() => setActiveTab('details')}
-                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'details'
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'details'
                                         ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <AlignLeft className={`w-5 h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
+                                    <AlignLeft className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
                                     Details
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('roles')}
-                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'roles'
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'roles'
                                         ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Users className={`w-5 h-5 ${activeTab === 'roles' ? 'text-[#DAA520]' : ''}`} />
+                                    <Users className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'roles' ? 'text-[#DAA520]' : ''}`} />
                                     Roles & Tasks
                                     {tasks.length > 0 && (
-                                        <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 text-xs rounded-full font-bold">
+                                        <span className="ml-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 text-[10px] md:text-xs rounded-full font-bold">
                                             {tasks.length}
                                         </span>
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('participants')}
-                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'participants'
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'participants'
                                         ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Users className={`w-5 h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
+                                    <Users className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
                                     Participants
                                     {(post?.rsvps || 0) > 0 && (
-                                        <span className="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full font-bold">
+                                        <span className="ml-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[10px] md:text-xs rounded-full font-bold">
                                             {post?.rsvps || 0}
                                         </span>
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('budget')}
-                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'budget'
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'budget'
                                         ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
+                                    <Save className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
                                     Budget
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('certificates')}
-                                    className={`flex items-center gap-2 px-6 py-4 font-bold transition-all ${activeTab === 'certificates'
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'certificates'
                                         ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Award className={`w-5 h-5 ${activeTab === 'certificates' ? 'text-[#DAA520]' : ''}`} />
+                                    <Award className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'certificates' ? 'text-[#DAA520]' : ''}`} />
                                     Certificates
                                     {eventRsvps.filter(r => r.certificateUrl).length > 0 && (
-                                        <span className="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-bold">
+                                        <span className="ml-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] md:text-xs rounded-full font-bold">
                                             {eventRsvps.filter(r => r.certificateUrl).length}
                                         </span>
                                     )}
@@ -711,26 +711,26 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     {activeTab === 'participants' && (
                         <div className="space-y-6">
                             {/* Stats */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
-                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Total Registered</p>
-                                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 md:p-4">
+                                    <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 font-medium">Total Registered</p>
+                                    <p className="text-xl md:text-2xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
                                 </div>
-                                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
-                                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">Present</p>
-                                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 md:p-4">
+                                    <p className="text-xs md:text-sm text-green-600 dark:text-green-400 font-medium">Present</p>
+                                    <p className="text-xl md:text-2xl font-bold text-green-700 dark:text-green-300">
                                         {eventRsvps.filter(r => r.attendance === 'present').length}
                                     </p>
                                 </div>
-                                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4">
-                                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">Absent</p>
-                                    <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 md:p-4">
+                                    <p className="text-xs md:text-sm text-red-600 dark:text-red-400 font-medium">Absent</p>
+                                    <p className="text-xl md:text-2xl font-bold text-red-700 dark:text-red-300">
                                         {eventRsvps.filter(r => r.attendance === 'absent').length}
                                     </p>
                                 </div>
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Pending</p>
-                                    <p className="text-2xl font-bold text-slate-700 dark:text-slate-300">
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 md:p-4">
+                                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-medium">Pending</p>
+                                    <p className="text-xl md:text-2xl font-bold text-slate-700 dark:text-slate-300">
                                         {eventRsvps.filter(r => !r.attendance || r.attendance === 'pending').length}
                                     </p>
                                 </div>

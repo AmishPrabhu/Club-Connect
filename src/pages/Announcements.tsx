@@ -213,7 +213,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onNavigateToPost(post.relatedEventId!);
+                                                        onNavigateToPost(post.relatedEventId!, { page: 'announcements' });
                                                     }}
                                                     className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-[#002147] hover:bg-[#00152e] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] border border-[#00152e]"
                                                 >

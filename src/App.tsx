@@ -43,6 +43,7 @@ function AppContent() {
     navigateToPost,
     navigateToManagement,
     navigateToNotification,
+    navigateBack,
     handleLogout,
     closeManagementTab
   } = useNavigation();
@@ -83,10 +84,10 @@ function AppContent() {
         />
       )}
       {currentPage === 'event' && selectedEvent && (
-        <PostDetail postId={selectedEvent} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+        <PostDetail postId={selectedEvent} onBack={navigateBack} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'post' && selectedPost && (
-        <PostDetail postId={selectedPost} onBack={() => navigateToPage(previousPage)} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+        <PostDetail postId={selectedPost} onBack={navigateBack} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'events' && (
         <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />

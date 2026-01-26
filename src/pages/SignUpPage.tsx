@@ -167,7 +167,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                 <div className="p-6 lg:p-8 w-full flex-none z-10 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                     <button
                         onClick={() => onNavigate('home')}
-                        className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary transition-all font-medium text-sm group"
+                        className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary dark:hover:text-blue-400 transition-all font-medium text-sm group"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         Back
@@ -343,7 +343,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                             Already have an account?{' '}
                             <button
                                 onClick={() => onNavigate('login')}
-                                className="text-college-blue-primary font-bold hover:underline"
+                                className="text-college-blue-primary dark:text-blue-400 font-bold hover:underline"
                             >
                                 Sign In
                             </button>

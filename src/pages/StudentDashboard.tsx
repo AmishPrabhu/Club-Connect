@@ -7,7 +7,7 @@ import { DBPost, EventRSVP } from '../types/auth';
 
 interface StudentDashboardProps {
     onNavigate: (page: Page) => void;
-    onNavigateToPost: (postId: string) => void;
+    onNavigateToPost: (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
 }
 
 interface UserEvent {
@@ -19,7 +19,22 @@ interface UserEvent {
 
 export default function StudentDashboard({ onNavigate, onNavigateToPost }: StudentDashboardProps) {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>(() => {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get('tab') as any) || 'upcoming';
+    });
+
+    // Sync tab to URL
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        if (activeTab === 'upcoming') {
+            url.searchParams.delete('tab');
+        } else {
+            url.searchParams.set('tab', activeTab);
+        }
+        window.history.replaceState({}, '', url.toString());
+    }, [activeTab]);
+
     const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -250,7 +265,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                             </a>
                                         )}
                                         <button
-                                            onClick={() => event.id && onNavigateToPost(event.id)}
+                                            onClick={() => event.id && onNavigateToPost(event.id, { page: 'studentDashboard', params: { tab: activeTab } })}
                                             className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                                         >
                                             View Details

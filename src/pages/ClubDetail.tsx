@@ -23,11 +23,26 @@ interface ClubDetailProps {
   clubId: string;
   onBack: () => void;
   onNavigateToMember: (member: any) => void;
-  onNavigateToPost: (postId: string) => void;
+  onNavigateToPost: (postId: string, returnTo?: { page: import('../types/page').Page; params?: Record<string, string> }) => void;
 }
 //...
 export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavigateToPost }: ClubDetailProps) {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('tab') as any) || 'upcoming';
+  });
+
+  // Sync tab to URL
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (activeTab === 'upcoming') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', activeTab);
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, [activeTab]);
+
   const [selectedYear, setSelectedYear] = useState<string>('All');
   const [rsvpModal, setRsvpModal] = useState<{ isOpen: boolean; event: DisplayEvent | null }>({
     isOpen: false,
@@ -250,9 +265,9 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
-        {/* Left Side - 70% */}
-        <div className="lg:col-span-5 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-8">
+        {/* Left Side - 70% desktop, 66% tablet */}
+        <div className="md:col-span-2 lg:col-span-5 space-y-8">
           {/* Club Info */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 md:p-8 border-l-4 border-[#002147]">
             <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">About the Club</h3>
@@ -405,7 +420,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                           } z-10 box-content`} />
 
                         <div
-                          onClick={() => onNavigateToPost(event.id)}
+                          onClick={() => onNavigateToPost(event.id, { page: 'club', params: { clubId, tab: activeTab } })}
                           className="group bg-slate-50 dark:bg-slate-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
                         >
                           <div className="flex flex-col md:flex-row md:h-32">
