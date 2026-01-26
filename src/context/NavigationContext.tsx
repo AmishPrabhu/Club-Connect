@@ -67,19 +67,47 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     };
 
+    // Helper to update URL without reload
+    const updateUrl = (page: Page, params?: Record<string, string>) => {
+        const url = new URL(window.location.href);
+        url.search = ''; // Clear existing params
+        url.searchParams.set('page', page);
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value) url.searchParams.set(key, value);
+            });
+        }
+        window.history.replaceState({}, '', url.toString());
+    };
+
+    // Initialize from URL on mount
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const pageParam = params.get('page');
+        const pageParam = params.get('page') as Page | null;
         const eventIdParam = params.get('eventId');
+        const clubIdParam = params.get('clubId');
+        const postIdParam = params.get('postId');
 
         if (pageParam === 'eventManagement' && eventIdParam) {
             setSelectedManagementEventId(eventIdParam);
             setCurrentPage('eventManagement');
             setIsOpenedFromUrl(true);
         } else if (pageParam === 'resetPassword') {
-            // Handle password reset page from email link
             setCurrentPage('resetPassword');
             setIsOpenedFromUrl(true);
+        } else if (pageParam === 'signUp') {
+            setCurrentPage('signUp');
+        } else if (pageParam === 'club' && clubIdParam) {
+            setSelectedClub(clubIdParam);
+            setCurrentPage('club');
+        } else if (pageParam === 'post' && postIdParam) {
+            setSelectedPost(postIdParam);
+            setCurrentPage('post');
+        } else if (pageParam === 'event' && postIdParam) {
+            setSelectedEvent(postIdParam);
+            setCurrentPage('event');
+        } else if (pageParam && ['home', 'dashboard', 'events', 'announcements', 'notifications', 'userProfile', 'adminDashboard', 'clubSecretaryDashboard', 'studentDashboard', 'advisorDashboard', 'login'].includes(pageParam)) {
+            setCurrentPage(pageParam);
         }
     }, []);
 
@@ -94,30 +122,38 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             setSelectedNotification(null);
             setSelectedManagementEventId(null);
         }
+        // Update URL for main pages
+        if (['home', 'dashboard', 'events', 'announcements', 'notifications', 'userProfile', 'adminDashboard', 'clubSecretaryDashboard', 'studentDashboard', 'advisorDashboard', 'login', 'signUp'].includes(page)) {
+            updateUrl(page);
+        }
     };
 
     const navigateToClub = (clubId: string) => {
         setPreviousPage(currentPage);
         setSelectedClub(clubId);
         setCurrentPage('club');
+        updateUrl('club', { clubId });
     };
 
     const navigateToMemberBoard = (member: any) => {
         setPreviousPage(currentPage);
         setSelectedMember(member);
         setCurrentPage('memberBoard');
+        // MemberBoard doesn't persist to URL (complex object)
     };
 
     const navigateToEvent = (eventId: string) => {
         setPreviousPage(currentPage);
         setSelectedEvent(eventId);
         setCurrentPage('event');
+        updateUrl('event', { postId: eventId });
     };
 
     const navigateToPost = (postId: string) => {
         setPreviousPage(currentPage);
         setSelectedPost(postId);
         setCurrentPage('post');
+        updateUrl('post', { postId });
     };
 
     const navigateToManagement = (eventId: string) => {
