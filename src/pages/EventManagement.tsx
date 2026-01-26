@@ -831,7 +831,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                         csvUrl = sheetUrl.replace(/\/edit.*$/, '/export?format=csv');
                                                     }
 
-                                                    console.log('Fetching CSV from:', csvUrl);
+
 
                                                     // Use CORS proxy to bypass browser restrictions
                                                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
@@ -840,7 +840,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     if (!response.ok) throw new Error('Failed to fetch sheet. Make sure the sheet is shared as "Anyone with the link can view".');
 
                                                     const csvText = await response.text();
-                                                    console.log('CSV data received, first 200 chars:', csvText.substring(0, 200));
+
                                                     const lines = csvText.split('\n').filter(line => line.trim());
 
                                                     if (lines.length < 2) {

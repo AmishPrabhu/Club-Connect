@@ -409,7 +409,6 @@ export const updatePost = async (postId: string, postData: Partial<DBPost>): Pro
         await api.put(`/posts/${postId}`, postData);
         return true;
     } catch (error) {
-        console.error('Error updating post:', error);
         return false;
     }
 };
@@ -431,7 +430,6 @@ export const verifyEventBudget = async (eventId: string): Promise<boolean> => {
         await api.put(`/posts/${eventId}/budget/verify`);
         return true;
     } catch (error) {
-        console.error('Error verifying event budget:', error);
         return false;
     }
 };

@@ -163,16 +163,16 @@ router.post('/:id/members', verifyToken, async (req, res) => {
         }
 
         // Send invitation email if user doesn't exist (fire-and-forget, don't block API response)
-        console.log('📧 Email check - existingUser:', existingUser ? 'EXISTS (email skipped)' : 'NOT FOUND (will send email)');
+
 
         if (!existingUser) {
-            console.log('📧 Starting email send process for:', email);
+
             // Fire-and-forget: don't await, let it run in background
             (async () => {
                 try {
                     const club = await Club.findById(clubId);
                     const signUpUrl = `${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}`;
-                    console.log('📧 Calling sendClubInvitationEmail...');
+
 
                     const result = await sendClubInvitationEmail({
                         name,
@@ -183,7 +183,7 @@ router.post('/:id/members', verifyToken, async (req, res) => {
                     });
 
                     if (result.success) {
-                        console.log(`✅ Invitation email sent to ${email}`);
+                        // Email sent
                     } else {
                         console.error('❌ Failed to send invitation email:', result.error);
                     }
@@ -192,7 +192,7 @@ router.post('/:id/members', verifyToken, async (req, res) => {
                 }
             })();
         } else {
-            console.log('📧 Skipping email - user already exists in system');
+            // User already exists
         }
 
         // Update member count in Club

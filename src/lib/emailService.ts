@@ -72,7 +72,7 @@ export const sendTaskAssignmentEmail = async (data: TaskEmailData): Promise<bool
             EMAILJS_PUBLIC_KEY
         );
 
-        console.log(`Email sent successfully to ${data.recipientEmail}`);
+        // console.log(`Email sent successfully to ${data.recipientEmail}`);
         return true;
     } catch (error) {
         console.error('Failed to send email:', error);
@@ -163,7 +163,7 @@ export const sendEventUpdateEmail = async (
             EMAILJS_PUBLIC_KEY
         );
 
-        console.log(`Event update email sent to ${recipientEmail}`);
+        // console.log(`Event update email sent to ${recipientEmail}`);
         return true;
     } catch (error) {
         console.error('Failed to send event update email:', error);
@@ -196,5 +196,5 @@ export const sendEventUpdateEmails = async (
     );
 
     await Promise.allSettled(promises);
-    console.log(`Sent ${attendees.length} event update emails`);
+    // console.log(`Sent ${attendees.length} event update emails`);
 };

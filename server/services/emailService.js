@@ -29,7 +29,7 @@ export async function sendEmail({ to, subject, html }) {
             return { success: false, error: 'Email service not configured' };
         }
 
-        console.log('📧 Sending email via Brevo to:', to);
+
 
         const sendSmtpEmail = new Brevo.SendSmtpEmail();
         sendSmtpEmail.subject = subject;
@@ -41,7 +41,7 @@ export async function sendEmail({ to, subject, html }) {
         sendSmtpEmail.to = [{ email: to }];
 
         const result = await client.sendTransacEmail(sendSmtpEmail);
-        console.log('✅ Email sent successfully:', result?.body?.messageId || 'sent');
+
         return { success: true, messageId: result?.body?.messageId };
     } catch (err) {
         console.error('❌ Email send failed:', err.message || err);

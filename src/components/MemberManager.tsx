@@ -59,15 +59,15 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         fetchMembers();
     }, [clubId]);
 
-    const fetchMembers = async () => {
-        setIsLoading(true);
+    const fetchMembers = async (silent = false) => {
+        if (!silent) setIsLoading(true);
         try {
             const membersList = await getClubMembers(clubId);
             setMembers(membersList);
         } catch (error) {
             console.error('Error fetching members:', error);
         } finally {
-            setIsLoading(false);
+            if (!silent) setIsLoading(false);
         }
     };
 
@@ -77,47 +77,86 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             return;
         }
 
-        const result = await addClubMember(clubId, {
+        // Optimistic update
+        const tempId = 'temp-' + Date.now();
+        const optimisticMember: ClubMember = {
+            id: tempId,
             ...newMember,
             role: newMember.boardType === 'member' ? 'Member' : newMember.role,
             joinedAt: new Date(newMember.joinedAt)
-        });
-        if (result.success) {
-            setFormMessage({ type: 'success', text: 'Member added successfully!' });
-            setNewMember({ name: '', email: '', role: 'Member', boardType: 'member', academicYear: '', joinedAt: new Date().getFullYear().toString() });
-            await fetchMembers();
-            setTimeout(() => {
-                setIsAddModalOpen(false);
-                setFormMessage(null);
-            }, 1000);
-        } else {
-            setFormMessage({ type: 'error', text: result.error || 'Failed to add member' });
+        };
+
+        setMembers(prev => [...prev, optimisticMember]);
+        setIsAddModalOpen(false);
+        setFormMessage(null);
+
+        // Reset form immediately
+        const resetForm = { name: '', email: '', role: 'Member', boardType: 'member' as const, academicYear: '', joinedAt: new Date().getFullYear().toString() };
+        setNewMember(resetForm);
+
+        try {
+            const result = await addClubMember(clubId, {
+                ...newMember,
+                role: newMember.boardType === 'member' ? 'Member' : newMember.role,
+                joinedAt: new Date(newMember.joinedAt)
+            });
+
+            if (result.success && result.memberId) {
+                // Silently update the ID
+                setMembers(prev => prev.map(m => m.id === tempId ? { ...m, id: result.memberId } : m));
+            } else {
+                throw new Error(result.error || 'Failed to add member');
+            }
+        } catch (error: any) {
+            // Revert changes
+            setMembers(prev => prev.filter(m => m.id !== tempId));
+            alert(`Failed to add member: ${error.message || 'Unknown error'}`);
+            // Optionally restore form state here if needed, but for now alert is sufficient backup
         }
     };
 
     const handleUpdateMember = async () => {
         if (!editingMember) return;
 
+        const originalMember = members.find(m => m.id === editingMember.id);
+
+        // Optimistic update
+        setMembers(prev => prev.map(m => m.id === editingMember.id ? editingMember : m));
+        setEditingMember(null);
+
         const success = await updateClubMember(clubId, editingMember.id!, {
             name: editingMember.name,
             email: editingMember.email,
             role: editingMember.role,
             academicYear: editingMember.academicYear,
-            joinedAt: editingMember.joinedAt
+            joinedAt: editingMember.joinedAt,
+            boardType: editingMember.boardType
         });
 
-        if (success) {
-            await fetchMembers();
-            setEditingMember(null);
+        if (!success) {
+            // Revert
+            if (originalMember) {
+                setMembers(prev => prev.map(m => m.id === editingMember.id ? originalMember : m));
+            }
+            alert('Failed to update member');
         }
     };
 
     const handleRemoveMember = async (memberId: string) => {
         if (!confirm('Are you sure you want to remove this member?')) return;
 
+        const memberToRemove = members.find(m => m.id === memberId);
+
+        // Optimistic update
+        setMembers(prev => prev.filter(m => m.id !== memberId));
+
         const success = await removeClubMember(clubId, memberId);
-        if (success) {
-            await fetchMembers();
+        if (!success) {
+            // Revert
+            if (memberToRemove) {
+                setMembers(prev => [...prev, memberToRemove]);
+            }
+            alert('Failed to remove member');
         }
     };
 
@@ -572,7 +611,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                 clubName={clubName}
                 onSuccess={() => {
                     setIsBulkImportOpen(false);
-                    fetchMembers();
+                    fetchMembers(false);
                 }}
             />
         </div>
