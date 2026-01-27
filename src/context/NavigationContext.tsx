@@ -80,11 +80,11 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
                 if (value) url.searchParams.set(key, value);
             });
         }
-        window.history.replaceState({}, '', url.toString());
+        // Use pushState to add to history stack, allowing browser back button to work
+        window.history.pushState({}, '', url.toString());
     };
 
-    // Initialize from URL on mount
-    useEffect(() => {
+    const handleUrlChange = () => {
         const params = new URLSearchParams(window.location.search);
         const pageParam = params.get('page') as Page | null;
         const eventIdParam = params.get('eventId');
@@ -94,10 +94,9 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         if (pageParam === 'eventManagement' && eventIdParam) {
             setSelectedManagementEventId(eventIdParam);
             setCurrentPage('eventManagement');
-            setIsOpenedFromUrl(true);
+            // Only set isOpenedFromUrl on initial load, not on popstate
         } else if (pageParam === 'resetPassword') {
             setCurrentPage('resetPassword');
-            setIsOpenedFromUrl(true);
         } else if (pageParam === 'signUp') {
             setCurrentPage('signUp');
         } else if (pageParam === 'club' && clubIdParam) {
@@ -111,7 +110,29 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             setCurrentPage('event');
         } else if (pageParam && ['home', 'dashboard', 'events', 'announcements', 'notifications', 'userProfile', 'adminDashboard', 'clubSecretaryDashboard', 'studentDashboard', 'advisorDashboard', 'login'].includes(pageParam)) {
             setCurrentPage(pageParam);
+        } else {
+            // Default to home if no page param (e.g. root url)
+            setCurrentPage('home');
         }
+    };
+
+    // Initialize from URL on mount and listen for popstate (browser back/forward)
+    useEffect(() => {
+        // Handle initial load
+        handleUrlChange();
+
+        // Check for opening context on initial load only
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('page') === 'eventManagement' || params.get('page') === 'resetPassword') {
+            setIsOpenedFromUrl(true);
+        }
+
+        // Add listener for browser navigation
+        window.addEventListener('popstate', handleUrlChange);
+
+        return () => {
+            window.removeEventListener('popstate', handleUrlChange);
+        };
     }, []);
 
     const navigateToPage = (page: Page, params?: Record<string, string>) => {
