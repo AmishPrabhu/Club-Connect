@@ -7,6 +7,24 @@ const router = express.Router();
 
 import EventRSVP from '../models/EventRSVP.js';
 
+// Get user RSVPs by email (for viewing registered events and certificates)
+// Moved to top to avoid shadowing by /:id/rsvps
+router.get('/user/rsvps', verifyToken, async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+
+        // Fetch all RSVPs matching user email (including self-registered 'rsvp' source)
+        const rsvps = await EventRSVP.find({
+            email: { $regex: new RegExp(`^${userEmail}$`, 'i') }
+        }).sort({ rsvpedAt: -1 });
+
+        res.json(rsvps);
+    } catch (error) {
+        console.error('Error fetching user RSVPs:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // GET all posts
 router.get('/', async (req, res) => {
     try {
@@ -331,27 +349,6 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
     }
 });
 
-// Get user RSVPs by email (for viewing registered events and certificates)
-router.get('/user/rsvps', verifyToken, async (req, res) => {
-    try {
-        const userEmail = req.user.email;
 
-        // Only show events where user was imported/manually added (registered participants)
-        // Self-RSVPs (source: 'rsvp') are not shown - only actual registrations
-        const rsvps = await EventRSVP.find({
-            email: { $regex: new RegExp(`^${userEmail}$`, 'i') },
-            $or: [
-                { source: { $in: ['import', 'manual'] } },
-                { source: { $exists: false } },
-                { source: null }
-            ]
-        }).sort({ rsvpedAt: -1 });
-
-        res.json(rsvps);
-    } catch (error) {
-        console.error('Error fetching user RSVPs:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
 
 export default router;

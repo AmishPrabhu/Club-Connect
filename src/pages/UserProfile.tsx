@@ -141,7 +141,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
           if (event) {
             events.push({
               event,
-              rsvpDate: rsvp.rsvpedAt,
+              rsvpDate: new Date(rsvp.rsvpedAt),
             });
           }
         }
@@ -248,6 +248,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
         <ArrowLeft className="w-5 h-5" />
         <span className="font-semibold">Back to Home</span>
       </button>
+
+
 
       {/* Message */}
       {message && (
