@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle, Award, Upload, Download } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { DBPost, User, ClubMember, EventTask, EventRSVP, CertificateNamePosition } from '../types/auth';
 import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs, saveCertificateTemplate, updateParticipantCertificate } from '../lib/dbService';
 import { useAuth } from '../context/AuthContext';
+
+const DEFAULT_CERTIFICATE_TEMPLATE = "https://res.cloudinary.com/drv3fdbve/image/upload/v1769153545/club-connect/certificates/696800e5b85566e533cbbbb3/mm8ktzaeontqyossmepi.png";
 
 interface EventManagementProps {
     eventId: string;
@@ -11,27 +13,54 @@ interface EventManagementProps {
     user?: User | null; // Keep for backward compatibility but prefer useAuth
 }
 
+
+
 export default function EventManagement({ eventId, onBack, user: propUser }: EventManagementProps) {
     // Get user from auth context (more reliable, especially in new tabs)
     const { user: authUser, isLoading: authLoading } = useAuth();
     const user = authUser || propUser; // Prefer context user, fallback to prop
+    // Use manual URL parsing since we might not be inside a Router context that supports useSearchParams
+    const getQueryParam = (param: string) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        return searchParams.get(param);
+    };
+
+    const updateQueryParam = (key: string, value: string) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set(key, value);
+        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+    };
+
     const [post, setPost] = useState<DBPost | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'roles' | 'participants' | 'budget' | 'certificates'>('details');
+
+    // Initialize active tab from URL or default to 'details'
+    const validTabs = ['details', 'roles', 'participants', 'budget', 'certificates'];
+    // Lazy initialization for state
+    const [activeTab, setActiveTabState] = useState<'details' | 'roles' | 'participants' | 'budget' | 'certificates'>(() => {
+        const tabParam = getQueryParam('tab');
+        return (tabParam && validTabs.includes(tabParam)) ? (tabParam as any) : 'details';
+    });
+
+    const setActiveTab = (tab: 'details' | 'roles' | 'participants' | 'budget' | 'certificates') => {
+        setActiveTabState(tab);
+        updateQueryParam('tab', tab);
+    };
     const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
     const [eventRsvps, setEventRsvps] = useState<EventRSVP[]>([]);
     const [isImporting, setIsImporting] = useState(false);
 
     // Certificate-related state
-    const [certificateTemplateUrl, setCertificateTemplateUrl] = useState<string | null>(null);
+    const [certificateTemplateUrl, setCertificateTemplateUrl] = useState<string | null>(DEFAULT_CERTIFICATE_TEMPLATE);
     const [namePosition, setNamePosition] = useState<CertificateNamePosition>({
         x: 50, y: 50, fontSize: 48, fontFamily: 'Arial', color: '#000000'
     });
     const [isGeneratingCertificates, setIsGeneratingCertificates] = useState(false);
     const [certificateProgress, setCertificateProgress] = useState({ current: 0, total: 0 });
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+
     // User's role in this specific club (for multi-club members)
     const [userClubRole, setUserClubRole] = useState<string | null>(null);
 
@@ -1389,9 +1418,14 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                     <button
                                         onClick={async () => {
-                                            const presentParticipants = eventRsvps.filter(r => r.attendance === 'present' && !r.certificateUrl);
+                                            // Process ALL present participants (to update them if settings changed), 
+                                            // or just those without certificates if that's preferred? 
+                                            // The user requested "it shud change in certificate accordingly", implying updates.
+                                            // So we re-generate for ALL present participants.
+                                            const presentParticipants = eventRsvps.filter(r => r.attendance === 'present');
+
                                             if (presentParticipants.length === 0) {
-                                                setMessage({ type: 'error', text: 'No participants need certificates. Either none are marked present or all already have certificates.' });
+                                                setMessage({ type: 'error', text: 'No participants marked as present.' });
                                                 return;
                                             }
 
@@ -1399,14 +1433,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             setCertificateProgress({ current: 0, total: presentParticipants.length });
 
                                             try {
-                                                // Create canvas for certificate generation
-                                                const canvas = document.createElement('canvas');
-                                                const ctx = canvas.getContext('2d');
-                                                if (!ctx) {
-                                                    throw new Error('Could not get canvas context');
-                                                }
-
-                                                // Load template image
+                                                // Load template image to get dimensions for precise positioning
                                                 const templateImg = new Image();
                                                 templateImg.crossOrigin = 'anonymous';
                                                 await new Promise<void>((resolve, reject) => {
@@ -1415,46 +1442,63 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     templateImg.src = certificateTemplateUrl;
                                                 });
 
-                                                canvas.width = templateImg.width;
-                                                canvas.height = templateImg.height;
+                                                const imgWidth = templateImg.width;
+                                                const imgHeight = templateImg.height;
 
                                                 let successCount = 0;
                                                 for (let i = 0; i < presentParticipants.length; i++) {
                                                     const participant = presentParticipants[i];
                                                     setCertificateProgress({ current: i + 1, total: presentParticipants.length });
 
-                                                    // Draw template
-                                                    ctx.drawImage(templateImg, 0, 0);
+                                                    // Calculate precise pixel coordinates relative to the IMAGE CENTER
+                                                    // The UI uses center-based positioning (translate(-50%, -50%)), so (50%, 50%) is dead center.
+                                                    // Cloudinary g_center places the text center at the image center.
+                                                    // x argument is offset from center (positive = right, negative = left).
+                                                    // y argument is offset from center (positive = down, negative = up).
 
-                                                    // Add name
-                                                    ctx.font = `${namePosition.fontSize}px ${namePosition.fontFamily}`;
-                                                    ctx.fillStyle = namePosition.color;
-                                                    ctx.textAlign = 'center';
-                                                    ctx.textBaseline = 'middle';
-                                                    const x = (namePosition.x / 100) * canvas.width;
-                                                    const y = (namePosition.y / 100) * canvas.height;
-                                                    ctx.fillText(participant.name, x, y);
+                                                    const textCenterX = (namePosition.x / 100) * imgWidth;
+                                                    const textCenterY = (namePosition.y / 100) * imgHeight;
 
-                                                    // Convert to blob and upload
-                                                    const blob = await new Promise<Blob>((resolve) => {
-                                                        canvas.toBlob((b) => resolve(b!), 'image/png');
-                                                    });
+                                                    const offsetX = Math.round(textCenterX - (imgWidth / 2));
+                                                    const offsetY = Math.round(textCenterY - (imgHeight / 2));
 
-                                                    // Upload to Cloudinary
-                                                    const formData = new FormData();
-                                                    formData.append('file', blob, `${participant.name.replace(/\s+/g, '_')}_certificate.png`);
-                                                    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-                                                    formData.append('folder', `club-connect/certificates/${post?.clubId || 'general'}/generated`);
+                                                    // Map font families to standard Cloudinary fonts
+                                                    const fontMap: Record<string, string> = {
+                                                        'Arial': 'Arial',
+                                                        'Times New Roman': 'Times',
+                                                        'Georgia': 'Georgia',
+                                                        'Verdana': 'Verdana'
+                                                    };
+                                                    const fontDate = fontMap[namePosition.fontFamily] || 'Arial';
 
-                                                    const response = await fetch(
-                                                        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-                                                        { method: 'POST', body: formData }
-                                                    );
-                                                    const data = await response.json();
+                                                    // Sanitize name for URL (Cloudinary text overlay requirements)
+                                                    const safeName = encodeURIComponent(participant.name);
 
-                                                    if (data.secure_url && participant.id) {
+                                                    // Construct Cloudinary transformation URL
+                                                    // Insert transformation after "/upload/"
+                                                    const uploadIndex = certificateTemplateUrl.indexOf('/upload/');
+                                                    if (uploadIndex === -1) {
+                                                        console.error('Invalid Cloudinary URL');
+                                                        continue;
+                                                    }
+
+                                                    const baseUrl = certificateTemplateUrl.slice(0, uploadIndex + 8); // include "/upload/"
+                                                    const restUrl = certificateTemplateUrl.slice(uploadIndex + 8);
+
+                                                    // Transformation:
+                                                    // co_rgb:HEX : Color
+                                                    // l_text:Font_Size_bold:Name : Text Layer
+                                                    // fl_layer_apply : Apply layer
+                                                    // g_center : Gravity center (matches UI's transform -50,-50)
+                                                    // x_PX, y_PX : Offsets from center
+                                                    const colorHex = namePosition.color.replace('#', '');
+                                                    const transformation = `co_rgb:${colorHex},l_text:${fontDate}_${namePosition.fontSize}_bold:${safeName}/fl_layer_apply,g_center,x_${offsetX},y_${offsetY}/`;
+
+                                                    const dynamicUrl = `${baseUrl}${transformation}${restUrl}`;
+
+                                                    if (participant.id) {
                                                         // Save certificate URL to participant
-                                                        const saved = await updateParticipantCertificate(eventId, participant.id, data.secure_url);
+                                                        const saved = await updateParticipantCertificate(eventId, participant.id, dynamicUrl);
                                                         if (saved) successCount++;
                                                     }
                                                 }
@@ -1463,10 +1507,10 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                 const updatedRsvps = await getEventRSVPs(eventId);
                                                 setEventRsvps(updatedRsvps);
 
-                                                setMessage({ type: 'success', text: `Generated ${successCount} certificates successfully!` });
+                                                setMessage({ type: 'success', text: `Updated ${successCount} certificates with new settings!` });
                                             } catch (error) {
                                                 console.error('Certificate generation error:', error);
-                                                setMessage({ type: 'error', text: 'Failed to generate certificates. Please try again.' });
+                                                setMessage({ type: 'error', text: 'Failed to update certificates. Please try again.' });
                                             } finally {
                                                 setIsGeneratingCertificates(false);
                                             }
@@ -1477,12 +1521,12 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         {isGeneratingCertificates ? (
                                             <>
                                                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                Generating...
+                                                Updating Certificates...
                                             </>
                                         ) : (
                                             <>
                                                 <Award className="w-5 h-5" />
-                                                Generate Certificates for Present Participants
+                                                Generate / Update Certificates
                                             </>
                                         )}
                                     </button>
@@ -1524,9 +1568,6 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     </div>
                                 )}
                             </div>
-
-                            {/* Hidden canvas for certificate generation */}
-                            <canvas ref={canvasRef} style={{ display: 'none' }} />
                         </div>
                     )}
                 </div>

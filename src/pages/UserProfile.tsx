@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink } from 'lucide-react';
+import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink, Award } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications, getClubMessages } from '../lib/dbService';
@@ -15,6 +15,7 @@ interface UserProfileProps {
 interface UserEvent {
   event: DBPost;
   rsvpDate: Date;
+  certificateUrl?: string;
 }
 
 export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNavigateToClub }: UserProfileProps) {
@@ -142,6 +143,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             events.push({
               event,
               rsvpDate: new Date(rsvp.rsvpedAt),
+              certificateUrl: rsvp.certificateUrl
             });
           }
         }
@@ -595,7 +597,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {displayedEvents.map(({ event, rsvpDate }) => (
+                    {displayedEvents.map(({ event, rsvpDate, certificateUrl }) => (
                       <div
                         key={event.id}
                         className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
@@ -645,6 +647,20 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                           </div>
 
                           <div className="flex gap-2 items-center">
+                            {/* Certificate Button - Only show if certificate exists */}
+                            {certificateUrl && (
+                              <a
+                                href={certificateUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg border border-yellow-200 dark:border-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors flex items-center gap-2 text-xs font-bold"
+                                title="Download Certificate"
+                              >
+                                <Award className="w-4 h-4" />
+                                <span className="hidden sm:inline">Certificate</span>
+                              </a>
+                            )}
+
                             <button
                               onClick={() => event.id && onNavigateToPost(event.id)}
                               className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
