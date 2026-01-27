@@ -74,7 +74,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             }
         },
         {
-            element: '#tour-stats-grid',
+            element: '#tour-stats-grid-anchor',
             popover: {
                 title: 'Campus Overview',
                 description: 'Here you can see live statistics about Active Clubs, Students, and Upcoming Events.',
@@ -124,7 +124,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             },
             onHighlightStarted: async () => {
                 navigateToPage('dashboard');
-                await waitForElement('#tour-dashboard-stats');
+                await waitForElement('#tour-stats-grid-anchor');
             }
         },
 

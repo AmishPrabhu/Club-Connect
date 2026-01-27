@@ -184,40 +184,45 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
       <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-16 relative z-20 w-full flex-grow">
 
         {/* Stats Overview - 2 Large Action Cards */}
-        <div className="grid grid-cols-2 gap-3 md:gap-6 mb-8 md:mb-12 -mt-6 md:-mt-16 relative z-20 px-4 md:px-0" id="tour-stats-grid">
-          {/* Explore Clubs Card */}
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
-          >
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
-                <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{clubs.length || '50+'}</span>
-                <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Clubs</span>
-              </div>
-            </div>
-            <div className="w-8 h-8 md:w-14 md:h-14 bg-[#002147]/5 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-              <Users className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-[#DAA520]" />
-            </div>
-          </button>
+        <div className="relative mb-8 md:mb-12 -mt-6 md:-mt-16 z-20 px-4 md:px-0">
+          {/* Anchor for tour to ensure visibility under sticky header */}
+          <div id="tour-stats-grid-anchor" className="absolute inset-0 w-full h-full pointer-events-none scroll-mt-[200px]" />
 
-          {/* Upcoming Events Card */}
-          <button
-            onClick={() => onNavigate('events')}
-            className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
-          >
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
-                <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{upcomingPosts.length || '0'}</span>
-                <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Events</span>
+          <div className="grid grid-cols-2 gap-3 md:gap-6" id="tour-stats-grid-visual">
+            {/* Explore Clubs Card */}
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
+            >
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
+                  <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{clubs.length || '50+'}</span>
+                  <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Clubs</span>
+                </div>
               </div>
-            </div>
-            <div className="w-8 h-8 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-              <Calendar className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-blue-400" />
-            </div>
-          </button>
+              <div className="w-8 h-8 md:w-14 md:h-14 bg-[#002147]/5 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                <Users className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-[#DAA520]" />
+              </div>
+            </button>
+
+            {/* Upcoming Events Card */}
+            <button
+              onClick={() => onNavigate('events')}
+              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
+            >
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
+                  <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{upcomingPosts.length || '0'}</span>
+                  <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Events</span>
+                </div>
+              </div>
+              <div className="w-8 h-8 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                <Calendar className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-blue-400" />
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Quick Actions & Search */}
@@ -323,7 +328,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
 
         {/* Upcoming Events and Notifications Section */}
-        <div className="mb-16" id="tour-upcoming-events">
+        <div className="mb-16 scroll-mt-32" id="tour-upcoming-events">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-2">
@@ -541,7 +546,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Campus Calendar & Weekly Events Section */}
-        <div className="mb-8" id="tour-calendar-section">
+        <div className="mb-8 scroll-mt-32" id="tour-calendar-section">
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-[#002147] dark:text-blue-400" />
             <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>

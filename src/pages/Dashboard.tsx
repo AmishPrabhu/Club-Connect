@@ -115,7 +115,7 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20" id="tour-dashboard-stats">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 scroll-mt-32" id="tour-dashboard-stats">
       {/* Page Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12 mb-8">
         <div className="max-w-7xl mx-auto">
