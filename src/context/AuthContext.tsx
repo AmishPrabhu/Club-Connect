@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '../lib/api';
 import { AuthContextType, AuthState, User } from '../types/auth';
+import { getUserMemberships } from '../lib/dbService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -21,6 +22,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    memberships: [],
   });
 
   // Check for existing token on mount
@@ -34,6 +36,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             user: response.data,
             isAuthenticated: true,
             isLoading: false,
+            memberships: [],
+          });
+
+          // Fetch memberships asynchronously
+          getUserMemberships(response.data.email).then(memberships => {
+            setAuthState(prev => ({ ...prev, memberships }));
           });
         } catch (error) {
           console.error('Failed to load user', error);
@@ -42,6 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            memberships: [],
           });
         }
       } else {
@@ -49,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           user: null,
           isAuthenticated: false,
           isLoading: false,
+          memberships: [],
         });
       }
     };
@@ -61,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        memberships: [],
       });
     };
 
@@ -83,6 +94,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: true,
         isLoading: false,
+        memberships: [],
+      });
+
+      // Fetch memberships
+      getUserMemberships(user.email).then(memberships => {
+        setAuthState(prev => ({ ...prev, memberships }));
       });
       return true;
     } catch (error) {
@@ -98,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      memberships: [],
     });
   };
 
@@ -113,6 +131,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: true,
         isLoading: false,
+        memberships: [],
+      });
+
+      // Fetch memberships (new user likely has none, but good to run for consistency or if auto-assigned)
+      getUserMemberships(user.email).then(memberships => {
+        setAuthState(prev => ({ ...prev, memberships }));
       });
 
       return { success: true };
@@ -142,6 +166,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: true,
         isLoading: false,
+        memberships: [],
+      });
+
+      // Fetch memberships
+      getUserMemberships(user.email).then(memberships => {
+        setAuthState(prev => ({ ...prev, memberships }));
       });
 
       return { success: true };
@@ -178,6 +208,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated: true,
         isLoading: false,
+        memberships: [],
+      });
+
+      // Fetch memberships
+      getUserMemberships(user.email).then(memberships => {
+        setAuthState(prev => ({ ...prev, memberships }));
       });
 
       return { success: true };
@@ -200,6 +236,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshMemberships = async () => {
+    if (authState.user?.email) {
+      const memberships = await getUserMemberships(authState.user.email);
+      setAuthState(prev => ({ ...prev, memberships }));
+    }
+  };
+
   const value: AuthContextType = {
     ...authState,
     login,
@@ -212,6 +255,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await api.post('/auth/forgot-password', { email });
       return response.data;
     },
+    refreshMemberships,
   };
 
   return (

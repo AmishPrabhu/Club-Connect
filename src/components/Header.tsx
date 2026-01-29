@@ -7,6 +7,7 @@ import { getNotifications } from '../lib/dbService';
 import { useTour } from '../context/TourContext';
 import { useNavigation } from '../context/NavigationContext';
 import ClubSwitcher from './ClubSwitcher';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   currentPage: Page;
@@ -17,6 +18,7 @@ interface HeaderProps {
 
 export default function Header({ currentPage, onNavigate, onLogout, user }: HeaderProps) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { memberships } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -119,8 +121,9 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           <div className="h-6 w-px bg-blue-700/50 hidden md:block"></div>
 
+
           {/* Club Switcher - For officers with multiple clubs */}
-          {user && ['club-secretary', 'president', 'treasurer', 'advisor'].includes(user.role) && (
+          {user && (['club-secretary', 'president', 'treasurer', 'advisor'].includes(user.role) || memberships.some(m => ['secretary', 'president', 'treasurer', 'advisor'].includes(m.role.toLowerCase()))) && (
             <ClubSwitcher className="flex" />
           )}
 
@@ -180,7 +183,8 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       </button>
                     )}
 
-                    {['club-secretary', 'president', 'treasurer'].includes(user.role) && (
+                    {/* Club Management Link - Show if global role OR if has specific club officer role */}
+                    {(['club-secretary', 'president', 'treasurer'].includes(user.role) || memberships.some(m => ['secretary', 'president', 'treasurer'].includes(m.role.toLowerCase()))) && (
                       <button
                         onClick={() => { onNavigate('clubSecretaryDashboard'); setShowUserMenu(false); }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"

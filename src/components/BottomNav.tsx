@@ -9,7 +9,7 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
-    const { user, logout } = useAuth();
+    const { user, logout, memberships } = useAuth();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +71,8 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                             </button>
                         )}
 
-                        {['club-secretary', 'president', 'treasurer'].includes(user.role) && (
+                        {/* Club Management Link */}
+                        {(['club-secretary', 'president', 'treasurer'].includes(user.role) || memberships.some(m => ['secretary', 'president', 'treasurer'].includes(m.role.toLowerCase()))) && (
                             <button
                                 onClick={() => { onNavigate('clubSecretaryDashboard'); setShowMenu(false); }}
                                 className="w-full text-left px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-[#002147] dark:hover:text-blue-400 rounded-xl flex items-center gap-3 font-medium transition-colors"

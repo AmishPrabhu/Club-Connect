@@ -557,29 +557,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-12">
-      {/* Official University Header for Dashboard */}
-      <div className="bg-[#002147] text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-            <img src="/wce-logo.png" alt="WCE Logo" className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-lg p-1 flex-shrink-0" />
-            <div className="min-w-0 flex-1 hidden md:block">
-              <h1 className="text-xl font-serif font-bold tracking-wide truncate">
-                Walchand College of Engineering, Sangli
-              </h1>
-              <p className="text-xs text-[#DAA520] uppercase tracking-wider font-semibold truncate">
-                Administrative Control Center
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 md:gap-4 flex-shrink-0 ml-2">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold">{user?.name}</p>
-              <p className="text-xs text-blue-200 uppercase">{user?.role}</p>
-            </div>
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-[#002147] flex items-center justify-center font-bold text-sm md:text-lg border-2 border-[#DAA520]">
-              {user?.name?.charAt(0) || 'A'}
-            </div>
-          </div>
+      {/* Page Title Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
+          <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
+            Administrative Control Center
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Manage clubs, events, and system settings • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
+          </p>
         </div>
       </div>
 

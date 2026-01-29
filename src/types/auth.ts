@@ -54,6 +54,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  memberships: ClubMembership[];
 }
 
 export interface AuthContextType extends AuthState {
@@ -64,6 +65,7 @@ export interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   resetPassword: (email: string) => Promise<void>;
+  refreshMemberships: () => Promise<void>;
 }
 
 // Firestore user document structure (stored in 'users' collection)

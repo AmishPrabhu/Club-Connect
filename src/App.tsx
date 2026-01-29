@@ -46,7 +46,8 @@ function AppContent() {
     navigateToNotification,
     navigateBack,
     handleLogout,
-    closeManagementTab
+    closeManagementTab,
+    selectedMembership
   } = useNavigation();
 
   const { user, logout } = useAuth();
@@ -72,8 +73,15 @@ function AppContent() {
     // 3. Secretary/Club Dashboard Protection
     // Used by: Club Secretary, President, Treasurer
     if (currentPage === 'clubSecretaryDashboard') {
-      const allowedRoles = ['club-secretary', 'president', 'treasurer'];
-      if (!user || !allowedRoles.includes(user.role)) {
+      const allowedGlobalRoles = ['club-secretary', 'president', 'treasurer'];
+      const hasGlobalRole = user && allowedGlobalRoles.includes(user.role);
+
+      // Also check selectedMembership (club-specific role)
+      // Roles are typically Title Case, but we check flexible casing to be safe
+      const allowedClubRoles = ['Secretary', 'President', 'Treasurer', 'secretary', 'president', 'treasurer'];
+      const hasClubRole = selectedMembership && allowedClubRoles.includes(selectedMembership.role);
+
+      if (!user || (!hasGlobalRole && !hasClubRole)) {
         navigateToPage('home');
       }
     }
@@ -81,7 +89,7 @@ function AppContent() {
     // 4. Student Dashboard Protection (optional, if restricted to users only, though usually open)
     // if (currentPage === 'studentDashboard' && !user) navigateToPage('login');
 
-  }, [currentPage, user, navigateToPage]);
+  }, [currentPage, user, navigateToPage, selectedMembership]);
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 pb-20 md:pb-0">
