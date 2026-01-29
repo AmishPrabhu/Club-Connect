@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -51,6 +52,36 @@ function AppContent() {
   const { user, logout } = useAuth();
 
   const onLogoutClick = () => handleLogout(logout);
+
+  // Protect Dashboard Routes
+  useEffect(() => {
+    // 1. Admin Dashboard Protection
+    if (currentPage === 'adminDashboard') {
+      if (!user || user.role !== 'admin') {
+        navigateToPage('home');
+      }
+    }
+
+    // 2. Advisor Dashboard Protection
+    if (currentPage === 'advisorDashboard') {
+      if (!user || user.role !== 'advisor') {
+        navigateToPage('home');
+      }
+    }
+
+    // 3. Secretary/Club Dashboard Protection
+    // Used by: Club Secretary, President, Treasurer
+    if (currentPage === 'clubSecretaryDashboard') {
+      const allowedRoles = ['club-secretary', 'president', 'treasurer'];
+      if (!user || !allowedRoles.includes(user.role)) {
+        navigateToPage('home');
+      }
+    }
+
+    // 4. Student Dashboard Protection (optional, if restricted to users only, though usually open)
+    // if (currentPage === 'studentDashboard' && !user) navigateToPage('login');
+
+  }, [currentPage, user, navigateToPage]);
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 pb-20 md:pb-0">
