@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Calendar, ArrowLeft, ChevronDown, Megaphone, Filter } from 'lucide-react';
 import { DBPost, DBClub } from '../types/auth';
+import { Page } from '../types/page';
 import { getPosts, getClubs } from '../lib/dbService';
 
 interface AnnouncementsProps {
     onBack: () => void;
-    onNavigateToPost: (postId: string) => void;
+    onNavigateToPost: (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
 }
 
 import ImageModal from '../components/ImageModal';
