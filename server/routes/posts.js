@@ -177,6 +177,49 @@ router.post('/', verifyToken, async (req, res) => {
     }
 });
 
+// GET tasks assigned to current user
+router.get('/user/tasks', verifyToken, async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+
+        // Find posts that have tasks assigned to this user email
+        const posts = await Post.find({
+            'eventTasks.assignedToEmails': userEmail
+        });
+
+        // Extract and flatten tasks
+        const userTasks = [];
+        posts.forEach(post => {
+            if (post.eventTasks && post.eventTasks.length > 0) {
+                post.eventTasks.forEach(task => {
+                    if (task.assignedToEmails && task.assignedToEmails.includes(userEmail)) {
+                        userTasks.push({
+                            ...task.toObject(),
+                            eventId: post._id,
+                            eventTitle: post.title,
+                            clubId: post.clubId,
+                            clubName: post.clubName
+                        });
+                    }
+                });
+            }
+        });
+
+        // Sort by deadline (ascending) or creation (descending)
+        userTasks.sort((a, b) => {
+            if (a.deadline && b.deadline) {
+                return new Date(a.deadline) - new Date(b.deadline);
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        res.json(userTasks);
+    } catch (error) {
+        console.error('Error fetching user tasks:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Update post
 router.put('/:id', verifyToken, async (req, res) => {
     try {

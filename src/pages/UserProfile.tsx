@@ -20,7 +20,7 @@ interface UserEvent {
 
 export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNavigateToClub }: UserProfileProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'following'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'following' | 'tasks'>('overview');
   const [likedClubsList, setLikedClubsList] = useState<DBClub[]>([]);
   const [likedClubNotifications, setLikedClubNotifications] = useState<DBNotification[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +48,51 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const [eventTab, setEventTab] = useState<'upcoming' | 'past'>('upcoming');
   const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+
+  // Tasks State
+  const [userTasks, setUserTasks] = useState<any[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+
+  // Tasks Tab Visibility - Show for anyone in a club
+  const showTasksTab = memberships.length > 0;
+  const [lastViewedTaskTime, setLastViewedTaskTime] = useState<string | null>(localStorage.getItem('last_viewed_tasks'));
+
+  // Load Tasks when tab is active or memberships loaded
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (showTasksTab && user?.email) {
+        setTasksLoading(true);
+        try {
+          // Dynamic import to avoid circular dependencies if any, though likely safe to import directly if available
+          const { getUserTasks } = await import('../lib/dbService');
+          const tasks = await getUserTasks();
+          setUserTasks(tasks);
+        } catch (error) {
+          console.error("Error loading tasks", error);
+        } finally {
+          setTasksLoading(false);
+        }
+      }
+    };
+
+    if (activeTab === 'tasks' || (showTasksTab && userTasks.length === 0)) {
+      fetchTasks();
+    }
+
+    // Mark as seen when opening tasks tab
+    if (activeTab === 'tasks') {
+      const now = new Date().toISOString();
+      localStorage.setItem('last_viewed_tasks', now);
+      setLastViewedTaskTime(now);
+    }
+  }, [activeTab, showTasksTab, user?.email]);
+
+  // Determine unseen tasks count
+  const unseenTasksCount = userTasks.filter(t => {
+    if (t.status !== 'pending') return false;
+    if (!lastViewedTaskTime) return true;
+    return new Date(t.createdAt) > new Date(lastViewedTaskTime);
+  }).length;
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -114,7 +159,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
         }
       }));
 
-      setUnreadState(newUnreadState);
+      setUnreadState(prev => ({ ...prev, ...newUnreadState }));
     };
 
     checkUnreadMessages();
@@ -371,7 +416,6 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             {[
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'events', label: 'My Events', icon: Calendar },
-              { id: 'following', label: 'Following', icon: Heart },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -385,6 +429,36 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 <span>{tab.label}</span>
               </button>
             ))}
+
+            {showTasksTab && (
+              <button
+                onClick={() => setActiveTab('tasks' as any)}
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === 'tasks'
+                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
+                  }`}
+              >
+                <History className={`w-5 h-5 ${activeTab === 'tasks' ? 'text-[#DAA520]' : ''}`} />
+                <span>Tasks</span>
+                {unseenTasksCount > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {unseenTasksCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            <button
+              key="following"
+              onClick={() => setActiveTab('following' as any)}
+              className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === 'following'
+                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
+                }`}
+            >
+              <Heart className={`w-5 h-5 ${activeTab === 'following' ? 'text-[#DAA520]' : ''}`} />
+              <span>Following</span>
+            </button>
 
             {memberships.map((membership) => (
               <button
@@ -677,6 +751,76 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
               </div>
             )}
 
+
+
+            {activeTab === 'tasks' && (
+              <div className="space-y-6">
+                {tasksLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : userTasks.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <History className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400">No tasks assigned to you yet.</p>
+                    <button onClick={() => onNavigate('dashboard')} className="mt-4 px-4 py-2 bg-[#002147] text-white rounded-lg font-bold text-sm">
+                      Go to Dashboard
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {userTasks.map((task) => (
+                      <div key={task.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${task.status === 'completed'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                : task.status === 'in-progress'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                }`}>
+                                {task.status === 'in-progress' ? 'In Progress' : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                              </span>
+                              <span className="text-xs text-slate-500 font-medium">for {task.eventTitle}</span>
+                              <span className="text-xs text-slate-400">• {task.clubName}</span>
+                            </div>
+
+                            <h4 className="font-serif font-bold text-[#002147] dark:text-white mb-2">{task.title}</h4>
+
+                            <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                              {task.deadline && (
+                                <div className="flex items-center gap-1.5">
+                                  <Calendar className="w-3.5 h-3.5 text-red-500" />
+                                  <span className={new Date(task.deadline) < new Date() && task.status !== 'completed' ? 'text-red-500 font-bold' : ''}>
+                                    Due {new Date(task.deadline).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5" />
+                                <span>Assigned by {task.createdBy}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <button
+                              onClick={() => onNavigateToPost(task.eventId)}
+                              className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                              title="View Event"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Dynamic Club Message Tabs */}
             {activeTab.startsWith('messages-') && (
               <div className="space-y-6">
@@ -718,7 +862,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }

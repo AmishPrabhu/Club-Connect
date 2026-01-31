@@ -740,3 +740,15 @@ export const updateParticipantCertificate = async (
         return false;
     }
 };
+
+// ==================== USER TASKS ====================
+
+export const getUserTasks = async (): Promise<any[]> => {
+    try {
+        const response = await api.get('/posts/user/tasks');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user tasks:', error);
+        return [];
+    }
+};
