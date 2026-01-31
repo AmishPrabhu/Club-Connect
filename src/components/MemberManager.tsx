@@ -77,6 +77,11 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             return;
         }
 
+        if (!newMember.email.endsWith('@walchandsangli.ac.in')) {
+            setFormMessage({ type: 'error', text: 'Only @walchandsangli.ac.in email addresses are allowed' });
+            return;
+        }
+
         // Optimistic update
         const tempId = 'temp-' + Date.now();
         const optimisticMember: ClubMember = {
@@ -505,7 +510,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                     value={newMember.email}
                                     onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
                                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="member@example.com"
+                                    placeholder="member@walchandsangli.ac.in"
                                 />
                             </div>
 

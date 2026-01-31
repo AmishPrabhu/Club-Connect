@@ -2,7 +2,7 @@ import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle } from 'luc
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getNotifications } from '../lib/dbService';
 import { useTour } from '../context/TourContext';
 import { useNavigation } from '../context/NavigationContext';
@@ -55,6 +55,22 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
     const interval = setInterval(fetchNotificationCount, 30000);
     return () => clearInterval(interval);
   }, [user]);
+
+  // Click outside handler for user menu
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-[#002147] text-white shadow-lg border-b border-[#00152e]">
@@ -150,7 +166,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           {/* User Profile */}
           {user ? (
-            <div className="relative ml-1 md:ml-2 hidden md:block" id="tour-profile">
+            <div className="relative ml-1 md:ml-2 hidden md:block" id="tour-profile" ref={dropdownRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 p-1 pl-2 pr-1 rounded-full bg-blue-800/50 hover:bg-blue-800 transition-colors border border-blue-700 hover:border-blue-600 group"

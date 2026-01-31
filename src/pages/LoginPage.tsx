@@ -141,7 +141,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
-                    placeholder="name@wce.ac.in"
+                    placeholder="name@walchandsangli.ac.in"
                     required
                   />
                 </div>

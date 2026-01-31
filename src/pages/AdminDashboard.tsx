@@ -556,7 +556,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 pb-12">
       {/* Page Title Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
@@ -633,8 +633,8 @@ export default function AdminDashboard() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-b-2 ${isActive
-                    ? 'text-[#002147] border-[#002147] bg-blue-50/50 dark:bg-blue-900/10'
-                    : 'text-slate-500 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
+                    : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''}`} />
@@ -658,7 +658,7 @@ export default function AdminDashboard() {
                 <div className="space-y-8">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white border-l-4 border-[#DAA520] pl-3">Recent Campus Activity</h3>
-                    <button onClick={() => setActiveTab('posts')} className="text-sm font-semibold text-[#002147] hover:underline whitespace-nowrap">View All Activity &rarr;</button>
+                    <button onClick={() => setActiveTab('posts')} className="text-sm font-semibold text-[#002147] dark:text-[#DAA520] hover:underline whitespace-nowrap">View All Activity &rarr;</button>
                   </div>
 
                   {posts.length === 0 && clubs.length === 0 ? (
@@ -1038,7 +1038,7 @@ export default function AdminDashboard() {
                     value={newSecretary.email}
                     onChange={(e) => setNewSecretary({ ...newSecretary, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="secretary@wce.ac.in"
+                    placeholder="secretary@walchandsangli.ac.in"
                   />
                 </div>
 
@@ -1104,7 +1104,7 @@ export default function AdminDashboard() {
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="president@wce.ac.in"
+                    placeholder="president@walchandsangli.ac.in"
                   />
                 </div>
 
@@ -1170,7 +1170,7 @@ export default function AdminDashboard() {
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="treasurer@wce.ac.in"
+                    placeholder="treasurer@walchandsangli.ac.in"
                   />
                 </div>
 
@@ -1236,7 +1236,7 @@ export default function AdminDashboard() {
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="advisor@wce.ac.in"
+                    placeholder="advisor@walchandsangli.ac.in"
                   />
                 </div>
 

@@ -22,6 +22,11 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        // Check email domain
+        if (!email.endsWith('@walchandsangli.ac.in')) {
+            return res.status(400).json({ message: 'Only @walchandsangli.ac.in email addresses are allowed' });
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -69,8 +74,6 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-
-
 
         // Find user
         const user = await User.findOne({ email });

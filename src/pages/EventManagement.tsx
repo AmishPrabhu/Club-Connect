@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle, Award, Upload, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle, Award, Upload, Download, Search } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { DBPost, User, ClubMember, EventTask, EventRSVP, CertificateNamePosition } from '../types/auth';
 import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs, saveCertificateTemplate, updateParticipantCertificate } from '../lib/dbService';
@@ -92,6 +93,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     // Tasks State
     const [tasks, setTasks] = useState<EventTask[]>([]);
     const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [newTaskAssignees, setNewTaskAssignees] = useState<string[]>([]);
     const [newTaskDeadline, setNewTaskDeadline] = useState('');
 
@@ -214,6 +216,66 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleExportAttendance = () => {
+        if (eventRsvps.length === 0) {
+            setMessage({ type: 'error', text: 'No participants to export' });
+            return;
+        }
+
+        // Prepare data for export
+        const exportData = eventRsvps.map(rsvp => ({
+            'Name': rsvp.name || 'Unknown',
+            'Email': rsvp.email || 'Unknown',
+            'Status': rsvp.attendance ? rsvp.attendance.charAt(0).toUpperCase() + rsvp.attendance.slice(1) : 'Pending',
+            'RSVP Date': new Date(rsvp.rsvpedAt).toLocaleDateString(),
+            'RSVP Time': new Date(rsvp.rsvpedAt).toLocaleTimeString()
+        }));
+
+        // Calculate stats
+        const total = eventRsvps.length;
+        const present = eventRsvps.filter(r => r.attendance === 'present').length;
+        const absent = eventRsvps.filter(r => r.attendance === 'absent').length;
+
+
+        // Create workaround for stats row
+        const statsData = [
+            { 'Name': '', 'Email': '', 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
+            { 'Name': 'SUMMARY', 'Email': '', 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
+            { 'Name': 'Total Registered', 'Email': total, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
+            { 'Name': 'Present', 'Email': present, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
+            { 'Name': 'Absent', 'Email': absent, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' }
+        ];
+
+        // Combine data
+        const finalData = [...exportData, ...statsData];
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(finalData);
+
+        // Adjust column widths
+        const wscols = [
+            { wch: 30 }, // Name
+            { wch: 35 }, // Email
+            { wch: 15 }, // Status
+            { wch: 15 }, // Date
+            { wch: 15 }, // Time
+        ];
+        ws['!cols'] = wscols;
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+
+        // Generate file name
+        const fileName = `${post?.title?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'event'}_attendance.xlsx`;
+
+        // Write file
+        XLSX.writeFile(wb, fileName);
+
+        setMessage({ type: 'success', text: 'Attendance exported successfully!' });
+        setTimeout(() => setMessage(null), 3000);
     };
 
     // Task Management Functions
@@ -493,15 +555,144 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
-                                            <div>
+                                            <div className="space-y-3">
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Time</label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.time}
-                                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
-                                                    placeholder="e.g., 2:00 PM - 5:00 PM"
-                                                />
+
+                                                {/* Start Time */}
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-10">Start:</span>
+                                                    <select
+                                                        value={(() => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const match = startTime.match(/^(\d+):/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentMin = startTime.match(/:(\d+)/)?.[1] || '00';
+                                                            const currentPeriod = startTime.match(/(AM|PM)/)?.[1] || 'AM';
+                                                            const newStart = `${e.target.value}:${currentMin} ${currentPeriod}`;
+                                                            setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">Hr</option>
+                                                        {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((h) => (
+                                                            <option key={h} value={h}>{h}</option>
+                                                        ))}
+                                                    </select>
+                                                    <span className="text-slate-400">:</span>
+                                                    <select
+                                                        value={(() => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const match = startTime.match(/:(\d+)/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentHour = startTime.match(/^(\d+):/)?.[1] || '12';
+                                                            const currentPeriod = startTime.match(/(AM|PM)/)?.[1] || 'AM';
+                                                            const newStart = `${currentHour}:${e.target.value} ${currentPeriod}`;
+                                                            setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">Min</option>
+                                                        {['00', '15', '30', '45'].map((m) => (
+                                                            <option key={m} value={m}>{m}</option>
+                                                        ))}
+                                                    </select>
+                                                    <select
+                                                        value={(() => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const match = startTime.match(/(AM|PM)/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentHour = startTime.match(/^(\d+):/)?.[1] || '12';
+                                                            const currentMin = startTime.match(/:(\d+)/)?.[1] || '00';
+                                                            const newStart = `${currentHour}:${currentMin} ${e.target.value}`;
+                                                            setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">-</option>
+                                                        <option value="AM">AM</option>
+                                                        <option value="PM">PM</option>
+                                                    </select>
+                                                </div>
+
+                                                {/* End Time */}
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-10">End:</span>
+                                                    <select
+                                                        value={(() => {
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const match = endTime.match(/^(\d+):/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentMin = endTime.match(/:(\d+)/)?.[1] || '00';
+                                                            const currentPeriod = endTime.match(/(AM|PM)/)?.[1] || 'PM';
+                                                            const newEnd = `${e.target.value}:${currentMin} ${currentPeriod}`;
+                                                            setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">Hr</option>
+                                                        {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((h) => (
+                                                            <option key={h} value={h}>{h}</option>
+                                                        ))}
+                                                    </select>
+                                                    <span className="text-slate-400">:</span>
+                                                    <select
+                                                        value={(() => {
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const match = endTime.match(/:(\d+)/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentHour = endTime.match(/^(\d+):/)?.[1] || '12';
+                                                            const currentPeriod = endTime.match(/(AM|PM)/)?.[1] || 'PM';
+                                                            const newEnd = `${currentHour}:${e.target.value} ${currentPeriod}`;
+                                                            setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">Min</option>
+                                                        {['00', '15', '30', '45'].map((m) => (
+                                                            <option key={m} value={m}>{m}</option>
+                                                        ))}
+                                                    </select>
+                                                    <select
+                                                        value={(() => {
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const match = endTime.match(/(AM|PM)/);
+                                                            return match ? match[1] : '';
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const startTime = formData.time.split(' - ')[0] || '';
+                                                            const endTime = formData.time.split(' - ')[1] || '';
+                                                            const currentHour = endTime.match(/^(\d+):/)?.[1] || '12';
+                                                            const currentMin = endTime.match(/:(\d+)/)?.[1] || '00';
+                                                            const newEnd = `${currentHour}:${currentMin} ${e.target.value}`;
+                                                            setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
+                                                        }}
+                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                    >
+                                                        <option value="">-</option>
+                                                        <option value="AM">AM</option>
+                                                        <option value="PM">PM</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -739,29 +930,46 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     {/* Participants Tab */}
                     {activeTab === 'participants' && (
                         <div className="space-y-6">
-                            {/* Stats */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 md:p-4">
-                                    <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 font-medium">Total Registered</p>
-                                    <p className="text-xl md:text-2xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
+                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                {/* Actions Header */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                    <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
+                                        <Users className="w-5 h-5 text-[#DAA520]" />
+                                        Attendance Overview
+                                    </h3>
+                                    <button
+                                        onClick={handleExportAttendance}
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm self-start sm:self-auto"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Export to Excel
+                                    </button>
                                 </div>
-                                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 md:p-4">
-                                    <p className="text-xs md:text-sm text-green-600 dark:text-green-400 font-medium">Present</p>
-                                    <p className="text-xl md:text-2xl font-bold text-green-700 dark:text-green-300">
-                                        {eventRsvps.filter(r => r.attendance === 'present').length}
-                                    </p>
-                                </div>
-                                <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 md:p-4">
-                                    <p className="text-xs md:text-sm text-red-600 dark:text-red-400 font-medium">Absent</p>
-                                    <p className="text-xl md:text-2xl font-bold text-red-700 dark:text-red-300">
-                                        {eventRsvps.filter(r => r.attendance === 'absent').length}
-                                    </p>
-                                </div>
-                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 md:p-4">
-                                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-medium">Pending</p>
-                                    <p className="text-xl md:text-2xl font-bold text-slate-700 dark:text-slate-300">
-                                        {eventRsvps.filter(r => !r.attendance || r.attendance === 'pending').length}
-                                    </p>
+
+                                {/* Stats */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
+                                        <p className="text-xs md:text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">Total Registered</p>
+                                        <p className="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-300">{eventRsvps.length}</p>
+                                    </div>
+                                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100 dark:border-green-900/30">
+                                        <p className="text-xs md:text-sm text-green-600 dark:text-green-400 font-medium mb-1">Present</p>
+                                        <p className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-300">
+                                            {eventRsvps.filter(r => r.attendance === 'present').length}
+                                        </p>
+                                    </div>
+                                    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-100 dark:border-red-900/30">
+                                        <p className="text-xs md:text-sm text-red-600 dark:text-red-400 font-medium mb-1">Absent</p>
+                                        <p className="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-300">
+                                            {eventRsvps.filter(r => r.attendance === 'absent').length}
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700">
+                                        <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-medium mb-1">Pending</p>
+                                        <p className="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-300">
+                                            {eventRsvps.filter(r => !r.attendance || r.attendance === 'pending').length}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -790,7 +998,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             type="email"
                                             id="newParticipantEmail"
                                             className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
-                                            placeholder="email@example.com"
+                                            placeholder="email@walchandsangli.ac.in"
                                         />
                                     </div>
                                     <div className="flex items-end">
@@ -803,6 +1011,11 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                                 if (!name || !email) {
                                                     setMessage({ type: 'error', text: 'Please enter both name and email' });
+                                                    return;
+                                                }
+
+                                                if (!email.endsWith('@walchandsangli.ac.in')) {
+                                                    setMessage({ type: 'error', text: 'Only @walchandsangli.ac.in email addresses are allowed' });
                                                     return;
                                                 }
 
@@ -959,8 +1172,20 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                             {/* Participant List */}
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                                    <h3 className="font-bold text-slate-900 dark:text-white">Participants ({eventRsvps.length})</h3>
+                                <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <h3 className="font-bold text-slate-900 dark:text-white whitespace-nowrap">Participants ({eventRsvps.length})</h3>
+                                        <div className="relative flex-1 max-w-xs">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                placeholder="Search participants..."
+                                                className="w-full pl-9 pr-4 py-1.5 bg-slate-100 dark:bg-slate-700/50 border-0 rounded-full text-sm focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="flex items-center gap-3">
                                         <a
                                             href={(post as any)?.responseSpreadsheetUrl || "https://docs.google.com/forms/d/1jVFhtGWaIcnVl0JjJw1P3sc09-nEuCCfBn9RCB9RKB8/edit#responses"}
@@ -1006,83 +1231,97 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                                {eventRsvps.map(participant => (
-                                                    <tr key={participant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                                        <td className="px-4 py-3 text-slate-900 dark:text-white font-medium">{participant.name}</td>
-                                                        <td className="px-4 py-3">
-                                                            <a href={`mailto:${participant.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                                                                {participant.email}
-                                                            </a>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                                                            {participant.rsvpedAt
-                                                                ? new Date(participant.rsvpedAt).toLocaleDateString('en-IN', {
-                                                                    day: 'numeric',
-                                                                    month: 'short',
-                                                                    year: 'numeric',
-                                                                })
-                                                                : 'N/A'
-                                                            }
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <div className="flex items-center justify-center gap-2">
+                                                {(() => {
+                                                    const filtered = eventRsvps.filter(p => !searchTerm || p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+                                                    if (filtered.length === 0 && searchTerm) {
+                                                        return (
+                                                            <tr>
+                                                                <td colSpan={5} className="py-8 text-center text-slate-500 dark:text-slate-400">
+                                                                    No participants found matching "{searchTerm}"
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    }
+
+                                                    return filtered.map(participant => (
+                                                        <tr key={participant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                            <td className="px-4 py-3 text-slate-900 dark:text-white font-medium">{participant.name}</td>
+                                                            <td className="px-4 py-3">
+                                                                <a href={`mailto:${participant.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                                    {participant.email}
+                                                                </a>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                                                                {participant.rsvpedAt
+                                                                    ? new Date(participant.rsvpedAt).toLocaleDateString('en-IN', {
+                                                                        day: 'numeric',
+                                                                        month: 'short',
+                                                                        year: 'numeric',
+                                                                    })
+                                                                    : 'N/A'
+                                                                }
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <div className="flex items-center justify-center gap-2">
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (!participant.id) return;
+                                                                            const success = await updateParticipantAttendance(eventId, participant.id, 'present');
+                                                                            if (success) {
+                                                                                setEventRsvps(prev => prev.map(p =>
+                                                                                    p.id === participant.id ? { ...p, attendance: 'present' } : p
+                                                                                ));
+                                                                            }
+                                                                        }}
+                                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'present'
+                                                                            ? 'bg-green-600 text-white'
+                                                                            : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
+                                                                            }`}
+                                                                    >
+                                                                        <CheckCircle className="w-3.5 h-3.5 inline mr-1" />
+                                                                        Present
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (!participant.id) return;
+                                                                            const success = await updateParticipantAttendance(eventId, participant.id, 'absent');
+                                                                            if (success) {
+                                                                                setEventRsvps(prev => prev.map(p =>
+                                                                                    p.id === participant.id ? { ...p, attendance: 'absent' } : p
+                                                                                ));
+                                                                            }
+                                                                        }}
+                                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'absent'
+                                                                            ? 'bg-red-600 text-white'
+                                                                            : 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
+                                                                            }`}
+                                                                    >
+                                                                        <XCircle className="w-3.5 h-3.5 inline mr-1" />
+                                                                        Absent
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3">
                                                                 <button
                                                                     onClick={async () => {
                                                                         if (!participant.id) return;
-                                                                        const success = await updateParticipantAttendance(eventId, participant.id, 'present');
-                                                                        if (success) {
-                                                                            setEventRsvps(prev => prev.map(p =>
-                                                                                p.id === participant.id ? { ...p, attendance: 'present' } : p
-                                                                            ));
+                                                                        if (confirm('Are you sure you want to remove this participant?')) {
+                                                                            const success = await deleteEventParticipant(eventId, participant.id);
+                                                                            if (success) {
+                                                                                setEventRsvps(prev => prev.filter(p => p.id !== participant.id));
+                                                                                setMessage({ type: 'success', text: 'Participant removed' });
+                                                                            }
                                                                         }
                                                                     }}
-                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'present'
-                                                                        ? 'bg-green-600 text-white'
-                                                                        : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
-                                                                        }`}
+                                                                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
                                                                 >
-                                                                    <CheckCircle className="w-3.5 h-3.5 inline mr-1" />
-                                                                    Present
+                                                                    <Trash2 className="w-4 h-4" />
                                                                 </button>
-                                                                <button
-                                                                    onClick={async () => {
-                                                                        if (!participant.id) return;
-                                                                        const success = await updateParticipantAttendance(eventId, participant.id, 'absent');
-                                                                        if (success) {
-                                                                            setEventRsvps(prev => prev.map(p =>
-                                                                                p.id === participant.id ? { ...p, attendance: 'absent' } : p
-                                                                            ));
-                                                                        }
-                                                                    }}
-                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${participant.attendance === 'absent'
-                                                                        ? 'bg-red-600 text-white'
-                                                                        : 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
-                                                                        }`}
-                                                                >
-                                                                    <XCircle className="w-3.5 h-3.5 inline mr-1" />
-                                                                    Absent
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <button
-                                                                onClick={async () => {
-                                                                    if (!participant.id) return;
-                                                                    if (confirm('Are you sure you want to remove this participant?')) {
-                                                                        const success = await deleteEventParticipant(eventId, participant.id);
-                                                                        if (success) {
-                                                                            setEventRsvps(prev => prev.filter(p => p.id !== participant.id));
-                                                                            setMessage({ type: 'success', text: 'Participant removed' });
-                                                                        }
-                                                                    }
-                                                                }}
-                                                                className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                })()}
                                             </tbody>
                                         </table>
                                     </div>

@@ -57,6 +57,10 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
       setErrorMessage('Please enter a valid email address');
       return;
     }
+    if (!email.endsWith('@walchandsangli.ac.in')) {
+      setErrorMessage('Only @walchandsangli.ac.in email addresses are allowed');
+      return;
+    }
     setErrorMessage('');
     setStep('confirm');
   };
@@ -139,7 +143,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="you@walchandsangli.ac.in"
                   className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                 />
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
