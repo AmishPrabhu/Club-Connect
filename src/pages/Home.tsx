@@ -143,7 +143,24 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             {/* Mobile-Only App Greeting */}
             <div className="block md:hidden w-full text-left mb-6">
               <p className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">
-                {user ? `Welcome Back, ${user.name.split(' ')[0]}` : 'Welcome Guest'}
+                {(() => {
+                  if (!user) return 'Welcome Guest';
+                  const parts = user.name.split(' ').filter(p => p.trim());
+                  if (parts.length === 0) return 'Welcome Guest';
+
+                  // Check if first part is an ID (contains numbers)
+                  const firstPart = parts[0];
+                  const hasNumbers = /\d/.test(firstPart);
+
+                  let friendlyName = firstPart;
+                  if (hasNumbers && parts.length > 1) {
+                    friendlyName = parts[1];
+                  }
+
+                  // Title Case
+                  friendlyName = friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1).toLowerCase();
+                  return `Welcome Back, ${friendlyName}`;
+                })()}
               </p>
               <h1 className="text-3xl font-serif font-bold text-white leading-tight">
                 Campus <span className="text-[#DAA520]">Connect</span>

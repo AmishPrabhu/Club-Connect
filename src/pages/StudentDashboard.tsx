@@ -107,7 +107,23 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                     </button>
 
                     <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2 break-words">
-                        Welcome back, <span className="text-[#DAA520]">{user?.name || 'Student'}</span>!
+                        Welcome back, <span className="text-[#DAA520]">{(() => {
+                            const name = user?.name || 'Student';
+                            const parts = name.split(' ').filter(p => p.trim());
+                            if (parts.length === 0) return 'Student';
+
+                            // Check if first part is an ID (contains numbers)
+                            const firstPart = parts[0];
+                            const hasNumbers = /\d/.test(firstPart);
+
+                            let friendlyName = firstPart;
+                            if (hasNumbers && parts.length > 1) {
+                                friendlyName = parts[1];
+                            }
+
+                            // Title Case
+                            return friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1).toLowerCase();
+                        })()}</span>!
                     </h1>
                     <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">
                         View and manage your event registrations
