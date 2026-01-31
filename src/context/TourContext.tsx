@@ -121,15 +121,15 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 
         // --- DASHBOARD PAGE ---
         {
-            element: '#tour-dashboard-stats',
+            element: '#nav-dashboard',
             popover: {
-                title: 'Your Dashboard',
-                description: 'Welcome to your personal command center. Here you can find all clubs.',
+                title: 'Clubs',
+                description: 'Explore all available clubs and join the ones that interest you.',
                 side: 'bottom'
             },
             onHighlightStarted: async () => {
                 navigateToPage('dashboard');
-                await waitForElement('#tour-dashboard-stats');
+                // await waitForElement('#nav-dashboard'); // Header is always there
             }
         },
 
@@ -149,29 +149,29 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 
         // --- EVENTS PAGE ---
         {
-            element: '#tour-events-filter',
+            element: '#nav-events',
             popover: {
-                title: 'Event Filters',
-                description: 'Filter events by "Upcoming", "Completed", or by specific clubs.',
+                title: 'Events',
+                description: 'Browse upcoming and past events from all clubs.',
                 side: 'bottom'
             },
             onHighlightStarted: async () => {
                 navigateToPage('events');
-                await waitForElement('#tour-events-filter');
+                // await waitForElement('#nav-events');
             }
         },
 
         // --- ANNOUNCEMENTS PAGE ---
         {
-            element: '#tour-announcements-list',
+            element: '#nav-announcements',
             popover: {
-                title: '📢 Announcements',
-                description: 'The official news feed. Stay informed about crucial updates.',
-                side: 'top'
+                title: 'Announcements',
+                description: 'Stay updated with important news and notices.',
+                side: 'bottom'
             },
             onHighlightStarted: async () => {
                 navigateToPage('announcements');
-                await waitForElement('#tour-announcements-list');
+                // await waitForElement('#nav-announcements');
             }
         },
 

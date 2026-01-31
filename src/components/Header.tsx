@@ -113,6 +113,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
           {navItems.map((item) => (
             <button
               key={item.id}
+              id={`nav-${item.id}`}
               onClick={() => onNavigate(item.id as Page)}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${currentPage === item.id
                 ? 'bg-white/10 text-[#DAA520] shadow-sm backdrop-blur-sm'

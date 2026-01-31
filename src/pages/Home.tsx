@@ -208,6 +208,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           <div className="grid grid-cols-2 gap-3 md:gap-6" id="tour-stats-grid-visual">
             {/* Explore Clubs Card */}
             <button
+              id="tour-stats-clubs-card"
               onClick={() => onNavigate('dashboard')}
               className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
             >
@@ -238,6 +239,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
             {/* Upcoming Events Card */}
             <button
+              id="tour-stats-events-card"
               onClick={() => onNavigate('events')}
               className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
             >
