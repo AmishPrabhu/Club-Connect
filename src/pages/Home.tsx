@@ -186,11 +186,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         {/* Stats Overview - 2 Large Action Cards */}
         <div className="relative mb-8 md:mb-12 -mt-6 md:-mt-16 z-20 px-4 md:px-0">
           {/* Anchor for tour to ensure visibility under sticky header */}
-          <div id="tour-stats-grid-anchor" className="absolute inset-0 w-full h-full pointer-events-none scroll-mt-[200px]" />
 
-          <div className="grid grid-cols-2 gap-3 md:gap-6" id="tour-stats-grid-visual">
+          <div className="grid grid-cols-2 gap-3 md:gap-6 scroll-mt-32 relative z-30" id="tour-stats-grid-visual">
             {/* Explore Clubs Card */}
             <button
+              id="tour-stats-clubs-card"
               onClick={() => onNavigate('dashboard')}
               className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
             >
@@ -208,6 +208,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
             {/* Upcoming Events Card */}
             <button
+              id="tour-stats-events-card"
               onClick={() => onNavigate('events')}
               className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
             >
@@ -226,7 +227,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Quick Actions & Search */}
-        <div className="mb-12" id="tour-quick-actions">
+        <div className="mb-12 relative z-30" id="tour-quick-actions">
           <div className="flex flex-col md:flex-row gap-6 items-center">
 
 
@@ -328,7 +329,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
 
         {/* Upcoming Events and Notifications Section */}
-        <div className="mb-16 scroll-mt-32" id="tour-upcoming-events">
+        <div className="mb-16 scroll-mt-32 relative z-30" id="tour-upcoming-events">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-2">
@@ -546,7 +547,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Campus Calendar & Weekly Events Section */}
-        <div className="mb-8 scroll-mt-32" id="tour-calendar-section">
+        <div className="mb-8 scroll-mt-32 relative z-30" id="tour-calendar-section">
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-[#002147] dark:text-blue-400" />
             <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>

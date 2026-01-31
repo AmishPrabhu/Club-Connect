@@ -131,6 +131,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             onClick={toggleDarkMode}
             className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors"
             aria-label="Toggle theme"
+            id="tour-dark-mode-toggle"
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
@@ -139,6 +140,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
           <button
             onClick={() => onNavigate('notifications')}
             className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors relative"
+            id="tour-notifications"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
@@ -223,6 +225,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             <button
               onClick={() => onNavigate('login')}
               className="ml-2 px-3 py-2 md:px-5 md:py-2.5 bg-[#DAA520] hover:bg-yellow-500 text-[#002147] font-bold rounded-lg shadow-md hover:shadow-lg transition-all text-sm flex items-center gap-2"
+              id="tour-profile"
             >
               <User className="w-4 h-4" />
               <span className="hidden md:inline">Login</span>

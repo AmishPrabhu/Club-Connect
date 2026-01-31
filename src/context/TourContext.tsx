@@ -38,7 +38,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
                 return resolve();
             }
 
-            const observer = new MutationObserver((mutations, obs) => {
+            const observer = new MutationObserver((_mutations, obs) => {
                 if (document.querySelector(selector)) {
                     obs.disconnect();
                     resolve();
@@ -74,25 +74,30 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             }
         },
         {
-            element: '#tour-stats-grid-anchor',
+            element: '#tour-stats-clubs-card',
             popover: {
-                title: 'Campus Overview',
-                description: 'Here you can see live statistics about Active Clubs, Students, and Upcoming Events.',
-                side: 'bottom'
-            },
-            onHighlightStarted: () => {
-            }
-        },
-        {
-            element: '#tour-quick-actions',
-            popover: {
-                title: 'Quick Navigation',
-                description: 'Use these shortcuts to jump to specific sections instantly.',
+                title: 'Club Statistics',
+                description: 'See the total number of active clubs on campus.',
                 side: 'top'
             },
             onHighlightStarted: () => {
+                const el = document.querySelector('#tour-stats-clubs-card');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         },
+        {
+            element: '#tour-stats-events-card',
+            popover: {
+                title: 'Event Statistics',
+                description: 'Check how many upcoming events are scheduled.',
+                side: 'top'
+            },
+            onHighlightStarted: () => {
+                const el = document.querySelector('#tour-stats-events-card');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+
         {
             element: '#tour-upcoming-events',
             popover: {
@@ -124,7 +129,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             },
             onHighlightStarted: async () => {
                 navigateToPage('dashboard');
-                await waitForElement('#tour-stats-grid-anchor');
+                await waitForElement('#tour-dashboard-stats');
             }
         },
 
@@ -207,16 +212,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         },
 
 
-        {
-            element: '#tour-ai-assistant',
-            popover: {
-                title: 'I am Here',
-                description: 'And finally, I am always here to assist you. Click to chat!',
-                side: 'left'
-            },
-            onHighlightStarted: () => {
-            }
-        },
+
     ];
 
     const startTour = () => {
