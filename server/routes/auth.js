@@ -16,6 +16,7 @@ const authLimiter = rateLimit({
     message: { message: 'Too many login attempts, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
+    skipSuccessfulRequests: true,
 });
 
 // Slightly more lenient for signup (10 per hour to prevent spam accounts)

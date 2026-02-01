@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; remainingAttempts?: number; lockoutDuration?: number }> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
       const response = await api.post('/auth/login', { email, password });
@@ -101,11 +101,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       getUserMemberships(user.email).then(memberships => {
         setAuthState(prev => ({ ...prev, memberships }));
       });
-      return true;
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
       console.error('Login error:', error);
       setAuthState(prev => ({ ...prev, isLoading: false }));
-      return false;
+
+      const result: { success: boolean; error?: string; remainingAttempts?: number; lockoutDuration?: number } = {
+        success: false,
+        error: error.response?.data?.message || 'Login failed',
+      };
+
+      if (error.response) {
+        // Parse RateLimit headers
+        const remaining = error.response.headers['ratelimit-remaining'];
+        if (remaining !== undefined) {
+          result.remainingAttempts = parseInt(remaining, 10);
+        }
+
+        const reset = error.response.headers['ratelimit-reset'];
+        const retryAfter = error.response.headers['retry-after'];
+
+        if (retryAfter) {
+          // Retry-After is usually in seconds
+          result.lockoutDuration = parseInt(retryAfter, 10) * 1000;
+        } else if (reset) {
+          // RateLimit-Reset is usually epoch seconds or seconds from now depending on draft
+          // express-rate-limit draft-7 (default) returns seconds until reset
+          // Check if it's large (epoch) or small (seconds)
+          // standardHeaders: true sends RateLimit-Reset as seconds
+          const resetSeconds = parseInt(reset, 10);
+          result.lockoutDuration = resetSeconds * 1000;
+        }
+      }
+
+      return result;
     }
   };
 

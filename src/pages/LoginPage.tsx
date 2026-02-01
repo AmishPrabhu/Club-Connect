@@ -31,8 +31,46 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     }
   }, [isAuthenticated, user, onNavigate]);
 
+  // Lockout state
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(() => {
+    const saved = localStorage.getItem('loginLockoutUntil');
+    if (saved) {
+      const timestamp = parseInt(saved, 10);
+      return timestamp > Date.now() ? timestamp : null;
+    }
+    return null;
+  });
+
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  // Timer to update countdown and clear lockout
+  useEffect(() => {
+    if (!lockoutUntil) return;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const diff = lockoutUntil - now;
+
+      if (diff <= 0) {
+        setLockoutUntil(null);
+        localStorage.removeItem('loginLockoutUntil');
+        setError('');
+      } else {
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+      }
+    };
+
+    updateTimer(); // Initial call
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [lockoutUntil]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutUntil) return; // Prevent submission if locked out
+
     setError('');
 
     if (!email || !password) {
@@ -40,9 +78,23 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       return;
     }
 
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid email or password. Please check your credentials.');
+    const result = await login(email, password);
+    if (!result.success) {
+      let msg = result.error || 'Invalid credentials';
+
+      // Handle Lockout
+      if (result.lockoutDuration) {
+        const until = Date.now() + result.lockoutDuration;
+        setLockoutUntil(until);
+        localStorage.setItem('loginLockoutUntil', until.toString());
+        msg = `Too many attempts. Try again in 15 minutes.`;
+      }
+      // Handle Attempts Remaining
+      else if (result.remainingAttempts !== undefined) {
+        msg = `Invalid credentials. ${result.remainingAttempts} attempts remaining.`;
+      }
+
+      setError(msg);
     }
   };
 
@@ -183,11 +235,19 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3"
+                disabled={isLoading || !!lockoutUntil}
+                className={`w-full font-bold py-4 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg ${lockoutUntil
+                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                    : 'bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] hover:scale-[1.02] active:scale-[0.98] hover:shadow-yellow-500/30'
+                  }`}
               >
                 {isLoading ? (
                   <div className="w-6 h-6 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                ) : lockoutUntil ? (
+                  <span className="flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Locked ({timeLeft})
+                  </span>
                 ) : (
                   <>
                     <span>Access Dashboard</span>
