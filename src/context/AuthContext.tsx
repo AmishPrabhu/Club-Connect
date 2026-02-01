@@ -121,16 +121,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const reset = error.response.headers['ratelimit-reset'];
         const retryAfter = error.response.headers['retry-after'];
 
-        if (retryAfter) {
-          // Retry-After is usually in seconds
-          result.lockoutDuration = parseInt(retryAfter, 10) * 1000;
-        } else if (reset) {
-          // RateLimit-Reset is usually epoch seconds or seconds from now depending on draft
-          // express-rate-limit draft-7 (default) returns seconds until reset
-          // Check if it's large (epoch) or small (seconds)
-          // standardHeaders: true sends RateLimit-Reset as seconds
-          const resetSeconds = parseInt(reset, 10);
-          result.lockoutDuration = resetSeconds * 1000;
+        if (error.response.status === 429) {
+          if (retryAfter) {
+            // Retry-After is usually in seconds
+            result.lockoutDuration = parseInt(retryAfter, 10) * 1000;
+          } else if (reset) {
+            // express-rate-limit draft-7 (default) returns seconds until reset
+            const resetSeconds = parseInt(reset, 10);
+            result.lockoutDuration = resetSeconds * 1000;
+          }
         }
       }
 
