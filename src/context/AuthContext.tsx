@@ -242,10 +242,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUpWithGoogle = async (credential: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const signUpWithGoogle = async (credential: string, password: string, name?: string): Promise<{ success: boolean; error?: string }> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
-      const response = await api.post('/auth/google/signup', { credential, password });
+      const response = await api.post('/auth/google/signup', { credential, password, name });
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);

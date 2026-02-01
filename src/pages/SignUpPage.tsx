@@ -144,7 +144,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
         // If we have Google data, use Google signup
         if (googleData) {
-            const result = await signUpWithGoogle(googleData.credential, password);
+            const result = await signUpWithGoogle(googleData.credential, password, name);
             if (!result.success) {
                 setError(result.error || 'Failed to create account');
             }
@@ -425,23 +425,18 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                         {(googleData || step === 'DETAILS') && (
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div className="space-y-4">
-                                    {/* Only show name field for manual signup as email is fixed */}
-                                    {!googleData && (
-                                        <>
-                                            <div className="grid grid-cols-1 gap-2">
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
-                                                    placeholder="e.g. Amish Prabhu"
-                                                    required
-                                                    autoFocus
-                                                />
-                                            </div>
-                                        </>
-                                    )}
+                                    <div className="grid grid-cols-1 gap-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-college-blue-primary/20 focus:border-college-blue-primary transition-all outline-none"
+                                            placeholder="e.g. Amish Prabhu"
+                                            required
+                                            autoFocus
+                                        />
+                                    </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-2">

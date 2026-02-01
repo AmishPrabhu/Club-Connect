@@ -19,7 +19,7 @@ interface UserEvent {
 }
 
 export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNavigateToClub }: UserProfileProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'following' | 'tasks'>('overview');
   const [likedClubsList, setLikedClubsList] = useState<DBClub[]>([]);
   const [likedClubNotifications, setLikedClubNotifications] = useState<DBNotification[]>([]);
@@ -285,6 +285,47 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
   const pastEvents = userEvents.filter(e => new Date(e.event.date) < now);
   const displayedEvents = eventTab === 'upcoming' ? upcomingEvents : pastEvents;
+
+  // Delete Account State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<'confirm' | 'otp'>('confirm');
+  const [deleteOtp, setDeleteOtp] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleRequestDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError('');
+    // Dynamically import to ensure availability
+    const { requestDeleteOtp } = await import('../lib/dbService');
+    const result = await requestDeleteOtp();
+    setIsDeleting(false);
+
+    if (result.success) {
+      setDeleteStep('otp');
+    } else {
+      setDeleteError(result.message || 'Failed to send verification code');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteOtp) return;
+    setIsDeleting(true);
+    setDeleteError('');
+
+    const { deleteAccount } = await import('../lib/dbService');
+    const result = await deleteAccount(deleteOtp);
+    setIsDeleting(false);
+
+    if (result.success) {
+      // Force logout and redirect
+      // Force logout and redirect
+      await logout();
+      window.location.href = '/';
+    } else {
+      setDeleteError(result.message || 'Failed to delete account');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -797,11 +838,14 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                                   </span>
                                 </div>
                               )}
-                              <div className="flex items-center gap-1.5">
-                                <User className="w-3.5 h-3.5" />
-                                <span>Assigned by {task.createdBy}</span>
-                              </div>
                             </div>
+
+
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5" />
+                              <span>Assigned by {task.createdBy}</span>
+                            </div>
+
                           </div>
 
                           <div>
@@ -815,55 +859,202 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ))
+                    }
                   </div>
                 )}
               </div>
             )}
 
             {/* Dynamic Club Message Tabs */}
-            {activeTab.startsWith('messages-') && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
-                    Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
-                  </h3>
-                </div>
+            {
+              activeTab.startsWith('messages-') && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
+                      Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
+                    </h3>
+                  </div>
 
-                {loadingMessages[activeTab.replace('messages-', '')] ? (
-                  <div className="flex justify-center py-8">
-                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
-                      clubMessages[activeTab.replace('messages-', '')].map(msg => (
-                        <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
-                              <p className="text-xs text-slate-500 font-medium mt-1">
-                                From {msg.senderName} ({msg.senderRole}) • {new Date(msg.createdAt).toLocaleDateString()}
-                              </p>
+                  {loadingMessages[activeTab.replace('messages-', '')] ? (
+                    <div className="flex justify-center py-8">
+                      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
+                        clubMessages[activeTab.replace('messages-', '')].map(msg => (
+                          <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
+                                <p className="text-xs text-slate-500 font-medium mt-1">
+                                  From {msg.senderName} ({msg.senderRole}) • {new Date(msg.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
                             </div>
+                            <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                              {msg.body}
+                            </p>
                           </div>
-                          <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                            {msg.body}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-slate-500 dark:text-slate-400 italic text-center py-8">No messages from this club yet.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                        ))
+                      ) : (
+                        <p className="text-slate-500 dark:text-slate-400 italic text-center py-8">No messages from this club yet.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            }
 
           </div>
         </div>
       )
       }
-    </div >
+
+      {/* Dynamic Club Message Tabs */}
+      {
+        activeTab.startsWith('messages-') && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
+                Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
+              </h3>
+            </div>
+
+            {loadingMessages[activeTab.replace('messages-', '')] ? (
+              <div className="flex justify-center py-8">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
+                  clubMessages[activeTab.replace('messages-', '')].map(msg => (
+                    <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
+                          <p className="text-xs text-slate-500 font-medium mt-1">
+                            From {msg.senderName} ({msg.senderRole}) • {new Date(msg.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                        {msg.body}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 dark:text-slate-400 italic text-center py-8">No messages from this club yet.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      {/* Danger Zone */}
+      <div className="mt-12 border-t border-slate-200 dark:border-slate-700 pt-8">
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-2xl p-6">
+          <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Danger Zone</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            Delete Account
+          </button>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {
+        showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+                  <div className="w-6 h-6 text-red-600 dark:text-red-400">⚠️</div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteStep('confirm');
+                    setDeleteOtp('');
+                    setDeleteError('');
+                  }}
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+
+              <h3 className="text-xl font-bold text-[#002147] dark:text-white mb-2">
+                {deleteStep === 'confirm' ? 'Delete Account?' : 'Verify Identity'}
+              </h3>
+
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
+                {deleteStep === 'confirm'
+                  ? 'This action triggers a permanent deletion of your profile, history, and data. To proceed, we need to verify your email.'
+                  : 'Please enter the verification code sent to your email to confirm deletion.'}
+              </p>
+
+              {deleteError && (
+                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 text-red-600 text-sm rounded-lg font-medium">
+                  {deleteError}
+                </div>
+              )}
+
+              {deleteStep === 'confirm' ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRequestDelete}
+                    disabled={isDeleting}
+                    className="flex-1 py-3 px-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+                  >
+                    {isDeleting ? 'Sending...' : 'Send Verification Code'}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      value={deleteOtp}
+                      onChange={(e) => setDeleteOtp(e.target.value)}
+                      placeholder="Enter 6-digit code"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-red-500 outline-none"
+                      maxLength={6}
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    onClick={handleConfirmDelete}
+                    disabled={isDeleting || deleteOtp.length < 6}
+                    className="w-full py-3 px-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+                  >
+                    {isDeleting ? (
+                      <>Loading...</>
+                    ) : (
+                      <>
+                        Confirm Deletion
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
   );
 }

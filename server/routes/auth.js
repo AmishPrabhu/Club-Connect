@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
-import { sendPasswordResetEmail, sendOtpEmail } from '../services/emailService.js';
+import { sendPasswordResetEmail, sendOtpEmail, sendDeleteAccountOtpEmail } from '../services/emailService.js';
 import rateLimit from 'express-rate-limit';
 import Otp from '../models/Otp.js';
 
@@ -435,7 +435,10 @@ router.post('/google/signup', async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        const { email, name } = payload;
+        const { email, name: googleName } = payload;
+
+        // Use provided name if available, otherwise fallback to Google name
+        const finalName = req.body.name || googleName || name;
 
         // Check domain restriction - only allow @walchandsangli.ac.in emails
         if (!email.endsWith('@walchandsangli.ac.in')) {
@@ -457,7 +460,7 @@ router.post('/google/signup', async (req, res) => {
         const newUser = new User({
             email,
             password: hashedPassword,
-            name,
+            name: finalName,
             authProvider: 'google',
             role: 'user',
         });
@@ -575,6 +578,76 @@ router.post('/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Reset password error:', error);
         res.status(500).json({ message: 'Failed to reset password. Please try again.' });
+    }
+});
+
+// Request Delete Account OTP
+router.post('/request-delete-otp', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const otp = generateOTP();
+
+        // Save OTP to DB (reusing Otp model, keyed by email)
+        await Otp.findOneAndUpdate(
+            { email: user.email },
+            { otp, createdAt: Date.now() },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+
+        // Send email with specific warning template
+        await sendDeleteAccountOtpEmail(user.email, otp);
+
+        res.json({ message: 'Verification code sent to your email' });
+    } catch (error) {
+        console.error('Request delete OTP error:', error);
+        res.status(500).json({ message: 'Failed to send verification code' });
+    }
+});
+
+// Confirm Delete Account
+router.delete('/delete-account', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { otp } = req.body;
+
+        if (!otp) {
+            return res.status(400).json({ message: 'Verification code is required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify OTP
+        const otpRecord = await Otp.findOne({ email: user.email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'Invalid or expired code' });
+        }
+
+        if (otpRecord.otp !== otp) {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+
+        // Delete user
+        await User.findByIdAndDelete(userId);
+
+        // Cleanup: Remove OTP
+        await Otp.deleteOne({ email: user.email });
+
+        // Optional: Cleanup club memberships
+        await ClubMember.deleteMany({ userId: userId });
+
+        res.json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Failed to delete account' });
     }
 });
 

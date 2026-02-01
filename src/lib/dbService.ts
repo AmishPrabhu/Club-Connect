@@ -9,6 +9,28 @@ import {
     ClubMessage,
 } from '../types/auth';
 
+// ==================== ACCOUNT DELETION ====================
+
+export const requestDeleteOtp = async (): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const response = await api.post('/auth/request-delete-otp');
+        return { success: true, message: response.data.message };
+    } catch (error: any) {
+        console.error('Error requesting delete OTP:', error);
+        return { success: false, message: error.response?.data?.message || 'Failed to send OTP' };
+    }
+};
+
+export const deleteAccount = async (otp: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const response = await api.delete('/auth/delete-account', { data: { otp } });
+        return { success: true, message: response.data.message };
+    } catch (error: any) {
+        console.error('Error deleting account:', error);
+        return { success: false, message: error.response?.data?.message || 'Failed to delete account' };
+    }
+};
+
 // Helper to map _id to id
 const mapId = (item: any) => {
     if (!item) return null;
