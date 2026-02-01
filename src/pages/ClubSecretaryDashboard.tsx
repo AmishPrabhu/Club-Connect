@@ -10,6 +10,7 @@ import AttachmentGallery from '../components/AttachmentGallery';
 import MemberManager from '../components/MemberManager';
 import LocationPickerModal from '../components/LocationPickerModal';
 import ImageModal from '../components/ImageModal';
+import ConfirmModal from '../components/ConfirmModal';
 import { useNavigation } from '../context/NavigationContext';
 
 // Notification Sender Component
@@ -509,6 +510,22 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isEditingInstagram, setIsEditingInstagram] = useState(false);
   const [instagramSaving, setInstagramSaving] = useState(false);
 
+  // Confirm modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'info';
+    variant: 'confirm' | 'alert';
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'danger',
+    variant: 'confirm',
+  });
+
 
 
   // Ref to prevent duplicate member additions in React Strict Mode
@@ -714,14 +731,21 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setCollisionEvents([]);
   };
 
-  const handleDeletePost = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-
-    const success = await deletePost(postId);
-    if (success && user?.clubId) {
-      const allPosts = await getPosts();
-      setPosts(allPosts.filter(p => p.clubId === activeClubId));
-    }
+  const handleDeletePost = (postId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Post',
+      message: 'Are you sure you want to delete this post? This action cannot be undone.',
+      type: 'danger',
+      variant: 'confirm',
+      onConfirm: async () => {
+        const success = await deletePost(postId);
+        if (success && user?.clubId) {
+          const allPosts = await getPosts();
+          setPosts(allPosts.filter(p => p.clubId === activeClubId));
+        }
+      },
+    });
   };
 
   const handleEditPhotos = (post: DBPost) => {
@@ -1349,7 +1373,13 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
                                     if (!cloudName || !uploadPreset || !window.cloudinary) {
-                                      alert('Upload not available');
+                                      setConfirmModal({
+                                        isOpen: true,
+                                        title: 'Upload Unavailable',
+                                        message: 'The upload widget is not available. Please refresh the page and try again.',
+                                        type: 'info',
+                                        variant: 'alert',
+                                      });
                                       return;
                                     }
 
@@ -2321,6 +2351,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         imageUrl={modalImage || ''}
+      />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        variant={confirmModal.variant}
       />
     </div >
 

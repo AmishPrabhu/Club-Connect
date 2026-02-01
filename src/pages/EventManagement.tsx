@@ -5,6 +5,7 @@ import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService
 import { DBPost, User, ClubMember, EventTask, EventRSVP, CertificateNamePosition } from '../types/auth';
 import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs, saveCertificateTemplate, updateParticipantCertificate } from '../lib/dbService';
 import { useAuth } from '../context/AuthContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const DEFAULT_CERTIFICATE_TEMPLATE = "https://res.cloudinary.com/drv3fdbve/image/upload/v1769153545/club-connect/certificates/696800e5b85566e533cbbbb3/mm8ktzaeontqyossmepi.png";
 
@@ -64,6 +65,22 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
     // User's role in this specific club (for multi-club members)
     const [userClubRole, setUserClubRole] = useState<string | null>(null);
+
+    // Confirm modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'danger' | 'warning' | 'info';
+        variant: 'confirm' | 'alert';
+        onConfirm?: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        variant: 'confirm',
+    });
 
     // Compute isTreasurer from userClubRole (club-specific) or fallback to user.role (for single-club users)
     const isTreasurer = userClubRole
@@ -1304,15 +1321,22 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             </td>
                                                             <td className="px-4 py-3">
                                                                 <button
-                                                                    onClick={async () => {
+                                                                    onClick={() => {
                                                                         if (!participant.id) return;
-                                                                        if (confirm('Are you sure you want to remove this participant?')) {
-                                                                            const success = await deleteEventParticipant(eventId, participant.id);
-                                                                            if (success) {
-                                                                                setEventRsvps(prev => prev.filter(p => p.id !== participant.id));
-                                                                                setMessage({ type: 'success', text: 'Participant removed' });
-                                                                            }
-                                                                        }
+                                                                        setConfirmModal({
+                                                                            isOpen: true,
+                                                                            title: 'Remove Participant',
+                                                                            message: 'Are you sure you want to remove this participant? This action cannot be undone.',
+                                                                            type: 'danger',
+                                                                            variant: 'confirm',
+                                                                            onConfirm: async () => {
+                                                                                const success = await deleteEventParticipant(eventId, participant.id!);
+                                                                                if (success) {
+                                                                                    setEventRsvps(prev => prev.filter(p => p.id !== participant.id));
+                                                                                    setMessage({ type: 'success', text: 'Participant removed' });
+                                                                                }
+                                                                            },
+                                                                        });
                                                                     }}
                                                                     className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
                                                                 >
@@ -1811,7 +1835,17 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     )}
                 </div>
             </div>
+
+            {/* Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                variant={confirmModal.variant}
+            />
         </div>
     );
 }
-

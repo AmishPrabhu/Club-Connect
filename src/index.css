@@ -128,3 +128,34 @@ body:is(.dark *) {
 .driver-popover.jarvis-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-top-color: rgba(15, 23, 42, 0.95);
 }
+
+/* Confirm Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-modalSlide {
+  animation: modalSlide 0.25s ease-out;
+}

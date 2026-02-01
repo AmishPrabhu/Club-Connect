@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Page } from '../types/page';
 import { DBPost, DBClub } from '../types/auth';
 import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer, verifyEventBudget } from '../lib/dbService';
+import ConfirmModal from '../components/ConfirmModal';
 
 interface AdvisorDashboardProps {
     onNavigate: (page: Page) => void;
@@ -24,6 +25,22 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     const [editingRole, setEditingRole] = useState<'secretary' | 'president' | 'treasurer' | null>(null);
     const [roleForm, setRoleForm] = useState({ name: '', email: '', password: 'Hello@123' });
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Confirm modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'danger' | 'warning' | 'info';
+        variant: 'confirm' | 'alert';
+        onConfirm?: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        variant: 'confirm',
+    });
 
     useEffect(() => {
         const loadData = async () => {
@@ -114,30 +131,47 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     };
 
 
-    const handleRemoveRole = async (role: 'secretary' | 'president' | 'treasurer') => {
+    const handleRemoveRole = (role: 'secretary' | 'president' | 'treasurer') => {
         if (!club?.id) return;
 
-        if (!window.confirm(`Are you sure you want to remove the ${role}? This will unlink their account from the club.`)) {
-            return;
-        }
-
-        setIsSaving(true);
-        try {
-            const result = await removeClubOfficer(club.id, role);
-            if (result.success) {
-                // Refresh club data
-                const clubs = await getClubs();
-                const foundClub = clubs.find(c => c.id === user?.clubId);
-                if (foundClub) setClub(foundClub);
-            } else {
-                alert('Failed to remove officer');
-            }
-        } catch (error) {
-            console.error('Error removing role:', error);
-            alert('An error occurred');
-        } finally {
-            setIsSaving(false);
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: `Remove ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+            message: `Are you sure you want to remove the ${role}? This will unlink their account from the club.`,
+            type: 'warning',
+            variant: 'confirm',
+            onConfirm: async () => {
+                setIsSaving(true);
+                try {
+                    const result = await removeClubOfficer(club!.id, role);
+                    if (result.success) {
+                        // Refresh club data
+                        const clubs = await getClubs();
+                        const foundClub = clubs.find(c => c.id === user?.clubId);
+                        if (foundClub) setClub(foundClub);
+                    } else {
+                        setConfirmModal({
+                            isOpen: true,
+                            title: 'Error',
+                            message: 'Failed to remove officer. Please try again.',
+                            type: 'info',
+                            variant: 'alert',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error removing role:', error);
+                    setConfirmModal({
+                        isOpen: true,
+                        title: 'Error',
+                        message: 'An error occurred. Please try again.',
+                        type: 'info',
+                        variant: 'alert',
+                    });
+                } finally {
+                    setIsSaving(false);
+                }
+            },
+        });
     };
 
     if (isLoading) {
@@ -559,6 +593,17 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                     </div>
                 </div>
             )}
+
+            {/* Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                variant={confirmModal.variant}
+            />
         </div>
     );
 }

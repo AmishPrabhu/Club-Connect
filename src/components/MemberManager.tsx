@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, UserPlus, X, Check, Users, Download, Upload } from
 import { ClubMember, UserRole } from '../types/auth';
 import { getClubMembers, addClubMember, updateClubMember, removeClubMember } from '../lib/dbService';
 import BulkImportModal from './BulkImportModal';
+import ConfirmModal from './ConfirmModal';
 
 interface MemberManagerProps {
     clubId: string;
@@ -43,6 +44,22 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [yearFilter, setYearFilter] = useState<string>('');
     const [boardTypeFilter, setBoardTypeFilter] = useState<string>('');
+
+    // Confirm modal state
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'danger' | 'warning' | 'info';
+        variant: 'confirm' | 'alert';
+        onConfirm?: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        variant: 'confirm',
+    });
 
     // Form state
     const [newMember, setNewMember] = useState({
@@ -115,7 +132,13 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         } catch (error: any) {
             // Revert changes
             setMembers(prev => prev.filter(m => m.id !== tempId));
-            alert(`Failed to add member: ${error.message || 'Unknown error'}`);
+            setConfirmModal({
+                isOpen: true,
+                title: 'Error',
+                message: `Failed to add member: ${error.message || 'Unknown error'}`,
+                type: 'info',
+                variant: 'alert',
+            });
             // Optionally restore form state here if needed, but for now alert is sufficient backup
         }
     };
@@ -143,26 +166,45 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             if (originalMember) {
                 setMembers(prev => prev.map(m => m.id === editingMember.id ? originalMember : m));
             }
-            alert('Failed to update member');
+            setConfirmModal({
+                isOpen: true,
+                title: 'Error',
+                message: 'Failed to update member. Please try again.',
+                type: 'info',
+                variant: 'alert',
+            });
         }
     };
 
-    const handleRemoveMember = async (memberId: string) => {
-        if (!confirm('Are you sure you want to remove this member?')) return;
+    const handleRemoveMember = (memberId: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Remove Member',
+            message: 'Are you sure you want to remove this member? This action cannot be undone.',
+            type: 'danger',
+            variant: 'confirm',
+            onConfirm: async () => {
+                const memberToRemove = members.find(m => m.id === memberId);
 
-        const memberToRemove = members.find(m => m.id === memberId);
+                // Optimistic update
+                setMembers(prev => prev.filter(m => m.id !== memberId));
 
-        // Optimistic update
-        setMembers(prev => prev.filter(m => m.id !== memberId));
-
-        const success = await removeClubMember(clubId, memberId);
-        if (!success) {
-            // Revert
-            if (memberToRemove) {
-                setMembers(prev => [...prev, memberToRemove]);
-            }
-            alert('Failed to remove member');
-        }
+                const success = await removeClubMember(clubId, memberId);
+                if (!success) {
+                    // Revert
+                    if (memberToRemove) {
+                        setMembers(prev => [...prev, memberToRemove]);
+                    }
+                    setConfirmModal({
+                        isOpen: true,
+                        title: 'Error',
+                        message: 'Failed to remove member. Please try again.',
+                        type: 'info',
+                        variant: 'alert',
+                    });
+                }
+            },
+        });
     };
 
     const getBoardTypeLabel = (boardType: string) => {
@@ -618,6 +660,17 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                     setIsBulkImportOpen(false);
                     fetchMembers(false);
                 }}
+            />
+
+            {/* Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                variant={confirmModal.variant}
             />
         </div>
     );

@@ -3,6 +3,7 @@ import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus
 
 import { useAuth } from '../context/AuthContext';
 import { DBClub, DBPost, DBNotification } from '../types/auth';
+import ConfirmModal from '../components/ConfirmModal';
 import {
   getClubs,
   createClub,
@@ -196,6 +197,22 @@ export default function AdminDashboard() {
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<DBClub | null>(null);
 
+  // Confirm modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'info';
+    variant: 'confirm' | 'alert';
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'danger',
+    variant: 'confirm',
+  });
+
   // Form states
   const [newClub, setNewClub] = useState({
     name: '',
@@ -282,15 +299,28 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteClub = async (clubId: string) => {
-    if (!confirm('Are you sure you want to delete this club? This action cannot be undone.')) return;
-
-    const success = await deleteClub(clubId);
-    if (success) {
-      loadData();
-    } else {
-      alert('Failed to delete club');
-    }
+  const handleDeleteClub = (clubId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Club',
+      message: 'Are you sure you want to delete this club? This action cannot be undone.',
+      type: 'danger',
+      variant: 'confirm',
+      onConfirm: async () => {
+        const success = await deleteClub(clubId);
+        if (success) {
+          loadData();
+        } else {
+          setConfirmModal({
+            isOpen: true,
+            title: 'Error',
+            message: 'Failed to delete club. Please try again.',
+            type: 'info',
+            variant: 'alert',
+          });
+        }
+      },
+    });
   };
 
   // Secretary handlers
@@ -399,15 +429,28 @@ export default function AdminDashboard() {
   };
 
   // Post handlers
-  const handleDeletePost = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-
-    const success = await deletePost(postId);
-    if (success) {
-      loadData();
-    } else {
-      alert('Failed to delete post');
-    }
+  const handleDeletePost = (postId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Post',
+      message: 'Are you sure you want to delete this post? This will remove it permanently.',
+      type: 'danger',
+      variant: 'confirm',
+      onConfirm: async () => {
+        const success = await deletePost(postId);
+        if (success) {
+          loadData();
+        } else {
+          setConfirmModal({
+            isOpen: true,
+            title: 'Error',
+            message: 'Failed to delete post. Please try again.',
+            type: 'info',
+            variant: 'alert',
+          });
+        }
+      },
+    });
   };
 
   // Notification handlers
@@ -1451,6 +1494,17 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* Confirm Modal */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          type={confirmModal.type}
+          variant={confirmModal.variant}
+        />
       </div>
     </div >
   );
