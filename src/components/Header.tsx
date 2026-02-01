@@ -1,4 +1,4 @@
-import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle } from 'lucide-react';
+import { LogOut, Bell, User, Sun, Moon, Shield, Settings, PlayCircle, ExternalLink } from 'lucide-react';
 import { Page } from '../types/page';
 import { useDarkMode } from '../context/DarkModeContext';
 import { User as UserType } from '../types/auth';
@@ -227,6 +227,17 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       <div className="p-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"><User className="w-4 h-4" /></div>
                       <span>My Profile</span>
                     </button>
+
+                    <a
+                      href="https://wic.walchandsangli.ac.in/login.aspx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowUserMenu(false)}
+                      className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
+                    >
+                      <div className="p-1.5 rounded-md bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400"><ExternalLink className="w-4 h-4" /></div>
+                      <span>ERP Portal</span>
+                    </a>
                   </div>
 
                   <div className="border-t border-slate-100 dark:border-slate-700 p-1.5 mt-1">
