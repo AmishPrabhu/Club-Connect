@@ -16,7 +16,7 @@ interface NavigationContextType {
     selectedMembership: ClubMembership | null;
     setSelectedMembership: (membership: ClubMembership | null) => void;
     navigateToPage: (page: Page, params?: Record<string, string>) => void;
-    navigateToClub: (clubId: string) => void;
+    navigateToClub: (clubId: string, slug?: string) => void;
     navigateToMemberBoard: (member: any) => void;
     navigateToEvent: (eventId: string) => void;
     navigateToPost: (postId: string, returnTo?: { page: Page; params?: Record<string, string> }) => void;
@@ -186,11 +186,11 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
         }
     };
 
-    const navigateToClub = (clubId: string) => {
+    const navigateToClub = (clubId: string, slug?: string) => {
         setPreviousPage(currentPage);
-        setSelectedClub(clubId);
+        setSelectedClub(clubId); // Internal state uses ID (or slug if that's all we have)
         setCurrentPage('club');
-        updateUrl('club', { clubId });
+        updateUrl('club', { clubId: slug || clubId });
     };
 
     const navigateToMemberBoard = (member: any) => {

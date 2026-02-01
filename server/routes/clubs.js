@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Club from '../models/Club.js';
 import User from '../models/User.js';
 import Post from '../models/Post.js';
@@ -30,7 +31,16 @@ router.get('/', async (req, res) => {
 // Get single club
 router.get('/:id', async (req, res) => {
     try {
-        const club = await Club.findById(req.params.id);
+        let club;
+
+        if (mongoose.isValidObjectId(req.params.id)) {
+            club = await Club.findById(req.params.id);
+        }
+
+        if (!club) {
+            club = await Club.findOne({ slug: req.params.id });
+        }
+
         if (!club) return res.status(404).json({ message: 'Club not found' });
         res.json(club);
     } catch (error) {
@@ -52,6 +62,18 @@ router.post('/', verifyToken, async (req, res) => {
 // Update club (Protected)
 router.put('/:id', verifyToken, async (req, res) => {
     try {
+        // Authorization Check
+        if (req.user.role !== 'admin') {
+            const officer = await ClubMember.findOne({
+                clubId: req.params.id,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (!officer) {
+                return res.status(403).json({ message: 'Not authorized to update this club' });
+            }
+        }
+
         const updatedClub = await Club.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedClub) return res.status(404).json({ message: 'Club not found' });
         res.json(updatedClub);
@@ -62,7 +84,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 
 // Delete club (Protected)
 // Delete club (Protected)
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyAdmin, async (req, res) => {
     try {
         const club = await Club.findById(req.params.id);
         if (!club) return res.status(404).json({ message: 'Club not found' });
@@ -127,6 +149,18 @@ router.post('/:id/members', verifyToken, async (req, res) => {
     try {
         const { name, email, role, userId, boardType, academicYear, joinedAt } = req.body;
         const clubId = req.params.id;
+
+        // Authorization Check
+        if (req.user.role !== 'admin') {
+            const officer = await ClubMember.findOne({
+                clubId,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (!officer) {
+                return res.status(403).json({ message: 'Not authorized to add members to this club' });
+            }
+        }
 
         const existing = await ClubMember.findOne({ clubId, email });
         if (existing) {
@@ -208,6 +242,18 @@ router.post('/:id/members', verifyToken, async (req, res) => {
 // Update member
 router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
     try {
+        // Authorization Check
+        if (req.user.role !== 'admin') {
+            const officer = await ClubMember.findOne({
+                clubId: req.params.id,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (!officer) {
+                return res.status(403).json({ message: 'Not authorized to manage members' });
+            }
+        }
+
         const { name, email, role, academicYear, joinedAt, boardType } = req.body;
         // Basic validation/permission check could go here
 
@@ -230,6 +276,18 @@ router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
 // Remove member
 router.delete('/:id/members/:memberId', verifyToken, async (req, res) => {
     try {
+        // Authorization Check
+        if (req.user.role !== 'admin') {
+            const officer = await ClubMember.findOne({
+                clubId: req.params.id,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (!officer) {
+                return res.status(403).json({ message: 'Not authorized to remove members' });
+            }
+        }
+
         const memberToDelete = await ClubMember.findById(req.params.memberId);
         if (!memberToDelete) {
             return res.status(404).json({ message: 'Member not found' });

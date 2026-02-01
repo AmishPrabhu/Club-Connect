@@ -56,7 +56,7 @@ router.get('/stats/count', async (req, res) => {
 // Get user profile
 router.get('/:id', verifyToken, async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('-password');
+        const user = await User.findById(req.params.id).select('-password -resetPasswordToken -resetPasswordExpires');
         if (!user) return res.status(404).json({ message: 'User not found' });
         res.json(user);
     } catch (error) {
@@ -68,6 +68,11 @@ router.get('/:id', verifyToken, async (req, res) => {
 router.put('/:id', verifyToken, async (req, res) => {
 
     try {
+        // Authorization Check: User can only update their own profile
+        if (req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Not authorized to update this profile' });
+        }
+
         const { name, bio, email, clubId, clubName } = req.body;
         // Prevent role update here for security, unless admin
         const updates = { name, bio, email };
@@ -76,7 +81,7 @@ router.put('/:id', verifyToken, async (req, res) => {
         if (clubId !== undefined) updates.clubId = clubId;
         if (clubName !== undefined) updates.clubName = clubName;
 
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password -resetPasswordToken -resetPasswordExpires');
         res.json(updatedUser);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });

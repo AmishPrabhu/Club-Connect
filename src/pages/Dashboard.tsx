@@ -6,7 +6,7 @@ import { getClubs, getPosts, toggleClubLike } from '../lib/dbService';
 import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
-  onNavigateToClub: (clubId: string) => void;
+  onNavigateToClub: (clubId: string, slug?: string) => void;
   onBack?: () => void;
 }
 
@@ -109,7 +109,8 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   };
 
   const handleResultClick = (clubId: string) => {
-    onNavigateToClub(clubId);
+    const club = clubs.find(c => c.id === clubId);
+    onNavigateToClub(clubId, club?.slug);
     setShowDropdown(false);
     setSearchQuery('');
   };
@@ -247,7 +248,7 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
                 <ClubCard
                   key={club.id}
                   club={club}
-                  onClick={() => onNavigateToClub(club.id!)}
+                  onClick={() => onNavigateToClub(club.id!, club.slug)}
                   isLiked={user?.likedClubs?.includes(club.id!)}
                   onToggleLike={handleToggleLike}
                 />

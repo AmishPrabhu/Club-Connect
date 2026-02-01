@@ -9,7 +9,7 @@ interface UserProfileProps {
   onBack: () => void;
   onNavigate: (page: Page) => void;
   onNavigateToPost: (postId: string) => void;
-  onNavigateToClub?: (clubId: string) => void;
+  onNavigateToClub?: (clubId: string, slug?: string) => void;
 }
 
 interface UserEvent {
@@ -558,7 +558,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                         <div
                           key={club.id}
                           className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all cursor-pointer"
-                          onClick={() => onNavigateToClub ? onNavigateToClub(club.id!) : onNavigate('dashboard')}
+                          onClick={() => onNavigateToClub ? onNavigateToClub(club.id!, club.slug) : onNavigate('dashboard')}
                         >
                           <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-600 flex items-center justify-center text-xl shadow-sm border border-slate-100 dark:border-slate-500 overflow-hidden">
                             {club.image ? <img src={club.image} alt={club.name} className="w-full h-full object-cover" /> : <Heart className="w-6 h-6 text-red-500" />}

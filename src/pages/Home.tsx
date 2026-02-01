@@ -10,7 +10,7 @@ import RSVPModal from '../components/RSVPModal';
 
 interface HomeProps {
   onNavigate: (page: Page) => void;
-  onNavigateToClub: (clubId: string) => void;
+  onNavigateToClub: (clubId: string, slug?: string) => void;
   onNavigateToEvent: (eventId: string) => void;
   onNavigateToPost: (postId: string) => void;
   onNavigateToNotification: (notification: DBNotification) => void;
@@ -106,7 +106,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
   const handleResultClick = (type: 'club' | 'post', id: string) => {
     if (type === 'club') {
-      onNavigateToClub(id);
+      const club = clubs.find(c => c.id === id);
+      onNavigateToClub(id, club?.slug);
     } else {
       onNavigateToPost(id);
     }

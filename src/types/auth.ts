@@ -83,6 +83,7 @@ export interface DBUser {
 export interface DBClub {
   id?: string;
   name: string;
+  slug?: string;
   description: string;
   category: 'technical' | 'academic' | 'cultural' | 'sports';
   members: number;

@@ -35,8 +35,16 @@ router.post('/:clubId/members/bulk-import', verifyToken, upload.single('file'), 
         const { id: userId, role } = req.user;
 
         // Check authorization - only club secretary, president, treasurer, or admin
-        if (!['admin', 'club-secretary', 'president', 'treasurer'].includes(role)) {
-            return res.status(403).json({ message: 'Unauthorized to import members' });
+        if (role !== 'admin') {
+            // Verify user is an officer of THIS specific club
+            const officer = await ClubMember.findOne({
+                clubId,
+                userId,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (!officer) {
+                return res.status(403).json({ message: 'Unauthorized to import members for this club' });
+            }
         }
 
         if (!req.file) {

@@ -7,14 +7,40 @@ import User from '../models/User.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../services/emailService.js';
+import rateLimit from 'express-rate-limit';
+
+// Stricter rate limit for auth routes (5 attempts per 15 mins)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { message: 'Too many login attempts, please try again after 15 minutes' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Slightly more lenient for signup (10 per hour to prevent spam accounts)
+const signupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    message: { message: 'Too many accounts created from this IP, please try again later' },
+});
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Helper to escape regex special characters
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Signup
-router.post('/signup', async (req, res) => {
+router.post('/signup', signupLimiter, async (req, res) => {
     try {
         const { email, password, name, role } = req.body;
+
+        if (typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Invalid input format' });
+        }
 
         // Check if user exists
         const existingUser = await User.findOne({ email });
@@ -43,7 +69,7 @@ router.post('/signup', async (req, res) => {
         // Link any existing club memberships to this new user
         // We use a case-insensitive regex to match email since ClubMember might not match exact case
         await ClubMember.updateMany(
-            { email: { $regex: new RegExp(`^${email}$`, 'i') } },
+            { email: { $regex: new RegExp(`^${escapeRegExp(email)}$`, 'i') } },
             { $set: { userId: newUser._id } }
         );
 
@@ -71,9 +97,13 @@ router.post('/signup', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        if (typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Invalid input format' });
+        }
 
         // Find user
         const user = await User.findOne({ email });
@@ -116,7 +146,7 @@ router.post('/login', async (req, res) => {
         // Create token
         const token = jwt.sign(
             { id: user._id, email: user.email, role: effectiveRole },
-            process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_In_production',
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
@@ -141,7 +171,7 @@ router.post('/login', async (req, res) => {
 // Get Current User (Me)
 router.get('/me', verifyToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password -resetPasswordToken -resetPasswordExpires');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -265,7 +295,7 @@ router.post('/google', async (req, res) => {
         // Create JWT token
         const token = jwt.sign(
             { id: user._id, email: user.email, role: effectiveRole },
-            process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_In_production',
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
@@ -338,7 +368,7 @@ router.post('/google/signup', async (req, res) => {
 
         // Link any existing club memberships to this new user
         await ClubMember.updateMany(
-            { email: { $regex: new RegExp(`^${email}$`, 'i') } },
+            { email: { $regex: new RegExp(`^${escapeRegExp(email)}$`, 'i') } },
             { $set: { userId: newUser._id } }
         );
 
@@ -366,7 +396,7 @@ router.post('/google/signup', async (req, res) => {
 });
 
 // Forgot Password - Send reset email
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', authLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 

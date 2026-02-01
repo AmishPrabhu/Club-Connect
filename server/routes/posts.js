@@ -1,5 +1,6 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -221,12 +222,34 @@ router.get('/user/tasks', verifyToken, async (req, res) => {
 });
 
 // Update post
+// Update post
 router.put('/:id', verifyToken, async (req, res) => {
     try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        // Authorization Check
+        const isCreator = post.authorId === req.user.id;
+        const isAdmin = req.user.role === 'admin';
+        let isClubOfficer = false;
+
+        if (!isCreator && !isAdmin) {
+            const member = await ClubMember.findOne({
+                userId: req.user.id,
+                clubId: post.clubId,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (member) isClubOfficer = true;
+        }
+
+        if (!isCreator && !isAdmin && !isClubOfficer) {
+            return res.status(403).json({ message: 'Not authorized to update this post' });
+        }
+
         const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
         res.json(updatedPost);
     } catch (error) {
+        console.error("Error updating post:", error);
         res.status(500).json({ message: 'Server error' });
     }
 })
@@ -235,14 +258,37 @@ router.put('/:id', verifyToken, async (req, res) => {
 import Notification from '../models/Notification.js';
 
 // Delete post (Protected)
+// Delete post (Protected)
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        // Authorization Check
+        const isCreator = post.authorId === req.user.id;
+        const isAdmin = req.user.role === 'admin';
+        let isClubOfficer = false;
+
+        if (!isCreator && !isAdmin) {
+            const member = await ClubMember.findOne({
+                userId: req.user.id,
+                clubId: post.clubId,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            if (member) isClubOfficer = true;
+        }
+
+        if (!isCreator && !isAdmin && !isClubOfficer) {
+            return res.status(403).json({ message: 'Not authorized to delete this post' });
+        }
+
         await Post.findByIdAndDelete(req.params.id);
         // Delete associated notifications
         await Notification.deleteMany({ relatedId: req.params.id });
 
         res.json({ message: 'Post deleted' });
     } catch (error) {
+        console.error("Error deleting post:", error);
         res.status(500).json({ message: 'Server error' });
     }
 });

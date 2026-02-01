@@ -6,6 +6,11 @@ const clubSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    slug: {
+        type: String,
+        unique: true,
+        sparse: true, // Allow nulls initially, but migration will fill them
+    },
     description: {
         type: String,
         default: '',
@@ -42,6 +47,15 @@ const clubSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+});
+
+import slugify from 'slugify';
+
+clubSchema.pre('save', function (next) {
+    if (this.isModified('name') || !this.slug) {
+        this.slug = slugify(this.name, { lower: true, strict: true });
+    }
+    next();
 });
 
 export default mongoose.model('Club', clubSchema);
