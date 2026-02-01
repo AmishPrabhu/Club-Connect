@@ -20,6 +20,10 @@ const authLimiter = rateLimit({
     keyGenerator: (req) => {
         return req.body.email ? req.body.email.toLowerCase() : req.ip;
     },
+    validate: {
+        xForwardedForHeader: false,
+        keyGeneratorIpFallback: false,
+    },
 });
 
 // Slightly more lenient for signup (10 per hour to prevent spam accounts)
