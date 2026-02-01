@@ -147,10 +147,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  const signUp = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+  const signUp = async (email: string, password: string, name: string, otp: string): Promise<{ success: boolean; error?: string }> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     try {
-      const response = await api.post('/auth/signup', { email, password, name });
+      const response = await api.post('/auth/signup', { email, password, name, otp });
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
@@ -175,6 +175,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         success: false,
         error: error.response?.data?.message || 'Failed to create account'
       };
+    }
+  };
+
+  const sendOtp = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await api.post('/auth/send-otp-signup', { email });
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.message || 'Failed to send OTP' };
+    }
+  };
+
+  const verifyOtp = async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await api.post('/auth/verify-otp', { email, otp });
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.message || 'Failed to verify OTP' };
     }
   };
 
@@ -284,6 +302,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return response.data;
     },
     refreshMemberships,
+    sendOtp,
+    verifyOtp,
   };
 
   return (

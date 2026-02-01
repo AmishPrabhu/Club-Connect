@@ -59,9 +59,11 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; remainingAttempts?: number; lockoutDuration?: number }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name: string, otp: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: (credential?: string) => Promise<{ success: boolean; error?: string; needsSignup?: boolean; googleData?: { email: string; name: string; credential: string } }>;
   signUpWithGoogle: (credential: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
+  verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   resetPassword: (email: string) => Promise<void>;

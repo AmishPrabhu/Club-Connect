@@ -6,8 +6,9 @@ import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
-import { sendPasswordResetEmail } from '../services/emailService.js';
+import { sendPasswordResetEmail, sendOtpEmail } from '../services/emailService.js';
 import rateLimit from 'express-rate-limit';
+import Otp from '../models/Otp.js';
 
 // Stricter rate limit for auth routes (5 attempts per 15 mins)
 const authLimiter = rateLimit({
@@ -41,6 +42,77 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Generate OTP
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send OTP
+router.post('/send-otp-signup', signupLimiter, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        if (!email.endsWith('@walchandsangli.ac.in')) {
+            return res.status(400).json({ message: 'Only @walchandsangli.ac.in email addresses are allowed' });
+        }
+
+        // Check if user exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        const otp = generateOTP();
+
+        // Save OTP to DB
+        // Determine if we should update an existing OTP or create a new one
+        // upsert: true will create if not exists
+        await Otp.findOneAndUpdate(
+            { email },
+            { otp, createdAt: Date.now() },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+
+        // Send email
+        await sendOtpEmail(email, otp);
+
+        res.json({ message: 'OTP sent successfully' });
+    } catch (error) {
+        console.error('Send OTP error:', error);
+        res.status(500).json({ message: 'Failed to send OTP' });
+    }
+});
+
+// Verify OTP (Check only)
+router.post('/verify-otp', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: 'Email and OTP are required' });
+        }
+
+        const otpRecord = await Otp.findOne({ email });
+
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'OTP expired or not found. Please request a new one.' });
+        }
+
+        if (otpRecord.otp !== otp) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+
+        res.json({ message: 'OTP verified successfully' });
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Signup
 router.post('/signup', signupLimiter, async (req, res) => {
     try {
@@ -60,6 +132,24 @@ router.post('/signup', signupLimiter, async (req, res) => {
         if (!email.endsWith('@walchandsangli.ac.in')) {
             return res.status(400).json({ message: 'Only @walchandsangli.ac.in email addresses are allowed' });
         }
+
+        // Verify OTP if not a Google signup (Google signup sends OTP? No, Google handles auth)
+        // But this is the standard signup route.
+        // We require 'otp' in the body now.
+        if (!req.body.otp) {
+            return res.status(400).json({ message: 'OTP is required' });
+        }
+
+        const otpRecord = await Otp.findOne({ email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'OTP expired or not found. Please request a new one.' });
+        }
+        if (otpRecord.otp !== req.body.otp) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+
+        // Delete OTP after successful use
+        await Otp.deleteOne({ email });
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);

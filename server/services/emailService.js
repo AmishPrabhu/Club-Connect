@@ -115,4 +115,37 @@ export async function sendClubInvitationEmail({ name, email, role, clubName, sig
     });
 }
 
-export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail };
+
+/**
+ * Send OTP for registration
+ */
+export async function sendOtpEmail(email, otp) {
+    return sendEmail({
+        to: email,
+        subject: 'Verify Your Email - Club Connect',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #002147; padding: 20px; text-align: center;">
+                    <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
+                </div>
+                <div style="padding: 30px; background: #f9f9f9;">
+                    <h2 style="color: #002147;">Verify Your Email</h2>
+                    <p>Hello,</p>
+                    <p>Use the following One-Time Password (OTP) to complete your registration:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <span style="font-size: 32px; letter-spacing: 5px; font-weight: bold; color: #002147; background: #e0e7ff; padding: 10px 20px; border-radius: 8px;">
+                            ${otp}
+                        </span>
+                    </div>
+                    <p style="color: #666; font-size: 14px;">This OTP is valid for 10 minutes.</p>
+                    <p style="color: #666; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+                </div>
+                <div style="background: #002147; padding: 15px; text-align: center;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
+                </div>
+            </div>
+        `,
+    });
+}
+
+export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail };
