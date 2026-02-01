@@ -91,7 +91,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         const result = await sendOtp(email);
         if (result.success) {
             setStep('OTP');
-            setTimer(60); // 60 seconds cooldown
+            setTimer(30); // 60 seconds cooldown
             setCanResend(false);
         } else {
             setError(result.error || 'Failed to send OTP');
@@ -119,7 +119,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         setError('');
         const result = await sendOtp(email);
         if (result.success) {
-            setTimer(60);
+            setTimer(30);
             setCanResend(false);
             setError(''); // Clear any previous errors
             // Optional: Show success message

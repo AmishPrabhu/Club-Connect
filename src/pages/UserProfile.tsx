@@ -293,6 +293,23 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  // Timer state for resend OTP
+  const [resendTimer, setResendTimer] = useState(0);
+  const [canResend, setCanResend] = useState(true);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let interval: any;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   const handleRequestDelete = async () => {
     setIsDeleting(true);
     setDeleteError('');
@@ -303,8 +320,25 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
     if (result.success) {
       setDeleteStep('otp');
+      setResendTimer(30); // 30 seconds cooldown
+      setCanResend(false);
     } else {
       setDeleteError(result.message || 'Failed to send verification code');
+    }
+  };
+
+  const handleResendDeleteOtp = async () => {
+    setDeleteError('');
+    setIsDeleting(true);
+    const { requestDeleteOtp } = await import('../lib/dbService');
+    const result = await requestDeleteOtp();
+    setIsDeleting(false);
+
+    if (result.success) {
+      setResendTimer(30);
+      setCanResend(false);
+    } else {
+      setDeleteError(result.message || 'Failed to resend verification code');
     }
   };
 
@@ -1049,6 +1083,20 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                       </>
                     )}
                   </button>
+
+                  <div className="text-center mt-2">
+                    <p className="text-sm text-slate-500">
+                      Didn't receive code?{' '}
+                      <button
+                        type="button"
+                        onClick={handleResendDeleteOtp}
+                        disabled={!canResend || isDeleting}
+                        className={`font-semibold ${!canResend ? 'text-slate-400 cursor-not-allowed' : 'text-blue-600 hover:underline'}`}
+                      >
+                        Resend {resendTimer > 0 ? `(${resendTimer}s)` : ''}
+                      </button>
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
