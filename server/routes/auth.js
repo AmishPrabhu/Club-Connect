@@ -17,6 +17,9 @@ const authLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: true,
+    keyGenerator: (req) => {
+        return req.body.email ? req.body.email.toLowerCase() : req.ip;
+    },
 });
 
 // Slightly more lenient for signup (10 per hour to prevent spam accounts)

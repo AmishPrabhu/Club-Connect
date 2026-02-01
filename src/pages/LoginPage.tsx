@@ -32,14 +32,23 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   }, [isAuthenticated, user, onNavigate]);
 
   // Lockout state
-  const [lockoutUntil, setLockoutUntil] = useState<number | null>(() => {
-    const saved = localStorage.getItem('loginLockoutUntil');
+  // Lockout state
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
+
+  // Update lockout state when email changes
+  useEffect(() => {
+    if (!email) {
+      setLockoutUntil(null);
+      return;
+    }
+    const saved = localStorage.getItem(`loginLockout_${email.toLowerCase()}`);
     if (saved) {
       const timestamp = parseInt(saved, 10);
-      return timestamp > Date.now() ? timestamp : null;
+      setLockoutUntil(timestamp > Date.now() ? timestamp : null);
+    } else {
+      setLockoutUntil(null);
     }
-    return null;
-  });
+  }, [email]);
 
   const [timeLeft, setTimeLeft] = useState<string>('');
 
@@ -53,7 +62,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
       if (diff <= 0) {
         setLockoutUntil(null);
-        localStorage.removeItem('loginLockoutUntil');
+        if (email) {
+          localStorage.removeItem(`loginLockout_${email.toLowerCase()}`);
+        }
         setError('');
       } else {
         const minutes = Math.floor(diff / 60000);
@@ -65,7 +76,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     updateTimer(); // Initial call
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [lockoutUntil]);
+  }, [lockoutUntil, email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,15 +94,20 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       let msg = result.error || 'Invalid credentials';
 
       // Handle Lockout
+      // Handle Lockout
       if (result.lockoutDuration) {
         const until = Date.now() + result.lockoutDuration;
         setLockoutUntil(until);
-        localStorage.setItem('loginLockoutUntil', until.toString());
-        msg = `Too many attempts. Try again in 15 minutes.`;
+        localStorage.setItem(`loginLockout_${email.toLowerCase()}`, until.toString());
+        msg = `Too many attempts for this account. Try again in 15 minutes.`;
       }
       // Handle Attempts Remaining
       else if (result.remainingAttempts !== undefined) {
-        msg = `Invalid credentials. ${result.remainingAttempts} attempts remaining.`;
+        if (result.remainingAttempts === 1) {
+          msg = "Invalid credentials. Next attempt will lock your account.";
+        } else {
+          msg = `Invalid credentials. ${result.remainingAttempts} attempts remaining.`;
+        }
       }
 
       setError(msg);
@@ -237,8 +253,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 type="submit"
                 disabled={isLoading || !!lockoutUntil}
                 className={`w-full font-bold py-4 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg ${lockoutUntil
-                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
-                    : 'bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] hover:scale-[1.02] active:scale-[0.98] hover:shadow-yellow-500/30'
+                  ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                  : 'bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] hover:scale-[1.02] active:scale-[0.98] hover:shadow-yellow-500/30'
                   }`}
               >
                 {isLoading ? (

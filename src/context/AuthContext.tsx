@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const reset = error.response.headers['ratelimit-reset'];
         const retryAfter = error.response.headers['retry-after'];
 
-        if (error.response.status === 429) {
+        if (error.response.status === 429 || result.remainingAttempts === 0) {
           if (retryAfter) {
             // Retry-After is usually in seconds
             result.lockoutDuration = parseInt(retryAfter, 10) * 1000;
