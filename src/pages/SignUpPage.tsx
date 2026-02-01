@@ -48,18 +48,45 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         }
     }, []);
 
-    // Countdown timer effect
+    // Countdown timer effect with persistence
     useEffect(() => {
-        let interval: any;
-        if (timer > 0) {
-            interval = setInterval(() => {
-                setTimer((prev) => prev - 1);
-            }, 1000);
-        } else {
-            setCanResend(true);
-        }
+        const checkTimer = () => {
+            const blockExpiry = localStorage.getItem('signupOtpBlockExpiry');
+            const cooldownExpiry = localStorage.getItem('signupOtpExpiry');
+            const now = Date.now();
+
+            if (blockExpiry) {
+                const secondsLeft = Math.ceil((parseInt(blockExpiry) - now) / 1000);
+                if (secondsLeft > 0) {
+                    setTimer(secondsLeft);
+                    setCanResend(false);
+                    return;
+                } else {
+                    localStorage.removeItem('signupOtpBlockExpiry');
+                    localStorage.removeItem('signupOtpCount');
+                }
+            }
+
+            if (cooldownExpiry) {
+                const secondsLeft = Math.ceil((parseInt(cooldownExpiry) - now) / 1000);
+                if (secondsLeft > 0) {
+                    setTimer(secondsLeft);
+                    setCanResend(false);
+                } else {
+                    setTimer(0);
+                    setCanResend(true);
+                    localStorage.removeItem('signupOtpExpiry');
+                }
+            } else {
+                setTimer(0);
+                setCanResend(true);
+            }
+        };
+
+        checkTimer(); // Initial check
+        const interval = setInterval(checkTimer, 1000);
         return () => clearInterval(interval);
-    }, [timer]);
+    }, []);
 
     // Navigate when user is authenticated
     useEffect(() => {
@@ -78,6 +105,15 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         e.preventDefault();
         setError('');
 
+        // Check if blocked
+        if (localStorage.getItem('signupOtpBlockExpiry')) {
+            const expiry = parseInt(localStorage.getItem('signupOtpBlockExpiry') || '0');
+            if (Date.now() < expiry) {
+                setError('Too many attempts. Please try again later.');
+                return;
+            }
+        }
+
         if (!email) {
             setError('Please enter your email');
             return;
@@ -91,8 +127,23 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         const result = await sendOtp(email);
         if (result.success) {
             setStep('OTP');
-            setTimer(30); // 60 seconds cooldown
-            setCanResend(false);
+
+            // Increment count
+            let count = parseInt(localStorage.getItem('signupOtpCount') || '0');
+            count++;
+            localStorage.setItem('signupOtpCount', count.toString());
+
+            if (count > 3) {
+                const expiry = Date.now() + 3600000;
+                localStorage.setItem('signupOtpBlockExpiry', expiry.toString());
+                setTimer(3600);
+                setCanResend(false);
+            } else {
+                const expiry = Date.now() + 30000;
+                localStorage.setItem('signupOtpExpiry', expiry.toString());
+                setTimer(30);
+                setCanResend(false);
+            }
         } else {
             setError(result.error || 'Failed to send OTP');
         }
@@ -119,10 +170,22 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
         setError('');
         const result = await sendOtp(email);
         if (result.success) {
-            setTimer(30);
-            setCanResend(false);
-            setError(''); // Clear any previous errors
-            // Optional: Show success message
+            let count = parseInt(localStorage.getItem('signupOtpCount') || '0');
+            count++;
+            localStorage.setItem('signupOtpCount', count.toString());
+
+            if (count > 3) {
+                const expiry = Date.now() + 3600000;
+                localStorage.setItem('signupOtpBlockExpiry', expiry.toString());
+                setTimer(3600);
+                setCanResend(false);
+            } else {
+                const expiry = Date.now() + 30000;
+                localStorage.setItem('signupOtpExpiry', expiry.toString());
+                setTimer(30);
+                setCanResend(false);
+            }
+            setError('');
         } else {
             setError(result.error || 'Failed to resend OTP');
         }
@@ -413,7 +476,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                             disabled={!canResend || isLoading}
                                             className={`font-semibold ${!canResend ? 'text-slate-400 cursor-not-allowed' : 'text-college-blue-primary hover:underline'}`}
                                         >
-                                            Resend {timer > 0 ? `(${timer}s)` : ''}
+                                            {timer > 60
+                                                ? `Try again in ${Math.ceil(timer / 60)}m`
+                                                : `Resend ${timer > 0 ? `(${timer}s)` : ''}`
+                                            }
                                         </button>
                                     </p>
                                 </div>

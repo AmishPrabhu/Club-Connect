@@ -294,23 +294,60 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const [deleteError, setDeleteError] = useState('');
 
   // Timer state for resend OTP
+  // Timer state for resend OTP
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
 
-  // Countdown timer effect
+  // Countdown timer effect with persistence
   useEffect(() => {
-    let interval: any;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setCanResend(true);
-    }
+    const checkTimer = () => {
+      const blockExpiry = localStorage.getItem('deleteOtpBlockExpiry');
+      const cooldownExpiry = localStorage.getItem('deleteOtpExpiry');
+      const now = Date.now();
+
+      if (blockExpiry) {
+        const secondsLeft = Math.ceil((parseInt(blockExpiry) - now) / 1000);
+        if (secondsLeft > 0) {
+          setResendTimer(secondsLeft);
+          setCanResend(false);
+          return;
+        } else {
+          localStorage.removeItem('deleteOtpBlockExpiry');
+          localStorage.removeItem('deleteOtpCount');
+        }
+      }
+
+      if (cooldownExpiry) {
+        const secondsLeft = Math.ceil((parseInt(cooldownExpiry) - now) / 1000);
+        if (secondsLeft > 0) {
+          setResendTimer(secondsLeft);
+          setCanResend(false);
+        } else {
+          setResendTimer(0);
+          setCanResend(true);
+          localStorage.removeItem('deleteOtpExpiry');
+        }
+      } else {
+        setResendTimer(0);
+        setCanResend(true);
+      }
+    };
+
+    checkTimer(); // Initial check
+    const interval = setInterval(checkTimer, 1000);
     return () => clearInterval(interval);
-  }, [resendTimer]);
+  }, []);
 
   const handleRequestDelete = async () => {
+    // Check if blocked
+    if (localStorage.getItem('deleteOtpBlockExpiry')) {
+      const expiry = parseInt(localStorage.getItem('deleteOtpBlockExpiry') || '0');
+      if (Date.now() < expiry) {
+        setDeleteError('Too many attempts. Please try again later.');
+        return;
+      }
+    }
+
     setIsDeleting(true);
     setDeleteError('');
     // Dynamically import to ensure availability
@@ -320,8 +357,23 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
     if (result.success) {
       setDeleteStep('otp');
-      setResendTimer(30); // 30 seconds cooldown
-      setCanResend(false);
+
+      // Increment count
+      let count = parseInt(localStorage.getItem('deleteOtpCount') || '0');
+      count++;
+      localStorage.setItem('deleteOtpCount', count.toString());
+
+      if (count > 3) {
+        const expiry = Date.now() + 3600000; // 1 hour
+        localStorage.setItem('deleteOtpBlockExpiry', expiry.toString());
+        setResendTimer(3600);
+        setCanResend(false);
+      } else {
+        const expiry = Date.now() + 30000;
+        localStorage.setItem('deleteOtpExpiry', expiry.toString());
+        setResendTimer(30);
+        setCanResend(false);
+      }
     } else {
       setDeleteError(result.message || 'Failed to send verification code');
     }
@@ -335,8 +387,21 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
     setIsDeleting(false);
 
     if (result.success) {
-      setResendTimer(30);
-      setCanResend(false);
+      let count = parseInt(localStorage.getItem('deleteOtpCount') || '0');
+      count++;
+      localStorage.setItem('deleteOtpCount', count.toString());
+
+      if (count > 3) {
+        const expiry = Date.now() + 3600000; // 1 hour
+        localStorage.setItem('deleteOtpBlockExpiry', expiry.toString());
+        setResendTimer(3600);
+        setCanResend(false);
+      } else {
+        const expiry = Date.now() + 30000;
+        localStorage.setItem('deleteOtpExpiry', expiry.toString());
+        setResendTimer(30);
+        setCanResend(false);
+      }
     } else {
       setDeleteError(result.message || 'Failed to resend verification code');
     }
@@ -1093,7 +1158,10 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                         disabled={!canResend || isDeleting}
                         className={`font-semibold ${!canResend ? 'text-slate-400 cursor-not-allowed' : 'text-blue-600 hover:underline'}`}
                       >
-                        Resend {resendTimer > 0 ? `(${resendTimer}s)` : ''}
+                        {resendTimer > 60
+                          ? `Try again in ${Math.ceil(resendTimer / 60)}m`
+                          : `Resend ${resendTimer > 0 ? `(${resendTimer}s)` : ''}`
+                        }
                       </button>
                     </p>
                   </div>
