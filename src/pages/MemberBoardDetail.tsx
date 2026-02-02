@@ -157,14 +157,14 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                   {BOARD_LABELS[boardType]} ({boardMembers.length})
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                   {boardMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow"
+                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 md:p-4 hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-[#DAA520] flex-shrink-0">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg border-2 border-[#DAA520] flex-shrink-0">
                           {member.profileImage ? (
                             <img
                               src={member.profileImage}
@@ -176,10 +176,10 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-semibold text-[#002147] dark:text-white truncate">
+                          <h3 className="text-sm md:text-base font-semibold text-[#002147] dark:text-white truncate">
                             {member.name}
                           </h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
+                          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 truncate">
                             {member.role || 'Member'}
                           </p>
                         </div>
