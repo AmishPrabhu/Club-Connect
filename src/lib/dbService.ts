@@ -426,12 +426,13 @@ export const deletePost = async (postId: string): Promise<boolean> => {
     }
 };
 
-export const updatePost = async (postId: string, postData: Partial<DBPost>): Promise<boolean> => {
+export const updatePost = async (postId: string, postData: Partial<DBPost>): Promise<{ success: boolean; error?: string }> => {
     try {
         await api.put(`/posts/${postId}`, postData);
-        return true;
-    } catch (error) {
-        return false;
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error updating post:', error);
+        return { success: false, error: error.response?.data?.message || error.message || 'Failed to update post' };
     }
 };
 

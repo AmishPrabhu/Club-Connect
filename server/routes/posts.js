@@ -1,6 +1,7 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import ClubMember from '../models/ClubMember.js';
+import Club from '../models/Club.js';
 import { verifyToken, verifyClubOfficer } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -261,12 +262,31 @@ router.put('/:id', verifyToken, async (req, res) => {
         let isClubOfficer = false;
 
         if (!isCreator && !isAdmin) {
+            // 1. Check ClubMember collection (modern way)
             const member = await ClubMember.findOne({
                 userId: req.user.id,
                 clubId: post.clubId,
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
             });
             if (member) isClubOfficer = true;
+
+            // 2. Check Club document fields (legacy/direct way)
+            if (!isClubOfficer) {
+                const club = await Club.findById(post.clubId);
+                if (club) {
+                    const userId = req.user.id;
+                    const userEmail = req.user.email;
+
+                    if (
+                        club.secretaryId === userId || club.secretaryEmail === userEmail ||
+                        club.presidentId === userId || club.presidentEmail === userEmail ||
+                        club.treasurerId === userId || club.treasurerEmail === userEmail ||
+                        club.advisorId === userId || club.advisorEmail === userEmail
+                    ) {
+                        isClubOfficer = true;
+                    }
+                }
+            }
         }
 
         if (!isCreator && !isAdmin && !isClubOfficer) {
@@ -320,12 +340,31 @@ router.delete('/:id', verifyToken, async (req, res) => {
         let isClubOfficer = false;
 
         if (!isCreator && !isAdmin) {
+            // 1. Check ClubMember collection
             const member = await ClubMember.findOne({
                 userId: req.user.id,
                 clubId: post.clubId,
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
             });
             if (member) isClubOfficer = true;
+
+            // 2. Check Club document fields
+            if (!isClubOfficer) {
+                const club = await Club.findById(post.clubId);
+                if (club) {
+                    const userId = req.user.id;
+                    const userEmail = req.user.email;
+
+                    if (
+                        club.secretaryId === userId || club.secretaryEmail === userEmail ||
+                        club.presidentId === userId || club.presidentEmail === userEmail ||
+                        club.treasurerId === userId || club.treasurerEmail === userEmail ||
+                        club.advisorId === userId || club.advisorEmail === userEmail
+                    ) {
+                        isClubOfficer = true;
+                    }
+                }
+            }
         }
 
         if (!isCreator && !isAdmin && !isClubOfficer) {

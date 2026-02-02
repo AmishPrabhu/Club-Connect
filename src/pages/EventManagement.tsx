@@ -208,7 +208,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         setMessage(null);
 
         try {
-            const success = await updatePost(post.id, {
+            const result = await updatePost(post.id, {
                 title: formData.title,
                 content: formData.content,
                 date: formData.date,
@@ -221,11 +221,11 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 eventTasks: tasks,
             } as any);
 
-            if (success) {
+            if (result.success) {
                 setMessage({ type: 'success', text: 'Event updated successfully!' });
                 setPost(prev => prev ? { ...prev, ...formData, registrationLink: formData.registrationlink, responseSpreadsheetUrl: formData.responseSpreadsheetUrl } as any : null);
             } else {
-                setMessage({ type: 'error', text: 'Failed to update event.' });
+                setMessage({ type: 'error', text: result.error || 'Failed to update event.' });
             }
         } catch (error) {
             console.error('Error updating post:', error);
