@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink, Award } from 'lucide-react';
+import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink, Award, Menu, Settings2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications, getClubMessages } from '../lib/dbService';
@@ -23,6 +23,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'following' | 'tasks'>('overview');
   const [likedClubsList, setLikedClubsList] = useState<DBClub[]>([]);
   const [likedClubNotifications, setLikedClubNotifications] = useState<DBNotification[]>([]);
+  const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -446,9 +447,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       )}
 
       {/* Profile Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-          <div className="w-24 h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-2xl sm:text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0">
             👨‍🎓
           </div>
           <div className="flex-1">
@@ -501,7 +502,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
               </div>
             ) : (
               <>
-                <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2">{profileData.name || 'User'}</h1>
+                <h1 className="text-xl sm:text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2">{profileData.name || 'User'}</h1>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
                   {profileData.bio || 'No bio yet. Click edit to add one!'}
                 </p>
@@ -551,75 +552,103 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden">
-          <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
-            {[
-              { id: 'overview', label: 'Overview', icon: User },
-              { id: 'events', label: 'My Events', icon: Calendar },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
-                  }`}
-              >
-                <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-
-            {showTasksTab && (
-              <button
-                onClick={() => setActiveTab('tasks' as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === 'tasks'
-                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
-                  }`}
-              >
-                <History className={`w-5 h-5 ${activeTab === 'tasks' ? 'text-[#DAA520]' : ''}`} />
-                <span>Tasks</span>
-                {unseenTasksCount > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {unseenTasksCount}
-                  </span>
-                )}
-              </button>
-            )}
-
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden relative z-30">
+          {/* Mobile Header for Tabs */}
+          <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+            <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-[#DAA520]" />
+              Menu
+            </span>
             <button
-              key="following"
-              onClick={() => setActiveTab('following' as any)}
-              className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activeTab === 'following'
-                ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
-                }`}
+              onClick={() => setIsMobileTabOpen(!isMobileTabOpen)}
+              className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
             >
-              <Heart className={`w-5 h-5 ${activeTab === 'following' ? 'text-[#DAA520]' : ''}`} />
-              <span>Following</span>
+              {isMobileTabOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+          </div>
 
-            {memberships.map((membership) => (
+          <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
+            <div className="flex flex-col md:flex-row border-b border-slate-200 dark:border-slate-700 md:overflow-x-auto scrollbar-hide">
+              {[
+                { id: 'overview', label: 'Overview', icon: User },
+                { id: 'events', label: 'My Events', icon: Calendar },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as any);
+                    setIsMobileTabOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-4 text-left md:text-center ${activeTab === tab.id
+                    ? 'text-[#002147] dark:text-white border-[#002147] bg-blue-50/50 dark:bg-blue-900/10 md:bg-transparent'
+                    : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
+                    }`}
+                >
+                  <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+
+              {showTasksTab && (
+                <button
+                  onClick={() => {
+                    setActiveTab('tasks' as any);
+                    setIsMobileTabOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-4 text-left md:text-center ${activeTab === 'tasks'
+                    ? 'text-[#002147] dark:text-white border-[#002147] bg-blue-50/50 dark:bg-blue-900/10 md:bg-transparent'
+                    : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
+                    }`}
+                >
+                  <History className={`w-5 h-5 ${activeTab === 'tasks' ? 'text-[#DAA520]' : ''}`} />
+                  <span>Tasks</span>
+                  {unseenTasksCount > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {unseenTasksCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
               <button
-                key={`messages-${membership.clubId}`}
-                onClick={() => setActiveTab(`messages-${membership.clubId}` as any)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap relative ${activeTab === `messages-${membership.clubId}`
-                  ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
-                  : 'text-slate-500 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
+                key="following"
+                onClick={() => {
+                  setActiveTab('following' as any);
+                  setIsMobileTabOpen(false);
+                }}
+                className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-4 text-left md:text-center ${activeTab === 'following'
+                  ? 'text-[#002147] dark:text-white border-[#002147] bg-blue-50/50 dark:bg-blue-900/10 md:bg-transparent'
+                  : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
                   }`}
               >
-                <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs overflow-hidden">
-                  {membership.clubImage ? <img src={membership.clubImage} className="w-full h-full object-cover" /> : '💬'}
-                </div>
-                <span>{membership.clubName} Msgs</span>
-
-                {/* Unread Indicator */}
-                {unreadState[membership.clubId] && (
-                  <span className="absolute top-3 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
-                )}
+                <Heart className={`w-5 h-5 ${activeTab === 'following' ? 'text-[#DAA520]' : ''}`} />
+                <span>Following</span>
               </button>
-            ))}
+
+              {memberships.map((membership) => (
+                <button
+                  key={`messages-${membership.clubId}`}
+                  onClick={() => {
+                    setActiveTab(`messages-${membership.clubId}` as any);
+                    setIsMobileTabOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap relative border-l-4 md:border-l-0 md:border-b-4 text-left md:text-center ${activeTab === `messages-${membership.clubId}`
+                    ? 'text-[#002147] dark:text-white border-[#002147] bg-blue-50/50 dark:bg-blue-900/10 md:bg-transparent'
+                    : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
+                    }`}
+                >
+                  <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs overflow-hidden">
+                    {membership.clubImage ? <img src={membership.clubImage} className="w-full h-full object-cover" /> : '💬'}
+                  </div>
+                  <span>{membership.clubName} Msgs</span>
+
+                  {/* Unread Indicator */}
+                  {unreadState[membership.clubId] && (
+                    <span className="absolute top-3 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="p-6">
@@ -1011,46 +1040,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       )
       }
 
-      {/* Dynamic Club Message Tabs */}
-      {
-        activeTab.startsWith('messages-') && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">
-                Messages from {memberships.find(m => `messages-${m.clubId}` === activeTab)?.clubName}
-              </h3>
-            </div>
 
-            {loadingMessages[activeTab.replace('messages-', '')] ? (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
-                  clubMessages[activeTab.replace('messages-', '')].map(msg => (
-                    <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
-                          <p className="text-xs text-slate-500 font-medium mt-1">
-                            From {msg.senderName} ({msg.senderRole}) • {new Date(msg.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                        {msg.body}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-500 dark:text-slate-400 italic text-center py-8">No messages from this club yet.</p>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      }
 
       {/* Danger Zone */}
       <div className="mt-12 border-t border-slate-200 dark:border-slate-700 pt-8">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, ArrowLeft, ChevronDown, Filter, Settings } from 'lucide-react';
+import ImageModal from '../components/ImageModal';
 import { DBPost, DBClub, User } from '../types/auth';
 import { getPosts, getClubs } from '../lib/dbService';
 
@@ -26,6 +27,13 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
 
 
     // ... existing useEffect and helpers
+
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleImageClick = (e: React.MouseEvent, imageUrl: string) => {
+        e.stopPropagation();
+        setSelectedImage(imageUrl);
+    };
 
 
     useEffect(() => {
@@ -97,6 +105,11 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+            <ImageModal
+                isOpen={!!selectedImage}
+                onClose={() => setSelectedImage(null)}
+                imageUrl={selectedImage || ''}
+            />
             {/* Page Header */}
             <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-8 md:py-12 mb-8">
                 <div className="max-w-5xl mx-auto">
@@ -258,20 +271,28 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
 
                                     <div className="flex flex-col md:flex-row">
                                         {/* Event Image - Full Width Mobile, 40% Desktop */}
-                                        <div className="w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                                        <div
+                                            className={`w-full md:w-[40%] h-56 md:h-auto relative z-20 bg-slate-100 dark:bg-slate-900 overflow-hidden group/image ${post.coverImage ? 'cursor-pointer' : ''}`}
+                                            onClick={(e) => post.coverImage && handleImageClick(e, post.coverImage)}
+                                        >
                                             {post.coverImage ? (
-                                                <img
-                                                    src={post.coverImage}
-                                                    alt={post.title}
-                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                                />
+                                                <>
+                                                    <img
+                                                        src={post.coverImage}
+                                                        alt={post.title}
+                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
+                                                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                                    </div>
+                                                </>
                                             ) : (
                                                 <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
                                                     <Calendar className="w-16 h-16 text-white/40" />
                                                 </div>
                                             )}
                                             {/* Date Overlay (Mobile & Desktop) */}
-                                            <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center border border-slate-100 dark:border-slate-700">
+                                            <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center border border-slate-100 dark:border-slate-700 pointer-events-none">
                                                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{new Date(post.date).toLocaleDateString('en-US', { month: 'short' })}</span>
                                                 <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{new Date(post.date).getDate()}</span>
                                             </div>

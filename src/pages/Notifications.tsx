@@ -88,7 +88,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
           className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-semibold">Back to Dashboard</span>
+          <span className="font-semibold">Back to Home</span>
         </button>
         <div className="flex items-center gap-2">
           <Bell className="w-6 h-6 text-slate-600 dark:text-slate-400" />

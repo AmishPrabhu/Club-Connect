@@ -112,7 +112,7 @@ function AppContent() {
         <MemberBoardDetail club={selectedMember} onBack={() => navigateToPage('club')} />
       )}
       {currentPage === 'notifications' && (
-        <Notifications onBack={() => navigateToPage('dashboard')} onNavigateToNotification={navigateToNotification} />
+        <Notifications onBack={() => navigateToPage('home')} onNavigateToNotification={navigateToNotification} />
       )}
       {currentPage === 'userProfile' && (
         <UserProfile

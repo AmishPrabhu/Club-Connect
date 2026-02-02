@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import xlsx from 'xlsx';
+import ExcelJS from 'exceljs';
 import ClubMember from '../models/ClubMember.js';
 import User from '../models/User.js';
 import { verifyToken } from '../middleware/auth.js';
@@ -51,14 +51,55 @@ router.post('/:clubId/members/bulk-import', verifyToken, upload.single('file'), 
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Parse Excel file
-        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(worksheet);
+        // Parse Excel file using ExcelJS
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(req.file.buffer);
+        const worksheet = workbook.getWorksheet(1); // Get first sheet or by name
+
+        if (!worksheet || worksheet.rowCount <= 1) { // rowCount includes header
+            return res.status(400).json({ message: 'Excel file is empty or missing data' });
+        }
+
+        // Convert worksheet to JSON array
+        const data = [];
+        const headers = [];
+
+        // Get headers from first row
+        worksheet.getRow(1).eachCell((cell, colNumber) => {
+            headers[colNumber] = cell.value;
+        });
+
+        // specific check for empty headers array which implies an empty sheet
+        if (headers.length === 0) {
+            return res.status(400).json({ message: 'Excel file appears to be empty or has no headers' });
+        }
+
+        // Iterate over rows starting from 2
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return; // Skip header
+
+            const rowData = {};
+            row.eachCell((cell, colNumber) => {
+                const header = headers[colNumber];
+                if (header) {
+                    // Handle rich text or strange cell values if necessary, usually .value implies the raw value
+                    // For ExcelJS, check if value is object (like hyperlink or rich text)
+                    let cellValue = cell.value;
+                    if (cellValue && typeof cellValue === 'object') {
+                        if (cellValue.text) cellValue = cellValue.text;
+                        else if (cellValue.result) cellValue = cellValue.result; // formula result
+                    }
+                    rowData[header] = cellValue;
+                }
+            });
+            // Only add if we have some data
+            if (Object.keys(rowData).length > 0) {
+                data.push(rowData);
+            }
+        });
 
         if (data.length === 0) {
-            return res.status(400).json({ message: 'Excel file is empty' });
+            return res.status(400).json({ message: 'Excel file contains no valid data rows' });
         }
 
         if (data.length > 500) {

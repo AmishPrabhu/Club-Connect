@@ -7,6 +7,7 @@ import { getPosts, getNotifications, getClubs } from '../lib/dbService';
 import MiniCalendar from '../components/MiniCalendar';
 import WeeklyEvents from '../components/WeeklyEvents';
 import RSVPModal from '../components/RSVPModal';
+import ImageModal from '../components/ImageModal';
 
 interface HomeProps {
   onNavigate: (page: Page) => void;
@@ -29,6 +30,14 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [rsvpEvent, setRsvpEvent] = useState<DBPost | null>(null);
+
+  // Image Modal State
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleImageClick = (e: React.MouseEvent, imageUrl: string) => {
+    e.stopPropagation();
+    setSelectedImage(imageUrl);
+  };
 
 
   // Search Dropdown State
@@ -428,13 +437,21 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
                       <div className="flex flex-col md:flex-row">
                         {/* Event Image - Full Width Mobile, 40% Desktop */}
-                        <div className="w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                        <div
+                          className={`w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden group/image ${post.coverImage ? 'cursor-zoom-in' : ''}`}
+                          onClick={(e) => post.coverImage && handleImageClick(e, post.coverImage)}
+                        >
                           {post.coverImage ? (
-                            <img
-                              src={post.coverImage}
-                              alt={post.title}
-                              className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                            />
+                            <>
+                              <img
+                                src={post.coverImage}
+                                alt={post.title}
+                                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 group-hover/image:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
+                                <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                              </div>
+                            </>
                           ) : (
                             <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
                               <Calendar className="w-16 h-16 text-white/40" />
@@ -652,6 +669,11 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         />
       )}
       {/* Image Modal */}
+      <ImageModal
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        imageUrl={selectedImage || ''}
+      />
 
     </div>
   );

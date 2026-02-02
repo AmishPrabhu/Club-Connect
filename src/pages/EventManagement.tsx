@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, Circle, UserPlus, Clock, XCircle, Award, Upload, Download, Search } from 'lucide-react';
 import { sendTaskAssignmentEmails, isEmailConfigured } from '../lib/emailService';
 import { DBPost, User, ClubMember, EventTask, EventRSVP, CertificateNamePosition } from '../types/auth';
@@ -235,61 +235,58 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         }
     };
 
-    const handleExportAttendance = () => {
+    const handleExportAttendance = async () => {
         if (eventRsvps.length === 0) {
             setMessage({ type: 'error', text: 'No participants to export' });
             return;
         }
 
-        // Prepare data for export
-        const exportData = eventRsvps.map(rsvp => ({
-            'Name': rsvp.name || 'Unknown',
-            'Email': rsvp.email || 'Unknown',
-            'Status': rsvp.attendance ? rsvp.attendance.charAt(0).toUpperCase() + rsvp.attendance.slice(1) : 'Pending',
-            'RSVP Date': new Date(rsvp.rsvpedAt).toLocaleDateString(),
-            'RSVP Time': new Date(rsvp.rsvpedAt).toLocaleTimeString()
-        }));
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Attendance');
 
-        // Calculate stats
+        // Set columns
+        worksheet.columns = [
+            { header: 'Name', key: 'Name', width: 30 },
+            { header: 'Email', key: 'Email', width: 35 },
+            { header: 'Status', key: 'Status', width: 15 },
+            { header: 'RSVP Date', key: 'RSVP Date', width: 15 },
+            { header: 'RSVP Time', key: 'RSVP Time', width: 15 },
+        ];
+
+        // Add data rows
+        eventRsvps.forEach(rsvp => {
+            worksheet.addRow({
+                'Name': rsvp.name || 'Unknown',
+                'Email': rsvp.email || 'Unknown',
+                'Status': rsvp.attendance ? rsvp.attendance.charAt(0).toUpperCase() + rsvp.attendance.slice(1) : 'Pending',
+                'RSVP Date': new Date(rsvp.rsvpedAt).toLocaleDateString(),
+                'RSVP Time': new Date(rsvp.rsvpedAt).toLocaleTimeString()
+            });
+        });
+
+        // Add Stats
         const total = eventRsvps.length;
         const present = eventRsvps.filter(r => r.attendance === 'present').length;
         const absent = eventRsvps.filter(r => r.attendance === 'absent').length;
 
+        worksheet.addRow({}); // Empty row
+        worksheet.addRow(['SUMMARY']);
+        worksheet.addRow(['Total Registered', total]);
+        worksheet.addRow(['Present', present]);
+        worksheet.addRow(['Absent', absent]);
 
-        // Create workaround for stats row
-        const statsData = [
-            { 'Name': '', 'Email': '', 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
-            { 'Name': 'SUMMARY', 'Email': '', 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
-            { 'Name': 'Total Registered', 'Email': total, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
-            { 'Name': 'Present', 'Email': present, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' },
-            { 'Name': 'Absent', 'Email': absent, 'Status': '', 'RSVP Date': '', 'RSVP Time': '' }
-        ];
 
-        // Combine data
-        const finalData = [...exportData, ...statsData];
-
-        // Create workbook and worksheet
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(finalData);
-
-        // Adjust column widths
-        const wscols = [
-            { wch: 30 }, // Name
-            { wch: 35 }, // Email
-            { wch: 15 }, // Status
-            { wch: 15 }, // Date
-            { wch: 15 }, // Time
-        ];
-        ws['!cols'] = wscols;
-
-        // Add worksheet to workbook
-        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
-
-        // Generate file name
+        // Generate Blob and Download
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
         const fileName = `${post?.title?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'event'}_attendance.xlsx`;
 
-        // Write file
-        XLSX.writeFile(wb, fileName);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
 
         setMessage({ type: 'success', text: 'Attendance exported successfully!' });
         setTimeout(() => setMessage(null), 3000);

@@ -1,7 +1,7 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import ClubMember from '../models/ClubMember.js';
-import { verifyToken } from '../middleware/auth.js';
+import { verifyToken, verifyClubOfficer } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -166,10 +166,37 @@ router.post('/:id/rsvps/add', verifyToken, async (req, res) => {
 });
 
 
-// Create post (Protected)
-router.post('/', verifyToken, async (req, res) => {
+// Create post (Protected - Club Officer Only)
+router.post('/', verifyClubOfficer, async (req, res) => {
     try {
-        const newPost = new Post(req.body);
+        // Whitelist allowed fields to prevent arbitrary data injection
+        const allowedFields = [
+            'title', 'content', 'image', 'coverImage', 'type', 'status',
+            'clubId', 'clubName', 'clubImage', // These are validated by verifyClubOfficer implicitly but nice to be explicit
+            'date', 'time', 'location', 'locationType', 'locationUrl',
+            'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
+            'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
+            'relatedEventId', 'relatedEventTitle',
+            'attachments', 'eventTasks'
+        ];
+
+        const postData = {};
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) postData[field] = req.body[field];
+        });
+
+        // Force author to be current user
+        postData.authorId = req.user.id;
+        postData.authorName = req.user.name || 'Club Officer';
+
+        // Force critical stats to defaults
+        postData.likes = 0;
+        postData.rsvps = 0;
+        postData.budgetVerified = false;
+        postData.budgetVerifiedBy = null;
+        postData.budgetVerifiedAt = null;
+
+        const newPost = new Post(postData);
         const savedPost = await newPost.save();
         res.status(201).json(savedPost);
     } catch (error) {
@@ -246,7 +273,30 @@ router.put('/:id', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to update this post' });
         }
 
-        const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        // Whitelist allowed updates
+        const allowedUpdates = [
+            'title', 'content', 'image', 'coverImage', 'type', 'status',
+            // 'clubId', 'clubName' - prevented from changing club ownership
+            'date', 'time', 'location', 'locationType', 'locationUrl',
+            'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
+            'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
+            'relatedEventId', 'relatedEventTitle',
+            'attachments', 'eventTasks',
+            // Budget image allowed to be updated here or via specific route, 
+            // but if updated here, we must reset verification (handled below or safely excluded)
+            // Let's exclude budgetImage here to force use of the dedicated route which handles logic overrides
+        ];
+
+        const updates = {};
+        allowedUpdates.forEach(field => {
+            if (req.body[field] !== undefined) updates[field] = req.body[field];
+        });
+
+        // Ensure updatedAt is set
+        updates.updatedAt = new Date();
+
+        const updatedPost = await Post.findByIdAndUpdate(req.params.id, updates, { new: true });
         res.json(updatedPost);
     } catch (error) {
         console.error("Error updating post:", error);
@@ -296,9 +346,24 @@ router.delete('/:id', verifyToken, async (req, res) => {
 // Upload/Update budget image (Treasurer only)
 router.put('/:id/budget', verifyToken, async (req, res) => {
     try {
-        // Check if user is treasurer
-        if (req.user.role !== 'treasurer') {
-            return res.status(403).json({ message: 'Only treasurers can upload budgets' });
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Check if user is treasurer OF THIS CLUB
+        if (req.user.role === 'admin') {
+            // Admin allowed
+        } else {
+            const isTreasurer = await ClubMember.findOne({
+                clubId: post.clubId,
+                userId: req.user.id,
+                role: 'Treasurer'
+            });
+
+            if (!isTreasurer) {
+                return res.status(403).json({ message: 'Only the treasurer of this club can upload budgets' });
+            }
         }
 
         const { budgetImage } = req.body;
@@ -332,14 +397,24 @@ router.put('/:id/budget', verifyToken, async (req, res) => {
 // Verify budget (Advisor only)
 router.put('/:id/budget/verify', verifyToken, async (req, res) => {
     try {
-        // Check if user is advisor
-        if (req.user.role !== 'advisor') {
-            return res.status(403).json({ message: 'Only advisors can verify budgets' });
-        }
-
         const post = await Post.findById(req.params.id);
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Check if user is advisor OF THIS CLUB
+        if (req.user.role === 'admin') {
+            // Admin allowed
+        } else {
+            const isAdvisor = await ClubMember.findOne({
+                clubId: post.clubId,
+                userId: req.user.id,
+                role: 'Advisor'
+            });
+
+            if (!isAdvisor) {
+                return res.status(403).json({ message: 'Only the advisor of this club can verify budgets' });
+            }
         }
 
         if (!post.budgetImage) {
@@ -369,9 +444,20 @@ router.put('/:id/budget/verify', verifyToken, async (req, res) => {
 // Save certificate template configuration (President/Secretary only)
 router.put('/:id/certificate-template', verifyToken, async (req, res) => {
     try {
-        const userRole = req.user.role;
-        if (!['admin', 'club-secretary', 'president', 'secretary'].includes(userRole)) {
-            return res.status(403).json({ message: 'Only presidents and secretaries can manage certificates' });
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        // Authorization: Admin or Officer of THIS club
+        if (req.user.role !== 'admin') {
+            const isOfficer = await ClubMember.findOne({
+                clubId: post.clubId,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President'] }
+            });
+
+            if (!isOfficer) {
+                return res.status(403).json({ message: 'Only presidents and secretaries of this club can manage certificates' });
+            }
         }
 
         const { templateUrl, namePosition } = req.body;
@@ -411,9 +497,24 @@ router.put('/:id/certificate-template', verifyToken, async (req, res) => {
 // Update participant certificate URL (President/Secretary only)
 router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => {
     try {
-        const userRole = req.user.role;
-        if (!['admin', 'club-secretary', 'president', 'secretary'].includes(userRole)) {
-            return res.status(403).json({ message: 'Only presidents and secretaries can update certificates' });
+        const rsvp = await EventRSVP.findById(req.params.rsvpId);
+        if (!rsvp) return res.status(404).json({ message: 'RSVP not found' });
+
+        // We need the event to check club permission
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Event not found' });
+
+        // Authorization: Admin or Officer of THIS club
+        if (req.user.role !== 'admin') {
+            const isOfficer = await ClubMember.findOne({
+                clubId: post.clubId,
+                userId: req.user.id,
+                role: { $in: ['Secretary', 'President'] }
+            });
+
+            if (!isOfficer) {
+                return res.status(403).json({ message: 'Only presidents and secretaries of this club can update certificates' });
+            }
         }
 
         const { certificateUrl } = req.body;
@@ -421,11 +522,13 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
             return res.status(400).json({ message: 'Certificate URL is required' });
         }
 
-        const rsvp = await EventRSVP.findByIdAndUpdate(
+        const updatedRsvp = await EventRSVP.findByIdAndUpdate(
             req.params.rsvpId,
             { certificateUrl },
             { new: true }
         );
+
+        res.json(updatedRsvp);
 
         if (!rsvp) {
             return res.status(404).json({ message: 'RSVP not found' });

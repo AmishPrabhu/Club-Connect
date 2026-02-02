@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send, Image as ImageIcon } from 'lucide-react';
+import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send, Image as ImageIcon, Menu, Settings2 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
 import { DBClub, DBPost, DBNotification } from '../types/auth';
@@ -196,6 +196,7 @@ export default function AdminDashboard() {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<DBClub | null>(null);
+  const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
   // Confirm modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -614,77 +615,100 @@ export default function AdminDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-[#002147] hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-[#002147]">
-                <Users className="w-6 h-6" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-blue-400" />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Clubs</span>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{clubs.length}</p>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Total Clubs</p>
+              </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{clubs.length}</p>
-            <div className="mt-2 text-xs text-slate-500">Registered Organizations</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-[#DAA520] hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-[#DAA520]">
-                <Calendar className="w-6 h-6" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-amber-400" />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Events</span>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{posts.filter(p => p.type === 'event').length}</p>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Active Events</p>
+              </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
-            <div className="mt-2 text-xs text-slate-500">Upcoming Campus Activities</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-purple-500 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600">
-                <TrendingUp className="w-6 h-6" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Posts</span>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{posts.length}</p>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Total Posts</p>
+              </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{posts.length}</p>
-            <div className="mt-2 text-xs text-slate-500">Announcements & Updates</div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-sm border-l-4 border-red-500 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600">
-                <Bell className="w-6 h-6" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 dark:text-red-400" />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Alerts</span>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{notifications.filter(n => !n.read).length}</p>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Alerts</p>
+              </div>
             </div>
-            <p className="text-3xl font-serif font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
-            <div className="mt-2 text-xs text-slate-500">Unread System Messages</div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8">
-          <div className="flex overflow-x-auto">
-            {[
-              { id: 'overview', label: 'Overview', icon: TrendingUp },
-              { id: 'clubs', label: 'Manage Clubs', icon: Users },
-              { id: 'posts', label: 'Manage Posts', icon: Edit },
-              { id: 'notifications', label: 'Notifications', icon: Bell }
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-b-2 ${isActive
-                    ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
-                    : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
-                    }`}
-                >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''}`} />
-                  {tab.label}
-                </button>
-              );
-            })}
+        <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8 relative z-30">
+          {/* Mobile Header for Tabs */}
+          <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+            <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-[#DAA520]" />
+              Menu
+            </span>
+            <button
+              onClick={() => setIsMobileTabOpen(!isMobileTabOpen)}
+              className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            >
+              {isMobileTabOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
+            <div className="flex flex-col md:flex-row md:overflow-x-auto">
+              {[
+                { id: 'overview', label: 'Overview', icon: TrendingUp },
+                { id: 'clubs', label: 'Manage Clubs', icon: Users },
+                { id: 'posts', label: 'Manage Posts', icon: Edit },
+                { id: 'notifications', label: 'Notifications', icon: Bell }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveTab(tab.id as any);
+                      setIsMobileTabOpen(false);
+                    }}
+                    className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-2 text-left md:text-center ${isActive
+                      ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
+                      : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''}`} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
         </div>
@@ -962,7 +986,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
-                  <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Register Organization</h3>
+                  <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Register Club</h3>
                   <p className="text-sm text-slate-500">Add a new student club to the system</p>
                 </div>
                 <button onClick={() => { setShowCreateClubModal(false); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
@@ -1002,30 +1026,17 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Category</label>
-                    <select
-                      value={newClub.category}
-                      onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
-                    >
-                      {CLUB_CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Icon (Emoji)</label>
-                    <input
-                      type="text"
-                      value={newClub.icon}
-                      onChange={(e) => setNewClub({ ...newClub, icon: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium text-center"
-                      placeholder="🎯"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Category</label>
+                  <select
+                    value={newClub.category}
+                    onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
+                  >
+                    {CLUB_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="pt-4">
@@ -1460,7 +1471,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-college-blue-primary dark:text-white">
-                    Update Branding
+                    Update Logo
                   </h3>
                   <p className="text-xs text-slate-500">For <span className="font-semibold text-college-gold">{selectedClub.name}</span></p>
                 </div>

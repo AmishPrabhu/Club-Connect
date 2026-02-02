@@ -174,7 +174,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
         // Create token
         const token = jwt.sign(
             { id: newUser._id, email: newUser.email, role: newUser.role },
-            process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_In_production',
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
@@ -476,7 +476,7 @@ router.post('/google/signup', async (req, res) => {
         // Create token
         const token = jwt.sign(
             { id: newUser._id, email: newUser.email, role: newUser.role },
-            process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_In_production',
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 

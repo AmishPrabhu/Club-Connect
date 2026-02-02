@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { X, Upload, Download, CheckCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import api from '../lib/api';
 
 interface BulkImportModalProps {
@@ -36,7 +36,7 @@ export default function BulkImportModal({ isOpen, onClose, clubId, clubName, onS
     const [result, setResult] = useState<ImportResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const selectedFile = acceptedFiles[0];
         if (!selectedFile) return;
 
@@ -44,22 +44,52 @@ export default function BulkImportModal({ isOpen, onClose, clubId, clubName, onS
         setError(null);
 
         // Parse Excel file for preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = e.target?.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json<ParsedMember>(worksheet);
+        try {
+            const arrayBuffer = await selectedFile.arrayBuffer();
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(arrayBuffer);
 
-                setPreviewData(jsonData.slice(0, 10)); // Show first 10 rows
-            } catch (err) {
-                setError('Failed to parse Excel file. Please check the format.');
-                setFile(null);
+            const worksheet = workbook.worksheets[0];
+            if (!worksheet) {
+                throw new Error('No worksheets found');
             }
-        };
-        reader.readAsBinaryString(selectedFile);
+
+            const jsonData: ParsedMember[] = [];
+            const headers: string[] = [];
+
+            // Get headers from row 1
+            const headerRow = worksheet.getRow(1);
+            headerRow.eachCell((cell, colNumber) => {
+                headers[colNumber] = cell.text;
+            });
+
+            // Iterate rows (starting from 2)
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // Skip header
+
+                const rowData: any = {};
+                let hasData = false;
+
+                headers.forEach((header, colNumber) => {
+                    if (header) {
+                        const cell = row.getCell(colNumber);
+                        // Use .text to get the string representation safely
+                        rowData[header] = cell.text;
+                        if (rowData[header]) hasData = true;
+                    }
+                });
+
+                if (hasData) {
+                    jsonData.push(rowData as ParsedMember);
+                }
+            });
+
+            setPreviewData(jsonData.slice(0, 10)); // Show first 10 rows
+        } catch (err) {
+            console.error('Error parsing excel:', err);
+            setError('Failed to parse Excel file. Please check the format.');
+            setFile(null);
+        }
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -98,8 +128,20 @@ export default function BulkImportModal({ isOpen, onClose, clubId, clubName, onS
         }
     };
 
-    const downloadTemplate = () => {
-        const template = [
+    const downloadTemplate = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Members');
+
+        worksheet.columns = [
+            { header: 'Name', key: 'Name', width: 20 },
+            { header: 'Email', key: 'Email', width: 30 },
+            { header: 'Role', key: 'Role', width: 15 },
+            { header: 'Board Type', key: 'Board Type', width: 15 },
+            { header: 'Academic Year', key: 'Academic Year', width: 15 },
+            { header: 'Year Joined', key: 'Year Joined', width: 15 }
+        ];
+
+        worksheet.addRows([
             {
                 Name: 'John Doe',
                 Email: 'john@walchandsangli.ac.in',
@@ -116,12 +158,16 @@ export default function BulkImportModal({ isOpen, onClose, clubId, clubName, onS
                 'Academic Year': 'SY',
                 'Year Joined': '2025-10-16'
             }
-        ];
+        ]);
 
-        const worksheet = XLSX.utils.json_to_sheet(template);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Members');
-        XLSX.writeFile(workbook, `${clubName}_members_template.xlsx`);
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${clubName}_members_template.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     };
 
     const resetModal = () => {

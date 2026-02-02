@@ -74,12 +74,12 @@ router.put('/:id', verifyToken, async (req, res) => {
         }
 
         const { name, bio, email, clubId, clubName } = req.body;
-        // Prevent role update here for security, unless admin
-        const updates = { name, bio, email };
-
-        // Allow updating club association
-        if (clubId !== undefined) updates.clubId = clubId;
-        if (clubName !== undefined) updates.clubName = clubName;
+        // Prevent role, clubId, clubName updates here for security
+        // These should only be updated via specific actions (joining a club, being promoted)
+        const updates = {};
+        if (name !== undefined) updates.name = name;
+        if (bio !== undefined) updates.bio = bio;
+        if (email !== undefined) updates.email = email;
 
         const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password -resetPasswordToken -resetPasswordExpires');
         res.json(updatedUser);

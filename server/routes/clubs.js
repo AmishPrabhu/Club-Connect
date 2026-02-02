@@ -5,7 +5,7 @@ import User from '../models/User.js';
 import Post from '../models/Post.js';
 import ClubMember from '../models/ClubMember.js';
 import ClubMessage from '../models/ClubMessage.js';
-import { verifyToken, verifyAdmin } from '../middleware/auth.js';
+import { verifyToken, verifySuperAdmin, verifyClubOfficer, verifyClubMember } from '../middleware/auth.js';
 import { sendClubInvitationEmail } from '../services/emailService.js';
 
 const router = express.Router();
@@ -48,8 +48,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create club (Protected)
-router.post('/', verifyToken, async (req, res) => {
+// Create club (Protected - Super Admin Only)
+router.post('/', verifySuperAdmin, async (req, res) => {
     try {
         const newClub = new Club(req.body);
         const savedClub = await newClub.save();
@@ -59,22 +59,21 @@ router.post('/', verifyToken, async (req, res) => {
     }
 });
 
-// Update club (Protected)
-router.put('/:id', verifyToken, async (req, res) => {
+// Update club (Protected - Club Officer)
+router.put('/:id', verifyClubOfficer, async (req, res) => {
     try {
-        // Authorization Check
-        if (req.user.role !== 'admin') {
-            const officer = await ClubMember.findOne({
-                clubId: req.params.id,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
-            });
-            if (!officer) {
-                return res.status(403).json({ message: 'Not authorized to update this club' });
-            }
-        }
+        // Whitelist allowed fields for Club Officer updates
+        // Prevent updating members count, officer IDs, or slug directly
+        const allowedUpdates = ['name', 'description', 'image', 'category'];
+        const updates = {};
 
-        const updatedClub = await Club.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        allowedUpdates.forEach(field => {
+            if (req.body[field] !== undefined) updates[field] = req.body[field];
+        });
+
+        updates.updatedAt = Date.now();
+
+        const updatedClub = await Club.findByIdAndUpdate(req.params.id, updates, { new: true });
         if (!updatedClub) return res.status(404).json({ message: 'Club not found' });
         res.json(updatedClub);
     } catch (error) {
@@ -82,9 +81,8 @@ router.put('/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Delete club (Protected)
-// Delete club (Protected)
-router.delete('/:id', verifyAdmin, async (req, res) => {
+// Delete club (Protected - Super Admin Only - was Officer)
+router.delete('/:id', verifySuperAdmin, async (req, res) => {
     try {
         const club = await Club.findById(req.params.id);
         if (!club) return res.status(404).json({ message: 'Club not found' });
@@ -144,23 +142,11 @@ router.get('/:id/members', async (req, res) => {
     }
 });
 
-// Add member to club
-router.post('/:id/members', verifyToken, async (req, res) => {
+// Add member to club (Protected - Club Officer)
+router.post('/:id/members', verifyClubOfficer, async (req, res) => {
     try {
         const { name, email, role, userId, boardType, academicYear, joinedAt } = req.body;
         const clubId = req.params.id;
-
-        // Authorization Check
-        if (req.user.role !== 'admin') {
-            const officer = await ClubMember.findOne({
-                clubId,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
-            });
-            if (!officer) {
-                return res.status(403).json({ message: 'Not authorized to add members to this club' });
-            }
-        }
 
         const existing = await ClubMember.findOne({ clubId, email });
         if (existing) {
@@ -239,21 +225,9 @@ router.post('/:id/members', verifyToken, async (req, res) => {
     }
 });
 
-// Update member
-router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
+// Update member (Protected - Club Officer)
+router.put('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
     try {
-        // Authorization Check
-        if (req.user.role !== 'admin') {
-            const officer = await ClubMember.findOne({
-                clubId: req.params.id,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
-            });
-            if (!officer) {
-                return res.status(403).json({ message: 'Not authorized to manage members' });
-            }
-        }
-
         const { name, email, role, academicYear, joinedAt, boardType } = req.body;
         // Basic validation/permission check could go here
 
@@ -273,21 +247,9 @@ router.put('/:id/members/:memberId', verifyToken, async (req, res) => {
     }
 });
 
-// Remove member
-router.delete('/:id/members/:memberId', verifyToken, async (req, res) => {
+// Remove member (Protected - Club Officer)
+router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
     try {
-        // Authorization Check
-        if (req.user.role !== 'admin') {
-            const officer = await ClubMember.findOne({
-                clubId: req.params.id,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
-            });
-            if (!officer) {
-                return res.status(403).json({ message: 'Not authorized to remove members' });
-            }
-        }
-
         const memberToDelete = await ClubMember.findById(req.params.memberId);
         if (!memberToDelete) {
             return res.status(404).json({ message: 'Member not found' });
@@ -326,8 +288,8 @@ router.delete('/:id/members/:memberId', verifyToken, async (req, res) => {
 
 // ==================== MESSAGE ROUTES ====================
 
-// GET messages for a club
-router.get('/:id/messages', verifyToken, async (req, res) => {
+// GET messages for a club (Protected - Club Member Only)
+router.get('/:id/messages', verifyClubMember, async (req, res) => {
     try {
         const messages = await ClubMessage.find({ clubId: req.params.id }).sort({ createdAt: -1 });
         res.json(messages);
@@ -337,17 +299,35 @@ router.get('/:id/messages', verifyToken, async (req, res) => {
 });
 
 // Create club message
-router.post('/:id/messages', verifyToken, async (req, res) => {
+router.post('/:id/messages', verifyClubOfficer, async (req, res) => {
     try {
-        const { title, body, senderId, senderName, senderRole, clubName } = req.body;
+        const { title, body } = req.body;
         const clubId = req.params.id;
+        const userId = req.user.id;
+
+        let officerRole = null;
+
+        if (req.user.role === 'admin') {
+            officerRole = 'Admin';
+        } else {
+            const member = await ClubMember.findOne({
+                clubId,
+                userId,
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+            });
+            officerRole = member.role;
+        }
+
+        // Fetch club name for the message record
+        const club = await Club.findById(clubId);
+        if (!club) return res.status(404).json({ message: 'Club not found' });
 
         const newMessage = new ClubMessage({
             clubId,
-            clubName,
-            senderId,
-            senderName,
-            senderRole,
+            clubName: club.name,
+            senderId: userId,
+            senderName: req.user.name || 'Club Officer', // Fallback if name missing in token/user
+            senderRole: officerRole,
             title,
             body,
         });
@@ -355,7 +335,8 @@ router.post('/:id/messages', verifyToken, async (req, res) => {
         await newMessage.save();
         res.status(201).json(newMessage);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Create message error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
