@@ -185,6 +185,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
                 email: newUser.email,
                 name: newUser.name,
                 role: newUser.role,
+                profileImage: newUser.profileImage,
                 likedClubs: newUser.likedClubs || [],
             },
         });
@@ -257,9 +258,35 @@ router.post('/login', authLimiter, async (req, res) => {
                 role: effectiveRole,
                 clubId: effectiveClubId,
                 clubName: effectiveClubName,
+                profileImage: user.profileImage,
                 likedClubs: user.likedClubs || [],
             },
         });
+
+        // SYNC: Link any unlinked ClubMember records to this user (in case they were added by admin while offline)
+        // Fire-and-forget background sync
+        (async () => {
+            try {
+                // 1. Link userId to ClubMember records
+                await ClubMember.updateMany(
+                    { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') }, userId: { $exists: false } },
+                    { $set: { userId: user._id } }
+                );
+
+                // 2. If user is still 'user' role but has memberships, upgrade to 'club-member'
+                if (user.role === 'user') {
+                    const memberCount = await ClubMember.countDocuments({
+                        $or: [{ userId: user._id }, { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') } }]
+                    });
+
+                    if (memberCount > 0) {
+                        await User.findByIdAndUpdate(user._id, { role: 'club-member' });
+                    }
+                }
+            } catch (err) {
+                console.error('Background membership sync error:', err);
+            }
+        })();
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -313,6 +340,7 @@ router.get('/me', verifyToken, async (req, res) => {
             role: effectiveRole,
             clubId: effectiveClubId,
             clubName: effectiveClubName,
+            profileImage: user.profileImage,
             likedClubs: user.likedClubs || [],
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
@@ -406,9 +434,34 @@ router.post('/google', async (req, res) => {
                 role: effectiveRole,
                 clubId: effectiveClubId,
                 clubName: effectiveClubName,
+                profileImage: user.profileImage,
                 likedClubs: user.likedClubs || [],
             },
         });
+
+        // SYNC: Link any unlinked ClubMember records to this user
+        (async () => {
+            try {
+                // 1. Link userId
+                await ClubMember.updateMany(
+                    { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') }, userId: { $exists: false } },
+                    { $set: { userId: user._id } }
+                );
+
+                // 2. Upgrade role if needed
+                if (user.role === 'user') {
+                    const memberCount = await ClubMember.countDocuments({
+                        $or: [{ userId: user._id }, { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') } }]
+                    });
+
+                    if (memberCount > 0) {
+                        await User.findByIdAndUpdate(user._id, { role: 'club-member' });
+                    }
+                }
+            } catch (err) {
+                console.error('Background membership sync error:', err);
+            }
+        })();
     } catch (error) {
         console.error('Google OAuth error:', error);
         res.status(500).json({ message: 'Google authentication failed' });
@@ -487,6 +540,7 @@ router.post('/google/signup', async (req, res) => {
                 email: newUser.email,
                 name: newUser.name,
                 role: newUser.role,
+                profileImage: newUser.profileImage,
                 likedClubs: newUser.likedClubs || [],
             },
         });

@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink, Award, Menu, Settings2 } from 'lucide-react';
+import { ArrowLeft, User, Mail, Calendar, Heart, Share2, Save, Edit, X, CalendarCheck, History, Clock, MapPin, ExternalLink, Award, Menu, Settings2, Camera } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, getUserMemberships, getUserRSVPsByEmail, getPosts, getClubs, getNotifications, getClubMessages } from '../lib/dbService';
@@ -26,11 +26,13 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [profileData, setProfileData] = useState({
     name: '',
     bio: '',
     email: '',
     joinDate: '',
+    profileImage: '',
   });
   const [memberships, setMemberships] = useState<any[]>([]); // Add state for memberships
   const [editForm, setEditForm] = useState({
@@ -105,6 +107,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             bio: (profile as any).bio || '',
             email: profile.email || user.email || '',
             joinDate: profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown',
+            profileImage: (profile as any).profileImage || '',
           });
           setEditForm({
             name: profile.name || user.name || '',
@@ -118,6 +121,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             bio: '',
             email: user.email || '',
             joinDate: 'Recently',
+            profileImage: '',
           });
           setEditForm({
             name: user.name || '',
@@ -449,8 +453,103 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       {/* Profile Header */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
-          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-2xl sm:text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0">
-            👨‍🎓
+          <div className="relative group">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-2xl sm:text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0 overflow-hidden">
+              {profileData.profileImage ? (
+                <img
+                  src={profileData.profileImage}
+                  alt={profileData.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold">
+                  {profileData.name ? profileData.name.charAt(0).toUpperCase() : '👨‍🎓'}
+                </span>
+              )}
+            </div>
+            {/* Upload button overlay */}
+            <button
+              onClick={() => {
+                const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+                if (!window.cloudinary || !cloudName || !uploadPreset) {
+                  setMessage({ type: 'error', text: 'Upload not available. Please try again later.' });
+                  return;
+                }
+
+                setIsUploadingPhoto(true);
+                const widget = window.cloudinary.createUploadWidget(
+                  {
+                    cloudName,
+                    uploadPreset,
+                    folder: 'club-connect/profile-pictures',
+                    sources: ['local', 'camera'],
+                    multiple: false,
+                    maxFiles: 1,
+                    resourceType: 'image',
+                    cropping: true,
+                    croppingAspectRatio: 1,
+                    croppingShowDimensions: true,
+                    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                    maxFileSize: 5000000, // 5MB
+                    styles: {
+                      palette: {
+                        window: '#1e293b',
+                        windowBorder: '#475569',
+                        tabIcon: '#3b82f6',
+                        menuIcons: '#94a3b8',
+                        textDark: '#f1f5f9',
+                        textLight: '#94a3b8',
+                        link: '#3b82f6',
+                        action: '#3b82f6',
+                        inactiveTabIcon: '#64748b',
+                        error: '#ef4444',
+                        inProgress: '#3b82f6',
+                        complete: '#22c55e',
+                        sourceBg: '#0f172a'
+                      }
+                    }
+                  },
+                  async (error: any, result: any) => {
+                    if (error) {
+                      console.error('Upload error:', error);
+                      setIsUploadingPhoto(false);
+                      return;
+                    }
+
+                    if (result.event === 'success') {
+                      const imageUrl = result.info.secure_url;
+                      setProfileData(prev => ({ ...prev, profileImage: imageUrl }));
+
+                      // Save to backend
+                      if (user?.id) {
+                        const saveResult = await updateUserProfile(user.id, { profileImage: imageUrl } as any);
+                        if (saveResult.success) {
+                          setMessage({ type: 'success', text: 'Profile picture updated!' });
+                        } else {
+                          setMessage({ type: 'error', text: 'Failed to save profile picture' });
+                        }
+                      }
+                      setIsUploadingPhoto(false);
+                    }
+
+                    if (result.event === 'close') {
+                      setIsUploadingPhoto(false);
+                    }
+                  }
+                );
+                widget.open();
+              }}
+              disabled={isUploadingPhoto}
+              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
+            >
+              {isUploadingPhoto ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-6 h-6 text-white" />
+              )}
+            </button>
           </div>
           <div className="flex-1">
             {isEditing ? (

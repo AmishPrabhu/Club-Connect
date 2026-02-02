@@ -31,6 +31,10 @@ const clubMemberSchema = new mongoose.Schema({
         type: String, // e.g. "FY", "SY", "TY", "Final Year"
         default: '',
     },
+    profileImage: {
+        type: String, // Profile picture URL
+        default: '',
+    },
     joinedAt: {
         type: Date,
         default: Date.now,

@@ -24,6 +24,7 @@ export interface ClubMember {
   role: string; // Custom role (e.g., "President", "App Executive", "Member")
   boardType: 'main' | 'executive' | 'member'; // Main Board (TY), Executive Board (SY), Member Board (FY)
   academicYear?: string;
+  profileImage?: string; // Profile picture URL
   joinedAt: Date;
 }
 

@@ -73,13 +73,14 @@ router.put('/:id', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to update this profile' });
         }
 
-        const { name, bio, email, clubId, clubName } = req.body;
+        const { name, bio, email, profileImage, clubId, clubName } = req.body;
         // Prevent role, clubId, clubName updates here for security
         // These should only be updated via specific actions (joining a club, being promoted)
         const updates = {};
         if (name !== undefined) updates.name = name;
         if (bio !== undefined) updates.bio = bio;
         if (email !== undefined) updates.email = email;
+        if (profileImage !== undefined) updates.profileImage = profileImage;
 
         const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password -resetPasswordToken -resetPasswordExpires');
         res.json(updatedUser);

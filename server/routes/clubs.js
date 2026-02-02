@@ -53,20 +53,71 @@ router.post('/', verifySuperAdmin, async (req, res) => {
     try {
         const newClub = new Club(req.body);
         const savedClub = await newClub.save();
+
+        // === AUTO-CREATE ClubMember records for officers ===
+        // This ensures officers can perform actions immediately after club creation
+        const officerRoles = [
+            { email: req.body.secretaryEmail, role: 'Secretary', name: req.body.secretaryName },
+            { email: req.body.presidentEmail, role: 'President', name: req.body.presidentName },
+            { email: req.body.treasurerEmail, role: 'Treasurer', name: req.body.treasurerName },
+            { email: req.body.advisorEmail, role: 'Advisor', name: req.body.advisorName },
+        ];
+
+        for (const officer of officerRoles) {
+            if (officer.email) {
+                // Check if already exists (avoid duplicates)
+                const existing = await ClubMember.findOne({
+                    clubId: savedClub._id.toString(),
+                    email: officer.email
+                });
+
+                if (!existing) {
+                    // Find if user already has an account to link userId
+                    const existingUser = await User.findOne({
+                        email: { $regex: new RegExp(`^${officer.email}$`, 'i') }
+                    });
+
+                    await ClubMember.create({
+                        clubId: savedClub._id.toString(),
+                        name: officer.name || officer.role,
+                        email: officer.email,
+                        role: officer.role,
+                        boardType: 'main',
+                        userId: existingUser?._id?.toString() || null,
+                        joinedAt: new Date()
+                    });
+                    console.log(`[Club Create] Added ${officer.role}: ${officer.email} to ClubMember`);
+                }
+            }
+        }
+
+        // Update member count
+        const count = await ClubMember.countDocuments({ clubId: savedClub._id.toString() });
+        if (count > 0) {
+            await Club.findByIdAndUpdate(savedClub._id, { members: count });
+        }
+
         res.status(201).json(savedClub);
     } catch (error) {
+        console.error('Create club error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Update club (Protected - Club Officer)
+// Update club (Protected - Club Officer or Super Admin)
 router.put('/:id', verifyClubOfficer, async (req, res) => {
     try {
-        // Whitelist allowed fields for Club Officer updates
-        // Prevent updating members count, officer IDs, or slug directly
-        const allowedUpdates = ['name', 'description', 'image', 'category'];
-        const updates = {};
+        // Allowed fields depend on role
+        // For admin, also allow officer email/id updates
+        const baseUpdates = ['name', 'description', 'image', 'category'];
+        const adminUpdates = ['secretaryEmail', 'presidentEmail', 'treasurerEmail', 'advisorEmail',
+            'secretaryId', 'presidentId', 'treasurerId', 'advisorId', 'advisorName'];
 
+        const allowedUpdates = req.user.role === 'admin'
+            ? [...baseUpdates, ...adminUpdates]
+            : baseUpdates;
+
+        const updates = {};
         allowedUpdates.forEach(field => {
             if (req.body[field] !== undefined) updates[field] = req.body[field];
         });
@@ -75,8 +126,53 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
 
         const updatedClub = await Club.findByIdAndUpdate(req.params.id, updates, { new: true });
         if (!updatedClub) return res.status(404).json({ message: 'Club not found' });
+
+        // === AUTO-CREATE ClubMember records when officer emails are updated ===
+        const officerMappings = [
+            { emailField: 'secretaryEmail', role: 'Secretary' },
+            { emailField: 'presidentEmail', role: 'President' },
+            { emailField: 'treasurerEmail', role: 'Treasurer' },
+            { emailField: 'advisorEmail', role: 'Advisor' },
+        ];
+
+        for (const mapping of officerMappings) {
+            const email = req.body[mapping.emailField];
+            if (email) {
+                // Check if ClubMember entry exists
+                const existing = await ClubMember.findOne({
+                    clubId: req.params.id,
+                    email: { $regex: new RegExp(`^${email}$`, 'i') }
+                });
+
+                if (!existing) {
+                    // Find if user has an account to link userId
+                    const existingUser = await User.findOne({
+                        email: { $regex: new RegExp(`^${email}$`, 'i') }
+                    });
+
+                    await ClubMember.create({
+                        clubId: req.params.id,
+                        name: mapping.role,
+                        email: email,
+                        role: mapping.role,
+                        boardType: 'main',
+                        userId: existingUser?._id?.toString() || null,
+                        joinedAt: new Date()
+                    });
+                    console.log(`[Club Update] Auto-created ${mapping.role} ClubMember for ${email}`);
+                } else if (existing.role !== mapping.role) {
+                    // Update role if officer was already a member
+                    existing.role = mapping.role;
+                    existing.boardType = 'main';
+                    await existing.save();
+                    console.log(`[Club Update] Updated role for ${email} to ${mapping.role}`);
+                }
+            }
+        }
+
         res.json(updatedClub);
     } catch (error) {
+        console.error('Update club error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -135,8 +231,30 @@ router.delete('/:id', verifySuperAdmin, async (req, res) => {
 // GET members for a club
 router.get('/:id/members', async (req, res) => {
     try {
-        const members = await ClubMember.find({ clubId: req.params.id }).sort({ name: 1 });
-        res.json(members);
+        const members = await ClubMember.find({ clubId: req.params.id }).sort({ name: 1 }).lean();
+
+        // Fetch latest profile info from User collection to ensure avatar is up to date
+        // Logic: 1. Try userId 2. Try email (case insensitive)
+        const enhancedMembers = await Promise.all(members.map(async (member) => {
+            let user = null;
+
+            if (member.userId) {
+                user = await User.findById(member.userId).select('profileImage');
+            }
+
+            if (!user && member.email) {
+                user = await User.findOne({
+                    email: { $regex: new RegExp(`^${member.email}$`, 'i') }
+                }).select('profileImage');
+            }
+
+            return {
+                ...member,
+                profileImage: user?.profileImage || member.profileImage || ''
+            };
+        }));
+
+        res.json(enhancedMembers);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

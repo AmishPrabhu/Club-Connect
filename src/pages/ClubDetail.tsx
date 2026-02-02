@@ -50,7 +50,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   });
   const [club, setClub] = useState<DBClub | null>(null);
   const [posts, setPosts] = useState<DBPost[]>([]);
-  const [members, setMembers] = useState<Array<{ id?: string; name: string; email: string; role: string; joinedAt: Date }>>([]);
+  const [mainBoardMembers, setMainBoardMembers] = useState<Array<{ id?: string; name: string; email: string; role: string; boardType?: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Image Modal State
@@ -92,10 +92,12 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         const clubPosts = allPosts.filter(p => p.clubId === clubId);
         setPosts(clubPosts);
 
-        // Fetch club members
+        // Fetch club members and filter for Main Board only
         const { getClubMembers } = await import('../lib/dbService');
         const clubMembers = await getClubMembers(clubId);
-        setMembers(clubMembers);
+        const mainMembers = clubMembers.filter(m => m.boardType === 'main');
+        setMainBoardMembers(mainMembers);
+
       } catch (error) {
         console.error('Error fetching club data:', error);
       } finally {
@@ -184,31 +186,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
     }
   });
 
-  // Helper function to format role display
-  const getRoleDisplay = (role: string) => {
-    const roleMap: Record<string, string> = {
-      'president': 'President',
-      'vice-president': 'Vice President',
-      'treasurer': 'Treasurer',
-      'secretary': 'Secretary',
-      'coordinator': 'Coordinator',
-      'member': 'Member',
-    };
-    return roleMap[role] || role;
-  };
 
-  // Helper function to get avatar emoji based on role
-  const getRoleAvatar = (role: string) => {
-    const avatarMap: Record<string, string> = {
-      'president': '👔',
-      'vice-president': '🎖️',
-      'treasurer': '💰',
-      'secretary': '📝',
-      'coordinator': '🎯',
-      'member': '👤',
-    };
-    return avatarMap[role] || '👤';
-  };
 
   const handleRSVP = (event: DisplayEvent) => {
     setRsvpModal({ isOpen: true, event });
@@ -265,7 +243,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-8 items-start">
         {/* Left Side - 70% desktop, 66% tablet */}
         <div className="md:col-span-2 lg:col-span-5 space-y-8">
           {/* Club Info */}
@@ -276,33 +254,33 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-              <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
-                <div className="p-3 bg-[#002147] rounded-lg text-white">
-                  <Users className="w-6 h-6" />
+              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20 overflow-hidden">
+                <div className="p-2 md:p-3 bg-[#002147] rounded-lg text-white flex-shrink-0">
+                  <Users className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Members</p>
-                  <p className="text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/20">
-                <div className="p-3 bg-[#DAA520] rounded-lg text-white">
-                  <Calendar className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Posts</p>
-                  <p className="text-2xl font-bold text-[#DAA520] dark:text-white">{posts.length}</p>
+                <div className="min-w-0 overflow-hidden">
+                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Members</p>
+                  <p className="text-xl md:text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                <div className="p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300">
-                  <MapPin className="w-6 h-6" />
+              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/20 overflow-hidden">
+                <div className="p-2 md:p-3 bg-[#DAA520] rounded-lg text-white flex-shrink-0">
+                  <Calendar className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-white capitalize">{club.category}</p>
+                <div className="min-w-0 overflow-hidden">
+                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
+                  <p className="text-xl md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => new Date(p.date) >= new Date()).length}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden col-span-2 md:col-span-1 justify-self-center md:justify-self-auto w-fit md:w-full">
+                <div className="p-2 md:p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300 flex-shrink-0">
+                  <MapPin className="w-5 h-5 md:w-6 md:h-6" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
+                  <p className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white capitalize">{club.category}</p>
                 </div>
               </div>
             </div>
@@ -526,8 +504,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         </div>
 
         {/* Right Side - 30% */}
-        <div className="lg:col-span-2" id="tour-member-board">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 lg:sticky lg:top-6">
+        <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start" id="tour-member-board">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
                 {club.image ? (
@@ -549,24 +527,24 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
               Meet the dedicated members who make {club.name} thrive
             </p>
 
-            {/* Member list */}
-            <div className="space-y-4">
-              {members.length === 0 ? (
+            {/* Main Board Member list - Hidden on mobile, shown on laptop */}
+            <div className="hidden lg:block space-y-3 mb-6">
+              {mainBoardMembers.length === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
-                  No members yet
+                  No Main Board members yet
                 </p>
               ) : (
-                members.slice(0, 6).map((member, index) => (
+                mainBoardMembers.slice(0, 6).map((member, index) => (
                   <div key={member.id || index} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-sm">
-                      {getRoleAvatar(member.role)}
+                    <div className="w-8 h-8 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-[#DAA520]">
+                      {member.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                         {member.name}
                       </p>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {getRoleDisplay(member.role)}
+                        {member.role}
                       </p>
                     </div>
                   </div>
@@ -576,7 +554,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
 
             <button
               onClick={() => onNavigateToMember(club)}
-              className="w-full mt-6 px-4 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold uppercase tracking-wider transition-all transform hover:scale-[1.02] shadow-md border-b-4 border-[#00152e]"
+              className="w-full px-4 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold uppercase tracking-wider transition-all transform hover:scale-[1.02] shadow-md border-b-4 border-[#00152e]"
             >
               View Full Board
             </button>

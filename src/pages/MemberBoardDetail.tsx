@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Crown, Mail } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import { ClubMember } from '../types/auth';
 import { getClubMembers } from '../lib/dbService';
 
@@ -26,6 +26,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
   const [members, setMembers] = useState<ClubMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [yearFilter, setYearFilter] = useState<string>('');
+  const [boardFilter, setBoardFilter] = useState<string>('');
 
   useEffect(() => {
     const loadMembers = async () => {
@@ -46,13 +47,6 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
     loadMembers();
   }, [club?.id]);
 
-  const getRoleIcon = (role: string) => {
-    if (role.toLowerCase().includes('president')) {
-      return <Crown className="w-5 h-5 text-[#DAA520]" />;
-    }
-    return <Users className="w-5 h-5 text-[#002147]" />;
-  };
-
   // Filter members by year
   const filteredMembers = yearFilter
     ? members.filter(m => String(m.joinedAt).includes(yearFilter))
@@ -63,6 +57,11 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
     acc[boardType] = filteredMembers.filter(m => (m.boardType || 'member') === boardType);
     return acc;
   }, {} as Record<string, ClubMember[]>);
+
+  // Filter board types to display
+  const displayBoardOrder = boardFilter
+    ? BOARD_ORDER.filter(bt => bt === boardFilter)
+    : BOARD_ORDER;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -98,23 +97,42 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         </div>
       </div>
 
-      {/* Year Filter */}
-      <div className="mb-6 flex items-center gap-3">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Filter by Year:</label>
-        <select
-          value={yearFilter}
-          onChange={(e) => setYearFilter(e.target.value)}
-          className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Years</option>
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-          <option value="2027">2027</option>
-        </select>
-        {yearFilter && (
+      {/* Filters */}
+      <div className="mb-6 flex flex-wrap items-center gap-4">
+        {/* Board Type Filter */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Board:</label>
+          <select
+            value={boardFilter}
+            onChange={(e) => setBoardFilter(e.target.value)}
+            className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All</option>
+            <option value="main">Main</option>
+            <option value="executive">Executive</option>
+            <option value="member">Member</option>
+          </select>
+        </div>
+
+        {/* Year Filter */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Year:</label>
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Years</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+
+        {(yearFilter || boardFilter) && (
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            Showing {filteredMembers.length} member{filteredMembers.length !== 1 ? 's' : ''}
+            Showing {boardFilter ? groupedMembers[boardFilter]?.length || 0 : filteredMembers.length} member{(boardFilter ? groupedMembers[boardFilter]?.length : filteredMembers.length) !== 1 ? 's' : ''}
           </span>
         )}
       </div>
@@ -130,7 +148,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         </div>
       ) : (
         <div className="space-y-8">
-          {BOARD_ORDER.map((boardType) => {
+          {displayBoardOrder.map((boardType) => {
             const boardMembers = groupedMembers[boardType];
             if (boardMembers.length === 0) return null;
 
@@ -145,32 +163,26 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
                       key={member.id}
                       className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-[#DAA520]">
-                          {member.name.charAt(0)}
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-[#DAA520] flex-shrink-0">
+                          {member.profileImage ? (
+                            <img
+                              src={member.profileImage}
+                              alt={member.name}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            member.name.charAt(0).toUpperCase()
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-base font-semibold text-[#002147] dark:text-white truncate">
                             {member.name}
                           </h3>
-                          {boardType !== 'member' && (
-                            <div className="flex items-center gap-1">
-                              {getRoleIcon(member.role)}
-                              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">
-                                {member.role}
-                              </p>
-                            </div>
-                          )}
+                          <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
+                            {member.role || 'Member'}
+                          </p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs pt-3 border-t border-slate-100 dark:border-slate-700">
-                        <Mail className="w-3 h-3 text-[#DAA520]" />
-                        <a
-                          href={`mailto:${member.email}`}
-                          className="text-[#002147] dark:text-blue-400 hover:underline truncate"
-                        >
-                          {member.email}
-                        </a>
                       </div>
                     </div>
                   ))}

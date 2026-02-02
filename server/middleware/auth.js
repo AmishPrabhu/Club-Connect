@@ -67,16 +67,30 @@ export const verifyClubOfficer = async (req, res, next) => {
                 return res.status(400).json({ message: 'Club ID is required for authorization check.' });
             }
 
-            // Check if user is an officer of THIS club
+            console.log('[Auth Debug] Checking officer for clubId:', clubId, 'userId:', req.user.id, 'email:', req.user.email);
+
+            // Check if user is an officer of THIS club by userId OR email (case-insensitive)
             const officerFn = await ClubMember.findOne({
                 clubId: clubId,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+                $or: [
+                    { userId: req.user.id },
+                    { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                ],
+                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor', 'secretary', 'president', 'treasurer', 'advisor'] }
             });
 
+            console.log('[Auth Debug] Found officer record:', officerFn ? JSON.stringify({ email: officerFn.email, role: officerFn.role, userId: officerFn.userId }) : 'null');
+
             if (officerFn) {
+                // If found by email but userId not set, link it now
+                if (!officerFn.userId && req.user.id) {
+                    officerFn.userId = req.user.id;
+                    await officerFn.save();
+                    console.log('[Auth Debug] Linked userId to officer record');
+                }
                 next();
             } else {
+                console.log('[Auth Debug] No officer record found - access denied');
                 res.status(403).json({ message: 'Access denied. You are not an officer of this club.' });
             }
         } catch (error) {
