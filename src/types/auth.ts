@@ -129,6 +129,23 @@ export interface EventTask {
   createdAt: string;
 }
 
+export interface DBTask {
+  id: string;
+  title: string;
+  description: string;
+  clubId: string;
+  assignedTo: string[];
+  assignedToEmails: string[];
+  status: 'pending' | 'in-progress' | 'completed';
+  deadline?: string;
+  relatedEventId?: string;
+  relatedEventTitle?: string;
+  createdBy: string;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 
 // Firestore post document structure

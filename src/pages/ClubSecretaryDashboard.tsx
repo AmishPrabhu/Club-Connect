@@ -11,7 +11,9 @@ import MemberManager from '../components/MemberManager';
 import LocationPickerModal from '../components/LocationPickerModal';
 import ImageModal from '../components/ImageModal';
 import ConfirmModal from '../components/ConfirmModal';
+import ClubTaskManager from '../components/ClubTaskManager';
 import { useNavigation } from '../context/NavigationContext';
+import { CheckSquare } from 'lucide-react';
 
 // Notification Sender Component
 function NotificationSender({ club }: { club: DBClub }) {
@@ -429,7 +431,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     setIsModalOpen(true);
     setIsModalOpen(true);
   };
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget'>(() => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'posts' | 'notifications' | 'events' | 'messages' | 'budget' | 'tasks'>(() => {
     const params = new URLSearchParams(window.location.search);
     return (params.get('tab') as any) || 'overview';
   });
@@ -886,6 +888,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               { id: 'events', label: 'Events', icon: Calendar, secretaryOnly: true },
               { id: 'budget', label: 'Budgets', icon: Edit, treasurerOnly: true },
               { id: 'posts', label: 'Manage Posts', icon: Edit, secretaryOnly: true },
+              { id: 'tasks', label: 'Roles & Tasks', icon: CheckSquare },
               { id: 'notifications', label: 'Send Notifications', icon: Bell, secretaryOnly: true },
               { id: 'messages', label: 'Messages', icon: MessageSquare }
             ].filter(tab => {
@@ -1430,6 +1433,16 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <NotificationSender club={club} />
+          )}
+
+
+          {/* Tasks Tab */}
+          {activeTab === 'tasks' && club && (
+            <ClubTaskManager
+              club={club}
+              user={user!}
+              posts={posts}
+            />
           )}
 
           {/* Posts Tab */}

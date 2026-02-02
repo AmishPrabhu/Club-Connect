@@ -15,6 +15,7 @@ import postRoutes from './routes/posts.js';
 import notificationRoutes from './routes/notifications.js';
 import userRoutes from './routes/users.js';
 import bulkImportRoutes from './routes/bulk-import.js';
+import tasksRoutes from './routes/tasks.js';
 
 const app = express();
 const PORT = (process.env.PORT && process.env.PORT != 5000) ? process.env.PORT : 5001;
@@ -49,6 +50,7 @@ app.use('/api/clubs', bulkImportRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/tasks', tasksRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

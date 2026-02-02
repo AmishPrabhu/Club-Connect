@@ -7,6 +7,7 @@ import {
     ClubMember,
     EventRSVP,
     ClubMessage,
+    DBTask,
 } from '../types/auth';
 
 // ==================== ACCOUNT DELETION ====================
@@ -773,5 +774,47 @@ export const getUserTasks = async (): Promise<any[]> => {
     } catch (error) {
         console.error('Error fetching user tasks:', error);
         return [];
+    }
+};
+
+// ==================== CLUB TASKS ====================
+
+export const getClubTasks = async (clubId: string): Promise<DBTask[]> => {
+    try {
+        const response = await api.get('/tasks', { params: { clubId } });
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching club tasks:', error);
+        return [];
+    }
+};
+
+export const createClubTask = async (taskData: Omit<DBTask, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdById'>): Promise<DBTask | null> => {
+    try {
+        const response = await api.post('/tasks', taskData);
+        return mapId(response.data);
+    } catch (error) {
+        console.error('Error creating club task:', error);
+        return null;
+    }
+};
+
+export const updateClubTask = async (taskId: string, updates: Partial<DBTask>): Promise<boolean> => {
+    try {
+        await api.put(`/tasks/${taskId}`, updates);
+        return true;
+    } catch (error) {
+        console.error('Error updating club task:', error);
+        return false;
+    }
+};
+
+export const deleteClubTask = async (taskId: string): Promise<boolean> => {
+    try {
+        await api.delete(`/tasks/${taskId}`);
+        return true;
+    } catch (error) {
+        console.error('Error deleting club task:', error);
+        return false;
     }
 };
