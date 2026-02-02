@@ -30,7 +30,7 @@ import BottomNav from './components/BottomNav';
 function AppContent() {
   const {
     currentPage,
-    previousPage,
+    // previousPage,
     selectedClub,
     selectedMember,
     selectedEvent,

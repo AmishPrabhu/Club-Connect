@@ -143,7 +143,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
             onConfirm: async () => {
                 setIsSaving(true);
                 try {
-                    const result = await removeClubOfficer(club!.id, role);
+                    const result = await removeClubOfficer(club!.id as string, role);
                     if (result.success) {
                         // Refresh club data
                         const clubs = await getClubs();

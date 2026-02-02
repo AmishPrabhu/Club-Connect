@@ -42,7 +42,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                 setEmail(parsed.email);
                 localStorage.removeItem('googleSignupData'); // Clear after reading
                 setStep('DETAILS'); // Google signup doesn't need OTP step here as verified by Google
-            } catch (e) {
+            } catch {
                 console.error('Failed to parse Google signup data');
             }
         }

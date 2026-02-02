@@ -350,7 +350,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                     {post.registrationLink && (() => {
                         // Check if registration period has ended
                         if (post.registrationEnd) {
-                            let registrationEndDateTime = new Date(post.registrationEnd);
+                            const registrationEndDateTime = new Date(post.registrationEnd);
                             // If there's an end time, parse and apply it
                             if (post.registrationEndTime) {
                                 const timeMatch = post.registrationEndTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);

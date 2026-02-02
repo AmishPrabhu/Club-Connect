@@ -249,7 +249,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        post.id && onManageEvent(post.id);
+                                                        if (post.id) onManageEvent(post.id);
                                                     }}
                                                     className="p-1.5 text-slate-400 hover:text-[#002147] dark:hover:text-blue-400 transition-colors"
                                                     title="Manage Event"

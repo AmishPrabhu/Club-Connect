@@ -146,7 +146,7 @@ const assignOfficerRole = async (
     password: string,
     name: string,
     clubId: string,
-    clubName: string,
+    _clubName: string,
     role: 'club-secretary' | 'president' | 'treasurer' | 'advisor',
     roleLabel: string,
     clubUpdateField: 'secretary' | 'president' | 'treasurer' | 'advisor'
@@ -459,7 +459,7 @@ export const verifyEventBudget = async (eventId: string): Promise<boolean> => {
 
 // ==================== NOTIFICATIONS ====================
 
-export const getNotifications = async (userId?: string): Promise<DBNotification[]> => {
+export const getNotifications = async (_userId?: string): Promise<DBNotification[]> => {
     try {
         // Backend handles filtering by userId using the token usually, 
         // but if we need explicit userId fetching we can pass it as query param if API supports it.
@@ -472,7 +472,7 @@ export const getNotifications = async (userId?: string): Promise<DBNotification[
     }
 };
 
-export const getNotification = async (notificationId: string): Promise<DBNotification | null> => {
+export const getNotification = async (_notificationId: string): Promise<DBNotification | null> => {
     // Single notification fetch not implemented yet in backend but easy to add if needed.
     // For now returning null or relying on cached list.
     return null;
@@ -575,7 +575,7 @@ export const removeClubMember = async (
 
 // ==================== MISSING HELPERS (POLYFILLS) ====================
 
-export const checkEmailExists = async (email: string): Promise<boolean> => {
+export const checkEmailExists = async (_email: string): Promise<boolean> => {
     // Basic implementation: try to login with wrong password? No.
     // Ideally use backend route. For now return true to allow flow.
     return true;
@@ -647,7 +647,7 @@ export const getUserMemberships = async (email: string): Promise<any[]> => {
     }
 };
 
-export const getUserRSVPsByEmail = async (email: string): Promise<EventRSVP[]> => {
+export const getUserRSVPsByEmail = async (_email: string): Promise<EventRSVP[]> => {
     try {
         const response = await api.get('/posts/user/rsvps');
         return response.data.map(mapId);
