@@ -89,8 +89,10 @@ function AppContent() {
       }
     }
 
-    // 4. Student Dashboard Protection (optional, if restricted to users only, though usually open)
-    // if (currentPage === 'studentDashboard' && !user) navigateToPage('login');
+    // 4. Student Dashboard & Profile Protection
+    if ((currentPage === 'studentDashboard' || currentPage === 'userProfile') && !user) {
+      navigateToPage('home');
+    }
 
   }, [currentPage, user, navigateToPage, selectedMembership]);
 

@@ -135,6 +135,20 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
           const userMemberships = await getUserMemberships(user.email);
           setMemberships(userMemberships);
         }
+      } else {
+        // Clear state if no user
+        setProfileData({
+          name: '',
+          bio: '',
+          email: '',
+          joinDate: '',
+          profileImage: '',
+        });
+        setMemberships([]);
+        setUserEvents([]);
+        setUserTasks([]);
+        setLikedClubsList([]);
+        setLikedClubNotifications([]);
       }
     };
     loadProfile();

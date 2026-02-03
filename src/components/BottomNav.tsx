@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Home, Users, Calendar, Bell, Menu, LogOut, Settings, Shield, User } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '../context/NavigationContext';
 
 interface BottomNavProps {
     currentPage: Page;
@@ -10,6 +11,7 @@ interface BottomNavProps {
 
 export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
     const { user, logout, memberships } = useAuth();
+    const { handleLogout } = useNavigation();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -103,7 +105,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
 
                     <div className="border-t border-slate-100 dark:border-slate-700 p-2 mt-1">
                         <button
-                            onClick={() => { logout(); setShowMenu(false); }}
+                            onClick={() => { handleLogout(logout); setShowMenu(false); }}
                             className="w-full text-left px-3 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl flex items-center gap-3 font-medium transition-colors"
                         >
                             <div className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-500"><LogOut className="w-4 h-4" /></div>
