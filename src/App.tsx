@@ -65,7 +65,10 @@ function AppContent() {
 
     // 2. Advisor Dashboard Protection
     if (currentPage === 'advisorDashboard') {
-      if (!user || user.role !== 'advisor') {
+      const hasGlobalRole = user && user.role === 'advisor';
+      const hasClubRole = selectedMembership && selectedMembership.role.toLowerCase() === 'advisor';
+
+      if (!user || (!hasGlobalRole && !hasClubRole)) {
         navigateToPage('home');
       }
     }

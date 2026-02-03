@@ -216,12 +216,12 @@ router.post('/login', authLimiter, async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Check for officer memberships if role is 'user'
+        // Check for officer memberships if role is 'user' or 'club-member'
         let effectiveRole = user.role;
         let effectiveClubId = user.clubId;
         let effectiveClubName = user.clubName;
 
-        if (effectiveRole === 'user') {
+        if (effectiveRole === 'user' || effectiveRole === 'club-member') {
             const officerMembership = await ClubMember.findOne({
                 $or: [{ userId: user._id }, { email: user.email }],
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
@@ -234,7 +234,7 @@ router.post('/login', authLimiter, async (req, res) => {
                     'Treasurer': 'treasurer',
                     'Advisor': 'advisor'
                 };
-                effectiveRole = roleMap[officerMembership.role] || 'club-secretary';
+                effectiveRole = roleMap[officerMembership.role] || effectiveRole;
 
                 if (!effectiveClubId) {
                     effectiveClubId = officerMembership.clubId;
@@ -273,14 +273,23 @@ router.post('/login', authLimiter, async (req, res) => {
                     { $set: { userId: user._id } }
                 );
 
-                // 2. If user is still 'user' role but has memberships, upgrade to 'club-member'
-                if (user.role === 'user') {
-                    const memberCount = await ClubMember.countDocuments({
-                        $or: [{ userId: user._id }, { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') } }]
-                    });
+                // 2. If user is 'user' or 'club-member', upgrade to appropriate role
+                const memberships = await ClubMember.find({
+                    $or: [{ userId: user._id }, { email: { $regex: new RegExp(`^${escapeRegExp(user.email)}$`, 'i') } }]
+                });
 
-                    if (memberCount > 0) {
-                        await User.findByIdAndUpdate(user._id, { role: 'club-member' });
+                if (memberships.length > 0) {
+                    // Find highest role
+                    const roles = memberships.map(m => m.role);
+                    let targetRole = 'club-member';
+
+                    if (roles.includes('Advisor')) targetRole = 'advisor';
+                    else if (roles.includes('President')) targetRole = 'president';
+                    else if (roles.includes('Treasurer')) targetRole = 'treasurer';
+                    else if (roles.includes('Secretary')) targetRole = 'club-secretary';
+
+                    if (user.role !== targetRole) {
+                        await User.findByIdAndUpdate(user._id, { role: targetRole });
                     }
                 }
             } catch (err) {
@@ -305,9 +314,9 @@ router.get('/me', verifyToken, async (req, res) => {
         let effectiveClubId = user.clubId;
         let effectiveClubName = user.clubName;
 
-        // If role is 'user', check if they have any officer memberships
-        // this handles cases where admin created them as 'user' but assigned officer role
-        if (effectiveRole === 'user') {
+        // If role is 'user' or 'club-member', check if they have any officer memberships
+        // this handles cases where admin created them as 'user/club-member' but assigned officer role
+        if (effectiveRole === 'user' || effectiveRole === 'club-member') {
             const officerMembership = await ClubMember.findOne({
                 $or: [{ userId: user._id }, { email: user.email }],
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
@@ -321,13 +330,11 @@ router.get('/me', verifyToken, async (req, res) => {
                     'Treasurer': 'treasurer',
                     'Advisor': 'advisor'
                 };
-                effectiveRole = roleMap[officerMembership.role] || 'club-secretary';
+                effectiveRole = roleMap[officerMembership.role] || effectiveRole;
 
                 // Also provide a default club context if missing
                 if (!effectiveClubId) {
                     effectiveClubId = officerMembership.clubId;
-                    // We don't have clubName here without a join, but that's okay
-                    // The frontend will fetch memberships via getUserMemberships for full details
                 }
             }
         }
@@ -392,12 +399,12 @@ router.post('/google', async (req, res) => {
             });
         }
 
-        // Check for officer memberships if role is 'user'
+        // Check for officer memberships if role is 'user' or 'club-member'
         let effectiveRole = user.role;
         let effectiveClubId = user.clubId;
         let effectiveClubName = user.clubName;
 
-        if (effectiveRole === 'user') {
+        if (effectiveRole === 'user' || effectiveRole === 'club-member') {
             const officerMembership = await ClubMember.findOne({
                 $or: [{ userId: user._id }, { email: user.email }],
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
@@ -410,7 +417,7 @@ router.post('/google', async (req, res) => {
                     'Treasurer': 'treasurer',
                     'Advisor': 'advisor'
                 };
-                effectiveRole = roleMap[officerMembership.role] || 'club-secretary';
+                effectiveRole = roleMap[officerMembership.role] || effectiveRole;
 
                 if (!effectiveClubId) {
                     effectiveClubId = officerMembership.clubId;

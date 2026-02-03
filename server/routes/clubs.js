@@ -71,12 +71,12 @@ router.post('/', verifySuperAdmin, async (req, res) => {
                     email: officer.email
                 });
 
-                if (!existing) {
-                    // Find if user already has an account to link userId
-                    const existingUser = await User.findOne({
-                        email: { $regex: new RegExp(`^${officer.email}$`, 'i') }
-                    });
+                // Find if user already has an account
+                const existingUser = await User.findOne({
+                    email: { $regex: new RegExp(`^${officer.email}$`, 'i') }
+                });
 
+                if (!existing) {
                     await ClubMember.create({
                         clubId: savedClub._id.toString(),
                         name: officer.name || officer.role,
@@ -87,6 +87,28 @@ router.post('/', verifySuperAdmin, async (req, res) => {
                         joinedAt: new Date()
                     });
                     console.log(`[Club Create] Added ${officer.role}: ${officer.email} to ClubMember`);
+                }
+
+                // === GLOBAL ROLE SYNC ===
+                // If user exists, upgrade their global role to the officer role
+                if (existingUser) {
+                    const roleMap = {
+                        'Secretary': 'club-secretary',
+                        'President': 'president',
+                        'Treasurer': 'treasurer',
+                        'Advisor': 'advisor'
+                    };
+                    const targetRole = roleMap[officer.role];
+
+                    if (targetRole && existingUser.role !== targetRole) {
+                        existingUser.role = targetRole;
+                        // Also set club context if missing
+                        if (!existingUser.clubId) existingUser.clubId = savedClub._id.toString();
+                        if (!existingUser.clubName) existingUser.clubName = savedClub.name;
+
+                        await existingUser.save();
+                        console.log(`[Club Create] Synced global role for ${officer.email} to ${targetRole}`);
+                    }
                 }
             }
         }
@@ -138,6 +160,11 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
         for (const mapping of officerMappings) {
             const email = req.body[mapping.emailField];
             if (email) {
+                // Find if user has an account
+                const existingUser = await User.findOne({
+                    email: { $regex: new RegExp(`^${email}$`, 'i') }
+                });
+
                 // Check if ClubMember entry exists
                 const existing = await ClubMember.findOne({
                     clubId: req.params.id,
@@ -145,11 +172,6 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
                 });
 
                 if (!existing) {
-                    // Find if user has an account to link userId
-                    const existingUser = await User.findOne({
-                        email: { $regex: new RegExp(`^${email}$`, 'i') }
-                    });
-
                     await ClubMember.create({
                         clubId: req.params.id,
                         name: mapping.role,
@@ -166,6 +188,27 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
                     existing.boardType = 'main';
                     await existing.save();
                     console.log(`[Club Update] Updated role for ${email} to ${mapping.role}`);
+                }
+
+                // === GLOBAL ROLE SYNC ===
+                if (existingUser) {
+                    const roleMap = {
+                        'Secretary': 'club-secretary',
+                        'President': 'president',
+                        'Treasurer': 'treasurer',
+                        'Advisor': 'advisor'
+                    };
+                    const targetRole = roleMap[mapping.role];
+
+                    if (targetRole && existingUser.role !== targetRole) {
+                        existingUser.role = targetRole;
+                        // Always update club context when role changes
+                        existingUser.clubId = req.params.id;
+                        existingUser.clubName = updatedClub.name;
+
+                        await existingUser.save();
+                        console.log(`[Club Update] Synced global role for ${email} to ${targetRole}`);
+                    }
                 }
             }
         }
