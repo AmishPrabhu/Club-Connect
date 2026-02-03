@@ -125,12 +125,22 @@ export const verifyClubMember = async (req, res, next) => {
                 return res.status(400).json({ message: 'Club ID is required for authorization check.' });
             }
 
+            // Check if user is a member of THIS club by userId OR email (case-insensitive)
             const member = await ClubMember.findOne({
                 clubId: clubId,
-                userId: req.user.id
+                $or: [
+                    { userId: req.user.id },
+                    { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                ]
             });
 
             if (member) {
+                // Self-healing: If found by email but userId not set, link it now
+                if (!member.userId && req.user.id) {
+                    member.userId = req.user.id;
+                    await member.save();
+                    console.log(`[Auth Debug] Linked userId ${req.user.id} to member record ${member._id}`);
+                }
                 next();
             } else {
                 res.status(403).json({ message: 'Access denied. You are not a member of this club.' });

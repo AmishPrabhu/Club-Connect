@@ -73,26 +73,23 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         Back to Club Details
       </button>
 
-      <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#002147] flex items-center justify-center border-2 border-[#DAA520] shadow-md">
+      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden bg-[#002147] flex items-center justify-center border-2 border-[#DAA520] shadow-md flex-shrink-0">
             {club.image ? (
               <img
                 src={club.image}
                 alt={club.name}
-                className="w-full h-full object-contain p-2 bg-white rounded-xl"
+                className="w-full h-full object-contain p-1.5 md:p-2 bg-white rounded-lg md:rounded-xl"
               />
             ) : (
-              <span className="text-4xl">{club.icon}</span>
+              <span className="text-xl md:text-4xl">{club.icon}</span>
             )}
           </div>
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">
               {club.name} - Member Board
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300 font-medium mt-1">
-              Meet the dedicated members who make {club.name} thrive
-            </p>
           </div>
         </div>
       </div>

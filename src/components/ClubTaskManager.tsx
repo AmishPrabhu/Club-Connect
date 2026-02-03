@@ -122,28 +122,28 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div onClick={() => setFilter('pending')} className={`cursor-pointer p-4 rounded-xl border ${filter === 'pending' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-orange-600 dark:text-orange-400">Pending</span>
-                        <Clock className="w-5 h-5 text-orange-500" />
+            {/* Stats Cards - Compact horizontal on mobile */}
+            <div className="grid grid-cols-3 gap-2 md:gap-4">
+                <div onClick={() => setFilter('pending')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'pending' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] md:text-sm font-medium text-orange-600 dark:text-orange-400">Pending</span>
+                        <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
+                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
                 </div>
-                <div onClick={() => setFilter('in-progress')} className={`cursor-pointer p-4 rounded-xl border ${filter === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">In Progress</span>
-                        <AlertCircle className="w-5 h-5 text-blue-500" />
+                <div onClick={() => setFilter('in-progress')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] md:text-sm font-medium text-blue-600 dark:text-blue-400">In Progress</span>
+                        <AlertCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{inProgressCount}</p>
+                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{inProgressCount}</p>
                 </div>
-                <div onClick={() => setFilter('completed')} className={`cursor-pointer p-4 rounded-xl border ${filter === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-green-600 dark:text-green-400">Completed</span>
-                        <CheckCircle className="w-5 h-5 text-green-500" />
+                <div onClick={() => setFilter('completed')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] md:text-sm font-medium text-green-600 dark:text-green-400">Completed</span>
+                        <CheckCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{completedCount}</p>
+                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{completedCount}</p>
                 </div>
             </div>
 
@@ -217,9 +217,9 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
             {/* Create Task Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full p-6 animate-in fade-in zoom-in duration-200">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Task</h3>
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full p-4 md:p-6 my-4 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
+                        <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Task</h3>
 
                         <div className="space-y-4">
                             <div>
@@ -228,7 +228,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                                     type="text"
                                     value={newTaskTitle}
                                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     placeholder="e.g. Design Event Poster"
                                 />
                             </div>
@@ -238,20 +238,20 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                                 <textarea
                                     value={newTaskDescription}
                                     onChange={(e) => setNewTaskDescription(e.target.value)}
-                                    rows={3}
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    rows={2}
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     placeholder="Any details..."
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deadline</label>
                                     <input
                                         type="date"
                                         value={newTaskDeadline}
                                         onChange={(e) => setNewTaskDeadline(e.target.value)}
-                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     />
                                 </div>
                                 <div>
@@ -259,7 +259,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                                     <select
                                         value={selectedEventId}
                                         onChange={(e) => setSelectedEventId(e.target.value)}
-                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     >
                                         <option value="">None</option>
                                         {posts.filter(p => p.type === 'event').map(event => (
@@ -271,9 +271,9 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assign Members</label>
-                                <div className="max-h-40 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-700">
+                                <div className="max-h-28 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-700">
                                     {members.map((member: any) => (
-                                        <label key={member.id} className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded cursor-pointer">
+                                        <label key={member.id} className="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-600 rounded cursor-pointer">
                                             <input
                                                 type="checkbox"
                                                 checked={newTaskAssignees.includes(member.name)}
@@ -293,17 +293,17 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                             </div>
                         </div>
 
-                        <div className="flex gap-3 mt-6">
+                        <div className="flex gap-3 mt-5">
                             <button
                                 onClick={() => setIsCreateModalOpen(false)}
-                                className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleCreateTask}
                                 disabled={!newTaskTitle.trim()}
-                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                                 Create Task
                             </button>

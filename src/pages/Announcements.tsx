@@ -81,22 +81,22 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
     return (
         <div className="max-w-5xl mx-auto px-6 py-12">
             {/* Header */}
-            <div className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+            <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors mb-6 font-medium"
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors mb-3 md:mb-6 font-medium text-sm md:text-base"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
                     <span>Back</span>
                 </button>
 
-                <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-[#002147] rounded-2xl flex items-center justify-center border-2 border-[#DAA520] shadow-md">
-                        <Megaphone className="w-7 h-7 text-[#DAA520]" />
+                <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-10 h-10 md:w-14 md:h-14 bg-[#002147] rounded-lg md:rounded-2xl flex items-center justify-center border-2 border-[#DAA520] shadow-md flex-shrink-0">
+                        <Megaphone className="w-5 h-5 md:w-7 md:h-7 text-[#DAA520]" />
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">All Announcements</h1>
-                        <p className="text-slate-600 dark:text-slate-400 font-medium">Stay updated with notifications from all clubs</p>
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-base md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">All Announcements</h1>
+                        <p className="text-xs md:text-base text-slate-600 dark:text-slate-400 font-medium truncate">Stay updated with notifications from all clubs</p>
                     </div>
                 </div>
             </div>

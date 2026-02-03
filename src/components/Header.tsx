@@ -74,7 +74,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
   return (
     <header className="sticky top-0 z-50 bg-[#002147] text-white shadow-lg border-b border-[#00152e]">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-[4.5rem] flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-3 md:px-6 h-14 md:h-[4.5rem] flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Mobile Menu Button - Hidden as we switched to Bottom Nav */}
           <div className="lg:hidden w-2"></div>
@@ -85,15 +85,15 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
             onClick={() => onNavigate('home')}
             id="tour-logo"
           >
-            <div className="bg-white p-1.5 rounded-lg shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div className="bg-white p-1 md:p-1.5 rounded-lg shadow-md group-hover:scale-105 transition-transform duration-300">
               <img
                 src="/wce-logo.png"
                 alt="Walchand College of Engineering Logo"
-                className="w-8 h-8 md:w-9 md:h-9 object-contain"
+                className="w-7 h-7 md:w-9 md:h-9 object-contain"
               />
             </div>
             <div className="md:hidden">
-              <span className="text-lg font-serif font-bold tracking-tight text-white">
+              <span className="text-base font-serif font-bold tracking-tight text-white">
                 WCE, Sangli
               </span>
             </div>
@@ -146,22 +146,22 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors"
+            className="p-1.5 md:p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors"
             aria-label="Toggle theme"
             id="tour-dark-mode-toggle"
           >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDarkMode ? <Sun className="w-4 h-4 md:w-5 md:h-5" /> : <Moon className="w-4 h-4 md:w-5 md:h-5" />}
           </button>
 
           {/* Notifications */}
           <button
             onClick={() => onNavigate('notifications')}
-            className="p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors relative"
+            className="p-1.5 md:p-2 rounded-full text-blue-200 hover:bg-white/10 hover:text-white transition-colors relative"
             id="tour-notifications"
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-4 h-4 md:w-5 md:h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#002147]"></span>
+              <span className="absolute top-1 right-1 md:top-1.5 md:right-1.5 w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500 rounded-full border-2 border-[#002147]"></span>
             )}
           </button>
 
@@ -213,7 +213,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       </button>
                     )}
 
-                    {user.role === 'advisor' && (
+                    {(user.role === 'advisor' || memberships.some(m => m.role.toLowerCase() === 'advisor')) && (
                       <button
                         onClick={() => { onNavigate('advisorDashboard'); setShowUserMenu(false); }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"

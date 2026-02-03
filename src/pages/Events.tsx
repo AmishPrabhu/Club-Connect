@@ -111,25 +111,25 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                 imageUrl={selectedImage || ''}
             />
             {/* Page Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-8 md:py-12 mb-8">
+            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-4 md:py-12 mb-4 md:mb-8">
                 <div className="max-w-5xl mx-auto">
                     <button
                         onClick={onBack}
-                        className="flex items-center gap-2 text-slate-500 hover:text-[#002147] dark:hover:text-blue-400 transition-colors mb-6 text-sm font-bold uppercase tracking-wide"
+                        className="flex items-center gap-2 text-slate-500 hover:text-[#002147] dark:hover:text-blue-400 transition-colors mb-3 md:mb-6 text-xs md:text-sm font-bold uppercase tracking-wide"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         <span>Back</span>
                     </button>
 
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-[#002147] rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
-                            <Calendar className="w-7 h-7 text-[#DAA520]" />
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-[#002147] rounded-lg md:rounded-xl flex items-center justify-center shadow-lg transform rotate-3 flex-shrink-0">
+                            <Calendar className="w-5 h-5 md:w-7 md:h-7 text-[#DAA520]" />
                         </div>
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white">Campus Events</h1>
-                            <p className="text-slate-600 dark:text-slate-400 mt-1">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-base md:text-4xl font-serif font-bold text-slate-900 dark:text-white truncate">Campus Events</h1>
+                            <p className="text-xs md:text-base text-slate-600 dark:text-slate-400 mt-0.5 md:mt-1 truncate">
                                 {filteredPosts.length === posts.length
-                                    ? `Browse all ${posts.length} upcoming activities and sessions.`
+                                    ? `Browse all ${posts.length} upcoming activities`
                                     : `Showing ${filteredPosts.length} of ${posts.length} events`
                                 }
                             </p>

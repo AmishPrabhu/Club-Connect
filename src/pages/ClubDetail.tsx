@@ -221,66 +221,69 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         Back to Dashboard
       </button>
 
-      {/* Club Header */}
-      <div className="relative mb-8 rounded-2xl overflow-hidden shadow-xl border-t-4 border-[#DAA520]">
+      {/* Club Header - Compact on mobile */}
+      <div className="relative mb-4 md:mb-8 rounded-xl md:rounded-2xl overflow-hidden shadow-xl border-t-4 border-[#DAA520]">
         <div className="absolute inset-0 bg-[#002147] opacity-90"></div>
         <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-40 mix-blend-overlay`}></div>
-        <div className="relative z-10 p-6 md:p-12 text-center text-white">
-          <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg">
+        <div className="relative z-10 p-4 md:p-12 flex items-center gap-3 md:gap-0 md:flex-col md:text-center text-white">
+          <div className="w-12 h-12 md:w-24 md:h-24 md:mx-auto md:mb-4 md:mb-6 rounded-xl md:rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg flex-shrink-0">
             {club.image ? (
               <img
                 src={club.image}
                 alt={club.name}
-                className="w-full h-full object-contain p-2 bg-white rounded-xl"
+                className="w-full h-full object-contain p-1.5 md:p-2 bg-white rounded-lg md:rounded-xl"
               />
             ) : (
-              <span className="text-3xl md:text-5xl">{club.icon}</span>
+              <span className="text-2xl md:text-5xl">{club.icon}</span>
             )}
           </div>
-          <h1 className="text-2xl md:text-4xl font-serif font-bold mb-2 tracking-wide text-[#DAA520]">{club.name}</h1>
-          <p className="text-white/80 max-w-2xl mx-auto font-light text-sm md:text-lg">Igniting Innovation & Excellence at Walchand College of Engineering</p>
+          <div className="flex-1 min-w-0 md:flex-none">
+            <h1 className="text-lg md:text-4xl font-serif font-bold mb-0.5 md:mb-2 tracking-wide text-[#DAA520] truncate md:whitespace-normal">{club.name}</h1>
+            <p className="text-white/80 md:max-w-2xl md:mx-auto font-light text-xs md:text-lg line-clamp-2 md:line-clamp-none">Igniting Innovation & Excellence at Walchand College of Engineering</p>
+          </div>
         </div>
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 md:gap-8 items-start">
         {/* Left Side - 70% desktop, 66% tablet */}
-        <div className="md:col-span-2 lg:col-span-5 space-y-8">
+        <div className="md:col-span-2 lg:col-span-5 space-y-4 md:space-y-8">
           {/* Club Info */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 md:p-8 border-l-4 border-[#002147]">
-            <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-4">About the Club</h3>
-            <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed font-serif">
+          <div className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm p-4 md:p-8 border-l-4 border-[#002147]">
+            <h3 className="text-base md:text-xl font-serif font-bold text-[#002147] dark:text-white mb-2 md:mb-4">About the Club</h3>
+            <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300 mb-4 md:mb-8 leading-relaxed font-serif">
               {club.description}
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20 overflow-hidden">
-                <div className="p-2 md:p-3 bg-[#002147] rounded-lg text-white flex-shrink-0">
-                  <Users className="w-5 h-5 md:w-6 md:h-6" />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-6">
+              <div className="flex items-center gap-2 md:gap-4 p-2 md:p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg md:rounded-xl border border-blue-100 dark:border-blue-900/20 overflow-hidden">
+                <div className="p-1.5 md:p-3 bg-[#002147] rounded-md md:rounded-lg text-white flex-shrink-0">
+                  <Users className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0 overflow-hidden">
-                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Members</p>
-                  <p className="text-xl md:text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
+                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Members</p>
+                  <p className="text-sm md:text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/20 overflow-hidden">
-                <div className="p-2 md:p-3 bg-[#DAA520] rounded-lg text-white flex-shrink-0">
-                  <Calendar className="w-5 h-5 md:w-6 md:h-6" />
+              {/* Events - Hidden on mobile, shown on desktop */}
+              <div className="hidden md:flex items-center gap-2 md:gap-4 p-2 md:p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg md:rounded-xl border border-amber-100 dark:border-amber-900/20 overflow-hidden">
+                <div className="p-1.5 md:p-3 bg-[#DAA520] rounded-md md:rounded-lg text-white flex-shrink-0">
+                  <Calendar className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0 overflow-hidden">
-                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
-                  <p className="text-xl md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => new Date(p.date) >= new Date()).length}</p>
+                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
+                  <p className="text-sm md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => new Date(p.date) >= new Date()).length}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden col-span-2 md:col-span-1 justify-self-center md:justify-self-auto w-fit md:w-full">
-                <div className="p-2 md:p-3 bg-slate-200 dark:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300 flex-shrink-0">
-                  <MapPin className="w-5 h-5 md:w-6 md:h-6" />
+              <div className="flex items-center gap-2 md:gap-4 p-2 md:p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg md:rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+                <div className="p-1.5 md:p-3 bg-slate-200 dark:bg-slate-600 rounded-md md:rounded-lg text-slate-600 dark:text-slate-300 flex-shrink-0">
+                  <MapPin className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
-                  <p className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white capitalize">{club.category}</p>
+                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
+                  <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white capitalize truncate">{club.category}</p>
                 </div>
               </div>
             </div>
@@ -319,19 +322,19 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           </div>
 
           {/* Posts Timeline */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-                <h2 className="text-2xl font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
-                  <Calendar className="w-6 h-6 text-[#DAA520]" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-3 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 md:mb-4 gap-2 md:gap-4">
+                <h2 className="text-base md:text-2xl font-serif font-bold text-[#002147] dark:text-white flex items-center gap-1.5 md:gap-2">
+                  <Calendar className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520]" />
                   Posts & Events
                 </h2>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600 shadow-sm">
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="flex bg-white dark:bg-slate-700 rounded-md md:rounded-lg p-0.5 md:p-1 border border-slate-200 dark:border-slate-600 shadow-sm">
                     <button
                       onClick={() => setActiveTab('upcoming')}
-                      className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'upcoming'
+                      className={`px-2.5 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm font-bold transition-all ${activeTab === 'upcoming'
                         ? 'bg-[#002147] text-white shadow-md'
                         : 'text-slate-600 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                         }`}
@@ -340,7 +343,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                     </button>
                     <button
                       onClick={() => setActiveTab('past')}
-                      className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'past'
+                      className={`px-2.5 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm font-bold transition-all ${activeTab === 'past'
                         ? 'bg-[#002147] text-white shadow-md'
                         : 'text-slate-600 dark:text-slate-300 hover:text-[#002147] dark:hover:text-white'
                         }`}

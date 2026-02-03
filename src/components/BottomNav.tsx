@@ -82,7 +82,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                             </button>
                         )}
 
-                        {user.role === 'advisor' && (
+                        {(user.role === 'advisor' || memberships.some(m => m.role.toLowerCase() === 'advisor')) && (
                             <button
                                 onClick={() => { onNavigate('advisorDashboard'); setShowMenu(false); }}
                                 className="w-full text-left px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-[#002147] dark:hover:text-blue-400 rounded-xl flex items-center gap-3 font-medium transition-colors"

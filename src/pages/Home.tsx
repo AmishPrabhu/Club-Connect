@@ -142,7 +142,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
       {/* Hero Section */}
       {/* Hero Section */}
-      <div className="bg-[#002147] relative overflow-hidden pt-6 pb-12 md:pt-20 md:pb-32 transition-all duration-300">
+      <div className="bg-[#002147] relative overflow-hidden pt-4 pb-8 md:pt-20 md:pb-32 transition-all duration-300">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.wce.ac.in/images/WCE_Main_Building.jpg')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#002147]/90"></div>
@@ -151,8 +151,8 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           {/* Left Column: Text & Actions */}
           <div className="w-full md:w-3/5 text-center md:text-left">
             {/* Mobile-Only App Greeting */}
-            <div className="block md:hidden w-full text-left mb-6">
-              <p className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-1">
+            <div className="block md:hidden w-full text-left mb-4">
+              <p className="text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">
                 {(() => {
                   if (!user) return 'Welcome Guest';
                   const parts = user.name.split(' ').filter(p => p.trim());
@@ -172,7 +172,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   return `Welcome Back, ${friendlyName}`;
                 })()}
               </p>
-              <h1 className="text-3xl font-serif font-bold text-white leading-tight">
+              <h1 className="text-2xl font-serif font-bold text-white leading-tight">
                 Campus <span className="text-[#DAA520]">Connect</span>
               </h1>
             </div>
@@ -211,16 +211,16 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
       <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-16 relative z-20 w-full flex-grow">
 
         {/* Stats Overview - 2 Large Action Cards */}
-        <div className="relative mb-8 md:mb-12 -mt-6 md:-mt-16 z-20 px-4 md:px-0">
+        <div className="relative mb-6 md:mb-12 -mt-4 md:-mt-16 z-20 px-3 md:px-0">
           {/* Anchor for tour to ensure visibility under sticky header */}
           <div id="tour-stats-grid-anchor" className="absolute inset-0 w-full h-full pointer-events-none scroll-mt-[200px]" />
 
-          <div className="grid grid-cols-2 gap-3 md:gap-6" id="tour-stats-grid-visual">
+          <div className="grid grid-cols-2 gap-2 md:gap-6" id="tour-stats-grid-visual">
             {/* Explore Clubs Card */}
             <button
               id="tour-stats-clubs-card"
               onClick={() => onNavigate('dashboard')}
-              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-2 md:gap-0"
+              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-lg md:rounded-2xl shadow-lg p-2.5 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-1 md:gap-0"
             >
               <div className="flex flex-col items-start">
                 <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
@@ -238,7 +238,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   )}
                 </div>
               </div>
-              <div className="w-8 h-8 md:w-14 md:h-14 bg-[#002147]/5 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
                 {isLoading ? (
                   <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
                 ) : (
@@ -251,7 +251,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <button
               id="tour-stats-events-card"
               onClick={() => onNavigate('events')}
-              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-2 md:gap-0"
+              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-lg md:rounded-2xl shadow-lg p-2.5 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-1 md:gap-0"
             >
               <div className="flex flex-col items-start">
                 <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
@@ -269,7 +269,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   )}
                 </div>
               </div>
-              <div className="w-8 h-8 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <div className="w-7 h-7 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
                 {isLoading ? (
                   <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
                 ) : (
@@ -388,10 +388,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-base md:text-2xl font-serif font-bold text-slate-900 dark:text-white">
                     Upcoming Events
                   </h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Don't miss out on what's happening on campus</p>
+                  <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5 md:mt-1">Don't miss out on what's happening</p>
                 </div>
                 <button
                   onClick={() => onNavigate('events')}
@@ -609,10 +609,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
         </div>
 
         {/* Campus Calendar & Weekly Events Section */}
-        <div className="mb-8 scroll-mt-32" id="tour-calendar-section">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-[#002147] dark:text-blue-400" />
-            <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>
+        <div className="mb-4 md:mb-8 scroll-mt-32" id="tour-calendar-section">
+          <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-6">
+            <Calendar className="w-4 h-4 md:w-6 md:h-6 text-[#002147] dark:text-blue-400" />
+            <h2 className="text-base md:text-2xl font-serif font-bold text-slate-900 dark:text-white">Campus Calendar</h2>
           </div>
 
           <div className="flex flex-col md:flex-row gap-6 lg:gap-8 h-auto md:h-[500px]">

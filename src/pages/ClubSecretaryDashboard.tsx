@@ -791,73 +791,73 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {/* Header */}
-      <div className="mb-8 p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden flex-shrink-0">
+      {/* Header - Horizontal on mobile */}
+      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden flex-shrink-0">
             {club.image && club.image.startsWith('http') ? (
               <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-3xl">{club.icon}</span>
+              <span className="text-xl md:text-3xl">{club.icon}</span>
             )}
           </div>
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">
               {club.name}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-xs md:text-base text-slate-500 dark:text-slate-400 font-medium truncate">
               Secretary Dashboard • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-blue-400" />
+      {/* Stats Cards - Compact on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-lg">
+              <Users className="w-4 h-4 md:w-6 md:h-6 text-[#002147] dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Members</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{club.members}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Members</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-amber-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md md:rounded-lg">
+              <Calendar className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Edit className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-purple-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-lg">
+              <Edit className="w-4 h-4 md:w-6 md:h-6 text-[#002147] dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Posts</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Posts</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-slate-400" />
+        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md md:rounded-lg">
+              <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-slate-400" />
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Past Events</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
+              <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Past Events</p>
             </div>
           </div>
         </div>
@@ -923,49 +923,49 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         <div className="p-4 sm:p-8">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">Club Overview</h3>
+            <div className="space-y-4 md:space-y-6">
+              <h3 className="text-lg md:text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">Club Overview</h3>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 border-l-4 border-[#002147]">
-                  <h4 className="font-serif font-bold text-[#002147] dark:text-white mb-4">Club Information</h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Name:</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{club.name}</span>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Total Members:</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">{club.members}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Total Posts:</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">{posts.length}</span>
-                      </div>
-                    </div>
+              {/* Club Information Card */}
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6 border-l-4 border-[#002147]">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Name:</span>
+                    <span className="font-semibold text-sm text-slate-900 dark:text-white">{club.name}</span>
                   </div>
-
-                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6">
-                    <h4 className="font-bold text-slate-900 dark:text-white mb-4">Club Profile Picture</h4>
-                    {isReadOnly ? (
-                      <div className="relative w-32 h-32 mx-auto">
-                        <img
-                          src={club.image || '/club-default.jpg'}
-                          alt="Club profile"
-                          className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
-                        />
-                      </div>
-                    ) : (
-                      <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
-                    )}
+                  <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Total Members:</span>
+                    <span className="font-semibold text-sm text-slate-900 dark:text-white">{club.members}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Total Posts:</span>
+                    <span className="font-semibold text-sm text-slate-900 dark:text-white">{posts.length}</span>
                   </div>
                 </div>
+              </div>
 
+              {/* Club Profile Picture Card */}
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-3 md:mb-4 text-sm md:text-base">Club Profile Picture</h4>
+                {isReadOnly ? (
+                  <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto">
+                    <img
+                      src={club.image || '/club-default.jpg'}
+                      alt="Club profile"
+                      className="w-full h-full object-cover rounded-lg border-2 border-slate-300 dark:border-slate-600"
+                    />
+                  </div>
+                ) : (
+                  <ImageUploader clubId={club.id!} currentImage={club.image} onImageUpdated={(url) => setClub({ ...club, image: url })} />
+                )}
+              </div>
 
-                {/* WhatsApp Community Link Section */}
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+              {/* WhatsApp Community Link Section */}
+              {!isReadOnly && (
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6">
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm md:text-base">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                       </svg>
                       WhatsApp Community
@@ -975,9 +975,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         href={club.whatsappLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
+                        className="text-xs md:text-sm text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
                       >
-                        Open Link
+                        Open
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
@@ -991,11 +991,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         type="url"
                         value={whatsappLink}
                         onChange={(e) => setWhatsappLink(e.target.value)}
-                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 dark:text-white"
-                        placeholder="https://chat.whatsapp.com/... or https://whatsapp.com/channel/..."
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900 dark:text-white text-sm"
+                        placeholder="https://chat.whatsapp.com/..."
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Paste your WhatsApp group or community invite link here.
+                        Paste your WhatsApp group or community invite link.
                       </p>
                       <div className="flex gap-2">
                         <button
@@ -1003,7 +1003,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             setIsEditingWhatsapp(false);
                             setWhatsappLink(club.whatsappLink || '');
                           }}
-                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                          className="flex-1 px-3 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all text-sm"
                         >
                           Cancel
                         </button>
@@ -1023,15 +1023,15 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             }
                           }}
                           disabled={whatsappSaving}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
+                          className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
                         >
                           {whatsappSaving ? (
                             <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                               Saving...
                             </>
                           ) : (
-                            'Save Link'
+                            'Save'
                           )}
                         </button>
                       </div>
@@ -1039,17 +1039,17 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   ) : (
                     <div>
                       {club.whatsappLink ? (
-                        <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 truncate">
+                        <div className="flex items-center justify-between p-2 md:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 truncate min-w-0">
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            <span className="text-sm truncate">{club.whatsappLink}</span>
+                            <span className="text-xs md:text-sm truncate">{club.whatsappLink}</span>
                           </div>
                           {!isReadOnly && (
                             <button
                               onClick={() => setIsEditingWhatsapp(true)}
-                              className="text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
+                              className="text-xs md:text-sm text-green-600 dark:text-green-400 hover:underline flex-shrink-0 ml-2"
                             >
                               Edit
                             </button>
@@ -1059,22 +1059,24 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         !isReadOnly && (
                           <button
                             onClick={() => setIsEditingWhatsapp(true)}
-                            className="w-full px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2"
+                            className="w-full px-3 py-2.5 md:px-4 md:py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400 transition-all flex items-center justify-center gap-2 text-sm"
                           >
-                            <Plus className="w-5 h-5" />
-                            Add WhatsApp Community Link
+                            <Plus className="w-4 h-4" />
+                            Add WhatsApp Link
                           </button>
                         )
                       )}
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* Instagram Link Section */}
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <Instagram className="w-5 h-5 text-pink-500" />
+              {/* Instagram Link Section */}
+              {!isReadOnly && (
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6 mt-4 md:mt-6">
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm md:text-base">
+                      <Instagram className="w-4 h-4 md:w-5 md:h-5 text-pink-500" />
                       Instagram Page
                     </h4>
                     {!isEditingInstagram && club.instagramLink && (
@@ -1082,7 +1084,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         href={club.instagramLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
+                        className="text-xs md:text-sm text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
                       >
                         Open Link
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1098,7 +1100,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         type="url"
                         value={instagramLink}
                         onChange={(e) => setInstagramLink(e.target.value)}
-                        className="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-slate-900 dark:text-white text-sm"
                         placeholder="https://instagram.com/..."
                       />
                       <div className="flex gap-2">
@@ -1107,7 +1109,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             setIsEditingInstagram(false);
                             setInstagramLink(club.instagramLink || '');
                           }}
-                          className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                          className="flex-1 px-3 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all text-sm"
                         >
                           Cancel
                         </button>
@@ -1127,11 +1129,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             }
                           }}
                           disabled={instagramSaving}
-                          className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50"
+                          className="flex-1 px-3 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
                         >
                           {instagramSaving ? (
                             <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                               Saving...
                             </>
                           ) : (
@@ -1143,411 +1145,419 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   ) : (
                     <div>
                       {club.instagramLink ? (
-                        <div className="flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                          <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate">
+                        <div className="flex items-center justify-between p-2 md:p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 truncate min-w-0">
                             <Instagram className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm truncate">{club.instagramLink}</span>
+                            <span className="text-xs md:text-sm truncate">{club.instagramLink}</span>
                           </div>
                           {!isReadOnly && (
                             <button
                               onClick={() => setIsEditingInstagram(true)}
-                              className="p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded-full transition-colors"
+                              className="text-xs md:text-sm text-pink-600 dark:text-pink-400 hover:underline flex-shrink-0 ml-2"
                             >
-                              <Edit className="w-4 h-4" />
+                              Edit
                             </button>
                           )}
                         </div>
                       ) : (
-                        <div className="text-center py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg">
-                          <Instagram className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                            Add an Instagram page link
-                          </p>
-                          {!isReadOnly && (
-                            <button
-                              onClick={() => setIsEditingInstagram(true)}
-                              className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline"
-                            >
-                              Add Link
-                            </button>
-                          )}
-                        </div>
+                        !isReadOnly && (
+                          <button
+                            onClick={() => setIsEditingInstagram(true)}
+                            className="w-full px-3 py-2.5 md:px-4 md:py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-pink-500 hover:text-pink-600 dark:hover:border-pink-500 dark:hover:text-pink-400 transition-all flex items-center justify-center gap-2 text-sm"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add Instagram Page
+                          </button>
+                        )
                       )}
                     </div>
                   )}
                 </div>
+              )}
 
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
-                  {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
-                    <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {posts
-                        .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
-                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                        .slice(0, 3)
-                        .map((post) => (
-                          <div key={post.id} className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
-                            <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
+
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
+                {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
+                  <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
+                ) : (
+                  <div className="space-y-3">
+                    {posts
+                      .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
+                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                      .slice(0, 3)
+                      .map((post) => (
+                        <div key={post.id} className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
+                          <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             </div>
-
           )}
 
           {/* Members Tab */}
-          {activeTab === 'members' && club && (
-            <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} userRole={activeRole as any} />
-          )}
+          {
+            activeTab === 'members' && club && (
+              <MemberManager clubId={club.id!} clubName={club.name} isReadOnly={isReadOnly} userRole={activeRole as any} />
+            )
+          }
 
           {/* Events Tab - For Treasurer */}
-          {activeTab === 'events' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Events</h3>
+          {
+            activeTab === 'events' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Events</h3>
 
-              {posts.filter(p => p.type === 'event').length === 0 ? (
-                <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-600 dark:text-slate-400">No events yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {posts
-                    .filter(p => p.type === 'event')
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((post) => {
-                      const isPast = new Date(post.date) < new Date();
-                      return (
-                        <div
-                          key={post.id}
-                          className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
-                                  ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                  }`}>
-                                  {isPast ? 'Past Event' : 'Upcoming'}
-                                </span>
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
-                                  {new Date(post.date).toLocaleDateString('en-US', {
-                                    weekday: 'short',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                  })}
-                                </span>
-                                {post.time && (
-                                  <span className="text-sm text-slate-500 dark:text-slate-400">
-                                    • {post.time}
+                {posts.filter(p => p.type === 'event').length === 0 ? (
+                  <div className="text-center py-12">
+                    <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-600 dark:text-slate-400">No events yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {posts
+                      .filter(p => p.type === 'event')
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .map((post) => {
+                        const isPast = new Date(post.date) < new Date();
+                        return (
+                          <div
+                            key={post.id}
+                            className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
+                                    ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                    }`}>
+                                    {isPast ? 'Past Event' : 'Upcoming'}
                                   </span>
-                                )}
-                              </div>
-                              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">
-                                {post.title}
-                              </h4>
-                              {post.location && (
-                                <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-2">
-                                  📍 {post.location}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                {post.rsvps !== undefined && post.rsvps > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Users className="w-4 h-4" />
-                                    {post.rsvps} RSVPs
+                                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                                    {new Date(post.date).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
                                   </span>
+                                  {post.time && (
+                                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                                      • {post.time}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">
+                                  {post.title}
+                                </h4>
+                                {post.location && (
+                                  <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-2">
+                                    📍 {post.location}
+                                  </p>
                                 )}
+                                <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                                  {post.rsvps !== undefined && post.rsvps > 0 && (
+                                    <span className="flex items-center gap-1">
+                                      <Users className="w-4 h-4" />
+                                      {post.rsvps} RSVPs
+                                    </span>
+                                  )}
 
+                                </div>
                               </div>
+                              <button
+                                onClick={() => post.id && navigateToManagement(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'events' } })}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
+                              >
+                                <Settings2 className="w-4 h-4" />
+                                Manage
+                              </button>
                             </div>
-                            <button
-                              onClick={() => post.id && navigateToManagement(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'events' } })}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 font-medium"
-                            >
-                              <Settings2 className="w-4 h-4" />
-                              Manage
-                            </button>
                           </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
-          )}
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )
+          }
 
 
 
           {/* Budget Tab */}
-          {activeTab === 'budget' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">
-                Event Budgets
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {isReadOnly
-                  ? 'Upload budget documents for each event. Your advisor can verify them.'
-                  : 'View submitted budgets for club events (read-only access).'}
-              </p>
+          {
+            activeTab === 'budget' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white border-l-4 border-[#DAA520] pl-3">
+                  Event Budgets
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  {isReadOnly
+                    ? 'Upload budget documents for each event. Your advisor can verify them.'
+                    : 'View submitted budgets for club events (read-only access).'}
+                </p>
 
-              {posts.filter(p => p.type === 'event').length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                  <Calendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-500 dark:text-slate-400">No events yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {posts
-                    .filter(p => p.type === 'event')
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((post) => {
-                      const isPast = new Date(post.date) < new Date();
-                      return (
-                        <div
-                          key={post.id}
-                          className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
-                        >
-                          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
-                                  ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                  }`}>
-                                  {isPast ? 'Past Event' : 'Upcoming'}
-                                </span>
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
-                                  {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </span>
-                              </div>
-                              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{post.title}</h4>
-
-                              {/* Budget Status */}
-                              <div className="flex items-center gap-2 mt-3">
-                                {post.budgetImage ? (
-                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.budgetVerified
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                {posts.filter(p => p.type === 'event').length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <Calendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400">No events yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {posts
+                      .filter(p => p.type === 'event')
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .map((post) => {
+                        const isPast = new Date(post.date) < new Date();
+                        return (
+                          <div
+                            key={post.id}
+                            className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
+                          >
+                            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isPast
+                                    ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
                                     }`}>
-                                    {post.budgetVerified ? '✓ Verified' : '⏳ Pending Verification'}
+                                    {isPast ? 'Past Event' : 'Upcoming'}
                                   </span>
-                                ) : (
-                                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                                    No Budget Uploaded
+                                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                                    {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                   </span>
+                                </div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{post.title}</h4>
+
+                                {/* Budget Status */}
+                                <div className="flex items-center gap-2 mt-3">
+                                  {post.budgetImage ? (
+                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.budgetVerified
+                                      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                      : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                      }`}>
+                                      {post.budgetVerified ? '✓ Verified' : '⏳ Pending Verification'}
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                      No Budget Uploaded
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Budget Actions */}
+                              <div className="flex flex-col gap-3 min-w-[200px]">
+                                {/* View Budget Button */}
+                                {post.budgetImage && (
+                                  <a
+                                    href={post.budgetImage}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm text-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                  >
+                                    View Budget
+                                  </a>
+                                )}
+
+                                {/* Upload Button (Treasurer Only) */}
+                                {isReadOnly && (
+                                  <button
+                                    onClick={() => {
+                                      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                                      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+                                      if (!cloudName || !uploadPreset || !window.cloudinary) {
+                                        setConfirmModal({
+                                          isOpen: true,
+                                          title: 'Upload Unavailable',
+                                          message: 'The upload widget is not available. Please refresh the page and try again.',
+                                          type: 'info',
+                                          variant: 'alert',
+                                        });
+                                        return;
+                                      }
+
+                                      const widget = window.cloudinary.createUploadWidget({
+                                        cloudName,
+                                        uploadPreset,
+                                        folder: `budgets/${post.clubId}/${post.id}`,
+                                        sources: ['local', 'camera', 'url'],
+                                        multiple: false,
+                                        maxFiles: 1,
+                                        resourceType: 'auto',
+                                        clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf', 'webp'],
+                                        maxFileSize: 10000000,
+                                      }, async (_error: any, result: any) => {
+                                        if (result.event === 'success') {
+                                          const budgetUrl = result.info.secure_url;
+                                          const success = await updateEventBudget(post.id!, budgetUrl);
+                                          if (success) {
+                                            // Refresh posts
+                                            const allPosts = await getPosts();
+                                            setPosts(allPosts.filter(p => p.clubId === user?.clubId));
+                                          }
+                                        }
+                                      });
+                                      widget.open();
+                                    }}
+                                    className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                    {post.budgetImage ? 'Update Budget' : 'Upload Budget'}
+                                  </button>
                                 )}
                               </div>
                             </div>
-
-                            {/* Budget Actions */}
-                            <div className="flex flex-col gap-3 min-w-[200px]">
-                              {/* View Budget Button */}
-                              {post.budgetImage && (
-                                <a
-                                  href={post.budgetImage}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm text-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                                >
-                                  View Budget
-                                </a>
-                              )}
-
-                              {/* Upload Button (Treasurer Only) */}
-                              {isReadOnly && (
-                                <button
-                                  onClick={() => {
-                                    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-                                    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-                                    if (!cloudName || !uploadPreset || !window.cloudinary) {
-                                      setConfirmModal({
-                                        isOpen: true,
-                                        title: 'Upload Unavailable',
-                                        message: 'The upload widget is not available. Please refresh the page and try again.',
-                                        type: 'info',
-                                        variant: 'alert',
-                                      });
-                                      return;
-                                    }
-
-                                    const widget = window.cloudinary.createUploadWidget({
-                                      cloudName,
-                                      uploadPreset,
-                                      folder: `budgets/${post.clubId}/${post.id}`,
-                                      sources: ['local', 'camera', 'url'],
-                                      multiple: false,
-                                      maxFiles: 1,
-                                      resourceType: 'auto',
-                                      clientAllowedFormats: ['png', 'jpg', 'jpeg', 'pdf', 'webp'],
-                                      maxFileSize: 10000000,
-                                    }, async (_error: any, result: any) => {
-                                      if (result.event === 'success') {
-                                        const budgetUrl = result.info.secure_url;
-                                        const success = await updateEventBudget(post.id!, budgetUrl);
-                                        if (success) {
-                                          // Refresh posts
-                                          const allPosts = await getPosts();
-                                          setPosts(allPosts.filter(p => p.clubId === user?.clubId));
-                                        }
-                                      }
-                                    });
-                                    widget.open();
-                                  }}
-                                  className="px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                  {post.budgetImage ? 'Update Budget' : 'Upload Budget'}
-                                </button>
-                              )}
-                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
-          )}
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )
+          }
 
           {/* Messages Tab */}
-          {activeTab === 'messages' && user && (
-            <MessageSender club={club} user={user} />
-          )}
+          {
+            activeTab === 'messages' && user && (
+              <MessageSender club={club} user={user} />
+            )
+          }
 
           {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <NotificationSender club={club} />
-          )}
+          {
+            activeTab === 'notifications' && (
+              <NotificationSender club={club} />
+            )
+          }
 
 
           {/* Tasks Tab */}
-          {activeTab === 'tasks' && club && (
-            <ClubTaskManager
-              club={club}
+          {
+            activeTab === 'tasks' && club && (
+              <ClubTaskManager
+                club={club}
 
-              posts={posts}
-            />
-          )}
+                posts={posts}
+              />
+            )
+          }
 
           {/* Posts Tab */}
-          {activeTab === 'posts' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
-                <button
-                  onClick={() => setIsCreatePostModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create New Post
-                </button>
-              </div>
-
-              {posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-600 dark:text-slate-400">No posts yet. Create your first post!</p>
+          {
+            activeTab === 'posts' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Posts</h3>
+                  <button
+                    onClick={() => setIsCreatePostModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create New Post
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {posts.map((post) => (
-                    <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div
-                          className="flex-1 cursor-pointer"
-                          onClick={() => post.id && onNavigateToPost(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'posts' } })}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                              : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                              }`}>
-                              {post.type}
-                            </span>
-                            <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
-                          </div>
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.title}</h4>
-                          {post.rsvps && post.rsvps > 0 && (
-                            <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
-                          )}
-                          {post.attachments && post.attachments.length > 0 && (
-                            <div className="mt-3">
-                              <AttachmentGallery attachments={post.attachments} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-2 flex-col">
-                          {post.type === 'event' && new Date(post.date) < new Date() && (
-                            <button
-                              onClick={() => handleEditPhotos(post)}
-                              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
-                              title="Add Event Photos"
-                            >
-                              <Image className="w-4 h-4" />
-                              Add Photos ({post.eventPhotos?.length || 0})
-                            </button>
-                          )}
-                          {post.type === 'event' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingRegistrationLink({ postId: post.id!, currentLink: post.registrationLink || '' });
-                                setNewRegistrationLink(post.registrationLink || '');
-                              }}
-                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.registrationLink
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
-                                }`}
-                              title={post.registrationLink ? 'Edit Registration Link' : 'Add Registration Link'}
-                            >
-                              <Link className="w-4 h-4" />
-                              {post.registrationLink ? 'Edit Link' : 'Add Link'}
-                            </button>
-                          )}
-                          {post.type === 'event' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingEventWhatsapp({ postId: post.id!, currentLink: post.eventWhatsappLink || '' });
-                                setNewEventWhatsappLink(post.eventWhatsappLink || '');
-                              }}
-                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.eventWhatsappLink
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
-                                }`}
-                              title={post.eventWhatsappLink ? 'Edit WhatsApp Group' : 'Add WhatsApp Group'}
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                              </svg>
-                              {post.eventWhatsappLink ? 'Edit Group' : 'Add Group'}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeletePost(post.id!)}
-                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+
+                {posts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Edit className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-600 dark:text-slate-400">No posts yet. Create your first post!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {posts.map((post) => (
+                      <div key={post.id} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 hover:shadow-md transition-shadow">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div
+                            className="flex-1 cursor-pointer"
+                            onClick={() => post.id && onNavigateToPost(post.id, { page: 'clubSecretaryDashboard', params: { tab: 'posts' } })}
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.type === 'event'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                                }`}>
+                                {post.type}
+                              </span>
+                              <span className="text-sm text-slate-600 dark:text-slate-400">{post.date}</span>
+                            </div>
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.title}</h4>
+                            {post.rsvps && post.rsvps > 0 && (
+                              <p className="text-sm text-green-600 dark:text-green-400">{post.rsvps} RSVPs</p>
+                            )}
+                            {post.attachments && post.attachments.length > 0 && (
+                              <div className="mt-3">
+                                <AttachmentGallery attachments={post.attachments} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-2 flex-col">
+                            {post.type === 'event' && new Date(post.date) < new Date() && (
+                              <button
+                                onClick={() => handleEditPhotos(post)}
+                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
+                                title="Add Event Photos"
+                              >
+                                <Image className="w-4 h-4" />
+                                Add Photos ({post.eventPhotos?.length || 0})
+                              </button>
+                            )}
+                            {post.type === 'event' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingRegistrationLink({ postId: post.id!, currentLink: post.registrationLink || '' });
+                                  setNewRegistrationLink(post.registrationLink || '');
+                                }}
+                                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.registrationLink
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
+                                  }`}
+                                title={post.registrationLink ? 'Edit Registration Link' : 'Add Registration Link'}
+                              >
+                                <Link className="w-4 h-4" />
+                                {post.registrationLink ? 'Edit Link' : 'Add Link'}
+                              </button>
+                            )}
+                            {post.type === 'event' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingEventWhatsapp({ postId: post.id!, currentLink: post.eventWhatsappLink || '' });
+                                  setNewEventWhatsappLink(post.eventWhatsappLink || '');
+                                }}
+                                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${post.eventWhatsappLink
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
+                                  }`}
+                                title={post.eventWhatsappLink ? 'Edit WhatsApp Group' : 'Add WhatsApp Group'}
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                </svg>
+                                {post.eventWhatsappLink ? 'Edit Group' : 'Add Group'}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeletePost(post.id!)}
+                              className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
           }
 
 

@@ -614,52 +614,52 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        {/* Stats Cards - 2x2 Grid like Secretary Dashboard */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#002147] dark:text-blue-400" />
+                <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{clubs.length}</p>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Total Clubs</p>
+              <div>
+                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Total Clubs</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-[#DAA520] dark:text-amber-400" />
+                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-[#DAA520] dark:text-amber-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{posts.filter(p => p.type === 'event').length}</p>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Active Events</p>
+              <div>
+                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Upcoming</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
+                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{posts.length}</p>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Total Posts</p>
+              <div>
+                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Posts</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 dark:text-red-400" />
+                <Bell className="w-4 h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">{notifications.filter(n => !n.read).length}</p>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 truncate">Alerts</p>
+              <div>
+                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Alerts</p>
               </div>
             </div>
           </div>

@@ -450,11 +450,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
         </div>
       )}
 
-      {/* Profile Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
-          <div className="relative group">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-[#002147] rounded-2xl flex items-center justify-center text-2xl sm:text-4xl shadow-md border-2 border-[#DAA520] flex-shrink-0 overflow-hidden">
+      {/* Profile Header - Horizontal layout on mobile */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl p-3 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-4 md:mb-8">
+        <div className="flex items-start gap-3 sm:gap-6">
+          {/* Avatar - Left side */}
+          <div className="relative group flex-shrink-0">
+            <div className="w-12 h-12 sm:w-24 sm:h-24 bg-[#002147] rounded-xl md:rounded-2xl flex items-center justify-center text-lg sm:text-4xl shadow-md border-2 border-[#DAA520] overflow-hidden">
               {profileData.profileImage ? (
                 <img
                   src={profileData.profileImage}
@@ -542,46 +543,48 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 widget.open();
               }}
               disabled={isUploadingPhoto}
-              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
+              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl md:rounded-2xl cursor-pointer"
             >
               {isUploadingPhoto ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Camera className="w-6 h-6 text-white" />
+                <Camera className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               )}
             </button>
           </div>
-          <div className="flex-1">
+
+          {/* Info - Right side */}
+          <div className="flex-1 min-w-0">
             {isEditing ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
                   <input
                     type="text"
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bio</label>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bio</label>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Tell us about yourself..."
                   />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-lg font-bold transition-colors uppercase tracking-wide text-sm"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-lg font-bold transition-colors uppercase tracking-wide text-xs sm:text-sm"
                   >
-                    <Save className="w-4 h-4 text-[#DAA520]" />
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    <Save className="w-3 h-3 sm:w-4 sm:h-4 text-[#DAA520]" />
+                    {isSaving ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     onClick={() => {
@@ -592,48 +595,49 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                         email: profileData.email
                       });
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors text-xs sm:text-sm"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
               <>
-                <h1 className="text-xl sm:text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2">{profileData.name || 'User'}</h1>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  {profileData.bio || 'No bio yet. Click edit to add one!'}
-                </p>
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-sm text-slate-600 dark:text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    <span>{profileData.email}</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h1 className="text-base sm:text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">{profileData.name || 'User'}</h1>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 sm:line-clamp-none mt-0.5">
+                      {profileData.bio || 'No bio yet. Click edit to add one!'}
+                    </p>
                   </div>
-                  <div className="hidden sm:block">•</div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#DAA520]" />
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex-shrink-0"
+                  >
+                    <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400" />
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-2">
+                  <div className="flex items-center gap-1">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="truncate max-w-[120px] sm:max-w-none">{profileData.email}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-[#DAA520]" />
                     <span>Joined {profileData.joinDate}</span>
                   </div>
                 </div>
               </>
             )}
           </div>
-          {!isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="p-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-            >
-              <Edit className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-            </button>
-          )}
         </div>
 
-        {/* Role Badge */}
+        {/* Role Badge - Compact on mobile */}
         {user?.role && (
-          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-bold ${user.role === 'admin'
+          <div className="mt-3 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold ${user.role === 'admin'
                 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
                 : user.role === 'club-secretary'
                   ? 'bg-blue-100 text-[#002147] dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200'
@@ -642,7 +646,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 {user.role === 'club-secretary' ? 'Club Secretary' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </span>
               {user.clubName && (
-                <span className="text-sm text-slate-600 dark:text-slate-400">• {user.clubName}</span>
+                <span className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">• {user.clubName}</span>
               )}
             </div>
           </div>
