@@ -1,5 +1,6 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import Task from '../models/Task.js';
 import ClubMember from '../models/ClubMember.js';
 import Club from '../models/Club.js';
 import { verifyToken, verifyClubOfficer } from '../middleware/auth.js';
@@ -211,34 +212,61 @@ router.get('/user/tasks', verifyToken, async (req, res) => {
     try {
         const userEmail = req.user.email;
 
-        // Find posts that have tasks assigned to this user email
+        // 1. Fetch event-embedded tasks
         const posts = await Post.find({
             'eventTasks.assignedToEmails': userEmail
         });
 
-        // Extract and flatten tasks
-        const userTasks = [];
+        const eventEmbeddedTasks = [];
         posts.forEach(post => {
             if (post.eventTasks && post.eventTasks.length > 0) {
                 post.eventTasks.forEach(task => {
                     if (task.assignedToEmails && task.assignedToEmails.includes(userEmail)) {
-                        userTasks.push({
+                        eventEmbeddedTasks.push({
                             ...task.toObject(),
                             eventId: post._id,
                             eventTitle: post.title,
                             clubId: post.clubId,
-                            clubName: post.clubName
+                            clubName: post.clubName,
+                            type: 'event-task'
                         });
                     }
                 });
             }
         });
 
+        // 2. Fetch standalone tasks from Task collection
+        const standaloneTasksMatches = await Task.find({
+            assignedToEmails: userEmail
+        }).lean();
+
+        // Fetch club names for standalone tasks
+        const standaloneTasks = await Promise.all(standaloneTasksMatches.map(async (task) => {
+            const club = await Club.findById(task.clubId);
+            return {
+                ...task,
+                id: task._id,
+                clubName: club?.name || 'Club Task',
+                eventTitle: task.relatedEventTitle || 'General Task',
+                eventId: task.relatedEventId || null,
+                type: 'standalone-task'
+            };
+        }));
+
+        // Combine and resolve IDs
+        const userTasks = [...eventEmbeddedTasks, ...standaloneTasks];
+
         // Sort by deadline (ascending) or creation (descending)
         userTasks.sort((a, b) => {
+            const dateA = a.deadline ? new Date(a.deadline) : new Date(0);
+            const dateB = b.deadline ? new Date(b.deadline) : new Date(0);
+
             if (a.deadline && b.deadline) {
-                return new Date(a.deadline) - new Date(b.deadline);
+                return dateA - dateB;
             }
+            if (a.deadline) return -1;
+            if (b.deadline) return 1;
+
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
 

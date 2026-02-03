@@ -1,6 +1,8 @@
 import express from 'express';
 import Task from '../models/Task.js';
+import Club from '../models/Club.js';
 import { verifyToken, verifyClubOfficer } from '../middleware/auth.js';
+import { sendTaskAssignmentEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -52,6 +54,32 @@ router.post('/', verifyClubOfficer, async (req, res) => {
         });
 
         const savedTask = await newTask.save();
+
+        // Fire-and-forget email notifications
+        (async () => {
+            try {
+                if (assignedToEmails && assignedToEmails.length > 0) {
+                    const club = await Club.findById(clubId);
+                    const clubName = club?.name || 'Your Club';
+                    const assignedBy = req.user.name || 'a Club Officer';
+
+                    for (const email of assignedToEmails) {
+                        await sendTaskAssignmentEmail({
+                            recipientEmail: email,
+                            recipientName: 'Team Member', // We don't have all names easily here, but email is primary
+                            taskTitle: title,
+                            description,
+                            deadline,
+                            clubName,
+                            assignedBy
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error in task creation email trigger:', err);
+            }
+        })();
+
         res.status(201).json(savedTask);
     } catch (error) {
         console.error('Error creating task:', error);
@@ -73,6 +101,8 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
             relatedEventTitle
         } = req.body;
 
+        const oldTask = await Task.findById(req.params.id);
+
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.id,
             {
@@ -92,6 +122,32 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
         if (!updatedTask) {
             return res.status(404).json({ message: 'Task not found' });
         }
+
+        // Fire-and-forget email notifications for NEW assignees
+        (async () => {
+            try {
+                const newEmails = assignedToEmails?.filter(email => !oldTask.assignedToEmails?.includes(email)) || [];
+                if (newEmails.length > 0) {
+                    const club = await Club.findById(updatedTask.clubId);
+                    const clubName = club?.name || 'Your Club';
+                    const assignedBy = req.user.name || 'a Club Officer';
+
+                    for (const email of newEmails) {
+                        await sendTaskAssignmentEmail({
+                            recipientEmail: email,
+                            recipientName: 'Team Member',
+                            taskTitle: updatedTask.title,
+                            description: updatedTask.description,
+                            deadline: updatedTask.deadline,
+                            clubName,
+                            assignedBy
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error in task update email trigger:', err);
+            }
+        })();
 
         res.json(updatedTask);
     } catch (error) {

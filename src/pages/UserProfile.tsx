@@ -1075,15 +1075,17 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
                           </div>
 
-                          <div>
-                            <button
-                              onClick={() => onNavigateToPost(task.eventId)}
-                              className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
-                              title="View Event"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </button>
-                          </div>
+                          {task.eventId && (
+                            <div>
+                              <button
+                                onClick={() => onNavigateToPost(task.eventId)}
+                                className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                                title="View Event"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))

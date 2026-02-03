@@ -181,4 +181,51 @@ export async function sendDeleteAccountOtpEmail(email, otp) {
     });
 }
 
-export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail };
+/**
+ * Send task assignment email
+ */
+export async function sendTaskAssignmentEmail({ recipientEmail, recipientName, taskTitle, description, deadline, clubName, assignedBy }) {
+    const formattedDeadline = deadline ? new Date(deadline).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }) : 'No deadline set';
+
+    return sendEmail({
+        to: recipientEmail,
+        subject: `New Task Assigned: ${taskTitle} - ${clubName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #002147; padding: 20px; text-align: center;">
+                    <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
+                </div>
+                <div style="padding: 30px; background: #f9f9f9; border: 1px solid #e2e8f0;">
+                    <h2 style="color: #002147; border-bottom: 2px solid #DAA520; padding-bottom: 10px;">New Task Assigned</h2>
+                    <p>Hello ${recipientName || 'Team Member'},</p>
+                    <p>You have been assigned a new task by <strong>${assignedBy}</strong> for <strong>${clubName}</strong>.</p>
+                    
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #002147;">
+                        <h3 style="margin-top: 0; color: #002147;">${taskTitle}</h3>
+                        <p style="color: #475569;">${description || 'No description provided.'}</p>
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
+                        <p style="margin-bottom: 0;"><strong>Deadline:</strong> ${formattedDeadline}</p>
+                    </div>
+
+                    <p>Please log in to the portal to manage your tasks and update their status.</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${process.env.FRONTEND_URL}?page=userProfile&tab=tasks" style="background: #002147; color: #DAA520; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                            View My Tasks
+                        </a>
+                    </div>
+                </div>
+                <div style="background: #002147; padding: 15px; text-align: center;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
+                </div>
+            </div>
+        `,
+    });
+}
+
+export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendTaskAssignmentEmail };
