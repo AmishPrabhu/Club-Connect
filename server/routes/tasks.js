@@ -47,7 +47,7 @@ router.post('/', verifyClubOfficer, async (req, res) => {
             deadline,
             relatedEventId: relatedEventId || null,
             relatedEventTitle: relatedEventTitle || '',
-            createdBy: req.user.name,
+            createdBy: req.user.name || req.user.email || 'Club Officer',
             createdById: req.user.id,
         });
 

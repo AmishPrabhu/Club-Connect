@@ -303,6 +303,7 @@ router.put('/:id', verifyToken, async (req, res) => {
             'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
             'relatedEventId', 'relatedEventTitle',
             'attachments', 'eventTasks',
+            'eventPhotos',
             // Budget image allowed to be updated here or via specific route, 
             // but if updated here, we must reset verification (handled below or safely excluded)
             // Let's exclude budgetImage here to force use of the dedicated route which handles logic overrides

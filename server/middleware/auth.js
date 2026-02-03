@@ -90,8 +90,20 @@ export const verifyClubOfficer = async (req, res, next) => {
                 }
                 next();
             } else {
-                console.log('[Auth Debug] No officer record found - access denied');
-                res.status(403).json({ message: 'Access denied. You are not an officer of this club.' });
+                console.log('[Auth Debug] Officer check failed. Details:', {
+                    clubId,
+                    userId: req.user.id,
+                    email: req.user.email,
+                    providedRole: req.user.role
+                });
+                res.status(403).json({
+                    message: 'Access denied. You are not an officer of this club.',
+                    debugInfo: {
+                        clubId,
+                        userId: req.user.id,
+                        email: req.user.email
+                    }
+                });
             }
         } catch (error) {
             console.error('Club Officer Auth Error:', error);

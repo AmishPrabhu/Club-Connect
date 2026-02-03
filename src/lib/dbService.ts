@@ -789,23 +789,29 @@ export const getClubTasks = async (clubId: string): Promise<DBTask[]> => {
     }
 };
 
-export const createClubTask = async (taskData: Omit<DBTask, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdById'>): Promise<DBTask | null> => {
+export const createClubTask = async (taskData: Omit<DBTask, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdById'>): Promise<{ task: DBTask | null; error?: string }> => {
     try {
         const response = await api.post('/tasks', taskData);
-        return mapId(response.data);
-    } catch (error) {
+        return { task: mapId(response.data) };
+    } catch (error: any) {
         console.error('Error creating club task:', error);
-        return null;
+        return {
+            task: null,
+            error: error.response?.data?.message || error.message || 'Failed to create task'
+        };
     }
 };
 
-export const updateClubTask = async (taskId: string, updates: Partial<DBTask>): Promise<boolean> => {
+export const updateClubTask = async (taskId: string, taskData: Partial<DBTask>): Promise<{ success: boolean; error?: string }> => {
     try {
-        await api.put(`/tasks/${taskId}`, updates);
-        return true;
-    } catch (error) {
+        await api.put(`/tasks/${taskId}`, taskData);
+        return { success: true };
+    } catch (error: any) {
         console.error('Error updating club task:', error);
-        return false;
+        return {
+            success: false,
+            error: error.response?.data?.message || error.message || 'Failed to update task'
+        };
     }
 };
 

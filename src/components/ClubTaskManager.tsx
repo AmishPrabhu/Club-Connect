@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
-import { DBTask, DBClub, DBPost, User } from '../types/auth'; // Ensure User is imported
+import { DBTask, DBClub, DBPost } from '../types/auth';
 import { getClubTasks, createClubTask, updateClubTask, deleteClubTask, getClubMembers } from '../lib/dbService';
 
 interface ClubTaskManagerProps {
     club: DBClub;
-    user: User; // Changed from user?: User | null for stricter type checking if possible, or handle null check inside
     posts: DBPost[];
     members?: any[]; // Optional now
+    initialMembers?: any[]; // Add this to match usage
 }
 
-export default function ClubTaskManager({ club, user, posts, members: initialMembers }: ClubTaskManagerProps) {
+export default function ClubTaskManager({ club, posts, members: initialMembers }: ClubTaskManagerProps) {
     const [tasks, setTasks] = useState<DBTask[]>([]);
     const [members, setMembers] = useState<any[]>(initialMembers || []);
     const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +48,7 @@ export default function ClubTaskManager({ club, user, posts, members: initialMem
 
         const relatedEvent = posts.find(p => p.id === selectedEventId);
 
-        const newTask = await createClubTask({
+        const { task: newTask, error } = await createClubTask({
             title: newTaskTitle,
             description: newTaskDescription,
             clubId: club.id,
@@ -64,6 +64,9 @@ export default function ClubTaskManager({ club, user, posts, members: initialMem
             setTasks([newTask, ...tasks]);
             setIsCreateModalOpen(false);
             resetForm();
+        } else {
+            // Show error message to user
+            alert(`Failed to create task: ${error || 'Please make sure you have the necessary permissions.'}`);
         }
     };
 
@@ -76,9 +79,11 @@ export default function ClubTaskManager({ club, user, posts, members: initialMem
     };
 
     const updateStatus = async (taskId: string, newStatus: 'pending' | 'in-progress' | 'completed') => {
-        const success = await updateClubTask(taskId, { status: newStatus });
+        const { success, error } = await updateClubTask(taskId, { status: newStatus });
         if (success) {
             setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+        } else {
+            alert(`Failed to update task: ${error || 'Unknown error'}`);
         }
     };
 
