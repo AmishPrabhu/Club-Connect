@@ -228,4 +228,35 @@ export async function sendTaskAssignmentEmail({ recipientEmail, recipientName, t
     });
 }
 
-export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendTaskAssignmentEmail };
+/**
+ * Send event update email to a single attendee
+ */
+export async function sendEventUpdateEmail({ recipientEmail, recipientName, eventTitle, updateMessage, clubName }) {
+    return sendEmail({
+        to: recipientEmail,
+        subject: `Update for ${eventTitle} - ${clubName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #002147; padding: 20px; text-align: center;">
+                    <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
+                </div>
+                <div style="padding: 30px; background: #f9f9f9; border: 1px solid #e2e8f0;">
+                    <h2 style="color: #002147; border-bottom: 2px solid #DAA520; padding-bottom: 10px;">Event Update</h2>
+                    <p>Hello ${recipientName || 'Attendee'},</p>
+                    <p>There is an update regarding the event <strong>${eventTitle}</strong> organized by <strong>${clubName}</strong>.</p>
+                    
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #002147;">
+                        <p style="color: #475569; white-space: pre-wrap; margin: 0;">${updateMessage}</p>
+                    </div>
+
+                    <p>If you have any questions, please contact the club through the portal.</p>
+                </div>
+                <div style="background: #002147; padding: 15px; text-align: center;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
+                </div>
+            </div>
+        `,
+    });
+}
+
+export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendTaskAssignmentEmail, sendEventUpdateEmail };

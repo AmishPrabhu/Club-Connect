@@ -4,6 +4,7 @@ import Task from '../models/Task.js';
 import ClubMember from '../models/ClubMember.js';
 import Club from '../models/Club.js';
 import { verifyToken, verifyClubOfficer } from '../middleware/auth.js';
+import { sendEventUpdateEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -177,9 +178,7 @@ router.post('/', verifyClubOfficer, async (req, res) => {
             'clubId', 'clubName', 'clubImage', // These are validated by verifyClubOfficer implicitly but nice to be explicit
             'date', 'time', 'location', 'locationType', 'locationUrl',
             'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
-            'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
-            'relatedEventId', 'relatedEventTitle',
-            'attachments', 'eventTasks'
+            'attachments'
         ];
 
         const postData = {};
@@ -212,36 +211,13 @@ router.get('/user/tasks', verifyToken, async (req, res) => {
     try {
         const userEmail = req.user.email;
 
-        // 1. Fetch event-embedded tasks
-        const posts = await Post.find({
-            'eventTasks.assignedToEmails': userEmail
-        });
-
-        const eventEmbeddedTasks = [];
-        posts.forEach(post => {
-            if (post.eventTasks && post.eventTasks.length > 0) {
-                post.eventTasks.forEach(task => {
-                    if (task.assignedToEmails && task.assignedToEmails.includes(userEmail)) {
-                        eventEmbeddedTasks.push({
-                            ...task.toObject(),
-                            eventId: post._id,
-                            eventTitle: post.title,
-                            clubId: post.clubId,
-                            clubName: post.clubName,
-                            type: 'event-task'
-                        });
-                    }
-                });
-            }
-        });
-
-        // 2. Fetch standalone tasks from Task collection
+        // Fetch standalone tasks from Task collection
         const standaloneTasksMatches = await Task.find({
             assignedToEmails: userEmail
         }).lean();
 
         // Fetch club names for standalone tasks
-        const standaloneTasks = await Promise.all(standaloneTasksMatches.map(async (task) => {
+        const userTasks = await Promise.all(standaloneTasksMatches.map(async (task) => {
             const club = await Club.findById(task.clubId);
             return {
                 ...task,
@@ -252,9 +228,6 @@ router.get('/user/tasks', verifyToken, async (req, res) => {
                 type: 'standalone-task'
             };
         }));
-
-        // Combine and resolve IDs
-        const userTasks = [...eventEmbeddedTasks, ...standaloneTasks];
 
         // Sort by deadline (ascending) or creation (descending)
         userTasks.sort((a, b) => {
@@ -329,8 +302,7 @@ router.put('/:id', verifyToken, async (req, res) => {
             'date', 'time', 'location', 'locationType', 'locationUrl',
             'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
             'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
-            'relatedEventId', 'relatedEventTitle',
-            'attachments', 'eventTasks',
+            'attachments',
             'eventPhotos',
             // Budget image allowed to be updated here or via specific route, 
             // but if updated here, we must reset verification (handled below or safely excluded)
@@ -605,6 +577,37 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
         res.json(rsvp);
     } catch (error) {
         console.error('Error updating certificate:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+/**
+ * Send event update emails to all attendees
+ */
+router.post('/send-event-update', verifyClubOfficer, async (req, res) => {
+    try {
+        const { eventId, updateMessage, attendees, eventTitle, clubName } = req.body;
+
+        if (!eventId || !updateMessage || !attendees || !Array.isArray(attendees)) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Send emails in parallel
+        const promises = attendees.map(attendee =>
+            sendEventUpdateEmail({
+                recipientEmail: attendee.email,
+                recipientName: attendee.name,
+                eventTitle,
+                updateMessage,
+                clubName
+            })
+        );
+
+        await Promise.allSettled(promises);
+
+        res.json({ message: `Successfully processed ${attendees.length} email notifications` });
+    } catch (error) {
+        console.error('Error in send-event-update route:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

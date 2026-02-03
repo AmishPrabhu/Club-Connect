@@ -130,12 +130,11 @@ Cloudinary Configuration
 VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 ```
-EmailJS Configuration
+Brevo (Sendinblue) Configuration
 ```bash
-
-VITE_EMAILJS_SERVICE_ID=your_service_id
-VITE_EMAILJS_TEMPLATE_ID=your_template_id
-VITE_EMAILJS_PUBLIC_KEY=your_public_key
+# Backend .env
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_USER=your_verified_sender_email
 ```
 AI Integration
 ```bash

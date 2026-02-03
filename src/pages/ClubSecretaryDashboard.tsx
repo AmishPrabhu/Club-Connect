@@ -1268,11 +1268,6 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                   </span>
                                 )}
 
-                                {(post as any).eventTasks && (post as any).eventTasks.length > 0 && (
-                                  <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                                    ✓ {(post as any).eventTasks.filter((t: any) => t.status === 'completed').length}/{(post as any).eventTasks.length} tasks
-                                  </span>
-                                )}
                               </div>
                             </div>
                             <button
@@ -1440,7 +1435,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           {activeTab === 'tasks' && club && (
             <ClubTaskManager
               club={club}
-              user={user!}
+
               posts={posts}
             />
           )}

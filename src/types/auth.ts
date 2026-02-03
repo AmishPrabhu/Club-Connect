@@ -117,17 +117,7 @@ export interface Attachment {
   label?: string;
 }
 
-// Event Task structure for role assignments
-export interface EventTask {
-  id: string;
-  title: string;
-  assignedTo: string[];           // Array of member names
-  assignedToEmails?: string[];    // Array of member emails
-  deadline?: string;              // Deadline date (YYYY-MM-DD format)
-  status: 'pending' | 'in-progress' | 'completed';
-  createdBy: string;
-  createdAt: string;
-}
+
 
 export interface DBTask {
   id: string;
@@ -177,7 +167,7 @@ export interface DBPost {
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   relatedEventId?: string;         // For announcements: ID of a related upcoming event
   relatedEventTitle?: string;      // For announcements: Title of the related event
-  eventTasks?: EventTask[];        // Tasks assigned to members for this event
+
 
   // Budget fields
   budgetImage?: string;            // URL of uploaded budget file/image

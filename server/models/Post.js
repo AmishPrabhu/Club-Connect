@@ -7,17 +7,6 @@ const attachmentSchema = new mongoose.Schema({
     label: { type: String },
 }, { _id: false });
 
-const eventTaskSchema = new mongoose.Schema({
-    id: { type: String, required: true },
-    title: { type: String, required: true },
-    assignedTo: [{ type: String }],
-    assignedToEmails: [{ type: String }],
-    deadline: { type: String },
-    status: { type: String, enum: ['pending', 'in-progress', 'completed'], default: 'pending' },
-    createdBy: { type: String },
-    createdAt: { type: String },
-}, { _id: false });
-
 const postSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -120,8 +109,7 @@ const postSchema = new mongoose.Schema({
     attachments: [attachmentSchema], // Description images (uploaded when creating post)
     eventPhotos: [attachmentSchema], // Event photos/videos (uploaded after event by secretary)
 
-    // Event tasks
-    eventTasks: [eventTaskSchema],
+
 
     // Stats
     likes: {
