@@ -62,14 +62,16 @@ export const sendEventUpdateEmail = async (
     recipientName: string,
     eventTitle: string,
     updateMessage: string,
-    clubName: string
+    clubName: string,
+    clubId: string
 ): Promise<boolean> => {
     try {
         await sendEventUpdateEmails(
             [{ name: recipientName, email: recipientEmail }],
             eventTitle,
             updateMessage,
-            clubName
+            clubName,
+            clubId
         );
         return true;
     } catch (error) {
@@ -85,7 +87,8 @@ export const sendEventUpdateEmails = async (
     attendees: Array<{ name: string; email: string }>,
     eventTitle: string,
     updateMessage: string,
-    clubName: string
+    clubName: string,
+    clubId: string
 ): Promise<void> => {
     try {
         const token = localStorage.getItem('token');
@@ -102,6 +105,7 @@ export const sendEventUpdateEmails = async (
                 attendees,
                 eventTitle,
                 clubName,
+                clubId,
                 // Passing a placeholder eventId as the backend expects it, 
                 // though it's primarily used for logging/auth check context
                 eventId: 'BULK_UPDATE'
