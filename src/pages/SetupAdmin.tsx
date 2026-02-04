@@ -29,12 +29,17 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                 role: 'admin'
             });
 
-            const uid = response.data.user.id;
-
+            const { token, user } = response.data;
             setMessage({
                 type: 'success',
-                text: `Super Admin created successfully! ID: ${uid}. You can now login with these credentials.`,
+                text: `Super Admin created successfully! Auto-logging in...`,
             });
+
+            // Store token and reload to initialize auth session
+            localStorage.setItem('token', token);
+            setTimeout(() => {
+                window.location.href = '/'; // Reloads the app and triggers AuthProvider to check token
+            }, 1000);
         } catch (error: any) {
             console.error('Error creating admin:', error);
             setMessage({

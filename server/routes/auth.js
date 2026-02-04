@@ -133,23 +133,32 @@ router.post('/signup', signupLimiter, async (req, res) => {
             return res.status(400).json({ message: 'Only @walchandsangli.ac.in email addresses are allowed' });
         }
 
-        // Verify OTP if not a Google signup (Google signup sends OTP? No, Google handles auth)
-        // But this is the standard signup route.
-        // We require 'otp' in the body now.
-        if (!req.body.otp) {
-            return res.status(400).json({ message: 'OTP is required' });
+        // Check if this is the first admin setup
+        let isFirstAdmin = false;
+        if (role === 'admin') {
+            const adminCount = await User.countDocuments({ role: 'admin' });
+            if (adminCount === 0) {
+                isFirstAdmin = true;
+            }
         }
 
-        const otpRecord = await Otp.findOne({ email });
-        if (!otpRecord) {
-            return res.status(400).json({ message: 'OTP expired or not found. Please request a new one.' });
-        }
-        if (otpRecord.otp !== req.body.otp) {
-            return res.status(400).json({ message: 'Invalid OTP' });
-        }
+        // Verify OTP if not a Google signup and not the first admin setup
+        if (!isFirstAdmin) {
+            if (!req.body.otp) {
+                return res.status(400).json({ message: 'OTP is required' });
+            }
 
-        // Delete OTP after successful use
-        await Otp.deleteOne({ email });
+            const otpRecord = await Otp.findOne({ email });
+            if (!otpRecord) {
+                return res.status(400).json({ message: 'OTP expired or not found. Please request a new one.' });
+            }
+            if (otpRecord.otp !== req.body.otp) {
+                return res.status(400).json({ message: 'Invalid OTP' });
+            }
+
+            // Delete OTP after successful use
+            await Otp.deleteOne({ email });
+        }
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,7 +168,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
             email,
             password: hashedPassword,
             name,
-            role: 'user', // Force user role to prevent privilege escalation
+            role: isFirstAdmin ? 'admin' : 'user', // Allow admin role only for first admin, otherwise force user
         });
 
         await newUser.save();
