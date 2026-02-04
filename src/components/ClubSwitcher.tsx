@@ -30,6 +30,17 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                 const officerMemberships = data.filter((m: any) =>
                     officerRoles.includes(m.role?.toLowerCase())
                 );
+
+                // If user is admin, add a "fake" membership for Admin Dashboard
+                if (user?.role === 'admin') {
+                    officerMemberships.unshift({
+                        clubId: 'admin-dashboard',
+                        clubName: 'Admin Dashboard',
+                        role: 'Super Admin',
+                        clubImage: '/wce-logo.png', // Or some admin icon
+                    });
+                }
+
                 setMemberships(officerMemberships);
 
                 // Validate saved membership and auto-select if needed
@@ -127,7 +138,11 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                                 onClick={() => {
                                     setSelectedMembership(membership);
                                     setIsOpen(false);
-                                    navigateToPage('clubSecretaryDashboard');
+                                    if (membership.clubId === 'admin-dashboard') {
+                                        navigateToPage('adminDashboard');
+                                    } else {
+                                        navigateToPage('clubSecretaryDashboard');
+                                    }
                                 }}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${selectedMembership?.clubId === membership.clubId
                                     ? 'bg-blue-50 dark:bg-blue-900/20'
