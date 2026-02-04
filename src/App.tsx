@@ -50,12 +50,13 @@ function AppContent() {
     selectedMembership
   } = useNavigation();
 
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
   const onLogoutClick = () => handleLogout(logout);
 
   // Protect Dashboard Routes
   useEffect(() => {
+    if (isLoading) return;
     // 1. Admin Dashboard Protection
     if (currentPage === 'adminDashboard') {
       if (!user || user.role !== 'admin') {
@@ -94,7 +95,15 @@ function AppContent() {
       navigateToPage('home');
     }
 
-  }, [currentPage, user, navigateToPage, selectedMembership]);
+  }, [currentPage, user, isLoading, navigateToPage, selectedMembership]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 pb-20 md:pb-0">

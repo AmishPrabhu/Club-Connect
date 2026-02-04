@@ -213,6 +213,7 @@ export interface EventRSVP {
   rsvpedAt: Date;
   attendance?: 'present' | 'absent' | 'pending';  // Attendance status for the event
   certificateUrl?: string;  // URL of generated certificate for this participant
+  source?: 'rsvp' | 'manual' | 'import';  // Source of registration
 }
 
 // Certificate configuration for name positioning

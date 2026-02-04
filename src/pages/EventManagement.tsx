@@ -167,7 +167,9 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     // Fetch RSVPs for attendees tab
                     if (foundPost.id) {
                         const rsvps = await getEventRSVPs(foundPost.id);
-                        setEventRsvps(rsvps);
+                        // Filter out self-RSVPs (source: 'rsvp') - only show officially registered participants
+                        const filteredRsvps = rsvps.filter(r => r.source !== 'rsvp');
+                        setEventRsvps(filteredRsvps);
                     }
 
                     // Load certificate template settings if they exist
@@ -410,9 +412,9 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 >
                                     <Users className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
                                     Participants
-                                    {(post?.rsvps || 0) > 0 && (
+                                    {eventRsvps.length > 0 && (
                                         <span className="ml-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[10px] md:text-xs rounded-full font-bold">
-                                            {post?.rsvps || 0}
+                                            {eventRsvps.length}
                                         </span>
                                     )}
                                 </button>
@@ -823,7 +825,9 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                 emailInput.value = '';
                                                 // Refresh participants list
                                                 const updatedRsvps = await getEventRSVPs(eventId);
-                                                setEventRsvps(updatedRsvps);
+                                                // Filter out self-RSVPs
+                                                const filteredRsvps = updatedRsvps.filter(r => r.source !== 'rsvp');
+                                                setEventRsvps(filteredRsvps);
                                             } else {
                                                 setMessage({ type: 'error', text: result.error || 'Failed to add participant' });
                                             }
@@ -925,7 +929,9 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                                 // Refresh participants list
                                                 const updatedRsvps = await getEventRSVPs(eventId);
-                                                setEventRsvps(updatedRsvps);
+                                                // Filter out self-RSVPs
+                                                const filteredRsvps = updatedRsvps.filter(r => r.source !== 'rsvp');
+                                                setEventRsvps(filteredRsvps);
 
                                                 setMessage({
                                                     type: 'success',

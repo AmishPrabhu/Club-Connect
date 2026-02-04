@@ -512,6 +512,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isEditingInstagram, setIsEditingInstagram] = useState(false);
   const [instagramSaving, setInstagramSaving] = useState(false);
 
+  // Description state
+  const [description, setDescription] = useState('');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
+
   // Confirm modal state
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -559,6 +564,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         setClub(processedClubData);
         setWhatsappLink(processedClubData.whatsappLink || '');
         setInstagramLink(processedClubData.instagramLink || '');
+        setDescription(processedClubData.description || '');
 
         // Check if secretary is already a member, if not add them (only once)
         // Note: syncing members from backend route if available
@@ -1174,6 +1180,83 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   )}
                 </div>
               )}
+
+
+              {/* Club Description Section */}
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6 mt-4 md:mt-6">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm md:text-base">
+                    <Edit className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
+                    About Club
+                  </h4>
+                  {!isReadOnly && !isEditingDescription && (
+                    <button
+                      onClick={() => setIsEditingDescription(true)}
+                      className="text-xs md:text-sm text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0"
+                    >
+                      Edit Description
+                    </button>
+                  )}
+                </div>
+
+                {isEditingDescription ? (
+                  <div className="space-y-3">
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={6}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                      placeholder="Write a brief description of your club..."
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setIsEditingDescription(false);
+                          setDescription(club.description || '');
+                        }}
+                        className="flex-1 px-3 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!club.id) return;
+                          setDescriptionSaving(true);
+                          try {
+                            const { updateClub } = await import('../lib/dbService');
+                            const success = await updateClub(club.id, { description });
+                            if (success) {
+                              setClub({ ...club, description });
+                              setIsEditingDescription(false);
+                            }
+                          } catch (error) {
+                            console.error('Error saving description:', error);
+                          } finally {
+                            setDescriptionSaving(false);
+                          }
+                        }}
+                        disabled={descriptionSaving}
+                        className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
+                      >
+                        {descriptionSaving ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                      {club.description || 'No description available.'}
+                    </p>
+                  </div>
+                )}
+              </div>
 
 
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
