@@ -41,6 +41,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
     useEffect(() => {
         const fetchUserEvents = async () => {
             if (!user?.email) {
+                setUserEvents([]);
                 setIsLoading(false);
                 return;
             }

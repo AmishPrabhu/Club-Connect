@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '../context/NavigationContext';
 import { Page } from '../types/page';
 import { DBPost, DBClub } from '../types/auth';
 import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer, verifyEventBudget } from '../lib/dbService';
@@ -13,7 +14,8 @@ interface AdvisorDashboardProps {
 
 export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardProps) {
     const { user } = useAuth();
-    const activeClubId = user?.clubId;
+    const { selectedMembership } = useNavigation();
+    const activeClubId = selectedMembership?.clubId || user?.clubId;
 
     const [activeTab, setActiveTab] = useState<'events' | 'team' | 'budgets'>('events');
     const [events, setEvents] = useState<DBPost[]>([]);
@@ -400,7 +402,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                                                             // Refresh events
                                                                             const allPosts = await getPosts();
                                                                             const clubEvents = allPosts.filter(
-                                                                                p => p.clubId === user?.clubId && p.type === 'event'
+                                                                                p => p.clubId === activeClubId && p.type === 'event'
                                                                             );
                                                                             setEvents(clubEvents);
                                                                         }
