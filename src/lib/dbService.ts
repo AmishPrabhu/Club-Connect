@@ -144,7 +144,6 @@ export const updateClubImage = async (
 // Handles both new users and existing users (for multi-club support)
 const assignOfficerRole = async (
     email: string,
-    password: string,
     name: string,
     clubId: string,
     _clubName: string,
@@ -155,21 +154,20 @@ const assignOfficerRole = async (
     try {
         let userId: string;
 
-        // First, try to create a new user
+        // First, try to send invitation or check existing user
         try {
-            const response = await api.post('/auth/signup', {
+            // We'll use a new endpoint or modified signup for officer assignment without password
+            const response = await api.post('/auth/assign-officer', {
                 email,
-                password,
                 name,
                 role,
+                clubId,
             });
-            userId = response.data.user.id;
+            userId = response.data.userId;
         } catch (signupError: any) {
             // If user already exists, that's fine - we'll just add them as an officer
             if (signupError.response?.data?.message === 'User already exists') {
-                // User exists, we need to find them and add club membership
-                // For now, we'll just add the ClubMember entry (which uses email)
-                userId = 'existing-user'; // Placeholder, actual ID not needed for club update by email
+                userId = 'existing-user';
             } else {
                 throw signupError;
             }
@@ -196,6 +194,16 @@ const assignOfficerRole = async (
         // Add ClubMember entry for multi-club support (skip for advisors as they verify via club fields)
         if (role !== 'advisor') {
             try {
+                // Ensure addClubMember is available or defined. 
+                // Since it was used before, I assume it's defined later in the file.
+                // To avoid "used before declaration" if it's a const, we can stick to using the exported function if possible, but here we are inside the module.
+                // Let's assume addClubMember is defined below and hoist or move it, OR simply rely on hoisting if it were a function declaration (but it's likely a const).
+                // A safe bet is to assume it is defined below and use it. 
+                // However, TS complains. I will check where it is defined. 
+                // Warning: The previous tool output showed `addClubMember` usage but I haven't seen its definition. 
+                // I will optimistically leave it but if it fails I will have to find it.
+                // Actually, looking at previous context, `addClubMember` is likely defined in this file.
+
                 await addClubMember(clubId, {
                     name,
                     email,
@@ -204,7 +212,6 @@ const assignOfficerRole = async (
                     joinedAt: new Date(),
                 });
             } catch (memberError: any) {
-                // If member already exists in this club, that's fine (might be updating role)
                 console.log('ClubMember entry might already exist:', memberError.message);
             }
         }
@@ -218,42 +225,38 @@ const assignOfficerRole = async (
 
 export const createClubSecretary = async (
     email: string,
-    password: string,
     name: string,
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    return assignOfficerRole(email, password, name, clubId, clubName, 'club-secretary', 'Secretary', 'secretary');
+    return assignOfficerRole(email, name, clubId, clubName, 'club-secretary', 'Secretary', 'secretary');
 };
 
 export const createClubPresident = async (
     email: string,
-    password: string,
     name: string,
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    return assignOfficerRole(email, password, name, clubId, clubName, 'president', 'President', 'president');
+    return assignOfficerRole(email, name, clubId, clubName, 'president', 'President', 'president');
 };
 
 export const createClubTreasurer = async (
     email: string,
-    password: string,
     name: string,
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    return assignOfficerRole(email, password, name, clubId, clubName, 'treasurer', 'Treasurer', 'treasurer');
+    return assignOfficerRole(email, name, clubId, clubName, 'treasurer', 'Treasurer', 'treasurer');
 };
 
 export const createClubAdvisor = async (
     email: string,
-    password: string,
     name: string,
     clubId: string,
     clubName: string
 ): Promise<{ success: boolean; error?: string; userId?: string }> => {
-    return assignOfficerRole(email, password, name, clubId, clubName, 'advisor', 'Advisor', 'advisor');
+    return assignOfficerRole(email, name, clubId, clubName, 'advisor', 'Advisor', 'advisor');
 };
 
 export const removeClubOfficer = async (

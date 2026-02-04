@@ -100,7 +100,7 @@ router.post('/', verifySuperAdmin, async (req, res) => {
                     };
                     const targetRole = roleMap[officer.role];
 
-                    if (targetRole && existingUser.role !== targetRole) {
+                    if (targetRole && existingUser.role !== targetRole && existingUser.role !== 'admin') {
                         existingUser.role = targetRole;
                         // Also set club context if missing
                         if (!existingUser.clubId) existingUser.clubId = savedClub._id.toString();
@@ -200,7 +200,7 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
                     };
                     const targetRole = roleMap[mapping.role];
 
-                    if (targetRole && existingUser.role !== targetRole) {
+                    if (targetRole && existingUser.role !== targetRole && existingUser.role !== 'admin') {
                         existingUser.role = targetRole;
                         // Always update club context when role changes
                         existingUser.clubId = req.params.id;

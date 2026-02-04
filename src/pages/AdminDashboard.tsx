@@ -225,14 +225,12 @@ export default function AdminDashboard() {
 
   const [newSecretary, setNewSecretary] = useState({
     email: '',
-    password: 'Hello@123',
     name: '',
   });
 
   // Generic state for President/Treasurer/Advisor creation
   const [newRoleUser, setNewRoleUser] = useState({
     email: '',
-    password: 'Hello@123',
     name: '',
   });
 
@@ -327,19 +325,13 @@ export default function AdminDashboard() {
   // Secretary handlers
   const handleCreateSecretary = async () => {
     setFormMessage(null);
-    if (!newSecretary.email || !newSecretary.password || !newSecretary.name || !selectedClub) {
+    if (!newSecretary.email || !newSecretary.name || !selectedClub) {
       setFormMessage({ type: 'error', text: 'Please fill in all fields' });
-      return;
-    }
-
-    if (newSecretary.password.length < 6) {
-      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
       return;
     }
 
     const result = await createClubSecretary(
       newSecretary.email,
-      newSecretary.password,
       newSecretary.name,
       selectedClub.id!,
       selectedClub.name
@@ -347,7 +339,8 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Secretary created for ${selectedClub.name}!` });
-      setNewSecretary({ email: '', password: 'Hello@123', name: '' });
+      setFormMessage({ type: 'success', text: `Secretary created for ${selectedClub.name}!` });
+      setNewSecretary({ email: '', name: '' });
       setTimeout(() => {
         setShowCreateSecretaryModal(false);
         setSelectedClub(null);
@@ -362,19 +355,13 @@ export default function AdminDashboard() {
   // President handlers
   const handleCreatePresident = async () => {
     setFormMessage(null);
-    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+    if (!newRoleUser.email || !newRoleUser.name || !selectedClub) {
       setFormMessage({ type: 'error', text: 'Please fill in all fields' });
-      return;
-    }
-
-    if (newRoleUser.password.length < 6) {
-      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
       return;
     }
 
     const result = await createClubPresident(
       newRoleUser.email,
-      newRoleUser.password,
       newRoleUser.name,
       selectedClub.id!,
       selectedClub.name
@@ -382,7 +369,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `President created for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setNewRoleUser({ email: '', name: '' });
       setTimeout(() => {
         setShowCreatePresidentModal(false);
         setSelectedClub(null);
@@ -397,19 +384,13 @@ export default function AdminDashboard() {
   // Treasurer handlers
   const handleCreateTreasurer = async () => {
     setFormMessage(null);
-    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+    if (!newRoleUser.email || !newRoleUser.name || !selectedClub) {
       setFormMessage({ type: 'error', text: 'Please fill in all fields' });
-      return;
-    }
-
-    if (newRoleUser.password.length < 6) {
-      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
       return;
     }
 
     const result = await createClubTreasurer(
       newRoleUser.email,
-      newRoleUser.password,
       newRoleUser.name,
       selectedClub.id!,
       selectedClub.name
@@ -417,7 +398,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Treasurer created for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setNewRoleUser({ email: '', name: '' });
       setTimeout(() => {
         setShowCreateTreasurerModal(false);
         setSelectedClub(null);
@@ -489,44 +470,38 @@ export default function AdminDashboard() {
 
   const openSecretaryModal = (club: DBClub) => {
     setSelectedClub(club);
-    setNewSecretary({ email: '', password: 'Hello@123', name: '' });
+    setNewSecretary({ email: '', name: '' });
     setShowCreateSecretaryModal(true);
   };
 
   const openPresidentModal = (club: DBClub) => {
     setSelectedClub(club);
-    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+    setNewRoleUser({ email: '', name: '' });
     setShowCreatePresidentModal(true);
   };
 
   const openTreasurerModal = (club: DBClub) => {
     setSelectedClub(club);
-    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+    setNewRoleUser({ email: '', name: '' });
     setShowCreateTreasurerModal(true);
   };
 
   const openAdvisorModal = (club: DBClub) => {
     setSelectedClub(club);
-    setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+    setNewRoleUser({ email: '', name: '' });
     setShowCreateAdvisorModal(true);
   };
 
   // Advisor handlers
   const handleCreateAdvisor = async () => {
     setFormMessage(null);
-    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+    if (!newRoleUser.email || !newRoleUser.name || !selectedClub) {
       setFormMessage({ type: 'error', text: 'Please fill in all fields' });
-      return;
-    }
-
-    if (newRoleUser.password.length < 6) {
-      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
       return;
     }
 
     const result = await createClubAdvisor(
       newRoleUser.email,
-      newRoleUser.password,
       newRoleUser.name,
       selectedClub.id!,
       selectedClub.name
@@ -534,7 +509,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Advisor created for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setNewRoleUser({ email: '', name: '' });
       setTimeout(() => {
         setShowCreateAdvisorModal(false);
         setSelectedClub(null);
@@ -550,7 +525,6 @@ export default function AdminDashboard() {
     setSelectedClub(club);
     setNewRoleUser({
       email: club.advisorEmail || '',
-      password: 'Hello@123',
       name: club.advisorName || ''
     });
     setShowEditAdvisorModal(true);
@@ -559,20 +533,14 @@ export default function AdminDashboard() {
   // Replace advisor (delete old account and create new one)
   const handleReplaceAdvisor = async () => {
     setFormMessage(null);
-    if (!newRoleUser.email || !newRoleUser.password || !newRoleUser.name || !selectedClub) {
+    if (!newRoleUser.email || !newRoleUser.name || !selectedClub) {
       setFormMessage({ type: 'error', text: 'Please fill in all fields' });
-      return;
-    }
-
-    if (newRoleUser.password.length < 6) {
-      setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
       return;
     }
 
     // So we just create a new advisor account and update the club reference
     const result = await createClubAdvisor(
       newRoleUser.email,
-      newRoleUser.password,
       newRoleUser.name,
       selectedClub.id!,
       selectedClub.name
@@ -580,7 +548,7 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setFormMessage({ type: 'success', text: `Advisor updated for ${selectedClub.name}!` });
-      setNewRoleUser({ email: '', password: 'Hello@123', name: '' });
+      setNewRoleUser({ email: '', name: '' });
       setTimeout(() => {
         setShowEditAdvisorModal(false);
         setSelectedClub(null);
@@ -1096,17 +1064,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
-                  <input
-                    type="password"
-                    value={newSecretary.password}
-                    onChange={(e) => setNewSecretary({ ...newSecretary, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="••••••••"
-                  />
-                </div>
-
                 <button
                   onClick={handleCreateSecretary}
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2 mt-4"
@@ -1159,17 +1116,6 @@ export default function AdminDashboard() {
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="president@walchandsangli.ac.in"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
-                  <input
-                    type="password"
-                    value={newRoleUser.password}
-                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="••••••••"
                   />
                 </div>
 
@@ -1228,17 +1174,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
-                  <input
-                    type="password"
-                    value={newRoleUser.password}
-                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="••••••••"
-                  />
-                </div>
-
                 <button
                   onClick={handleCreateTreasurer}
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-500/30 flex items-center justify-center gap-2 mt-4"
@@ -1291,17 +1226,6 @@ export default function AdminDashboard() {
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="advisor@walchandsangli.ac.in"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
-                  <input
-                    type="password"
-                    value={newRoleUser.password}
-                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="••••••••"
                   />
                 </div>
 
@@ -1361,17 +1285,6 @@ export default function AdminDashboard() {
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="advisor@wce.ac.in"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Set Password</label>
-                  <input
-                    type="password"
-                    value={newRoleUser.password}
-                    onChange={(e) => setNewRoleUser({ ...newRoleUser, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
-                    placeholder="••••••••"
                   />
                 </div>
 
