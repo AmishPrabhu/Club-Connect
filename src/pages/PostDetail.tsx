@@ -63,7 +63,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
     );
 
     // Check if event is past
-    const isPastEvent = post && post.type === 'event' && new Date(post.date) < new Date();
+    const isPastEvent = post && post.type === 'event' && post.date && new Date(post.date).getTime() < new Date().getTime();
 
     const handleShare = async () => {
         if (!post) return;
@@ -218,7 +218,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                                 <div>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Date</p>
                                     <p className="text-base font-semibold text-slate-900 dark:text-white">
-                                        {new Date(post.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                        {post.date ? new Date(post.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Date not specified'}
                                     </p>
                                 </div>
                             </div>
@@ -280,6 +280,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                                         {(post.registrationStart || post.registrationStartTime) && (post.registrationEnd || post.registrationEndTime) && ' - '}
                                         {post.registrationEnd && new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                         {post.registrationEndTime && ` ${post.registrationEndTime}`}
+                                        {!post.registrationStart && !post.registrationEnd && 'Flexible'}
                                     </p>
                                 </div>
                             </div>
@@ -534,7 +535,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                         event={{
                             id: post.id || '',
                             title: post.title,
-                            date: post.date,
+                            date: post.date || '',
                             time: post.time || 'Time not specified',
                             location: post.location || 'Location not specified',
                             attendees: post.rsvps || 0

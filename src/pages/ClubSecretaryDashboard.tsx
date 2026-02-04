@@ -599,6 +599,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
     if (!club || !user) return;
 
+    if (newPost.type === 'event' && !newPost.date) {
+      setFormMessage({ type: 'error', text: 'Please specify a date for the event.' });
+      return;
+    }
+
     // Build time string from 12-hour format
     let timeString: string | undefined;
     if (newPost.startHour && newPost.startMinute) {
@@ -609,7 +614,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     }
 
     // Check for time collision if it's an event with a start time (unless forceCreate is true)
-    if (!forceCreate && newPost.type === 'event' && newPost.startHour) {
+    if (!forceCreate && newPost.type === 'event' && newPost.date && newPost.startHour) {
       // Convert to 24h for collision check
       let startHour24 = parseInt(newPost.startHour);
       if (newPost.startPeriod === 'PM' && startHour24 !== 12) startHour24 += 12;
@@ -628,7 +633,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       title: newPost.title,
       content: newPost.content,
       type: newPost.type,
-      date: newPost.date,
+      ...(newPost.date ? { date: newPost.date } : {}),
       ...(timeString ? { time: timeString } : {}),
       ...(newPost.location ? { location: newPost.location } : {}),
       locationType: newPost.locationType,
@@ -839,7 +844,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               <Calendar className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length}</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && p.date && new Date(p.date!).getTime() >= new Date().getTime()).length}</p>
               <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Upcoming</p>
             </div>
           </div>
@@ -863,7 +868,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-slate-400" />
             </div>
             <div>
-              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && new Date(p.date) < new Date()).length}</p>
+              <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event' && p.date && new Date(p.date!).getTime() < new Date().getTime()).length}</p>
               <p className="text-[10px] md:text-sm text-slate-600 dark:text-slate-300">Past Events</p>
             </div>
           </div>
@@ -1262,19 +1267,19 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 mt-6">
                 <h4 className="font-bold text-slate-900 dark:text-white mb-4">Upcoming Events</h4>
-                {posts.filter(p => p.type === 'event' && new Date(p.date) >= new Date()).length === 0 ? (
+                {posts.filter(p => p.type === 'event' && p.date && new Date(p.date!).getTime() >= new Date().getTime()).length === 0 ? (
                   <p className="text-slate-600 dark:text-slate-400">No upcoming events. Create your first event!</p>
                 ) : (
                   <div className="space-y-3">
                     {posts
-                      .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
-                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                      .filter(p => p.type === 'event' && p.date && new Date(p.date!).getTime() >= new Date().getTime())
+                      .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime())
                       .slice(0, 3)
                       .map((post) => (
                         <div key={post.id} className="flex items-center gap-3">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                           <p className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">{post.title}</p>
-                          <span className="text-xs text-slate-400">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          <span className="text-xs text-slate-400">{new Date(post.date!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
                       ))}
                   </div>
@@ -1305,9 +1310,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   <div className="space-y-4">
                     {posts
                       .filter(p => p.type === 'event')
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
                       .map((post) => {
-                        const isPast = new Date(post.date) < new Date();
+                        const isPast = new Date(post.date!) < new Date();
                         return (
                           <div
                             key={post.id}
@@ -1323,12 +1328,12 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                     {isPast ? 'Past Event' : 'Upcoming'}
                                   </span>
                                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                                    {new Date(post.date).toLocaleDateString('en-US', {
+                                    {post.date ? new Date(post.date!).toLocaleDateString('en-US', {
                                       weekday: 'short',
                                       month: 'short',
                                       day: 'numeric',
                                       year: 'numeric'
-                                    })}
+                                    }) : 'No date'}
                                   </span>
                                   {post.time && (
                                     <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -1395,9 +1400,9 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   <div className="space-y-4">
                     {posts
                       .filter(p => p.type === 'event')
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
                       .map((post) => {
-                        const isPast = new Date(post.date) < new Date();
+                        const isPast = new Date(post.date!).getTime() < new Date().getTime();
                         return (
                           <div
                             key={post.id}
@@ -1413,7 +1418,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                     {isPast ? 'Past Event' : 'Upcoming'}
                                   </span>
                                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                                    {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    {post.date ? new Date(post.date!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date'}
                                   </span>
                                 </div>
                                 <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{post.title}</h4>
@@ -1582,7 +1587,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             )}
                           </div>
                           <div className="flex gap-2 flex-col">
-                            {post.type === 'event' && new Date(post.date) < new Date() && (
+                            {post.type === 'event' && post.date && new Date(post.date!).getTime() < new Date().getTime() && (
                               <button
                                 onClick={() => handleEditPhotos(post)}
                                 className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
@@ -1710,7 +1715,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {newPost.type === 'event' ? 'Event Date' : 'Date'}
+                      {newPost.type === 'event' ? 'Event Date' : 'Date (Optional)'}
                     </label>
                     <input
                       type="date"
@@ -1738,11 +1743,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                       >
                         <option value="">No related event</option>
                         {posts
-                          .filter(p => p.type === 'event' && new Date(p.date) >= new Date())
-                          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                          .filter(p => p.type === 'event' && p.date && new Date(p.date!).getTime() >= new Date().getTime())
+                          .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime())
                           .map(event => (
                             <option key={event.id} value={event.id}>
-                              {event.title} ({new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
+                              {event.title} ({new Date(event.date!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
                             </option>
                           ))
                         }

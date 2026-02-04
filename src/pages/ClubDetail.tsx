@@ -112,13 +112,13 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   const getEventsFromPosts = (): DisplayEvent[] => {
     const now = new Date();
     return posts.map(post => {
-      const postDate = new Date(post.date);
-      const isPast = postDate < now;
+      const postDate = post.date ? new Date(post.date!) : null;
+      const isPast = postDate ? postDate < now : false;
 
       return {
         id: post.id || '',
         title: post.title,
-        date: post.date,
+        date: post.date || '',
         time: post.time || 'Time not specified',
         location: post.location || 'Location not specified',
         attendees: post.rsvps || 0,
@@ -273,7 +273,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                 </div>
                 <div className="min-w-0 overflow-hidden">
                   <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
-                  <p className="text-sm md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => new Date(p.date) >= new Date()).length}</p>
+                  <p className="text-sm md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => p.date && new Date(p.date!).getTime() >= new Date().getTime()).length}</p>
                 </div>
               </div>
 
@@ -439,10 +439,10 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                             )}
 
                             {/* Right: Details */}
-                            <div className="md:w-3/4 p-4 flex flex-col justify-center">
+                            <div className="md:w-3/4 min-w-0 p-4 flex flex-col justify-center">
                               {/* Header with status */}
                               <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-lg font-bold font-serif text-[#002147] dark:text-white group-hover:text-[#DAA520] dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                                <h3 className="text-lg font-bold font-serif text-[#002147] dark:text-white group-hover:text-[#DAA520] dark:group-hover:text-blue-400 transition-colors line-clamp-1 break-all w-full">
                                   {event.title}
                                 </h3>
                                 {isUpcoming ? (

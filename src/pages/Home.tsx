@@ -135,7 +135,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   };
 
   // Filter to show only upcoming/incomplete events on home page (exclude announcements)
-  const upcomingPosts = posts.filter(post => new Date(post.date) >= new Date() && post.type === 'event');
+  const upcomingPosts = posts.filter(post => post.type === 'event' && post.date && new Date(post.date || '').getTime() >= new Date().getTime());
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -356,7 +356,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                 {post.title}
                               </h4>
                               <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {new Date(post.date).toLocaleDateString()}
+                                {post.date ? new Date(post.date!).toLocaleDateString() : 'No date'}
                               </p>
                             </div>
                           </div>
@@ -428,7 +428,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                           ) : (
                             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"><Users className="w-4 h-4 text-slate-500" /></div>
                           )}
-                          <span className="font-bold text-slate-900 dark:text-white font-serif">{post.clubName}</span>
+                          <span className="font-bold text-slate-900 dark:text-white font-serif truncate max-w-[150px] md:max-w-none">{post.clubName}</span>
                         </div>
                         <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
                           Upcoming
@@ -438,7 +438,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                       <div className="flex flex-col md:flex-row">
                         {/* Event Image - Full Width Mobile, 40% Desktop */}
                         <div
-                          className={`w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden group/image ${post.coverImage ? 'cursor-zoom-in' : ''}`}
+                          className={`w-full md:w-[40%] h-56 md:h-auto relative bg-slate-100 dark:bg-slate-900 overflow-hidden group/image flex-shrink-0 ${post.coverImage ? 'cursor-zoom-in' : ''}`}
                           onClick={(e) => post.coverImage && handleImageClick(e, post.coverImage)}
                         >
                           {post.coverImage ? (
@@ -459,15 +459,15 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                           )}
                           {/* Mobile Date Overlay */}
                           <div className="md:hidden absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{new Date(post.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                            <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{new Date(post.date).getDate()}</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{post.date ? new Date(post.date!).toLocaleDateString('en-US', { month: 'short' }) : '---'}</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{post.date ? new Date(post.date!).getDate() : '--'}</span>
                           </div>
                         </div>
 
                         {/* Event Details */}
-                        <div className="flex-1 p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
+                        <div className="flex-1 min-w-0 max-w-full p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
                           <div>
-                            <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
+                            <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-all w-full">
                               {post.title}
                             </h3>
 
@@ -478,7 +478,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                 <div>
                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Date</p>
                                   <p className="font-medium text-slate-700 dark:text-slate-300">
-                                    {new Date(post.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                                    {post.date ? new Date(post.date!).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'Date not specified'}
                                   </p>
                                 </div>
                               </div>
@@ -659,7 +659,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           event={{
             id: rsvpEvent.id || '',
             title: rsvpEvent.title,
-            date: rsvpEvent.date,
+            date: rsvpEvent.date || '',
             time: rsvpEvent.time || 'Time not specified',
             location: rsvpEvent.location || 'Location not specified',
             attendees: rsvpEvent.rsvps || 0

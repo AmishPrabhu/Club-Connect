@@ -149,7 +149,7 @@ export interface DBPost {
   authorName: string;
   type: 'event' | 'announcement';
   status: 'draft' | 'published';
-  date: string;
+  date?: string;
   time?: string;  // Optional time span (e.g., "2:00 PM - 5:00 PM")
   location?: string;  // Optional location for events
   locationType?: 'campus' | 'external';  // Whether location is on campus or external
