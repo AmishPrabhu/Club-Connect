@@ -12,7 +12,7 @@ interface AdvisorDashboardProps {
     onNavigateToPost: (postId: string) => void;
 }
 
-export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardProps) {
+export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: AdvisorDashboardProps) {
     const { user } = useAuth();
     const { selectedMembership } = useNavigation();
     const activeClubId = selectedMembership?.clubId || user?.clubId;
@@ -53,6 +53,28 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                 return;
             }
 
+            // STRICT CHECK: Verify user is actually the advisor for this SPECIFIC club
+            // Global 'advisor' role allows entry to the page, but we must ensure they manage THIS club
+            // Exception: If they are a Super Admin? Usually Super Admin has their own dashboard.
+            // But if Super Admin wants to see Advisor view, maybe allow it? 
+            // For now, let's enforce membership role check if selectedMembership exists.
+
+            if (selectedMembership && selectedMembership.clubId === activeClubId) {
+                if (selectedMembership.role.toLowerCase() !== 'advisor') {
+                    // User is viewing a club where they are NOT the advisor (e.g. President)
+                    // Redirect them to home or let them know
+                    console.warn(`User ${user?.email} attempted to access Advisor Dashboard for ${activeClubId} but is ${selectedMembership.role}`);
+                    // We can redirect to the correct dashboard based on their role?
+                    // Or just redirect to Home for safety.
+                    onNavigate('home');
+                    return;
+                }
+            } else if (user?.role !== 'advisor' && user?.role !== 'admin') {
+                // If checking via global user object (no selectedMembership), ensuring they are advisor
+                onNavigate('home');
+                return;
+            }
+
             try {
                 // Get club info
                 const clubs = await getClubs();
@@ -60,6 +82,15 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                 if (foundClub) {
                     setClubName(foundClub.name);
                     setClub(foundClub);
+
+                    // Double check if using global user object: 
+                    // If I am global advisor, am I assigned to THIS club?
+                    // The club object has advisorEmail. Use that as source of truth.
+                    if (user?.role !== 'admin' && foundClub.advisorEmail !== user?.email) {
+                        console.warn(`User ${user?.email} is not the assigned advisor for ${foundClub.name}`);
+                        onNavigate('home');
+                        return;
+                    }
                 }
 
                 // Get all events for this club
@@ -76,7 +107,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
         };
 
         loadData();
-    }, [activeClubId]);
+    }, [activeClubId, selectedMembership, user, onNavigate]);
 
     const openEditRoleModal = (role: 'secretary' | 'president' | 'treasurer') => {
         setEditingRole(role);
