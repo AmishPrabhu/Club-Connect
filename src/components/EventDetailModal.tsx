@@ -20,7 +20,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
 
     if (!isOpen || !event) return null;
 
-    const isPastEvent = new Date(event.date) < new Date();
+    const isPastEvent = new Date(event.date || Date.now()) < new Date();
 
 
 
@@ -113,7 +113,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                                 <div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 uppercase">Date</p>
                                     <p className="text-slate-900 dark:text-white font-medium text-sm">
-                                        {new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                        {new Date(event.date || Date.now()).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                     </p>
                                 </div>
                             </div>
@@ -229,7 +229,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                 event={{
                     id: event.id || '',
                     title: event.title,
-                    date: event.date,
+                    date: event.date || '',
                     time: event.time || 'Time not specified',
                     location: event.location || 'Location not specified',
                     attendees: event.rsvps || 0

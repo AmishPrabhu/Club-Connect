@@ -29,7 +29,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                 role: 'admin'
             });
 
-            const { token, user } = response.data;
+            const { token } = response.data;
             setMessage({
                 type: 'success',
                 text: `Super Admin created successfully! Auto-logging in...`,

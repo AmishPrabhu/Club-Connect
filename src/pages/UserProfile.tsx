@@ -213,7 +213,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
         }
 
         // Sort by event date
-        events.sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime());
+        events.sort((a, b) => new Date(b.event.date || 0).getTime() - new Date(a.event.date || 0).getTime());
         setUserEvents(events);
       } catch (error) {
         console.error('Error fetching user events:', error);
@@ -301,8 +301,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
   }, [user?.likedClubs]);
 
   const now = new Date();
-  const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
-  const pastEvents = userEvents.filter(e => new Date(e.event.date) < now);
+  const upcomingEvents = userEvents.filter(e => e.event.date && new Date(e.event.date) >= now);
+  const pastEvents = userEvents.filter(e => e.event.date && new Date(e.event.date) < now);
   const displayedEvents = eventTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   // Delete Account State
@@ -981,7 +981,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                             <div className="flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
                               <div className="flex items-center gap-1.5">
                                 <Calendar className="w-3.5 h-3.5" />
-                                {new Date(event.date).toLocaleDateString('en-US', {
+                                {new Date(event.date || Date.now()).toLocaleDateString('en-US', {
                                   weekday: 'short',
                                   month: 'short',
                                   day: 'numeric'
@@ -1079,7 +1079,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                                 <div className="flex items-center gap-1.5">
                                   <Calendar className="w-3.5 h-3.5 text-red-500" />
                                   <span className={new Date(task.deadline) < new Date() && task.status !== 'completed' ? 'text-red-500 font-bold' : ''}>
-                                    Due {new Date(task.deadline).toLocaleDateString()}
+                                    Due {new Date(task.deadline || Date.now()).toLocaleDateString()}
                                   </span>
                                 </div>
                               )}

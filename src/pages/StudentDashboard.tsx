@@ -21,7 +21,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>(() => {
         const params = new URLSearchParams(window.location.search);
-        return (params.get('tab') as any) || 'upcoming';
+        return (params.get('tab') as 'upcoming' | 'past') || 'upcoming';
     });
 
     // Sync tab to URL
@@ -68,7 +68,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                 }
 
                 // Sort by event date
-                events.sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime());
+                events.sort((a, b) => new Date(b.event.date || 0).getTime() - new Date(a.event.date || 0).getTime());
                 setUserEvents(events);
             } catch (error) {
                 console.error('Error fetching user events:', error);
@@ -81,8 +81,8 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
     }, [user?.email]);
 
     const now = new Date();
-    const upcomingEvents = userEvents.filter(e => new Date(e.event.date) >= now);
-    const pastEvents = userEvents.filter(e => new Date(e.event.date) < now);
+    const upcomingEvents = userEvents.filter(e => e.event.date && new Date(e.event.date) >= now);
+    const pastEvents = userEvents.filter(e => e.event.date && new Date(e.event.date) < now);
 
     const displayedEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
@@ -244,7 +244,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                                         <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400">
                                             <div className="flex items-center gap-1.5">
                                                 <Calendar className="w-4 h-4" />
-                                                {new Date(event.date).toLocaleDateString('en-US', {
+                                                {new Date(event.date || Date.now()).toLocaleDateString('en-US', {
                                                     weekday: 'short',
                                                     month: 'short',
                                                     day: 'numeric'

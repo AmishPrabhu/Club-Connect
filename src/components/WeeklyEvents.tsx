@@ -19,9 +19,10 @@ export default function WeeklyEvents({ events, onNavigateToPost, selectedDate }:
             endOfDay.setHours(23, 59, 59, 999);
 
             return events.filter(event => {
+                if (!event.date) return false;
                 const eventDate = new Date(event.date);
                 return eventDate >= startOfDay && eventDate <= endOfDay;
-            }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            }).sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
         }
 
         // Default: This week's events
@@ -39,13 +40,14 @@ export default function WeeklyEvents({ events, onNavigateToPost, selectedDate }:
         endOfWeek.setHours(23, 59, 59, 999);
 
         return events.filter(event => {
+            if (!event.date) return false;
             const eventDate = new Date(event.date);
             // Ensure date is treated as local day start for comparison
             const eventDateStart = new Date(eventDate);
             eventDateStart.setHours(0, 0, 0, 0);
 
             return eventDateStart >= startOfRange && eventDate <= endOfWeek;
-        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        }).sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
     }, [events, selectedDate]);
 
     if (displayEvents.length === 0) {
@@ -85,10 +87,10 @@ export default function WeeklyEvents({ events, onNavigateToPost, selectedDate }:
                         <div className="flex gap-4">
                             <div className="flex flex-col items-center justify-center w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-md shrink-0 border border-blue-100 dark:border-blue-800">
                                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">
-                                    {new Date(event.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                    {new Date(event.date || Date.now()).toLocaleDateString('en-US', { weekday: 'short' })}
                                 </span>
                                 <span className="text-lg font-bold text-slate-900 dark:text-white">
-                                    {new Date(event.date).getDate()}
+                                    {new Date(event.date || Date.now()).getDate()}
                                 </span>
                             </div>
 

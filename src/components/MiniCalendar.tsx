@@ -25,7 +25,7 @@ export default function MiniCalendar({ events, selectedDate, onDateSelect }: Min
 
     const monthEvents = useMemo(() => {
         return events.filter(event => {
-            const eventDate = new Date(event.date);
+            const eventDate = new Date(event.date || 0);
             return (
                 eventDate.getMonth() === currentDate.getMonth() &&
                 eventDate.getFullYear() === currentDate.getFullYear()
@@ -34,7 +34,7 @@ export default function MiniCalendar({ events, selectedDate, onDateSelect }: Min
     }, [events, currentDate]);
 
     const hasEvent = (day: number) => {
-        return monthEvents.some(event => new Date(event.date).getDate() === day);
+        return monthEvents.some(event => new Date(event.date || 0).getDate() === day);
     };
 
     const nextMonth = () => {

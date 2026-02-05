@@ -44,7 +44,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                 // Filter only announcements and sort by date (newest first)
                 const announcements = postsData
                     .filter(p => p.type === 'announcement')
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
                 setPosts(announcements);
                 setClubs(clubsData);
             } catch (error) {
@@ -220,7 +220,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                         <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                                                             <span className="font-bold text-[#002147] dark:text-blue-400">{post.clubName}</span>
                                                             <span>•</span>
-                                                            <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                                            <span>{new Date(post.date || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                                         </div>
                                                     </div>
 

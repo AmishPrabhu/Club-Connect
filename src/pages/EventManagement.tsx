@@ -120,7 +120,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     setFormData({
                         title: foundPost.title,
                         content: foundPost.content,
-                        date: foundPost.date,
+                        date: foundPost.date || '',
                         time: foundPost.time || '',
                         location: foundPost.location || '',
                         locationUrl: foundPost.locationUrl || '',

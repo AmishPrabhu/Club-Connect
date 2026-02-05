@@ -104,13 +104,14 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
 
         setIsSaving(true);
         try {
+            const clubId = club.id!;
             let result;
             if (editingRole === 'secretary') {
-                result = await createClubSecretary(roleForm.email, roleForm.password, roleForm.name, club.id, club.name);
+                result = await createClubSecretary(roleForm.email, roleForm.name, clubId, club.name);
             } else if (editingRole === 'president') {
-                result = await createClubPresident(roleForm.email, roleForm.password, roleForm.name, club.id, club.name);
+                result = await createClubPresident(roleForm.email, roleForm.name, clubId, club.name);
             } else {
-                result = await createClubTreasurer(roleForm.email, roleForm.password, roleForm.name, club.id, club.name);
+                result = await createClubTreasurer(roleForm.email, roleForm.name, clubId, club.name);
             }
 
             if (result.success) {
@@ -198,8 +199,8 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
         );
     }
 
-    const upcomingEvents = events.filter(e => new Date(e.date) >= new Date()).length;
-    const pastEvents = events.filter(e => new Date(e.date) < new Date()).length;
+    const upcomingEvents = events.filter(e => e.date && new Date(e.date) >= new Date()).length;
+    const pastEvents = events.filter(e => e.date && new Date(e.date) < new Date()).length;
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -271,7 +272,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
+                                onClick={() => setActiveTab(tab.id as 'events' | 'team' | 'budgets')}
                                 className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 font-semibold transition-all border-b-2 whitespace-nowrap flex-shrink-0 text-sm md:text-base ${activeTab === tab.id
                                     ? 'text-[#002147] dark:text-cyan-400 border-[#002147]'
                                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent'
@@ -302,7 +303,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                                 <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
                                                     <span className="flex items-center gap-1">
                                                         <Calendar className="w-4 h-4" />
-                                                        {event.date}
+                                                        {new Date(event.date || Date.now()).toLocaleDateString()}
                                                     </span>
                                                     {event.rsvps !== undefined && (
                                                         <span className="flex items-center gap-1">
@@ -347,9 +348,9 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                 <div className="space-y-4">
                                     {events
                                         .filter(e => e.budgetImage)
-                                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
                                         .map((event) => {
-                                            const isPast = new Date(event.date) < new Date();
+                                            const isPast = new Date(event.date || Date.now()) < new Date();
                                             return (
                                                 <div
                                                     key={event.id}
@@ -365,7 +366,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                                                                     {isPast ? 'Past Event' : 'Upcoming'}
                                                                 </span>
                                                                 <span className="text-sm text-slate-600 dark:text-slate-400">
-                                                                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    {new Date(event.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                                 </span>
                                                             </div>
                                                             <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-2">{event.title}</h4>
