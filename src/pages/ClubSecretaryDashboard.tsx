@@ -461,7 +461,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
-    type: 'Event' as 'event' | 'announcement',
+    type: 'event' as 'event' | 'announcement',
     date: new Date().toISOString().split('T')[0],
     startHour: '',
     startMinute: '',
@@ -648,7 +648,6 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       authorId: user.id,
       authorName: user.name,
       status: 'published',
-      rsvps: 0,
       registrationLink: newPost.registrationLink,
       responseSpreadsheetUrl: newPost.responseSpreadsheetUrl,
       eventWhatsappLink: newPost.eventWhatsappLink,
