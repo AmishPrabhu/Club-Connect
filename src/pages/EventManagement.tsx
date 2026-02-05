@@ -104,6 +104,10 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         registrationlink: '',
         responseSpreadsheetUrl: '',
         eventWhatsappLink: '',
+        registrationStart: '',
+        registrationStartTime: '',
+        registrationEnd: '',
+        registrationEndTime: '',
     });
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -127,6 +131,10 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         registrationlink: foundPost.registrationLink || '',
                         responseSpreadsheetUrl: (foundPost as any).responseSpreadsheetUrl || '',
                         eventWhatsappLink: foundPost.eventWhatsappLink || '',
+                        registrationStart: foundPost.registrationStart || '',
+                        registrationStartTime: foundPost.registrationStartTime || '',
+                        registrationEnd: foundPost.registrationEnd || '',
+                        registrationEndTime: foundPost.registrationEndTime || '',
                     });
 
 
@@ -213,6 +221,10 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 registrationLink: formData.registrationlink,
                 responseSpreadsheetUrl: formData.responseSpreadsheetUrl,
                 eventWhatsappLink: formData.eventWhatsappLink,
+                registrationStart: formData.registrationStart,
+                registrationStartTime: formData.registrationStartTime,
+                registrationEnd: formData.registrationEnd,
+                registrationEndTime: formData.registrationEndTime,
             } as any);
 
             if (result.success) {
@@ -486,7 +498,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Date</label>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Event Date</label>
                                                 <input
                                                     type="date"
                                                     value={formData.date}
@@ -495,7 +507,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Time</label>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Event Time</label>
 
                                                 {/* Start Time */}
                                                 <div className="flex items-center gap-2">
@@ -631,6 +643,52 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                         <option value="AM">AM</option>
                                                         <option value="PM">PM</option>
                                                     </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="border-t border-slate-200 dark:border-slate-700 my-6"></div>
+
+                                        <h3 className="text-md font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                            <Calendar className="w-5 h-5 text-blue-500" />
+                                            Registration Period
+                                        </h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {/* Registration Start */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Registration Opens</label>
+                                                <div className="space-y-2">
+                                                    <input
+                                                        type="date"
+                                                        value={formData.registrationStart}
+                                                        onChange={(e) => setFormData({ ...formData, registrationStart: e.target.value })}
+                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    />
+                                                    <input
+                                                        type="time"
+                                                        value={formData.registrationStartTime}
+                                                        onChange={(e) => setFormData({ ...formData, registrationStartTime: e.target.value })}
+                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Registration End */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Registration Closes</label>
+                                                <div className="space-y-2">
+                                                    <input
+                                                        type="date"
+                                                        value={formData.registrationEnd}
+                                                        onChange={(e) => setFormData({ ...formData, registrationEnd: e.target.value })}
+                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    />
+                                                    <input
+                                                        type="time"
+                                                        value={formData.registrationEndTime}
+                                                        onChange={(e) => setFormData({ ...formData, registrationEndTime: e.target.value })}
+                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>

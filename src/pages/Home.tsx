@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, ChevronRight, Award, Clock } from 'lucide-react';
+import { Calendar, Bell, Users, Search, MapPin, Shield, Megaphone, ChevronRight, Award, Clock, FileText } from 'lucide-react';
 import { Page } from '../types/page';
 import { DBPost, DBClub, DBNotification } from '../types/auth';
 import { getPosts, getNotifications, getClubs } from '../lib/dbService';
@@ -500,6 +500,32 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                   <p className="font-medium text-slate-700 dark:text-slate-300">{post.location || 'Campus'}</p>
                                 </div>
                               </div>
+
+                              {/* Registration Row */}
+                              {(post.registrationStart || post.registrationEnd) && (
+                                <div className="flex items-start gap-4">
+                                  <div className="mt-1"><FileText className="w-5 h-5 text-blue-500" /></div>
+                                  <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Registration</p>
+                                    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
+                                      {post.registrationStart && (
+                                        <p className="font-medium text-slate-700 dark:text-slate-300 text-sm">
+                                          <span className="text-slate-500 font-normal mr-2">Opens:</span>
+                                          {new Date(post.registrationStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                          {post.registrationStartTime ? `, ${post.registrationStartTime}` : ''}
+                                        </p>
+                                      )}
+                                      {post.registrationEnd && (
+                                        <p className="font-medium text-slate-700 dark:text-slate-300 text-sm">
+                                          <span className="text-slate-500 font-normal mr-2">Closes:</span>
+                                          {new Date(post.registrationEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                          {post.registrationEndTime ? `, ${post.registrationEndTime}` : ''}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
 

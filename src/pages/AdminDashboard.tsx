@@ -729,7 +729,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold text-slate-800 dark:text-white text-lg">{post.title}</h4>
-                            <p className="text-sm text-slate-500">Posted by <span className="font-semibold text-[#002147]">{post.clubName}</span> • {post.date}</p>
+                            <p className="text-sm text-slate-500">Posted by <span className="font-semibold text-[#002147] dark:text-blue-400">{post.clubName}</span> • {post.date}</p>
                           </div>
                           <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold uppercase text-slate-500">
                             {post.type}
@@ -791,7 +791,7 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white mb-2 group-hover:text-[#002147] transition-colors">{club.name}</h4>
+                              <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white mb-2 transition-transform duration-200 group-hover:scale-[1.02]">{club.name}</h4>
                             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
 
                             {/* Officers Grid */}
