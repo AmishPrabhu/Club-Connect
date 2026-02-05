@@ -108,9 +108,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       // Handle Attempts Remaining
       else if (result.remainingAttempts !== undefined) {
         if (result.remainingAttempts === 1) {
-          msg = "Invalid credentials. Next attempt will lock your account.";
+          msg = "Email or Password is incorrect. Next attempt will lock your account.";
         } else {
-          msg = `Invalid credentials. ${result.remainingAttempts} attempts remaining.`;
+          msg = `Email or Password is incorrect. ${result.remainingAttempts} attempts remaining.`;
         }
       }
 
