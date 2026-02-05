@@ -153,58 +153,52 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
         const club = await Club.findById(req.params.id);
         if (!club) return res.status(404).json({ message: 'Club not found' });
 
-        // Check for officer changes and demote previous officers
+        // Enforce Single Officer Per Role Strategy:
+        // Instead of just relying on comparing old vs new email, we explicitly:
+        // 1. Demote EVERYONE who currently has the role but isn't the new officer
+        // 2. Promote the new officer (handled in the next block)
         const rolesToCheck = ['secretary', 'president', 'treasurer', 'advisor'];
 
         for (const role of rolesToCheck) {
             const emailField = `${role}Email`;
-            // If email field is being updated (exists in req.body) AND acts as a change (different from current)
-            // Log for debugging
-            if (role === 'advisor') {
-                console.log('Checking advisor demotion:', {
-                    newEmail: req.body[emailField],
-                    oldEmail: club[emailField],
-                    isDifferent: req.body[emailField] !== club[emailField]
-                });
-            }
+            const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
 
-            if (req.body[emailField] !== undefined && req.body[emailField] !== club[emailField]) {
-                const oldEmail = club[emailField];
-                if (oldEmail) {
-                    try {
-                        console.log(`Demoting previous ${role}: ${oldEmail}`);
-                        // 1. Find the old user
-                        const oldUser = await User.findOne({ email: oldEmail });
-                        if (oldUser) {
-                            // Demote role to 'club-member' if they were an officer
-                            // But only if they don't hold ANOTHER officer role in THIS club or another club?
-                            // Simplified logic: If they are 'president' and get removed, they become 'club-member'
-                            // The global sync will handle if they are officer elsewhere.
-                            // But we should explicitly set them to 'club-member' to trigger strict refresh?
-                            // Actually, let's just clear their specific ClubMember role.
-                            // The global sync logic later (lines below) rebuilds the User.role based on ALL ClubMember entries.
-                            // So we just need to update ClubMember.
+            // Only run this logic if the field is actually being updated/passed in the request
+            if (req.body[emailField] !== undefined) {
+                const newEmail = req.body[emailField];
+
+                // Query to find any members in this club who hold this role BUT are not the new officer
+                // Note: If newEmail is null/empty, this effectively demotes ALL users with this role (correct for removal)
+                const query = {
+                    clubId: req.params.id,
+                    role: capitalizedRole
+                };
+
+                // If there is a new officer, exclude them from the demotion list
+                if (newEmail) {
+                    query.email = { $not: new RegExp(`^${escapeRegExp(newEmail)}$`, 'i') };
+                }
+
+                // Execute Demotion
+                const membersToDemote = await ClubMember.find(query);
+                for (const member of membersToDemote) {
+                    console.log(`[Role Cleanup] Demoting '${member.role}' ${member.email} to Member (Target is ${newEmail})`);
+                    member.role = 'Member';
+                    member.boardType = 'member'; // Reset board type if needed
+                    await member.save();
+
+                    // Also sync their global user role if necessary
+                    const user = await User.findOne({ email: member.email });
+                    if (user) {
+                        // Check if they hold office elsewhere before hard resetting?
+                        // Ideally yes, but for now we trust the global sync process or just reset to 'club-member'.
+                        // If they were 'president', 'secretary', etc., and are being removed here, downgrade them.
+                        // We check if their CURRENT global role attempts to be an officer role.
+                        if (['president', 'secretary', 'treasurer', 'advisor', 'club-secretary'].includes(user.role)) {
+                            user.role = 'club-member';
+                            await user.save();
+                            console.log(`[Role Cleanup] Global role for ${user.email} downgraded to 'club-member'`);
                         }
-
-                        // 2. Update ClubMember role to 'Member'
-                        await ClubMember.findOneAndUpdate(
-                            {
-                                clubId: req.params.id,
-                                email: { $regex: new RegExp(`^${escapeRegExp(oldEmail)}$`, 'i') }
-                            },
-                            { role: 'Member' }
-                        );
-
-                        // 3. User role update will happen via background sync or next login
-                        // But to be immediate, we can run a check.
-                        if (oldUser) {
-                            // We can force them to 'club-member' locally, then let sync fix if they are officer elsewhere
-                            // This ensures they lose the 'president' status immediately
-                            await User.findByIdAndUpdate(oldUser._id, { role: 'club-member' });
-                        }
-
-                    } catch (err) {
-                        console.error(`Failed to demote previous ${role}:`, err);
                     }
                 }
             }
