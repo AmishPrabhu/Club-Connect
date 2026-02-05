@@ -800,45 +800,45 @@ export default function AdminDashboard() {
                                 <span className="font-bold text-slate-400 uppercase">Secretary</span>
                                 {club.secretaryEmail ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-green-600 font-semibold truncate max-w-[100px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                    <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[100px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
                                     <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
                                 )}
                               </div>
                               <div className="flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-400 uppercase">President</span>
                                 {club.presidentEmail ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-purple-600 font-semibold truncate max-w-[100px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                    <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[100px]" title={club.presidentEmail}>{club.presidentEmail}</span>
                                     <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
                                 )}
                               </div>
                               <div className="flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-400 uppercase">Treasurer</span>
                                 {club.treasurerEmail ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-amber-600 font-semibold truncate max-w-[100px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                    <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[100px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
                                     <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
                                 )}
                               </div>
                               <div className="flex justify-between items-center text-xs border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
                                 <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
                                 {club.advisorEmail ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-cyan-600 font-semibold truncate max-w-[100px]" title={club.advisorName}>{club.advisorName || club.advisorEmail}</span>
+                                    <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate max-w-[100px]" title={club.advisorEmail}>{club.advisorEmail}</span>
                                     <button onClick={() => openEditAdvisorModal(club)} className="text-slate-400 hover:text-blue-500"><Edit className="w-3 h-3" /></button>
                                     <button onClick={() => handleRemoveOfficer(club.id!, 'advisor')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={() => openAdvisorModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
+                                  <button onClick={() => openAdvisorModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
                                 )}
                               </div>
                             </div>
