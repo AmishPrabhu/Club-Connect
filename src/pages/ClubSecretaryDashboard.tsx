@@ -461,7 +461,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
-    type: 'announcement' as 'event' | 'announcement',
+    type: 'Event' as 'event' | 'announcement',
     date: new Date().toISOString().split('T')[0],
     startHour: '',
     startMinute: '',
@@ -1299,7 +1299,16 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           {
             activeTab === 'events' && (
               <div className="space-y-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Events</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Manage Events</h3>
+                <button
+                    onClick={() => setIsCreatePostModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create New Event
+                  </button>
+                  </div>
 
                 {posts.filter(p => p.type === 'event').length === 0 ? (
                   <div className="text-center py-12">
@@ -1658,8 +1667,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         isCreatePostModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create New Post</h3>
+              <div className="flex items-center justify-end">
                 <button
                   onClick={() => { setIsCreatePostModalOpen(false); setFormMessage(null); }}
                   className="text-slate-400 hover:text-slate-600"
@@ -1690,27 +1698,28 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Content
+                      Description
                     </label>
                     <textarea
                       rows={4}
                       value={newPost.content}
                       onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Post content"
+                      placeholder="Description"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Type
+                      Type<span className='text-red-500'>*</span>
                     </label>
                     <select
                       value={newPost.type}
                       onChange={(e) => setNewPost({ ...newPost, type: e.target.value as 'event' | 'announcement' })}
+                      defaultValue="Event"
                       className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="announcement">Announcement</option>
                       <option value="event">Event</option>
+                      <option value="announcement">Announcement</option>
                     </select>
                   </div>
                   <div>
