@@ -348,13 +348,13 @@ export const getPosts = async (): Promise<DBPost[]> => {
     }
 };
 
-export const createPost = async (postData: Omit<DBPost, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> => {
+export const createPost = async (postData: Omit<DBPost, 'id' | 'createdAt' | 'updatedAt' | 'likes' | 'rsvps'>): Promise<{ success: boolean; postId?: string; error?: string }> => {
     try {
         const response = await api.post('/posts', postData);
-        return response.data._id;
-    } catch (error) {
+        return { success: true, postId: response.data._id };
+    } catch (error: any) {
         console.error('Error creating post:', error);
-        return null;
+        return { success: false, error: error.response?.data?.message || error.message || 'Failed to create post' };
     }
 };
 

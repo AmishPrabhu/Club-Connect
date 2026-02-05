@@ -201,8 +201,13 @@ router.post('/', verifyClubOfficer, async (req, res) => {
         const savedPost = await newPost.save();
         res.status(201).json(savedPost);
     } catch (error) {
-        console.error("Error creating post", error)
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error creating post", error);
+        // Better error handling for Mongoose validation errors
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ message: messages.join(', ') });
+        }
+        res.status(500).json({ message: error.message || 'Server error' });
     }
 });
 
