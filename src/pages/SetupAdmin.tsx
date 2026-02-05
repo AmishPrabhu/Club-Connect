@@ -13,6 +13,8 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
     const [name, setName] = useState('Super Admin');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [otp, setOtp] = useState('');
+    const [showOtpInput, setShowOtpInput] = useState(false);
 
     const handleCreateAdmin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,14 +22,31 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
         setMessage(null);
 
         try {
-            // Create admin via API
+            // Create admin via SAFE endpoint
             const { default: api } = await import('../lib/api');
-            const response = await api.post('/auth/signup', {
+
+            const payload: any = {
                 email,
                 password,
-                name,
-                role: 'admin'
-            });
+                name
+            };
+
+            if (showOtpInput) {
+                payload.otp = otp;
+            }
+
+            const response = await api.post('/auth/setup-admin', payload);
+
+            // Check if OTP is required (existing admin found)
+            if (response.data.requireOtp) {
+                setShowOtpInput(true);
+                setMessage({
+                    type: 'error',
+                    text: response.data.message
+                });
+                setIsLoading(false);
+                return;
+            }
 
             const { token } = response.data;
             setMessage({
@@ -150,6 +169,28 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                             </p>
                         </div>
 
+                        {showOtpInput && (
+                            <div className="mb-6 animate-fadeIn">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                    Verification Code
+                                </label>
+                                <div className="relative">
+                                    <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                        placeholder="Enter OTP sent to current Admin"
+                                        required
+                                    />
+                                </div>
+                                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                                    An existing Super Admin was found. Please enter the code sent to their email to authorize this transfer.
+                                </p>
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -158,12 +199,12 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                             {isLoading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Creating Admin...
+                                    {showOtpInput ? 'Verifying...' : 'Creating Admin...'}
                                 </>
                             ) : (
                                 <>
                                     <Shield className="w-5 h-5 text-[#DAA520]" />
-                                    Create Super Admin
+                                    {showOtpInput ? 'Verify & Claim Admin' : 'Create Super Admin'}
                                 </>
                             )}
                         </button>

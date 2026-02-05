@@ -778,4 +778,90 @@ router.delete('/delete-account', verifyToken, async (req, res) => {
     }
 });
 
+// Setup Super Admin (Protected Transfer)
+router.post('/setup-admin', authLimiter, async (req, res) => {
+    try {
+        const { email, password, name, otp } = req.body;
+
+        // 1. Check if any admin already exists
+        const existingAdmin = await User.findOne({ role: 'admin' });
+
+        if (existingAdmin) {
+            // Admin exists - require OTP from the EXISTING admin to authorize transfer
+            if (!otp) {
+                // Generate and send OTP to the EXISTING admin
+                const newOtp = generateOTP();
+
+                await Otp.findOneAndUpdate(
+                    { email: existingAdmin.email },
+                    { otp: newOtp, createdAt: Date.now() },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
+
+                await sendOtpEmail(existingAdmin.email, newOtp); // Reuse standard OTP email
+
+                // Mask the email for security
+                const maskedEmail = existingAdmin.email.replace(/(^.{2}).+(@.+)/, '$1***$2');
+
+                return res.json({
+                    requireOtp: true,
+                    message: `Super Admin already exists. An OTP has been sent to ${maskedEmail} to authorize this change.`
+                });
+            } else {
+                // Verify OTP sent to EXISTING admin
+                const otpRecord = await Otp.findOne({ email: existingAdmin.email });
+                if (!otpRecord || otpRecord.otp !== otp) {
+                    return res.status(400).json({ message: 'Invalid OTP. Authorization failed.' });
+                }
+
+                // OTP Valid - Demote existing admin
+                existingAdmin.role = 'user'; // Or 'club-member'
+                await existingAdmin.save();
+
+                // Clear OTP
+                await Otp.deleteOne({ email: existingAdmin.email });
+            }
+        }
+
+        // 2. Create the NEW Admin
+        // Check if the NEW email is already taken
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user = new User({
+            email,
+            password: hashedPassword,
+            name,
+            role: 'admin'
+        });
+
+        await user.save();
+
+        // 3. Login the new admin immediately
+        const token = jwt.sign(
+            { id: user._id, role: user.role, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.status(201).json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            message: 'Super Admin configured successfully'
+        });
+
+    } catch (error) {
+        console.error('Setup admin error:', error);
+        res.status(500).json({ message: 'Server error during setup' });
+    }
+});
+
 export default router;
