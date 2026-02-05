@@ -29,7 +29,8 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     const [canResend, setCanResend] = useState(true);
 
     const [error, setError] = useState('');
-    const { signUp, signInWithGoogle, signUpWithGoogle, sendOtp, verifyOtp, isLoading, user, isAuthenticated } = useAuth();
+    const { signUp, signInWithGoogle, signUpWithGoogle, sendOtp, verifyOtp, user, isAuthenticated } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Check for Google signup data on mount
     useEffect(() => {
@@ -124,7 +125,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
             return;
         }
 
+        setIsSubmitting(true);
         const result = await sendOtp(email);
+        setIsSubmitting(false);
+
         if (result.success) {
             setStep('OTP');
 
@@ -158,7 +162,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
             return;
         }
 
+        setIsSubmitting(true);
         const result = await verifyOtp(email, otp);
+        setIsSubmitting(false);
+
         if (result.success) {
             setStep('DETAILS');
         } else {
@@ -168,7 +175,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
     const handleResendOtp = async () => {
         setError('');
+        setIsSubmitting(true);
         const result = await sendOtp(email);
+        setIsSubmitting(false);
+
         if (result.success) {
             let count = parseInt(localStorage.getItem('signupOtpCount') || '0');
             count++;
@@ -205,6 +215,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
             return;
         }
 
+        setIsSubmitting(true);
         // If we have Google data, use Google signup
         if (googleData) {
             const result = await signUpWithGoogle(googleData.credential, password, name);
@@ -215,6 +226,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
             // Regular signup with OTP
             if (!name || !email || !password || !confirmPassword || !otp) {
                 setError('Please fill in all fields');
+                setIsSubmitting(false);
                 return;
             }
 
@@ -223,11 +235,22 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                 setError(result.error || 'Failed to create account');
             }
         }
+        setIsSubmitting(false);
     };
 
     const handleGoogleSuccess = async (credentialResponse: any) => {
         setError('');
+        // NOTE: signInWithGoogle is a top-level auth action, so we use local spinner
+        // But if it requires cleanup/redirect, the side effects happen in useEffect or parent
+        // Let's at least wrap it
+        /* 
+           Wait, signInWithGoogle might redirect if successful? 
+           No, AuthContext just sets user. But parent component might navigate.
+        */
+        setIsSubmitting(true);
         const result = await signInWithGoogle(credentialResponse.credential);
+        setIsSubmitting(false);
+
         if (!result.success) {
             if (result.needsSignup && result.googleData) {
                 // Set Google data for signup form
@@ -409,10 +432,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isSubmitting}
                                     className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
-                                    {isLoading ? (
+                                    {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
                                     ) : (
                                         <>
@@ -457,10 +480,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isSubmitting}
                                     className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
-                                    {isLoading ? (
+                                    {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
                                     ) : (
                                         <span>Verify Code</span>
@@ -473,7 +496,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                         <button
                                             type="button"
                                             onClick={handleResendOtp}
-                                            disabled={!canResend || isLoading}
+                                            disabled={!canResend || isSubmitting}
                                             className={`font-semibold ${!canResend ? 'text-slate-400 cursor-not-allowed' : 'text-college-blue-primary hover:underline'}`}
                                         >
                                             {timer > 60
@@ -543,10 +566,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={isSubmitting}
                                     className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
-                                    {isLoading ? (
+                                    {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
                                     ) : (
                                         <>

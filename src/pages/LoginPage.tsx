@@ -15,7 +15,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [error, setError] = useState('');
-  const { login, signInWithGoogle, isLoading, user, isAuthenticated } = useAuth();
+  const { login, signInWithGoogle, user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -78,6 +78,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     return () => clearInterval(interval);
   }, [lockoutUntil, email]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lockoutUntil) return; // Prevent submission if locked out
@@ -89,11 +91,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       return;
     }
 
+    setIsSubmitting(true);
     const result = await login(email, password);
+    setIsSubmitting(false);
+
     if (!result.success) {
       let msg = result.error || 'Invalid credentials';
 
-      // Handle Lockout
       // Handle Lockout
       if (result.lockoutDuration) {
         const until = Date.now() + result.lockoutDuration;
@@ -251,13 +255,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
               <button
                 type="submit"
-                disabled={isLoading || !!lockoutUntil}
+                disabled={isSubmitting || !!lockoutUntil}
                 className={`w-full font-bold py-4 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg ${lockoutUntil
                   ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
                   : 'bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] hover:scale-[1.02] active:scale-[0.98] hover:shadow-yellow-500/30'
                   }`}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <div className="w-6 h-6 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
                 ) : lockoutUntil ? (
                   <span className="flex items-center gap-2">

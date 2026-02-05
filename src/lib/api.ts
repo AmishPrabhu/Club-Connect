@@ -26,16 +26,21 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Token expired or invalid
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            // FIX: Don't trigger global logout for Login page errors (wrong password)
+            const isLoginRequest = error.config && error.config.url && error.config.url.includes('/auth/login');
 
-            // Dispatch a custom event so the AuthContext can update its state
-            window.dispatchEvent(new Event('auth:unauthorized'));
+            if (!isLoginRequest) {
+                // Token expired or invalid
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
 
-            // Only redirect if not already on the landing page
-            if (window.location.pathname !== '/') {
-                window.location.href = '/';
+                // Dispatch a custom event so the AuthContext can update its state
+                window.dispatchEvent(new Event('auth:unauthorized'));
+
+                // Only redirect if not already on the landing page
+                if (window.location.pathname !== '/') {
+                    window.location.href = '/';
+                }
             }
         }
         return Promise.reject(error);

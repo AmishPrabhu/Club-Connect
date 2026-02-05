@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; remainingAttempts?: number; lockoutDuration?: number }> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
+
     try {
       const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data;
@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: true };
     } catch (error: any) {
       console.error('Login error:', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
 
       const result: { success: boolean; error?: string; remainingAttempts?: number; lockoutDuration?: number } = {
         success: false,
@@ -148,7 +148,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signUp = async (email: string, password: string, name: string, otp: string): Promise<{ success: boolean; error?: string }> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
+
     try {
       const response = await api.post('/auth/signup', { email, password, name, otp });
       const { token, user } = response.data;
@@ -170,7 +170,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: true };
     } catch (error: any) {
       console.error('Sign up error:', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to create account'
@@ -201,7 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: false, error: 'No Google credential provided' };
     }
 
-    setAuthState(prev => ({ ...prev, isLoading: true }));
+
     try {
       const response = await api.post('/auth/google', { credential });
       const { token, user } = response.data;
@@ -223,7 +223,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: true };
     } catch (error: any) {
       console.error('Google Sign In error:', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
 
       // Check if user needs to sign up
       if (error.response?.status === 404 && error.response?.data?.code === 'USER_NOT_FOUND') {
@@ -243,7 +243,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signUpWithGoogle = async (credential: string, password: string, name?: string): Promise<{ success: boolean; error?: string }> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
+
     try {
       const response = await api.post('/auth/google/signup', { credential, password, name });
       const { token, user } = response.data;
@@ -265,7 +265,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: true };
     } catch (error: any) {
       console.error('Google Sign Up error:', error);
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
       return {
         success: false,
         error: error.response?.data?.message || 'Google signup failed'
