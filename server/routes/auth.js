@@ -230,50 +230,16 @@ router.post('/assign-officer', async (req, res) => {
             });
         }
 
-        // Create new user with random password
-        const randomPassword = crypto.randomBytes(8).toString('hex');
-        const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-        // Map specific officer roles to global role 'club-member' initially or 'user'
-        // The specific officer role is stored in ClubMember and synced to User.role if highest
-        // For new officers, we can set their role to the appropriate one immediately if desired,
-        // but the dbService/Club sync logic usually handles upgrading the role.
-        // Let's set it to 'user' by default and let the sync logic upgrade it, 
-        // OR set it directly if we want them to have access immediately.
-        // Given existing logic updates global role, let's start with 'user'.
-
-        user = new User({
-            email,
-            password: hashedPassword,
-            name,
-            role: 'user', // Will be upgraded by dbService logic
-        });
-
-        await user.save();
-
-        // Send invitation email with link to reset password (since we set a random one)
-        // OR link to just login if we want them to use "Forgot Password" to set it.
-        // User requested: "invitation email should be sent to create an account"
-        // Since we created the account technically, we should invite them to *claim* it / set password.
-        // We can generate a password reset token for them.
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-        user.resetPasswordToken = resetTokenHash;
-        user.resetPasswordExpires = Date.now() + 24 * 3600000; // 24 hours
-        await user.save();
-
-        // Using the same signup page link but maybe with a token? 
-        // Or preferably the "reset password" page so they can set their password.
-        // The user request said: "invitation email ... include a unique link for account creation".
-        // Since the account is technically created, "Account Creation" here means setting their password.
-        // So a reset password link is perfect.
-        const signUpUrl = `${process.env.FRONTEND_URL}?page=resetPassword&token=${resetToken}&email=${encodeURIComponent(email)}`;
+        // Do NOT create user account yet. User must sign up manually.
+        // We just send an invitation email.
 
         // Get club name for email
         const club = await Club.findById(clubId);
         const clubName = club ? club.name : 'Unknown Club';
+
+        // URL to Signup page (pre-filling email if possible via query param)
+        // Adjust frontend route as needed. Assuming /signup or ?page=signup
+        const signUpUrl = `${process.env.FRONTEND_URL}?page=signup&email=${encodeURIComponent(email)}`;
 
         // Send invitation
         await sendClubInvitationEmail({
@@ -285,8 +251,8 @@ router.post('/assign-officer', async (req, res) => {
         });
 
         res.status(201).json({
-            message: 'User created and invited',
-            userId: user._id
+            message: 'Invitation sent. User must create an account.',
+            userId: null // Explicitly null so dbService knows to just add email reference
         });
 
     } catch (error) {

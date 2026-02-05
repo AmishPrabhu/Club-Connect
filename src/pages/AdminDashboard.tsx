@@ -12,6 +12,7 @@ import {
   createClubPresident,
   createClubTreasurer,
   createClubAdvisor,
+  removeClubOfficer,
 
   getPosts,
   deletePost,
@@ -560,6 +561,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRemoveOfficer = async (clubId: string, role: 'secretary' | 'president' | 'treasurer' | 'advisor') => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Remove ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+      message: `Are you sure you want to remove the ${role} from this club? This action cannot be undone.`,
+      type: 'danger',
+      variant: 'confirm',
+      onConfirm: async () => {
+        const result = await removeClubOfficer(clubId, role);
+        if (result.success) {
+          setFormMessage({ type: 'success', text: `${role.charAt(0).toUpperCase() + role.slice(1)} removed successfully` });
+          loadData();
+        } else {
+          setFormMessage({ type: 'error', text: result.error || `Failed to remove ${role}` });
+        }
+      },
+    });
+  };
+
 
 
   const filteredClubs = clubs.filter(club =>
@@ -779,7 +799,10 @@ export default function AdminDashboard() {
                               <div className="flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-400 uppercase">Secretary</span>
                                 {club.secretaryEmail ? (
-                                  <span className="text-green-600 font-semibold truncate max-w-[120px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-green-600 font-semibold truncate max-w-[100px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                    <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                  </div>
                                 ) : (
                                   <button onClick={() => openSecretaryModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
                                 )}
@@ -787,7 +810,10 @@ export default function AdminDashboard() {
                               <div className="flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-400 uppercase">President</span>
                                 {club.presidentEmail ? (
-                                  <span className="text-purple-600 font-semibold truncate max-w-[120px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-purple-600 font-semibold truncate max-w-[100px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                    <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                  </div>
                                 ) : (
                                   <button onClick={() => openPresidentModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
                                 )}
@@ -795,7 +821,10 @@ export default function AdminDashboard() {
                               <div className="flex justify-between items-center text-xs">
                                 <span className="font-bold text-slate-400 uppercase">Treasurer</span>
                                 {club.treasurerEmail ? (
-                                  <span className="text-amber-600 font-semibold truncate max-w-[120px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-amber-600 font-semibold truncate max-w-[100px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                    <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                  </div>
                                 ) : (
                                   <button onClick={() => openTreasurerModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>
                                 )}
@@ -804,8 +833,9 @@ export default function AdminDashboard() {
                                 <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
                                 {club.advisorEmail ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-cyan-600 font-semibold truncate max-w-[100px]" title={club.advisorName}>{club.advisorName}</span>
+                                    <span className="text-cyan-600 font-semibold truncate max-w-[100px]" title={club.advisorName}>{club.advisorName || club.advisorEmail}</span>
                                     <button onClick={() => openEditAdvisorModal(club)} className="text-slate-400 hover:text-blue-500"><Edit className="w-3 h-3" /></button>
+                                    <button onClick={() => handleRemoveOfficer(club.id!, 'advisor')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
                                   <button onClick={() => openAdvisorModal(club)} className="text-[#002147] hover:underline font-medium">+ Assign</button>

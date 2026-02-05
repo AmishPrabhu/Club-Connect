@@ -27,7 +27,7 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     // Role edit states
     const [showEditRoleModal, setShowEditRoleModal] = useState(false);
     const [editingRole, setEditingRole] = useState<'secretary' | 'president' | 'treasurer' | null>(null);
-    const [roleForm, setRoleForm] = useState({ name: '', email: '', password: 'Hello@123' });
+    const [roleForm, setRoleForm] = useState({ name: '', email: '' });
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Confirm modal state
@@ -84,23 +84,19 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
             name: '', // Name not stored in DBClub for these roles
             email: role === 'secretary' ? (club?.secretaryEmail || '') :
                 role === 'president' ? (club?.presidentEmail || '') :
-                    (club?.treasurerEmail || ''),
-            password: 'Hello@123'
+                    (club?.treasurerEmail || '')
         });
         setShowEditRoleModal(true);
         setFormMessage(null);
     };
 
     const handleUpdateRole = async () => {
-        if (!roleForm.email || !roleForm.password || !roleForm.name || !club?.id || !editingRole) {
+        if (!roleForm.email || !roleForm.name || !club?.id || !editingRole) {
             setFormMessage({ type: 'error', text: 'Please fill in all fields' });
             return;
         }
 
-        if (roleForm.password.length < 6) {
-            setFormMessage({ type: 'error', text: 'Password must be at least 6 characters' });
-            return;
-        }
+        // Password validation removed as we use email-only invite flow
 
         setIsSaving(true);
         try {
@@ -203,9 +199,9 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
     const pastEvents = events.filter(e => e.date && new Date(e.date) < new Date()).length;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12" >
             {/* Header */}
-            <div className="mb-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border-l-4 border-[#DAA520]">
+            < div className="mb-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border-l-4 border-[#DAA520]" >
                 <div className="flex flex-row items-center gap-3">
                     <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-[#002147] shrink-0">
                         <Shield className="w-5 h-5 md:w-6 md:h-6 text-[#002147]" />
@@ -219,10 +215,10 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                         </p>
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
+            < div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6" >
                 <div className="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-[#002147]">
                     <div className="flex flex-col items-center text-center gap-1">
                         <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-1">
@@ -258,10 +254,10 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Navigation Tabs */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-6 md:mb-8 overflow-hidden">
+            < div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-6 md:mb-8 overflow-hidden" >
                 <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
@@ -525,79 +521,70 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Edit Role Modal */}
-            {showEditRoleModal && editingRole && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                {club?.secretaryEmail && editingRole === 'secretary' ? 'Edit' :
-                                    club?.presidentEmail && editingRole === 'president' ? 'Edit' :
-                                        club?.treasurerEmail && editingRole === 'treasurer' ? 'Edit' : 'Add'} {editingRole.charAt(0).toUpperCase() + editingRole.slice(1)}
-                            </h3>
-                            <button onClick={() => { setShowEditRoleModal(false); setEditingRole(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-4">
-                            ⚠️ This will create a new account. Existing credentials will be replaced.
-                        </p>
-
-                        {formMessage && (
-                            <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {formMessage.text}
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
-                                <input
-                                    type="text"
-                                    value={roleForm.name}
-                                    onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Full Name"
-                                />
+            {
+                showEditRoleModal && editingRole && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                    {club?.secretaryEmail && editingRole === 'secretary' ? 'Edit' :
+                                        club?.presidentEmail && editingRole === 'president' ? 'Edit' :
+                                            club?.treasurerEmail && editingRole === 'treasurer' ? 'Edit' : 'Add'} {editingRole.charAt(0).toUpperCase() + editingRole.slice(1)}
+                                </h3>
+                                <button onClick={() => { setShowEditRoleModal(false); setEditingRole(null); setFormMessage(null); }} className="text-slate-400 hover:text-slate-600">
+                                    <X className="w-6 h-6" />
+                                </button>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
-                                <input
-                                    type="email"
-                                    value={roleForm.email}
-                                    onChange={(e) => setRoleForm({ ...roleForm, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="user@wce.ac.in"
-                                />
-                            </div>
+                            <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg mb-4">
+                                ⚠️ This will create a new account. Existing credentials will be replaced.
+                            </p>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password *</label>
-                                <input
-                                    type="password"
-                                    value={roleForm.password}
-                                    onChange={(e) => setRoleForm({ ...roleForm, password: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Minimum 6 characters"
-                                />
-                            </div>
+                            {formMessage && (
+                                <div className={`p-3 rounded-lg mb-4 ${formMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {formMessage.text}
+                                </div>
+                            )}
 
-                            <button
-                                onClick={handleUpdateRole}
-                                disabled={isSaving}
-                                className="w-full bg-[#002147] hover:bg-[#00152e] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
-                            >
-                                <UserPlus className="w-5 h-5 text-[#DAA520]" />
-                                {isSaving ? 'Saving...' : 'Save Changes'}
-                            </button>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name *</label>
+                                    <input
+                                        type="text"
+                                        value={roleForm.name}
+                                        onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Full Name"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email *</label>
+                                    <input
+                                        type="email"
+                                        value={roleForm.email}
+                                        onChange={(e) => setRoleForm({ ...roleForm, email: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="user@wce.ac.in"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handleUpdateRole}
+                                    disabled={isSaving}
+                                    className="w-full bg-[#002147] hover:bg-[#00152e] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
+                                >
+                                    <UserPlus className="w-5 h-5 text-[#DAA520]" />
+                                    {isSaving ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Confirm Modal */}
             <ConfirmModal
@@ -609,6 +596,6 @@ export default function AdvisorDashboard({ onNavigateToPost }: AdvisorDashboardP
                 type={confirmModal.type}
                 variant={confirmModal.variant}
             />
-        </div>
+        </div >
     );
 }

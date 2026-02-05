@@ -175,17 +175,20 @@ const assignOfficerRole = async (
 
         // Update the club with officer info
         const clubUpdates: any = {};
+        // If userId is present (existing user), use it. If null (invited), set ID to null but keep Email.
+        const finalUserId = (userId && userId !== 'existing-user') ? userId : null;
+
         if (clubUpdateField === 'secretary') {
-            clubUpdates.secretaryId = userId === 'existing-user' ? null : userId;
+            clubUpdates.secretaryId = finalUserId;
             clubUpdates.secretaryEmail = email;
         } else if (clubUpdateField === 'president') {
-            clubUpdates.presidentId = userId === 'existing-user' ? null : userId;
+            clubUpdates.presidentId = finalUserId;
             clubUpdates.presidentEmail = email;
         } else if (clubUpdateField === 'treasurer') {
-            clubUpdates.treasurerId = userId === 'existing-user' ? null : userId;
+            clubUpdates.treasurerId = finalUserId;
             clubUpdates.treasurerEmail = email;
         } else if (clubUpdateField === 'advisor') {
-            clubUpdates.advisorId = userId === 'existing-user' ? null : userId;
+            clubUpdates.advisorId = finalUserId;
             clubUpdates.advisorEmail = email;
             clubUpdates.advisorName = name;
         }
@@ -210,13 +213,14 @@ const assignOfficerRole = async (
                     role: roleLabel,
                     boardType: 'main',
                     joinedAt: new Date(),
+                    suppressEmail: true,
                 });
             } catch (memberError: any) {
                 console.log('ClubMember entry might already exist:', memberError.message);
             }
         }
 
-        return { success: true, userId: userId === 'existing-user' ? undefined : userId };
+        return { success: true, userId: finalUserId || undefined };
     } catch (error: any) {
         console.error(`Error assigning ${roleLabel}:`, error);
         return { success: false, error: error.response?.data?.message || `Failed to assign ${roleLabel}` };
@@ -537,7 +541,7 @@ export const syncClubMemberCount = async (clubId: string): Promise<number> => {
 
 export const addClubMember = async (
     clubId: string,
-    memberData: Omit<ClubMember, 'id'>
+    memberData: Omit<ClubMember, 'id'> & { suppressEmail?: boolean }
 ): Promise<{ success: boolean; error?: string; memberId?: string }> => {
     try {
         const response = await api.post(`/clubs/${clubId}/members`, memberData);
