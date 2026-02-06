@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Page } from '../types/page';
 import { ClubMembership } from '../types/auth';
 import { markNotificationAsRead } from '../lib/dbService';
+import { useAuth } from './AuthContext';
 
 interface NavigationContextType {
     currentPage: Page;
@@ -38,6 +39,8 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { memberships } = useAuth(); // Get fresh memberships from AuthContext
+
     const [currentPage, setCurrentPage] = useState<Page>('home');
     const [previousPage, setPreviousPage] = useState<Page>('home');
     const [selectedClub, setSelectedClub] = useState<string | null>(null);
@@ -69,6 +72,27 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             localStorage.removeItem('selectedMembership');
         }
     };
+
+    // Validate selectedMembership against fresh memberships from AuthContext
+    useEffect(() => {
+        if (!selectedMembership) return;
+
+        // Check if the selected membership still exists in fresh data
+        const isValid = memberships.some(m =>
+            m.clubId === selectedMembership.clubId &&
+            m.role === selectedMembership.role
+        );
+
+        if (!isValid) {
+            console.warn('Selected membership is no longer valid. Clearing cached data.');
+            setSelectedMembership(null);
+
+            // If user is on an officer dashboard, redirect to home
+            if (['clubSecretaryDashboard', 'advisorDashboard'].includes(currentPage)) {
+                setCurrentPage('home');
+            }
+        }
+    }, [memberships, selectedMembership, currentPage]);
 
     // Helper to update URL without reload
     const updateUrl = (page: Page, params?: Record<string, string>) => {

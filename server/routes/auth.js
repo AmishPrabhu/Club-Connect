@@ -380,6 +380,25 @@ router.get('/me', verifyToken, async (req, res) => {
         let effectiveClubId = user.clubId;
         let effectiveClubName = user.clubName;
 
+        // Fetch ALL club memberships for this user (for validation)
+        const memberships = await ClubMember.find({
+            $or: [{ userId: user._id }, { email: user.email }]
+        }).lean();
+
+        // Fetch club details for each membership
+        const membershipDetails = await Promise.all(memberships.map(async (membership) => {
+            const club = await Club.findById(membership.clubId).select('name image slug');
+            return {
+                clubId: membership.clubId,
+                clubName: club?.name || 'Unknown Club',
+                clubImage: club?.image || '',
+                clubSlug: club?.slug || '',
+                role: membership.role,
+                boardType: membership.boardType,
+                email: membership.email
+            };
+        }));
+
         // If role is 'user' or 'club-member', check if they have any officer memberships
         // this handles cases where admin created them as 'user/club-member' but assigned officer role
         if (effectiveRole === 'user' || effectiveRole === 'club-member') {
@@ -415,6 +434,7 @@ router.get('/me', verifyToken, async (req, res) => {
             clubName: effectiveClubName,
             profileImage: user.profileImage,
             likedClubs: user.likedClubs || [],
+            memberships: membershipDetails, // NEW: Include fresh membership data
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         });

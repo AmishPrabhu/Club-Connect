@@ -50,16 +50,18 @@ function AppContent() {
     selectedMembership
   } = useNavigation();
 
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, memberships } = useAuth();
 
   const onLogoutClick = () => handleLogout(logout);
 
   // Protect Dashboard Routes
   useEffect(() => {
     if (isLoading) return;
+
     // 1. Admin Dashboard Protection
     if (currentPage === 'adminDashboard') {
       if (!user || user.role !== 'admin') {
+        console.warn('Unauthorized access attempt to admin dashboard');
         navigateToPage('home');
       }
     }
@@ -67,9 +69,15 @@ function AppContent() {
     // 2. Advisor Dashboard Protection
     if (currentPage === 'advisorDashboard') {
       const hasGlobalRole = user && user.role === 'advisor';
-      const hasClubRole = selectedMembership && selectedMembership.role.toLowerCase() === 'advisor';
+
+      // Validate against FRESH memberships from AuthContext (not cached selectedMembership)
+      const hasClubRole = selectedMembership && memberships.some(m =>
+        m.clubId === selectedMembership.clubId &&
+        m.role.toLowerCase() === 'advisor'
+      );
 
       if (!user || (!hasGlobalRole && !hasClubRole)) {
+        console.warn('Unauthorized access attempt to advisor dashboard. Role may have been removed.');
         navigateToPage('home');
       }
     }
@@ -80,12 +88,15 @@ function AppContent() {
       const allowedGlobalRoles = ['club-secretary', 'president', 'treasurer'];
       const hasGlobalRole = user && allowedGlobalRoles.includes(user.role);
 
-      // Also check selectedMembership (club-specific role)
-      // Roles are typically Title Case, but we check flexible casing to be safe
+      // Validate against FRESH memberships from AuthContext (not cached selectedMembership)
       const allowedClubRoles = ['Secretary', 'President', 'Treasurer', 'secretary', 'president', 'treasurer'];
-      const hasClubRole = selectedMembership && allowedClubRoles.includes(selectedMembership.role);
+      const hasClubRole = selectedMembership && memberships.some(m =>
+        m.clubId === selectedMembership.clubId &&
+        allowedClubRoles.includes(m.role)
+      );
 
       if (!user || (!hasGlobalRole && !hasClubRole)) {
+        console.warn('Unauthorized access attempt to club dashboard. Role may have been removed.');
         navigateToPage('home');
       }
     }
@@ -95,7 +106,7 @@ function AppContent() {
       navigateToPage('home');
     }
 
-  }, [currentPage, user, isLoading, navigateToPage, selectedMembership]);
+  }, [currentPage, user, isLoading, navigateToPage, selectedMembership, memberships]);
 
   if (isLoading) {
     return (

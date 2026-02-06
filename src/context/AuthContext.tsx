@@ -32,16 +32,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token) {
         try {
           const response = await api.get('/auth/me');
+
+          // Use memberships from /auth/me response (fresh from database)
+          const freshMemberships = response.data.memberships || [];
+
           setAuthState({
             user: response.data,
             isAuthenticated: true,
             isLoading: false,
-            memberships: [],
-          });
-
-          // Fetch memberships asynchronously
-          getUserMemberships(response.data.email).then(memberships => {
-            setAuthState(prev => ({ ...prev, memberships }));
+            memberships: freshMemberships,
           });
         } catch (error) {
           console.error('Failed to load user', error);
@@ -65,6 +64,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     loadUser();
 
+    // Periodic refresh every 5 minutes to catch role changes
+    const refreshInterval = setInterval(() => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        loadUser();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // Refresh on window focus to catch changes made in other tabs
+    const handleFocus = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        loadUser();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+
     // Listen for 401 Unauthorized events from api interceptor
     const handleUnauthorized = () => {
       setAuthState({
@@ -78,6 +94,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     window.addEventListener('auth:unauthorized', handleUnauthorized);
 
     return () => {
+      clearInterval(refreshInterval);
+      window.removeEventListener('focus', handleFocus);
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
   }, []);
@@ -86,20 +104,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+      const { token } = response.data;
 
       localStorage.setItem('token', token);
 
+      // Fetch fresh user data with memberships from /auth/me
+      const meResponse = await api.get('/auth/me');
+      const freshMemberships = meResponse.data.memberships || [];
+
       setAuthState({
-        user,
+        user: meResponse.data,
         isAuthenticated: true,
         isLoading: false,
-        memberships: [],
-      });
-
-      // Fetch memberships
-      getUserMemberships(user.email).then(memberships => {
-        setAuthState(prev => ({ ...prev, memberships }));
+        memberships: freshMemberships,
       });
       return { success: true };
     } catch (error: any) {
@@ -151,20 +168,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await api.post('/auth/signup', { email, password, name, otp });
-      const { token, user } = response.data;
+      const { token } = response.data;
 
       localStorage.setItem('token', token);
 
+      // Fetch fresh user data with memberships from /auth/me
+      const meResponse = await api.get('/auth/me');
+      const freshMemberships = meResponse.data.memberships || [];
+
       setAuthState({
-        user,
+        user: meResponse.data,
         isAuthenticated: true,
         isLoading: false,
-        memberships: [],
-      });
-
-      // Fetch memberships (new user likely has none, but good to run for consistency or if auto-assigned)
-      getUserMemberships(user.email).then(memberships => {
-        setAuthState(prev => ({ ...prev, memberships }));
+        memberships: freshMemberships,
       });
 
       return { success: true };
@@ -204,20 +220,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await api.post('/auth/google', { credential });
-      const { token, user } = response.data;
+      const { token } = response.data;
 
       localStorage.setItem('token', token);
 
+      // Fetch fresh user data with memberships from /auth/me
+      const meResponse = await api.get('/auth/me');
+      const freshMemberships = meResponse.data.memberships || [];
+
       setAuthState({
-        user,
+        user: meResponse.data,
         isAuthenticated: true,
         isLoading: false,
-        memberships: [],
-      });
-
-      // Fetch memberships
-      getUserMemberships(user.email).then(memberships => {
-        setAuthState(prev => ({ ...prev, memberships }));
+        memberships: freshMemberships,
       });
 
       return { success: true };
@@ -246,20 +261,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await api.post('/auth/google/signup', { credential, password, name });
-      const { token, user } = response.data;
+      const { token } = response.data;
 
       localStorage.setItem('token', token);
 
+      // Fetch fresh user data with memberships from /auth/me
+      const meResponse = await api.get('/auth/me');
+      const freshMemberships = meResponse.data.memberships || [];
+
       setAuthState({
-        user,
+        user: meResponse.data,
         isAuthenticated: true,
         isLoading: false,
-        memberships: [],
-      });
-
-      // Fetch memberships
-      getUserMemberships(user.email).then(memberships => {
-        setAuthState(prev => ({ ...prev, memberships }));
+        memberships: freshMemberships,
       });
 
       return { success: true };
