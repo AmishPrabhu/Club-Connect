@@ -7,6 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import {
   getClubs,
   createClub,
+  updateClub,
   deleteClub,
   createClubSecretary,
   createClubPresident,
@@ -242,6 +243,11 @@ export default function AdminDashboard() {
   });
 
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Inline club name editing states
+  const [editingClubId, setEditingClubId] = useState<string | null>(null);
+  const [editingClubName, setEditingClubName] = useState('');
+  const [savingClubName, setSavingClubName] = useState(false);
 
   // Load data on mount and tab change
   useEffect(() => {
@@ -580,6 +586,36 @@ export default function AdminDashboard() {
     });
   };
 
+  // Inline club name editing handlers
+  const handleEditClubName = (club: DBClub) => {
+    setEditingClubId(club.id!);
+    setEditingClubName(club.name);
+  };
+
+  const handleSaveClubName = async (clubId: string) => {
+    if (!editingClubName.trim()) return;
+
+    setSavingClubName(true);
+    try {
+      const success = await updateClub(clubId, { name: editingClubName });
+      if (success) {
+        // Update local state
+        setClubs(clubs.map(c => c.id === clubId ? { ...c, name: editingClubName } : c));
+        setEditingClubId(null);
+        setEditingClubName('');
+      }
+    } catch (error) {
+      console.error('Error saving club name:', error);
+    } finally {
+      setSavingClubName(false);
+    }
+  };
+
+  const handleCancelEditClubName = () => {
+    setEditingClubId(null);
+    setEditingClubName('');
+  };
+
 
 
   const filteredClubs = clubs.filter(club =>
@@ -791,7 +827,53 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                              <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white mb-2 transition-transform duration-200 group-hover:scale-[1.02]">{club.name}</h4>
+
+                            {/* Club Name with Inline Editing */}
+                            {editingClubId === club.id ? (
+                              <div className="mb-2 space-y-2">
+                                <input
+                                  type="text"
+                                  value={editingClubName}
+                                  onChange={(e) => setEditingClubName(e.target.value)}
+                                  className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                                  placeholder="Enter club name..."
+                                  autoFocus
+                                />
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={handleCancelEditClubName}
+                                    className="flex-1 px-3 py-1.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => handleSaveClubName(club.id!)}
+                                    disabled={savingClubName || !editingClubName.trim()}
+                                    className="flex-1 px-3 py-1.5 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                                  >
+                                    {savingClubName ? (
+                                      <>
+                                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Saving...
+                                      </>
+                                    ) : (
+                                      'Save'
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 mb-2 group/name">
+                                <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white transition-transform duration-200 group-hover:scale-[1.02]">{club.name}</h4>
+                                <button
+                                  onClick={() => handleEditClubName(club)}
+                                  className="opacity-0 group-hover/name:opacity-100 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
+                                  title="Edit club name"
+                                >
+                                  <Edit className="w-4 h-4 text-slate-400 hover:text-[#002147] dark:hover:text-[#DAA520]" />
+                                </button>
+                              </div>
+                            )}
                             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
 
                             {/* Officers Grid */}
