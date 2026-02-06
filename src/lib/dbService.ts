@@ -194,29 +194,35 @@ const assignOfficerRole = async (
         }
         await updateClub(clubId, clubUpdates);
 
-        // Add ClubMember entry for multi-club support (skip for advisors as they verify via club fields)
-        if (role !== 'advisor') {
+        // Add ClubMember entry for multi-club support
+        if (true) {
             try {
-                // Ensure addClubMember is available or defined. 
-                // Since it was used before, I assume it's defined later in the file.
-                // To avoid "used before declaration" if it's a const, we can stick to using the exported function if possible, but here we are inside the module.
-                // Let's assume addClubMember is defined below and hoist or move it, OR simply rely on hoisting if it were a function declaration (but it's likely a const).
-                // A safe bet is to assume it is defined below and use it. 
-                // However, TS complains. I will check where it is defined. 
-                // Warning: The previous tool output showed `addClubMember` usage but I haven't seen its definition. 
-                // I will optimistically leave it but if it fails I will have to find it.
-                // Actually, looking at previous context, `addClubMember` is likely defined in this file.
+                // First, check if a ClubMember entry already exists for this email+club
+                const response = await api.get(`/clubs/${clubId}/members`);
+                const existingMember = response.data.find((m: any) => m.email === email);
 
-                await addClubMember(clubId, {
-                    name,
-                    email,
-                    role: roleLabel,
-                    boardType: 'main',
-                    joinedAt: new Date(),
-                    suppressEmail: true,
-                });
+                if (existingMember) {
+                    // Update existing member with new name and role
+                    await api.put(`/clubs/${clubId}/members/${existingMember._id}`, {
+                        name,
+                        role: roleLabel,
+                        boardType: 'main',
+                    });
+                    console.log('Updated existing ClubMember entry');
+                } else {
+                    // Create new member
+                    await addClubMember(clubId, {
+                        name,
+                        email,
+                        role: roleLabel,
+                        boardType: 'main',
+                        joinedAt: new Date(),
+                        suppressEmail: true,
+                    });
+                    console.log('Created new ClubMember entry');
+                }
             } catch (memberError: any) {
-                console.log('ClubMember entry might already exist:', memberError.message);
+                console.error('Error managing ClubMember entry:', memberError.message);
             }
         }
 

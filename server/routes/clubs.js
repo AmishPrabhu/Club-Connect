@@ -460,6 +460,11 @@ router.put('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
             updateData,
             { new: true }
         );
+
+        // Update member count in Club
+        const count = await ClubMember.countDocuments({ clubId: req.params.id });
+        await Club.findByIdAndUpdate(req.params.id, { members: count });
+
         res.json(updatedMember);
     } catch (error) {
         res.status(500).json({ message: error.message });
