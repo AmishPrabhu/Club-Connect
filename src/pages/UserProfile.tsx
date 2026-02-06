@@ -654,12 +654,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             {(user?.role === 'admin' || user?.role === 'advisor') && (
               <div className="flex items-center gap-2 mb-1">
                 <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold ${user.role === 'admin'
-                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
-                    : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200'
+                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
+                  : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200'
                   }`}>
                   {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                 </span>
-                {user.clubName && (
+                {user.role === 'advisor' && user.clubName && (
                   <span className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">• {user.clubName}</span>
                 )}
               </div>
@@ -669,9 +669,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             {memberships.map((m, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold ${m.role === 'president' || m.role === 'President' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200' :
-                    m.role === 'secretary' || m.role === 'Secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200' :
-                      m.role === 'treasurer' || m.role === 'Treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200' :
-                        'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                  m.role === 'secretary' || m.role === 'Secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200' :
+                    m.role === 'treasurer' || m.role === 'Treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200' :
+                      'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                   }`}>
                   {m.role === 'club-secretary' ? 'Club Secretary' : m.role.charAt(0).toUpperCase() + m.role.slice(1).replace('-', ' ')}
                 </span>
@@ -679,15 +679,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
               </div>
             ))}
 
-            {/* 3. Fallback: If no memberships found & no global role displayed above, show generic */}
-            {memberships.length === 0 && user?.role !== 'admin' && user?.role !== 'advisor' && user?.role && (
+            {/* 3. Fallback: If no memberships found & no global role displayed above, show User badge */}
+            {memberships.length === 0 && user?.role !== 'admin' && user?.role !== 'advisor' && (
               <div className="flex items-center gap-2">
                 <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
-                  {user.role === 'club-secretary' ? 'Club Secretary' : user.role.charAt(0).toUpperCase() + user.role.slice(1).replace('-', ' ')}
+                  User
                 </span>
-                {user.clubName && (
-                  <span className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">• {user.clubName}</span>
-                )}
               </div>
             )}
           </div>
