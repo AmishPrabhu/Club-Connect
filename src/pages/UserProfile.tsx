@@ -482,6 +482,12 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 </span>
               )}
             </div>
+
+            {/* Persistent camera badge indicator */}
+            <div className="absolute bottom-0 right-0 bg-[#DAA520] rounded-full p-1 sm:p-1.5 shadow-lg border-2 border-white dark:border-slate-800 pointer-events-none">
+              <Camera className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white" />
+            </div>
+
             {/* Upload button overlay */}
             <button
               onClick={() => {
