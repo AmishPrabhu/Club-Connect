@@ -32,6 +32,19 @@ export const deleteAccount = async (otp: string): Promise<{ success: boolean; me
     }
 };
 
+export const changePassword = async (
+    currentPassword: string,
+    newPassword: string
+): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const response = await api.post('/auth/change-password', { currentPassword, newPassword });
+        return { success: true, message: response.data.message };
+    } catch (error: any) {
+        console.error('Error changing password:', error);
+        return { success: false, message: error.response?.data?.message || 'Failed to change password' };
+    }
+};
+
 // Helper to map _id to id
 const mapId = (item: any) => {
     if (!item) return null;

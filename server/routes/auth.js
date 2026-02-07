@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
-import { sendPasswordResetEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendClubInvitationEmail } from '../services/emailService.js';
+import { sendPasswordResetEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendClubInvitationEmail, sendPasswordChangeEmail } from '../services/emailService.js';
 import rateLimit from 'express-rate-limit';
 import Otp from '../models/Otp.js';
 import Club from '../models/Club.js';
@@ -795,6 +795,43 @@ router.delete('/delete-account', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Delete account error:', error);
         res.status(500).json({ message: 'Failed to delete account' });
+    }
+});
+
+// Change Password
+router.post('/change-password', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current password and new password are required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+        // Hash new password and save
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        // Send confirmation email (fire and forget)
+        sendPasswordChangeEmail({ email: user.email, name: user.name }).catch(err => {
+            console.error('Failed to send password change email:', err);
+        });
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Failed to change password' });
     }
 });
 

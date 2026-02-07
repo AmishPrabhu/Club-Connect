@@ -259,4 +259,54 @@ export async function sendEventUpdateEmail({ recipientEmail, recipientName, even
     });
 }
 
-export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendTaskAssignmentEmail, sendEventUpdateEmail };
+/**
+ * Send password change confirmation email
+ */
+export async function sendPasswordChangeEmail({ email, name }) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+    const timeStr = now.toLocaleTimeString('en-IN', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short'
+    });
+
+    const resetUrl = `${process.env.FRONTEND_URL}?page=forgot-password`;
+
+    return sendEmail({
+        to: email,
+        subject: 'Password Changed - Club Connect',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #002147; padding: 20px; text-align: center;">
+                    <h1 style="color: #DAA520; margin: 0;">Club Connect</h1>
+                </div>
+                <div style="padding: 30px; background: #f9f9f9;">
+                    <h2 style="color: #002147;">Password Changed</h2>
+                    <p>Hi ${name || 'User'},</p>
+                    <p>This is to inform you that your Club-Connect account password was changed on <strong>${dateStr}</strong> at <strong>${timeStr}</strong>.</p>
+                    <p>If this was you, no further action is required.</p>
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <p style="margin: 0; color: #856404;"><strong>⚠️ If you did not make this change</strong>, please reset your password immediately and contact support.</p>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="${resetUrl}" style="background: #dc3545; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                                Reset Password Now
+                            </a>
+                        </div>
+                    </div>
+                    <p>Stay safe,<br/><strong>Team Club-Connect</strong></p>
+                </div>
+                <div style="background: #002147; padding: 15px; text-align: center;">
+                    <p style="color: #888; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Club Connect - Walchand College of Engineering</p>
+                </div>
+            </div>
+        `,
+    });
+}
+
+export default { sendEmail, sendPasswordResetEmail, sendClubInvitationEmail, sendOtpEmail, sendDeleteAccountOtpEmail, sendTaskAssignmentEmail, sendEventUpdateEmail, sendPasswordChangeEmail };
