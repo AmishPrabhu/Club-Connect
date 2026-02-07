@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Home, Users, Calendar, Bell, Menu, LogOut, Settings, Shield, User } from 'lucide-react';
+import { Home, Users, Calendar, Menu, LogOut, Settings, Shield, User } from 'lucide-react';
 import { Page } from '../types/page';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
@@ -39,7 +39,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
         { id: 'home', label: 'Home', icon: Home },
         { id: 'dashboard', label: 'Clubs', icon: Users },
         { id: 'events', label: 'Events', icon: Calendar },
-        { id: 'notifications', label: 'Alerts', icon: Bell },
+        // Alerts removed as per user request (redundant with top bell)
     ];
 
     return (
