@@ -178,6 +178,15 @@ const GRADIENT_COLORS = [
   'from-indigo-500 to-blue-500',
 ];
 
+const DEPARTMENTS = [
+  'Computer Science(CSE)',
+  'Electronics',
+  'Mechanical',
+  'Civil',
+  'Artificial Intelligence and Machine Learning(AIML)',
+  'Information Technology(IT)'
+];
+
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -200,6 +209,7 @@ export default function AdminDashboard() {
   const [showEditAdvisorModal, setShowEditAdvisorModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
+  const [showEditClubModal, setShowEditClubModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<DBClub | null>(null);
   const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
@@ -223,7 +233,9 @@ export default function AdminDashboard() {
   const [newClub, setNewClub] = useState({
     name: '',
     description: '',
-    category: 'technical' as const,
+    fullForm: '',
+    category: 'technical' as typeof CLUB_CATEGORIES[number],
+    departments: [] as string[],
     icon: '🎯',
     image: '/club-default.jpg',
   });
@@ -315,7 +327,7 @@ export default function AdminDashboard() {
 
     if (clubId) {
       setFormMessage({ type: 'success', text: 'Club created successfully!' });
-      setNewClub({ name: '', description: '', category: 'technical', icon: '🎯', image: '/club-default.jpg' });
+      setNewClub({ name: '', description: '', fullForm: '', category: 'technical', departments: [], icon: '🎯', image: '/club-default.jpg' });
       setTimeout(() => {
         setShowCreateClubModal(false);
         setFormMessage(null);
@@ -324,6 +336,44 @@ export default function AdminDashboard() {
     } else {
       setFormMessage({ type: 'error', text: 'Failed to create club' });
     }
+  };
+
+  const handleUpdateClubDetails = async () => {
+    if (!selectedClub) return;
+
+    const result = await updateClub(selectedClub.id!, {
+      name: newClub.name,
+      description: newClub.description,
+      category: newClub.category,
+      departments: newClub.departments,
+      fullForm: newClub.fullForm
+    });
+
+    if (result) {
+      setFormMessage({ type: 'success', text: 'Club details updated!' });
+      setTimeout(() => {
+        setShowEditClubModal(false);
+        setSelectedClub(null);
+        setFormMessage(null);
+        loadData();
+      }, 1500);
+    } else {
+      setFormMessage({ type: 'error', text: 'Failed to update club details' });
+    }
+  };
+
+  const openEditClubModal = (club: DBClub) => {
+    setSelectedClub(club);
+    setNewClub({
+      name: club.name,
+      description: club.description,
+      fullForm: club.fullForm || '',
+      category: club.category,
+      departments: club.departments || [],
+      icon: club.icon || '🎯',
+      image: club.image || '/club-default.jpg',
+    });
+    setShowEditClubModal(true);
   };
 
   const handleDeleteClub = (clubId: string) => {
@@ -658,6 +708,8 @@ export default function AdminDashboard() {
 
 
 
+
+
   const filteredClubs = clubs.filter(club =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     club.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -862,8 +914,15 @@ export default function AdminDashboard() {
                                   club.icon
                                 )}
                               </div>
-                              <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-wider text-slate-500">
-                                {club.category}
+                              <div className="flex flex-wrap justify-end gap-2 max-w-[calc(100%-5rem)]">
+                                <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-wider text-slate-500">
+                                  {club.category}
+                                </div>
+                                {club.departments?.map(dept => (
+                                  <div key={dept} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-full text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                    {dept.match(/\(([^)]+)\)/)?.[1] || dept}
+                                  </div>
+                                ))}
                               </div>
                             </div>
 
@@ -1024,6 +1083,12 @@ export default function AdminDashboard() {
                                 EDIT IMAGE
                               </button>
                               <button
+                                onClick={() => openEditClubModal(club)}
+                                className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                              >
+                                EDIT DETAILS
+                              </button>
+                              <button
                                 onClick={() => handleDeleteClub(club.id!)}
                                 className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors"
                               >
@@ -1176,6 +1241,17 @@ export default function AdminDashboard() {
 
               <div className="space-y-5">
                 <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Full Form (Optional)</label>
+                  <input
+                    type="text"
+                    value={newClub.fullForm}
+                    onChange={(e) => setNewClub({ ...newClub, fullForm: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g., Association of Computer Science Engineering Students"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Club Name</label>
                   <input
                     type="text"
@@ -1208,6 +1284,29 @@ export default function AdminDashboard() {
                       <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Departments</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {DEPARTMENTS.map(dept => (
+                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={newClub.departments.includes(dept)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setNewClub({ ...newClub, departments: [...newClub.departments, dept] });
+                            } else {
+                              setNewClub({ ...newClub, departments: newClub.departments.filter(d => d !== dept) });
+                            }
+                          }}
+                          className="w-4 h-4 text-[#002147] rounded border-slate-300 focus:ring-[#002147]"
+                        />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{dept}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="pt-4">
@@ -1498,6 +1597,111 @@ export default function AdminDashboard() {
                   >
                     <Edit className="w-5 h-5 text-[#DAA520]" />
                     UPDATE ADVISOR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* Edit Club Details Modal */}
+        {showEditClubModal && selectedClub && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Edit Club Details</h3>
+                  <p className="text-sm text-slate-500">Update information for {selectedClub.name}</p>
+                </div>
+                <button onClick={() => { setShowEditClubModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
+                  <p className="text-sm font-medium">{formMessage.text}</p>
+                </div>
+              )}
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Full Form (Optional)</label>
+                  <input
+                    type="text"
+                    value={newClub.fullForm || ''}
+                    onChange={(e) => setNewClub({ ...newClub, fullForm: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g., Association of Computer Science Engineering Students"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Club Name</label>
+                  <input
+                    type="text"
+                    value={newClub.name}
+                    onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    placeholder="e.g., Google Developer Student Club"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Description</label>
+                  <textarea
+                    rows={3}
+                    value={newClub.description}
+                    onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
+                    placeholder="Brief description of the club's purpose and activities..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Category</label>
+                  <select
+                    value={newClub.category}
+                    onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
+                  >
+                    {CLUB_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Departments</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {DEPARTMENTS.map(dept => (
+                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={newClub.departments.includes(dept)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setNewClub({ ...newClub, departments: [...newClub.departments, dept] });
+                            } else {
+                              setNewClub({ ...newClub, departments: newClub.departments.filter(d => d !== dept) });
+                            }
+                          }}
+                          className="w-4 h-4 text-[#002147] rounded border-slate-300 focus:ring-[#002147]"
+                        />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{dept}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleUpdateClubDetails}
+                    className="w-full bg-[#002147] hover:bg-[#00152e] text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    <Edit className="w-5 h-5 text-[#DAA520]" />
+                    UPDATE DETAILS
                   </button>
                 </div>
               </div>

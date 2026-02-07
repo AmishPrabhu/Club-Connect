@@ -71,13 +71,18 @@ export default function ClubCard({ club, onClick, isLiked = false, onToggleLike 
         {club.name}
       </h3>
       <p className="text-[11px] md:text-sm text-slate-600 dark:text-slate-300 mb-2 md:mb-4 line-clamp-2 md:min-h-[40px] flex-grow">
-        {club.description}
+        {club.fullForm || club.description}
       </p>
 
-      <div className="flex items-center gap-2 mb-2 md:mb-4">
-        <span className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 border border-blue-100 dark:border-blue-800 truncate">
+      <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
+        <span className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 truncate">
           {club.category}
         </span>
+        {club.departments?.map(dept => (
+          <span key={dept} className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 border border-blue-100 dark:border-blue-800 truncate">
+            {dept.match(/\(([^)]+)\)/)?.[1] || dept}
+          </span>
+        ))}
       </div>
 
       <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-slate-100 dark:border-slate-800 mt-auto">

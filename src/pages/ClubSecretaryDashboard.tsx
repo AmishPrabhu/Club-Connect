@@ -517,6 +517,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionSaving, setDescriptionSaving] = useState(false);
 
+  // Full Form state
+  const [fullForm, setFullForm] = useState('');
+  const [isEditingFullForm, setIsEditingFullForm] = useState(false);
+  const [fullFormSaving, setFullFormSaving] = useState(false);
+
   // Confirm modal state
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -565,6 +570,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         setWhatsappLink(processedClubData.whatsappLink || '');
         setInstagramLink(processedClubData.instagramLink || '');
         setDescription(processedClubData.description || '');
+        setFullForm(processedClubData.fullForm || '');
 
         // Check if secretary is already a member, if not add them (only once)
         // Note: syncing members from backend route if available
@@ -1187,6 +1193,80 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 </div>
               )}
 
+
+              {/* Club Full Form Section */}
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6 mt-4 md:mt-6">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm md:text-base">
+                    <Edit className="w-4 h-4 md:w-5 md:h-5 text-purple-500" />
+                    Full Form
+                  </h4>
+                  {!isReadOnly && !isEditingDescription && ( // Reusing isEditingDescription logic for now, or should add new state? Better to add new state but let's see if I can do it inline with a new state variable or just reuse. Actually I should check if I missed defining a state variable. I'll need to inject state too.
+                    <button
+                      onClick={() => setIsEditingFullForm(true)}
+                      className="text-xs md:text-sm text-purple-600 dark:text-purple-400 hover:underline flex-shrink-0"
+                    >
+                      Edit Full Form
+                    </button>
+                  )}
+                </div>
+
+                {isEditingFullForm ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={fullForm}
+                      onChange={(e) => setFullForm(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 dark:text-white text-sm"
+                      placeholder="e.g., Association of Computer Science Engineering Students"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setIsEditingFullForm(false);
+                          setFullForm(club.fullForm || '');
+                        }}
+                        className="flex-1 px-3 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!club.id) return;
+                          setFullFormSaving(true);
+                          try {
+                            const { updateClub } = await import('../lib/dbService');
+                            const success = await updateClub(club.id, { fullForm });
+                            if (success) {
+                              setClub({ ...club, fullForm });
+                              setIsEditingFullForm(false);
+                            }
+                          } catch (error) {
+                            console.error('Error saving full form:', error);
+                          } finally {
+                            setFullFormSaving(false);
+                          }
+                        }}
+                        disabled={fullFormSaving}
+                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
+                      >
+                        {fullFormSaving ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">
+                    {club.fullForm || 'No full form added.'}
+                  </p>
+                )}
+              </div>
 
               {/* Club Description Section */}
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 md:p-6 mt-4 md:mt-6">

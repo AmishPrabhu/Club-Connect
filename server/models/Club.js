@@ -15,6 +15,11 @@ const clubSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    fullForm: {
+        type: String,
+        required: false,
+        default: ''
+    },
     image: {
         type: String, // URL
         default: '',
@@ -23,6 +28,18 @@ const clubSchema = new mongoose.Schema({
         type: String,
         default: 'technical', // Default to technical for existing clubs
         enum: ['technical', 'cultural', 'sports', 'academic', 'other'],
+    },
+    departments: {
+        type: [String],
+        enum: [
+            'Computer Science(CSE)',
+            'Electronics',
+            'Mechanical',
+            'Civil',
+            'Artificial Intelligence and Machine Learning(AIML)',
+            'Information Technology(IT)'
+        ],
+        default: []
     },
     // Officers
     secretaryId: { type: String },

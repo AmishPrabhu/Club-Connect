@@ -239,6 +239,9 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           </div>
           <div className="flex-1 min-w-0 md:flex-none">
             <h1 className="text-lg md:text-4xl font-serif font-bold mb-0.5 md:mb-2 tracking-wide text-[#DAA520] truncate md:whitespace-normal">{club.name}</h1>
+            {club.fullForm && (
+              <p className="text-white/90 font-medium text-xs md:text-lg mb-1 md:mb-2 md:max-w-2xl md:mx-auto">{club.fullForm}</p>
+            )}
             <p className="text-white/80 md:max-w-2xl md:mx-auto font-light text-xs md:text-lg line-clamp-2 md:line-clamp-none">Igniting Innovation & Excellence at Walchand College of Engineering</p>
           </div>
         </div>

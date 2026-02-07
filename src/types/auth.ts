@@ -109,6 +109,8 @@ export interface DBClub {
   instagramLink?: string; // Instagram profile link
   createdAt: Date;
   updatedAt: Date;
+  departments?: string[];
+  fullForm?: string;
 }
 
 // Attachment structure for posts (Cloudinary uploads)
