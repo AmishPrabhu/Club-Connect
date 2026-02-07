@@ -147,8 +147,8 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="py-4 md:py-6 px-3 md:px-4">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="py-4 md:py-6">
           {/* Search Bar */}
           <div className="relative mb-4 md:mb-6" id="tour-search-bar">
             <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400" />

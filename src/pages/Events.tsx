@@ -142,8 +142,8 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 w-full">
-                <div className="py-4 md:py-6 px-3 md:px-4">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
+                <div className="py-4 md:py-6">
                     {/* Filters */}
                     <div className="mb-6 flex flex-col md:flex-row gap-4" id="tour-events-filter">
                         {/* Status Filter Chips */}
