@@ -70,16 +70,30 @@ export const verifyClubOfficer = async (req, res, next) => {
             console.log('[Auth Debug] Checking officer for clubId:', clubId, 'userId:', req.user.id, 'email:', req.user.email);
 
             // Check if user is an officer of THIS club by userId OR email (case-insensitive)
+            // We check BOTH the role field AND the boardType field because:
+            // 1. Role field may contain custom labels (e.g., "LEAD" instead of "President")
+            // 2. BoardType 'main' or 'executive' indicates officer status regardless of custom role label
             const officerFn = await ClubMember.findOne({
                 clubId: clubId,
-                $or: [
-                    { userId: req.user.id },
-                    { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
-                ],
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor', 'secretary', 'president', 'treasurer', 'advisor'] }
+                $and: [
+                    // User identity check (userId OR email)
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    // Officer status check (standard role names OR boardType)
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor', 'secretary', 'president', 'treasurer', 'advisor'] } },
+                            { boardType: { $in: ['main', 'executive'] } }
+                        ]
+                    }
+                ]
             });
 
-            console.log('[Auth Debug] Found officer record:', officerFn ? JSON.stringify({ email: officerFn.email, role: officerFn.role, userId: officerFn.userId }) : 'null');
+            console.log('[Auth Debug] Found officer record:', officerFn ? JSON.stringify({ email: officerFn.email, role: officerFn.role, boardType: officerFn.boardType, userId: officerFn.userId }) : 'null');
 
             if (officerFn) {
                 // If found by email but userId not set, link it now

@@ -157,12 +157,44 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
 });
 
 // Delete a task
-router.delete('/:id', verifyClubOfficer, async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        const deletedTask = await Task.findByIdAndDelete(req.params.id);
-        if (!deletedTask) {
+        // First, fetch the task to get the clubId
+        const task = await Task.findById(req.params.id);
+        if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
+
+        // Manually verify the user is an officer of this club
+        // (We can't use verifyClubOfficer middleware directly because clubId is not in route params)
+        const ClubMember = (await import('../models/ClubMember.js')).default;
+
+        const isOfficer = await ClubMember.findOne({
+            clubId: task.clubId,
+            $and: [
+                // User identity check (userId OR email)
+                {
+                    $or: [
+                        { userId: req.user.id },
+                        { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                    ]
+                },
+                // Officer status check (standard role names OR boardType)
+                {
+                    $or: [
+                        { role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor', 'secretary', 'president', 'treasurer', 'advisor'] } },
+                        { boardType: { $in: ['main', 'executive'] } }
+                    ]
+                }
+            ]
+        });
+
+        // Also allow admin to delete
+        if (!isOfficer && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied. You are not an officer of this club.' });
+        }
+
+        const deletedTask = await Task.findByIdAndDelete(req.params.id);
         res.json({ message: 'Task deleted successfully' });
     } catch (error) {
         console.error('Error deleting task:', error);

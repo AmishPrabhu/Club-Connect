@@ -269,10 +269,23 @@ router.put('/:id', verifyToken, async (req, res) => {
 
         if (!isCreator && !isAdmin) {
             // 1. Check ClubMember collection (modern way)
+            // Check both standard role names AND boardType for custom role labels
             const member = await ClubMember.findOne({
-                userId: req.user.id,
                 clubId: post.clubId,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] } },
+                            { boardType: { $in: ['main', 'executive'] } }
+                        ]
+                    }
+                ]
             });
             if (member) isClubOfficer = true;
 
@@ -347,10 +360,23 @@ router.delete('/:id', verifyToken, async (req, res) => {
 
         if (!isCreator && !isAdmin) {
             // 1. Check ClubMember collection
+            // Check both standard role names AND boardType for custom role labels
             const member = await ClubMember.findOne({
-                userId: req.user.id,
                 clubId: post.clubId,
-                role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] } },
+                            { boardType: { $in: ['main', 'executive'] } }
+                        ]
+                    }
+                ]
             });
             if (member) isClubOfficer = true;
 
@@ -400,14 +426,27 @@ router.put('/:id/budget', verifyToken, async (req, res) => {
         if (req.user.role === 'admin') {
             // Admin allowed
         } else {
+            // Check if user is treasurer OR on main board (which includes treasurer role)
             const isTreasurer = await ClubMember.findOne({
                 clubId: post.clubId,
-                userId: req.user.id,
-                role: 'Treasurer'
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $regex: /treasurer/i } },
+                            { boardType: 'main' }  // Main board members can manage budgets
+                        ]
+                    }
+                ]
             });
 
             if (!isTreasurer) {
-                return res.status(403).json({ message: 'Only the treasurer of this club can upload budgets' });
+                return res.status(403).json({ message: 'Only the treasurer or main board members of this club can upload budgets' });
             }
         }
 
@@ -451,14 +490,27 @@ router.put('/:id/budget/verify', verifyToken, async (req, res) => {
         if (req.user.role === 'admin') {
             // Admin allowed
         } else {
+            // Check if user is advisor OR on main board
             const isAdvisor = await ClubMember.findOne({
                 clubId: post.clubId,
-                userId: req.user.id,
-                role: 'Advisor'
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $regex: /advisor/i } },
+                            { boardType: 'main' }  // Main board members can verify budgets
+                        ]
+                    }
+                ]
             });
 
             if (!isAdvisor) {
-                return res.status(403).json({ message: 'Only the advisor of this club can verify budgets' });
+                return res.status(403).json({ message: 'Only the advisor or main board members of this club can verify budgets' });
             }
         }
 
@@ -494,14 +546,27 @@ router.put('/:id/certificate-template', verifyToken, async (req, res) => {
 
         // Authorization: Admin or Officer of THIS club
         if (req.user.role !== 'admin') {
+            // Check both standard role names AND boardType for custom role labels
             const isOfficer = await ClubMember.findOne({
                 clubId: post.clubId,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President'] }
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President'] } },
+                            { boardType: { $in: ['main', 'executive'] } }  // Board members can manage certificates
+                        ]
+                    }
+                ]
             });
 
             if (!isOfficer) {
-                return res.status(403).json({ message: 'Only presidents and secretaries of this club can manage certificates' });
+                return res.status(403).json({ message: 'Only presidents, secretaries, and board members of this club can manage certificates' });
             }
         }
 
@@ -551,14 +616,27 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
 
         // Authorization: Admin or Officer of THIS club
         if (req.user.role !== 'admin') {
+            // Check both standard role names AND boardType for custom role labels
             const isOfficer = await ClubMember.findOne({
                 clubId: post.clubId,
-                userId: req.user.id,
-                role: { $in: ['Secretary', 'President'] }
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President'] } },
+                            { boardType: { $in: ['main', 'executive'] } }  // Board members can update certificates
+                        ]
+                    }
+                ]
             });
 
             if (!isOfficer) {
-                return res.status(403).json({ message: 'Only presidents and secretaries of this club can update certificates' });
+                return res.status(403).json({ message: 'Only presidents, secretaries, and board members of this club can update certificates' });
             }
         }
 
