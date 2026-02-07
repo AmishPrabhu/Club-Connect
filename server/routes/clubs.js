@@ -143,6 +143,7 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
             ? [...baseUpdates, ...adminUpdates]
             : baseUpdates;
 
+        // Create the updates object
         const updates = {};
         allowedUpdates.forEach(field => {
             if (req.body[field] !== undefined) updates[field] = req.body[field];
@@ -153,56 +154,10 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
         const club = await Club.findById(req.params.id);
         if (!club) return res.status(404).json({ message: 'Club not found' });
 
-        // Enforce Single Officer Per Role Strategy:
-        // Instead of just relying on comparing old vs new email, we explicitly:
-        // 1. Demote EVERYONE who currently has the role but isn't the new officer
-        // 2. Promote the new officer (handled in the next block)
-        const rolesToCheck = ['secretary', 'president', 'treasurer', 'advisor'];
-
-        for (const role of rolesToCheck) {
-            const emailField = `${role}Email`;
-            const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
-
-            // Only run this logic if the field is actually being updated/passed in the request
-            if (req.body[emailField] !== undefined) {
-                const newEmail = req.body[emailField];
-
-                // Query to find any members in this club who hold this role BUT are not the new officer
-                // Note: If newEmail is null/empty, this effectively demotes ALL users with this role (correct for removal)
-                const query = {
-                    clubId: req.params.id,
-                    role: capitalizedRole
-                };
-
-                // If there is a new officer, exclude them from the demotion list
-                if (newEmail) {
-                    query.email = { $not: new RegExp(`^${escapeRegExp(newEmail)}$`, 'i') };
-                }
-
-                // Execute Demotion
-                const membersToDemote = await ClubMember.find(query);
-                for (const member of membersToDemote) {
-                    console.log(`[Role Cleanup] Demoting '${member.role}' ${member.email} to Member (Target is ${newEmail})`);
-                    member.role = 'Member';
-                    member.boardType = 'member'; // Reset board type if needed
-                    await member.save();
-
-                    // Also sync their global user role if necessary
-                    const user = await User.findOne({ email: member.email });
-                    if (user) {
-                        // Check if they hold office elsewhere before hard resetting?
-                        // Ideally yes, but for now we trust the global sync process or just reset to 'club-member'.
-                        // If they were 'president', 'secretary', etc., and are being removed here, downgrade them.
-                        // We check if their CURRENT global role attempts to be an officer role.
-                        if (['president', 'secretary', 'treasurer', 'advisor', 'club-secretary'].includes(user.role)) {
-                            user.role = 'club-member';
-                            await user.save();
-                            console.log(`[Role Cleanup] Global role for ${user.email} downgraded to 'club-member'`);
-                        }
-                    }
-                }
-            }
-        }
+        // Logic to support Multiple Officers Per Role:
+        // We do NOT demote existing officers when a new one is added.
+        // The new officer will be added/promoted in the auto-create block below.
+        // Existing officers remain until explicitly removed.
 
         const updatedClub = await Club.findByIdAndUpdate(req.params.id, updates, { new: true });
         if (!updatedClub) return res.status(404).json({ message: 'Club not found' });
@@ -472,6 +427,7 @@ router.put('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
 });
 
 // Remove member (Protected - Club Officer)
+// Remove member (Protected - Club Officer)
 router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
     try {
         const memberToDelete = await ClubMember.findById(req.params.memberId);
@@ -480,18 +436,94 @@ router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
         }
 
         const memberEmail = memberToDelete.email;
-        await ClubMember.findByIdAndDelete(req.params.memberId);
+        const memberRole = memberToDelete.role;
 
-        // Auto-downgrade role if user is no longer in any clubs
-        const user = await User.findOne({ email: memberEmail });
-        if (user && user.role === 'club-member') {
-            // Check if user is still in any other clubs
-            const otherMemberships = await ClubMember.countDocuments({ email: memberEmail });
+        // Logic Change: If President, demote to Member instead of deleting
+        // For other roles, proceed with deletion
+        if (memberRole === 'President') {
+            memberToDelete.role = 'Member';
+            memberToDelete.boardType = 'member';
+            memberToDelete.name = memberToDelete.name || 'Member'; // Ensure name exists
+            await memberToDelete.save();
+            console.log(`[Club Delete] Demoted President ${memberEmail} to Member`);
+        } else {
+            await ClubMember.findByIdAndDelete(req.params.memberId);
+            console.log(`[Club Delete] Removed member ${memberEmail} (${memberRole})`);
+        }
 
-            if (otherMemberships === 0) {
-                // No longer in any clubs, downgrade to 'user'
-                user.role = 'user';
+        // Check and clear officer fields in Club document if the removed/demoted member was an officer
+        const club = await Club.findById(req.params.id);
+        if (club) {
+            let updates = {};
+            // We use case-insensitive comparison for email just in case
+            const isMatch = (email1, email2) => email1 && email2 && email1.toLowerCase() === email2.toLowerCase();
+
+            if (isMatch(club.secretaryEmail, memberEmail)) {
+                const anotherSec = await ClubMember.findOne({ clubId: req.params.id, role: 'Secretary' });
+                updates.secretaryEmail = anotherSec ? anotherSec.email : null;
+                updates.secretaryId = anotherSec ? anotherSec.userId : null;
+            }
+            if (isMatch(club.presidentEmail, memberEmail)) {
+                // We just demoted the president (or helper deleted if multiple?), so we must clear the Club's president field
+                updates.presidentEmail = null;
+                updates.presidentId = null;
+            }
+            if (isMatch(club.treasurerEmail, memberEmail)) {
+                const anotherTreas = await ClubMember.findOne({ clubId: req.params.id, role: 'Treasurer' });
+                updates.treasurerEmail = anotherTreas ? anotherTreas.email : null;
+                updates.treasurerId = anotherTreas ? anotherTreas.userId : null;
+            }
+            if (isMatch(club.advisorEmail, memberEmail)) {
+                updates.advisorEmail = null;
+                updates.advisorName = null;
+                updates.advisorId = null;
+            }
+
+            if (Object.keys(updates).length > 0) {
+                await Club.findByIdAndUpdate(req.params.id, updates);
+            }
+        }
+
+        // Auto-downgrade global role if user is no longer in any clubs (or role changed)
+        // Recalculate and update user role based on remaining memberships
+        const user = await User.findOne({ email: { $regex: new RegExp(`^${escapeRegExp(memberEmail)}$`, 'i') } });
+        if (user && user.role !== 'admin') {
+            // Check all memberships for this user
+            // Note: If demoted, the 'Member' record still exists, so they are still a 'club-member' at least
+            const remainingMemberships = await ClubMember.find({
+                email: { $regex: new RegExp(`^${escapeRegExp(memberEmail)}$`, 'i') }
+            });
+
+            let newRole = 'user';
+
+            if (remainingMemberships.length > 0) {
+                // Default base role if any membership exists
+                newRole = 'club-member';
+
+                // Determine highest role held across all clubs
+                const roles = remainingMemberships.map(m => m.role.toLowerCase());
+                const boardTypes = remainingMemberships.map(m => m.boardType);
+
+                const hasAdvisor = roles.includes('advisor');
+                const hasPresident = roles.includes('president');
+                const hasTreasurer = roles.includes('treasurer');
+
+                // Secretary or any main/executive board member gets officer access
+                const hasOfficerAccess = roles.includes('secretary') ||
+                    boardTypes.includes('main') ||
+                    boardTypes.includes('executive');
+
+                if (hasAdvisor) newRole = 'advisor';
+                else if (hasPresident) newRole = 'president';
+                else if (hasTreasurer) newRole = 'treasurer';
+                else if (hasOfficerAccess) newRole = 'club-secretary';
+            }
+
+            // Only update if role actually changes
+            if (user.role !== newRole) {
+                user.role = newRole;
                 await user.save();
+                console.log(`[Club Delete] Synced global role for ${memberEmail} to ${newRole}`);
             }
         }
 
@@ -499,7 +531,8 @@ router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
         const count = await ClubMember.countDocuments({ clubId: req.params.id });
         await Club.findByIdAndUpdate(req.params.id, { members: count });
 
-        res.json({ message: 'Member removed' });
+        const message = memberRole === 'President' ? 'President demoted to member' : 'Member removed';
+        res.json({ message });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

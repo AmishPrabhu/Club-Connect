@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send, Image as ImageIcon, Menu, Settings2 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
-import { DBClub, DBPost, DBNotification } from '../types/auth';
+import { DBClub, DBPost, DBNotification, ClubMember } from '../types/auth';
 import ConfirmModal from '../components/ConfirmModal';
 import {
   getClubs,
@@ -14,6 +14,8 @@ import {
   createClubTreasurer,
   createClubAdvisor,
   removeClubOfficer,
+  getClubMembers,
+  removeClubMember,
 
   getPosts,
   deletePost,
@@ -49,7 +51,7 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
       {
         cloudName: cloudName,
         uploadPreset: uploadPreset,
-        folder: `club_profiles/${clubId}`,
+        folder: `club_profiles / ${clubId} `,
         sources: ['local', 'camera', 'url'],
         multiple: false,
         maxFiles: 1,
@@ -186,6 +188,7 @@ export default function AdminDashboard() {
   const [clubs, setClubs] = useState<DBClub[]>([]);
   const [posts, setPosts] = useState<DBPost[]>([]);
   const [notifications, setNotifications] = useState<DBNotification[]>([]);
+  const [clubMembers, setClubMembers] = useState<Record<string, ClubMember[]>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -260,6 +263,16 @@ export default function AdminDashboard() {
       if (activeTab === 'clubs' || activeTab === 'overview') {
         const clubsData = await getClubs();
         setClubs(clubsData);
+
+        // Load members for each club
+        const membersData: Record<string, ClubMember[]> = {};
+        for (const club of clubsData) {
+          if (club.id) {
+            const members = await getClubMembers(club.id);
+            membersData[club.id] = members;
+          }
+        }
+        setClubMembers(membersData);
       }
       if (activeTab === 'posts' || activeTab === 'overview') {
         const postsData = await getPosts();
@@ -274,6 +287,14 @@ export default function AdminDashboard() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to get officers by role
+  const getOfficersByRole = (clubId: string, role: string): ClubMember[] => {
+    const members = clubMembers[clubId] || [];
+    return members.filter(m =>
+      m.role.toLowerCase().trim() === role.toLowerCase().trim()
+    );
   };
 
   // Club handlers
@@ -586,6 +607,25 @@ export default function AdminDashboard() {
     });
   };
 
+  const handleRemoveMember = async (clubId: string, memberId: string, memberName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Officer',
+      message: `Are you sure you want to remove ${memberName} from their officer role? This action cannot be undone.`,
+      type: 'danger',
+      variant: 'confirm',
+      onConfirm: async () => {
+        const success = await removeClubMember(clubId, memberId);
+        if (success) {
+          setFormMessage({ type: 'success', text: 'Officer removed successfully' });
+          loadData();
+        } else {
+          setFormMessage({ type: 'error', text: 'Failed to remove officer' });
+        }
+      },
+    });
+  };
+
   // Inline club name editing handlers
   const handleEditClubName = (club: DBClub) => {
     setEditingClubId(club.id!);
@@ -725,9 +765,9 @@ export default function AdminDashboard() {
                     className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-2 text-left md:text-center ${isActive
                       ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
                       : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
+                      } `}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''} `} />
                     {tab.label}
                   </button>
                 );
@@ -760,7 +800,7 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 gap-4">
                       {posts.slice(0, 5).map((post) => (
                         <div key={post.id} className="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
-                          <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                          <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'} `}>
                             {post.type === 'event' ? <Calendar className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
                           </div>
                           <div className="flex-1">
@@ -811,7 +851,7 @@ export default function AdminDashboard() {
                       {filteredClubs.map((club) => (
                         <div key={club.id} className="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 group">
                           {/* Decorative Top Border */}
-                          <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'}`}></div>
+                          <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'} `}></div>
 
                           <div className="p-6">
                             <div className="flex items-start justify-between mb-4">
@@ -877,41 +917,92 @@ export default function AdminDashboard() {
                             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
 
                             {/* Officers Grid */}
-                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 mb-6 space-y-2 border border-slate-100 dark:border-slate-700">
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-bold text-slate-400 uppercase">Secretary</span>
-                                {club.secretaryEmail ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[100px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
-                                    <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                  </div>
+                            {/* Officers Grid */}
+                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 mb-6 space-y-4 border border-slate-100 dark:border-slate-700">
+
+                              {/* Secretary List */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                  <span className="font-bold text-slate-400 uppercase">Secretaries</span>
+                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Secretary">
+                                    <Plus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                {getOfficersByRole(club.id!, 'secretary').length > 0 ? (
+                                  getOfficersByRole(club.id!, 'secretary').map(officer => (
+                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                      <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ))
                                 ) : (
-                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
+                                  club.secretaryEmail ? (
+                                    <div className="flex justify-between items-center text-xs pl-1">
+                                      <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                      <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ) : (
+                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                  )
                                 )}
                               </div>
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-bold text-slate-400 uppercase">President</span>
-                                {club.presidentEmail ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[100px]" title={club.presidentEmail}>{club.presidentEmail}</span>
-                                    <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                  </div>
+
+                              {/* President List */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                  <span className="font-bold text-slate-400 uppercase">Presidents</span>
+                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add President">
+                                    <Plus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                {getOfficersByRole(club.id!, 'president').length > 0 ? (
+                                  getOfficersByRole(club.id!, 'president').map(officer => (
+                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                      <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ))
                                 ) : (
-                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
+                                  club.presidentEmail ? (
+                                    <div className="flex justify-between items-center text-xs pl-1">
+                                      <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                      <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ) : (
+                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                  )
                                 )}
                               </div>
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-bold text-slate-400 uppercase">Treasurer</span>
-                                {club.treasurerEmail ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[100px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
-                                    <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                  </div>
+
+                              {/* Treasurer List */}
+                              <div className="space-y-1">
+                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                  <span className="font-bold text-slate-400 uppercase">Treasurers</span>
+                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Treasurer">
+                                    <Plus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                {getOfficersByRole(club.id!, 'treasurer').length > 0 ? (
+                                  getOfficersByRole(club.id!, 'treasurer').map(officer => (
+                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                      <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ))
                                 ) : (
-                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
+                                  club.treasurerEmail ? (
+                                    <div className="flex justify-between items-center text-xs pl-1">
+                                      <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                      <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ) : (
+                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                  )
                                 )}
                               </div>
-                              <div className="flex justify-between items-center text-xs border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
+
+                              {/* Faculty Advisor - keep single */}
+                              <div className="flex justify-between items-center text-xs pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
                                 <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
                                 {club.advisorEmail ? (
                                   <div className="flex items-center gap-2">
@@ -977,7 +1068,7 @@ export default function AdminDashboard() {
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.type === 'event'
                                   ? 'bg-blue-100 text-blue-800'
                                   : 'bg-purple-100 text-purple-800'
-                                  }`}>
+                                  } `}>
                                   {post.type}
                                 </span>
                               </td>
@@ -1032,7 +1123,7 @@ export default function AdminDashboard() {
                           className={`p-5 rounded-xl border-l-4 ${notification.read
                             ? 'bg-white dark:bg-slate-800 border-slate-300'
                             : 'bg-blue-50 dark:bg-blue-900/10 border-[#002147] shadow-sm'
-                            }`}
+                            } `}
                         >
                           <div className="flex items-start justify-between">
                             <div>
@@ -1075,8 +1166,8 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-                  <div className={`mt-0.5 p-1 rounded-full ${formMessage.type === 'success' ? 'bg-green-200' : 'bg-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
+                  <div className={`mt-0.5 p-1 rounded-full ${formMessage.type === 'success' ? 'bg-green-200' : 'bg-red-200'} `}>
                     {formMessage.type === 'success' ? <UserPlus className="w-3 h-3" /> : <X className="w-3 h-3" />}
                   </div>
                   <p className="text-sm font-medium">{formMessage.text}</p>
@@ -1148,7 +1239,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p - 4 rounded - xl mb - 6 flex items - start gap - 3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
@@ -1203,7 +1294,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
@@ -1258,7 +1349,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
@@ -1313,7 +1404,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
@@ -1372,7 +1463,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
@@ -1429,7 +1520,7 @@ export default function AdminDashboard() {
               </div>
 
               {formMessage && (
-                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl mb-6 flex items-start gap-3 ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'} `}>
                   <p className="text-sm font-medium">{formMessage.text}</p>
                 </div>
               )}
