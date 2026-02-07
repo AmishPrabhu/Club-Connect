@@ -818,7 +818,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               {club.name}
             </h1>
             <p className="text-xs md:text-base text-slate-500 dark:text-slate-400 font-medium truncate">
-              {activeRole === 'treasurer' ? 'Treasurer' : activeRole === 'president' ? 'President' : 'Secretary'} Dashboard • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
+              {selectedMembership?.role || 'Dashboard'} • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
             </p>
           </div>
         </div>

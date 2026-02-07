@@ -36,6 +36,7 @@ export interface ClubMembership {
   clubIcon?: string;
   clubColor?: string;
   role: string; // 'Secretary', 'President', 'Treasurer', 'Advisor', 'Member', etc.
+  officerRole?: 'secretary' | 'president' | 'treasurer' | null; // Officer status from Club's email fields
   joinedAt: Date;
 }
 

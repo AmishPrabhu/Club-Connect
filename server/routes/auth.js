@@ -387,7 +387,15 @@ router.get('/me', verifyToken, async (req, res) => {
 
         // Fetch club details for each membership
         const membershipDetails = await Promise.all(memberships.map(async (membership) => {
-            const club = await Club.findById(membership.clubId).select('name image slug');
+            const club = await Club.findById(membership.clubId).select('name image slug secretaryEmail presidentEmail treasurerEmail');
+
+            // Determine officer role based on Club's stored emails (not ClubMember role)
+            const userEmailLower = user.email.toLowerCase();
+            let officerRole = null;
+            if (club?.secretaryEmail?.toLowerCase() === userEmailLower) officerRole = 'secretary';
+            else if (club?.presidentEmail?.toLowerCase() === userEmailLower) officerRole = 'president';
+            else if (club?.treasurerEmail?.toLowerCase() === userEmailLower) officerRole = 'treasurer';
+
             return {
                 clubId: membership.clubId,
                 clubName: club?.name || 'Unknown Club',
@@ -395,7 +403,8 @@ router.get('/me', verifyToken, async (req, res) => {
                 clubSlug: club?.slug || '',
                 role: membership.role,
                 boardType: membership.boardType,
-                email: membership.email
+                email: membership.email,
+                officerRole // Added: officer status based on Club's email fields
             };
         }));
 

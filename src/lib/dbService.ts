@@ -622,46 +622,38 @@ export const getUserMemberships = async (email: string): Promise<any[]> => {
             console.warn("Failed to fetch remote memberships:", err);
         }
 
-        // 2. Check for officer roles (legacy/direct Club association)
+        // 2. Check for officer roles (from Club's email fields) and merge into existing memberships
         const clubs = await getClubs();
         clubs.forEach(club => {
-            // Check if already added (avoid duplicates)
-            if (memberships.find(m => m.clubId === club.id)) return;
+            // Determine officer role based on Club's stored emails
+            let officerRole: string | null = null;
+            if (club.secretaryEmail?.toLowerCase() === email.toLowerCase()) {
+                officerRole = 'secretary';
+            } else if (club.presidentEmail?.toLowerCase() === email.toLowerCase()) {
+                officerRole = 'president';
+            } else if (club.treasurerEmail?.toLowerCase() === email.toLowerCase()) {
+                officerRole = 'treasurer';
+            } else if (club.advisorEmail?.toLowerCase() === email.toLowerCase()) {
+                officerRole = 'advisor';
+            }
 
-            if (club.secretaryEmail === email) {
+            if (!officerRole) return; // User is not an officer for this club
+
+            // Check if membership already exists
+            const existingMembership = memberships.find(m => m.clubId === club.id);
+
+            if (existingMembership) {
+                // Merge officerRole into existing membership
+                existingMembership.officerRole = officerRole;
+            } else {
+                // Add new membership with officer role
                 memberships.push({
                     clubId: club.id,
                     clubName: club.name,
                     clubImage: club.image,
                     clubIcon: '🏛️',
-                    role: 'secretary',
-                    joinedAt: club.updatedAt
-                });
-            } else if (club.presidentEmail === email) {
-                memberships.push({
-                    clubId: club.id,
-                    clubName: club.name,
-                    clubImage: club.image,
-                    clubIcon: '🏛️',
-                    role: 'president',
-                    joinedAt: club.updatedAt
-                });
-            } else if (club.treasurerEmail === email) {
-                memberships.push({
-                    clubId: club.id,
-                    clubName: club.name,
-                    clubImage: club.image,
-                    clubIcon: '🏛️',
-                    role: 'treasurer',
-                    joinedAt: club.updatedAt
-                });
-            } else if (club.advisorEmail === email) {
-                memberships.push({
-                    clubId: club.id,
-                    clubName: club.name,
-                    clubImage: club.image,
-                    clubIcon: '🏛️',
-                    role: 'advisor',
+                    role: officerRole, // Use officer role as the display role
+                    officerRole: officerRole,
                     joinedAt: club.updatedAt
                 });
             }

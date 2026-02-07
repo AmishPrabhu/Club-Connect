@@ -77,10 +77,14 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
     useEffect(() => {
         if (!selectedMembership) return;
 
-        // Check if the selected membership still exists in fresh data
-        const isValid = memberships.some(m =>
-            m.clubId === selectedMembership.clubId &&
-            m.role === selectedMembership.role
+        // Check if the selected membership's club still exists in fresh data
+        // User is valid if they have a membership for this club AND either:
+        // - Their ClubMember role is an officer role, OR
+        // - They have an officerRole (assigned by admin via Club's email fields)
+        const officerRoles = ['secretary', 'president', 'treasurer', 'advisor'];
+        const clubMembership = memberships.find(m => m.clubId === selectedMembership.clubId);
+        const isValid = clubMembership && (
+            officerRoles.includes(clubMembership.role?.toLowerCase()) || clubMembership.officerRole
         );
 
         if (!isValid) {

@@ -26,9 +26,10 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
             try {
                 const data = await getUserMemberships(user.email);
                 // Filter to only officer roles (Secretary, President, Treasurer, Advisor)
+                // Also include memberships where officerRole is set (assigned by admin via Club's email fields)
                 const officerRoles = ['secretary', 'president', 'treasurer', 'advisor'];
                 const officerMemberships = data.filter((m: any) =>
-                    officerRoles.includes(m.role?.toLowerCase())
+                    officerRoles.includes(m.role?.toLowerCase()) || m.officerRole
                 );
 
                 // If user is admin, add a "fake" membership for Admin Dashboard
