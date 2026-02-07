@@ -26,6 +26,7 @@ router.get('/memberships', verifyToken, async (req, res) => {
                 clubImage: club.image,
                 clubIcon: '🏛️',
                 role: m.role,
+                boardType: m.boardType, // Include boardType for dashboard access control
                 joinedAt: m.joinedAt,
 
                 // Add styling props that frontend might expect

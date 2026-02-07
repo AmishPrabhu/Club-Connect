@@ -89,11 +89,11 @@ function AppContent() {
       const hasGlobalRole = user && allowedGlobalRoles.includes(user.role);
 
       // Validate against FRESH memberships from AuthContext (not cached selectedMembership)
-      // Check both ClubMember.role AND officerRole (from Club's email fields)
+      // Check both ClubMember.role AND officerRole (from Club's email fields) AND boardType
       const allowedClubRoles = ['Secretary', 'President', 'Treasurer', 'secretary', 'president', 'treasurer'];
       const hasClubRole = selectedMembership && memberships.some(m =>
         m.clubId === selectedMembership.clubId &&
-        (allowedClubRoles.includes(m.role) || m.officerRole)
+        (allowedClubRoles.includes(m.role) || m.officerRole || m.boardType === 'main' || m.boardType === 'executive')
       );
 
       if (!user || (!hasGlobalRole && !hasClubRole)) {
