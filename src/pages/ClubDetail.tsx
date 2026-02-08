@@ -264,8 +264,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   <Users className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0 overflow-hidden">
-                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Members</p>
-                  <p className="text-sm md:text-2xl font-bold text-[#002147] dark:text-white">{club.members}</p>
+                  <p className="text-[9px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Members</p>
+                  <p className="text-sm md:text-xl font-bold text-[#002147] dark:text-white">{club.members}</p>
                 </div>
               </div>
 
@@ -275,8 +275,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   <Calendar className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0 overflow-hidden">
-                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
-                  <p className="text-sm md:text-2xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => p.date && new Date(p.date!).getTime() >= new Date().getTime()).length}</p>
+                  <p className="text-[9px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Events</p>
+                  <p className="text-sm md:text-xl font-bold text-[#DAA520] dark:text-white">{posts.filter(p => p.date && new Date(p.date!).getTime() >= new Date().getTime()).length}</p>
                 </div>
               </div>
 
@@ -285,8 +285,8 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                   <MapPin className="w-3.5 h-3.5 md:w-6 md:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
-                  <p className="text-sm md:text-2xl font-bold text-slate-900 dark:text-white capitalize truncate">{club.category}</p>
+                  <p className="text-[9px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</p>
+                  <p className="text-sm md:text-xl font-bold text-slate-900 dark:text-white capitalize truncate">{club.category}</p>
                 </div>
               </div>
             </div>

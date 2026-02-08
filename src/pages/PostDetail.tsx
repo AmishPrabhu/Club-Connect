@@ -140,7 +140,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
     const totalPhotos = (post.attachments?.length || 0) + (post.eventPhotos?.length || 0);
 
     return (
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
             <button
                 onClick={onBack}
                 className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors mb-6 font-medium"
@@ -167,7 +167,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                     </div>
                 )}
 
-                <div className="p-8">
+                <div className="px-4 py-6 sm:p-8">
                     {/* Header */}
                     <div className="flex flex-col md:flex-row items-start justify-between mb-6 gap-4">
                         <div className="flex-1 w-full">
