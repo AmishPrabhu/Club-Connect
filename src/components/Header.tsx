@@ -213,13 +213,25 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                       </button>
                     )}
 
-                    {(user.role === 'advisor' || memberships.some(m => m.role.toLowerCase() === 'advisor')) && (
+                    {/* Advisor Dashboard - Show if user has advisor role in roles array OR primary role OR membership */}
+                    {(user.role === 'advisor' || user.roles?.includes('advisor') || memberships.some(m => m.role.toLowerCase() === 'advisor')) && (
                       <button
                         onClick={() => { onNavigate('advisorDashboard'); setShowUserMenu(false); }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
                       >
                         <div className="p-1.5 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"><Shield className="w-4 h-4" /></div>
                         <span>Advisor Dashboard</span>
+                      </button>
+                    )}
+
+                    {/* Teacher Dashboard - Show if user has teacher role in roles array OR primary role */}
+                    {(user.role === 'teacher' || user.roles?.includes('teacher')) && (
+                      <button
+                        onClick={() => { onNavigate('teacherDashboard'); setShowUserMenu(false); }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
+                      >
+                        <div className="p-1.5 rounded-md bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400"><Shield className="w-4 h-4" /></div>
+                        <span>Teacher Dashboard</span>
                       </button>
                     )}
 

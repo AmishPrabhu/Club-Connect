@@ -23,9 +23,12 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'club-member', 'admin', 'secretary', 'president', 'treasurer', 'advisor', 'club-secretary', 'student', 'cabinet-member'],
+        enum: ['user', 'club-member', 'admin', 'secretary', 'president', 'treasurer', 'advisor', 'club-secretary', 'student', 'cabinet-member', 'teacher'],
         default: 'user',
     },
+    managedClubs: [{
+        type: String, // Club IDs that teachers manage/monitor
+    }],
     clubId: {
         type: String,
         default: null,
@@ -61,6 +64,19 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
+    roles: [{
+        type: String,
+        enum: ['user', 'club-member', 'admin', 'secretary', 'president', 'treasurer', 'advisor', 'club-secretary', 'student', 'cabinet-member', 'teacher'],
+    }]
 });
+
+// Helper method to check if user has a specific role
+userSchema.methods.hasRole = function (roleName) {
+    if (this.roles && this.roles.length > 0) {
+        return this.roles.includes(roleName);
+    }
+    // Fallback to single role field for backward compatibility
+    return this.role === roleName;
+};
 
 export default mongoose.model('User', userSchema);

@@ -257,7 +257,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
     // Check if user can export (secretary or president) - handle both original role names and lowercase from membership
     const roleLC = userRole?.toLowerCase();
-    const canExport = roleLC === 'club-secretary' || roleLC === 'president' || roleLC === 'secretary';
+    const canExport = roleLC === 'club-secretary' || roleLC === 'president' || roleLC === 'secretary' || roleLC === 'teacher' || roleLC === 'advisor';
 
     return (
         <div className="space-y-6">

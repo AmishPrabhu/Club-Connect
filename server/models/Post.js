@@ -151,6 +151,24 @@ const postSchema = new mongoose.Schema({
         },
     },
 
+    // Event report fields
+    reportUrl: {
+        type: String, // URL of uploaded report document/PDF
+        default: null,
+    },
+    reportSubmittedBy: {
+        type: String, // User ID of officer who submitted report
+        default: null,
+    },
+    reportSubmittedByName: {
+        type: String, // Name of officer who submitted report
+        default: null,
+    },
+    reportSubmittedAt: {
+        type: Date,
+        default: null,
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,

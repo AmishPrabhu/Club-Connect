@@ -664,6 +664,69 @@ router.patch('/:id/rsvps/:rsvpId/certificate', verifyToken, async (req, res) => 
     }
 });
 
+// ==================== REPORT SUBMISSION ROUTE ====================
+
+// Submit event report (President/Secretary only)
+router.put('/:id/report', verifyToken, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Event not found' });
+
+        // Only allow event type posts to have reports
+        if (post.type !== 'event') {
+            return res.status(400).json({ message: 'Reports can only be submitted for events' });
+        }
+
+        // Authorization: Admin or President/Secretary of THIS club
+        if (req.user.role !== 'admin') {
+            // Check if user is President or Secretary (not treasurer, not advisor)
+            const isAuthorized = await ClubMember.findOne({
+                clubId: post.clubId,
+                $and: [
+                    {
+                        $or: [
+                            { userId: req.user.id },
+                            { email: { $regex: new RegExp(`^${req.user.email}$`, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { role: { $in: ['Secretary', 'President', 'secretary', 'president'] } },
+                            { boardType: { $in: ['main', 'executive'] } }  // Board members can submit reports
+                        ]
+                    }
+                ]
+            });
+
+            if (!isAuthorized) {
+                return res.status(403).json({ message: 'Only presidents and secretaries can submit event reports' });
+            }
+        }
+
+        const { reportUrl } = req.body;
+        if (!reportUrl) {
+            return res.status(400).json({ message: 'Report URL is required' });
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.id,
+            {
+                reportUrl,
+                reportSubmittedBy: req.user.id,
+                reportSubmittedByName: req.user.name || 'Club Officer',
+                reportSubmittedAt: new Date(),
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+
+        res.json(updatedPost);
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 /**
  * Send event update emails to all attendees
  */

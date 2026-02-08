@@ -22,6 +22,7 @@ import EventManagement from './pages/EventManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import ClubSecretaryDashboard from './pages/ClubSecretaryDashboard';
 import AdvisorDashboard from './pages/AdvisorDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
 import SetupAdmin from './pages/SetupAdmin';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 
@@ -69,6 +70,7 @@ function AppContent() {
     // 2. Advisor Dashboard Protection
     if (currentPage === 'advisorDashboard') {
       const hasGlobalRole = user && user.role === 'advisor';
+      const hasRoleInArray = user && user.roles?.includes('advisor');
 
       // Validate against FRESH memberships from AuthContext (not cached selectedMembership)
       const hasClubRole = selectedMembership && memberships.some(m =>
@@ -76,7 +78,7 @@ function AppContent() {
         m.role.toLowerCase() === 'advisor'
       );
 
-      if (!user || (!hasGlobalRole && !hasClubRole)) {
+      if (!user || (!hasGlobalRole && !hasRoleInArray && !hasClubRole)) {
         console.warn('Unauthorized access attempt to advisor dashboard. Role may have been removed.');
         navigateToPage('home');
       }
@@ -98,6 +100,15 @@ function AppContent() {
 
       if (!user || (!hasGlobalRole && !hasClubRole)) {
         console.warn('Unauthorized access attempt to club dashboard. Role may have been removed.');
+        navigateToPage('home');
+      }
+    }
+
+    // 4. Teacher Dashboard Protection
+    if (currentPage === 'teacherDashboard') {
+      const hasTeacherRole = user && (user.role === 'teacher' || user.roles?.includes('teacher'));
+      if (!hasTeacherRole) {
+        console.warn('Unauthorized access attempt to teacher dashboard');
         navigateToPage('home');
       }
     }
@@ -179,6 +190,10 @@ function AppContent() {
 
       {currentPage === 'advisorDashboard' && (
         <AdvisorDashboard onNavigate={navigateToPage} onNavigateToPost={navigateToPost} />
+      )}
+
+      {currentPage === 'teacherDashboard' && (
+        <TeacherDashboard />
       )}
 
       {currentPage === 'eventManagement' && selectedManagementEventId && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ExcelJS from 'exceljs';
-import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, UserPlus, XCircle, Award, Upload, Download, Search } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, MapPin, AlignLeft, Link as LinkIcon, Users, Plus, Trash2, CheckCircle, UserPlus, XCircle, Award, Upload, Download, Search, FileText } from 'lucide-react';
 import { DBPost, User, EventRSVP, CertificateNamePosition } from '../types/auth';
 import { getPosts, updatePost, getClubMembers, getEventRSVPs, updateParticipantAttendance, addEventParticipant, deleteEventParticipant, updateEventBudget, getClubs, saveCertificateTemplate, updateParticipantCertificate } from '../lib/dbService';
 import { useAuth } from '../context/AuthContext';
@@ -39,14 +39,14 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     // Initialize active tab from URL or default to 'details'
-    const validTabs = ['details', 'participants', 'budget', 'certificates'];
+    const validTabs = ['details', 'participants', 'budget', 'certificates', 'report'];
     // Lazy initialization for state
-    const [activeTab, setActiveTabState] = useState<'details' | 'participants' | 'budget' | 'certificates'>(() => {
+    const [activeTab, setActiveTabState] = useState<'details' | 'participants' | 'budget' | 'certificates' | 'report'>(() => {
         const tabParam = getQueryParam('tab');
         return (tabParam && validTabs.includes(tabParam)) ? (tabParam as any) : 'details';
     });
 
-    const setActiveTab = (tab: 'details' | 'participants' | 'budget' | 'certificates') => {
+    const setActiveTab = (tab: 'details' | 'participants' | 'budget' | 'certificates' | 'report') => {
         setActiveTabState(tab);
         updateQueryParam('tab', tab);
     };
@@ -454,6 +454,17 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             {eventRsvps.filter(r => r.certificateUrl).length}
                                         </span>
                                     )}
+                                </button>
+
+                                <button
+                                    onClick={() => setActiveTab('report')}
+                                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 md:px-6 md:py-4 font-bold transition-all whitespace-nowrap text-sm md:text-base ${activeTab === 'report'
+                                        ? 'text-[#002147] dark:text-white border-b-4 border-[#002147]'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
+                                        }`}
+                                >
+                                    <FileText className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'report' ? 'text-[#DAA520]' : ''}`} />
+                                    Report
                                 </button>
                             </>
                         )}
@@ -1674,6 +1685,109 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Report Tab */}
+                {activeTab === 'report' && (
+                    <div className="space-y-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-[#DAA520]" />
+                                Event Report
+                            </h2>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                                Upload the final report for this event. This report will be reviewed by the faculty advisor.
+                            </p>
+
+                            {/* Current Report Status */}
+                            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current Status</p>
+                                        {(post as any).reportUrl ? (
+                                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
+                                                ✓ Report Submitted
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                                No Report Uploaded
+                                            </span>
+                                        )}
+                                    </div>
+                                    {(post as any).reportUrl && (
+                                        <a
+                                            href={(post as any).reportUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-2"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            View Report
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Upload Button */}
+                            <button
+                                onClick={() => {
+                                    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                                    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+                                    if (!window.cloudinary || !cloudName || !uploadPreset) {
+                                        setMessage({ type: 'error', text: 'Upload service not available.' });
+                                        return;
+                                    }
+
+                                    const widget = window.cloudinary.createUploadWidget({
+                                        cloudName,
+                                        uploadPreset,
+                                        folder: `reports/${post.clubId}/${post.id}`,
+                                        sources: ['local', 'url'],
+                                        multiple: false,
+                                        maxFiles: 1,
+                                        resourceType: 'raw', // Important for PDFs/Docs
+                                        clientAllowedFormats: ['pdf', 'doc', 'docx'],
+                                        maxFileSize: 10000000,
+                                    }, async (error: any, result: any) => {
+                                        if (error) {
+                                            console.error('Upload Error:', error);
+                                            setMessage({ type: 'error', text: 'Upload failed.' });
+                                            return;
+                                        }
+                                        if (result.event === 'success') {
+                                            const reportUrl = result.info.secure_url;
+
+                                            // Dynamic import to avoid circular dependencies if any
+                                            const { updateEventReport, getPosts } = await import('../lib/dbService');
+
+                                            const success = await updateEventReport(post.id!, reportUrl);
+                                            if (success) {
+                                                setMessage({ type: 'success', text: 'Report uploaded successfully!' });
+                                                // Refresh post data
+                                                const posts = await getPosts();
+                                                const updatedPost = posts.find(p => p.id === eventId);
+                                                if (updatedPost) {
+                                                    setPost(updatedPost);
+                                                }
+                                            } else {
+                                                setMessage({ type: 'error', text: 'Failed to save report URL.' });
+                                            }
+                                        }
+                                    });
+                                    widget.open();
+                                }}
+                                className="w-full px-6 py-4 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
+                            >
+                                <Upload className="w-5 h-5 text-[#DAA520]" />
+                                {(post as any).reportUrl ? 'Update Report' : 'Upload Report (PDF)'}
+                            </button>
+
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
+                                Supported formats: PDF, DOC, DOCX (Max 10MB)
+                            </p>
                         </div>
                     </div>
                 )}

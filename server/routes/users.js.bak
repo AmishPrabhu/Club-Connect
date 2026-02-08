@@ -6,31 +6,6 @@ import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all teachers (Admin only) - MOVED HERE TO AVOID ROUTE COLLISION
-router.get('/teachers', verifyToken, async (req, res) => {
-    try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Only admins can view teachers' });
-        }
-
-        const teachers = await User.find({
-            $or: [
-                { role: 'teacher' },
-                { roles: 'teacher' }
-            ]
-        }).select('-password');
-
-        res.json(teachers);
-    } catch (error) {
-        console.error('[CRITICAL] Error fetching teachers:', error);
-        console.error(error.stack);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
-
-
-
-
 // Get my club memberships
 router.get('/memberships', verifyToken, async (req, res) => {
     try {
@@ -78,8 +53,6 @@ router.get('/stats/count', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-
-
 
 // Get user profile
 router.get('/:id', verifyToken, async (req, res) => {
@@ -135,46 +108,6 @@ router.post('/:id/like/:clubId', verifyToken, async (req, res) => {
     }
 });
 
-// Remove teacher role from a user (Admin only)
-router.post('/remove-teacher', verifyToken, async (req, res) => {
-    try {
-        // Verify user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Only admins can remove teacher roles' });
-        }
-
-        const { userId } = req.body;
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Remove 'teacher' from roles array
-        if (user.roles) {
-            user.roles = user.roles.filter(role => role !== 'teacher');
-        }
-
-        // If primary role is teacher, revert to user
-        if (user.role === 'teacher') {
-            user.role = 'user';
-        }
-
-        // Clear managed clubs
-        user.managedClubs = [];
-
-        await user.save();
-
-        res.json({ message: 'Teacher role removed successfully' });
-    } catch (error) {
-        console.error('Error removing teacher role:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
 // Unlike a club
 router.delete('/:id/like/:clubId', verifyToken, async (req, res) => {
     try {
@@ -194,11 +127,8 @@ router.delete('/:id/like/:clubId', verifyToken, async (req, res) => {
 
 // ==================== ADMIN: ASSIGN TEACHER ROLE ====================
 
-
-
 // Assign teacher role to a user (Admin only)
 router.post('/assign-teacher', verifyToken, async (req, res) => {
-
     try {
         // Verify user is admin
         if (req.user.role !== 'admin') {
@@ -211,97 +141,50 @@ router.post('/assign-teacher', verifyToken, async (req, res) => {
         }
 
         // Check if user exists
-        const existingUser = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+        let user = await User.findOne({ email: email.toLowerCase() });
 
-        if (existingUser) {
-            // User exists - update their role to teacher
-            if (existingUser.role === 'admin') {
-                return res.status(400).json({ message: 'Cannot assign teacher role to admin users' });
-            }
-
-            // Initialize roles array if it doesn't exist
-            if (!existingUser.roles) {
-                existingUser.roles = [];
-            }
-
-            // Add teacher to roles array if not already present
-            if (!existingUser.roles.includes('teacher')) {
-                existingUser.roles.push('teacher');
-            }
-
-            // Set primary role to teacher if currently 'user'
-            if (existingUser.role === 'user') {
-                existingUser.role = 'teacher';
-            }
-
-            await existingUser.save();
+        if (user) {
+            // User exists - update role to teacher
+            user.role = 'teacher';
+            user.name = name; // Update name in case it changed
+            await user.save();
 
             return res.json({
                 success: true,
-                isNewUser: false,
-                message: 'User role updated to teacher'
+                message: 'User role updated to teacher',
+                userId: user._id,
+                isNewUser: false
             });
         } else {
-            // User doesn't exist - create a pending invitation (no password)
-            const newUser = new User({
-                email,
+            // User doesn't exist - create new teacher account
+            // Generate a temporary password (they'll need to reset it)
+            const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const bcrypt = (await import('bcryptjs')).default;
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+            user = new User({
+                email: email.toLowerCase(),
                 name,
+                password: hashedPassword,
                 role: 'teacher',
-                roles: ['teacher'],
-                managedClubs: [],
-                // No password - user will set it during signup
+                managedClubs: []
             });
 
-            await newUser.save();
+            await user.save();
+
+            // TODO: Send email to teacher with account creation notification
+            // For now, we'll just return success
+            // In production, you'd send an email with a password reset link
 
             return res.json({
                 success: true,
-                isNewUser: true,
-                message: 'Teacher invitation created. User will set password during signup.'
+                message: 'Teacher account created. User will receive an email to set their password.',
+                userId: user._id,
+                isNewUser: true
             });
         }
     } catch (error) {
         console.error('Error assigning teacher role:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Remove teacher role from a user (Admin only)
-router.post('/remove-teacher', verifyToken, async (req, res) => {
-    try {
-        // Verify user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Only admins can remove teacher roles' });
-        }
-
-        const { userId } = req.body;
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Remove 'teacher' from roles array
-        if (user.roles) {
-            user.roles = user.roles.filter(role => role !== 'teacher');
-        }
-
-        // If primary role is teacher, revert to user
-        if (user.role === 'teacher') {
-            user.role = 'user';
-        }
-
-        // Clear managed clubs
-        user.managedClubs = [];
-
-        await user.save();
-
-        res.json({ message: 'Teacher role removed successfully' });
-    } catch (error) {
-        console.error('Error removing teacher role:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

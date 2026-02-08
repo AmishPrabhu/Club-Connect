@@ -4,6 +4,7 @@ import {
     DBPost,
     DBNotification,
     DBUser,
+    User, // NEW
     ClubMember,
     EventRSVP,
     ClubMessage,
@@ -783,6 +784,17 @@ export const updateParticipantCertificate = async (
     }
 };
 
+// Upload/update event report (Club Secretary/President only)
+export const updateEventReport = async (eventId: string, reportUrl: string): Promise<boolean> => {
+    try {
+        await api.put(`/posts/${eventId}/report`, { reportUrl });
+        return true;
+    } catch (error) {
+        console.error('Error updating event report:', error);
+        return false;
+    }
+};
+
 // ==================== USER TASKS ====================
 
 export const getUserTasks = async (): Promise<any[]> => {
@@ -840,5 +852,120 @@ export const deleteClubTask = async (taskId: string): Promise<boolean> => {
     } catch (error) {
         console.error('Error deleting club task:', error);
         return false;
+    }
+};
+
+// ==================== REPORT SUBMISSION ====================
+
+// Submit event report (President/Secretary only)
+export const submitEventReport = async (
+    eventId: string,
+    reportUrl: string
+): Promise<{ success: boolean; error?: string }> => {
+    try {
+        await api.post(`/posts/${eventId}/report`, { reportUrl });
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error submitting report:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to submit report' };
+    }
+};
+
+// ==================== ADMIN: TEACHER MANAGEMENT ====================
+
+// Get all teachers
+export const getTeachers = async (): Promise<User[]> => {
+    try {
+        const response = await api.get('/users/teachers');
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching teachers:', error);
+        return [];
+    }
+};
+
+// Remove a teacher
+export const removeTeacher = async (userId: string): Promise<boolean> => {
+    try {
+        await api.post('/users/remove-teacher', { userId });
+        return true;
+    } catch (error) {
+        console.error('Error removing teacher:', error);
+        return false;
+    }
+};
+
+// ==================== TEACHER ENDPOINTS ====================
+
+
+
+// Get teacher's managed clubs
+export const getTeacherClubs = async (): Promise<DBClub[]> => {
+    try {
+        const response = await api.get('/users/teacher/clubs');
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching teacher clubs:', error);
+        return [];
+    }
+};
+
+// Add club to teacher's managed list
+export const addTeacherClub = async (clubId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+        await api.post('/users/teacher/clubs', { clubId });
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error adding club to teacher:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to add club' };
+    }
+};
+
+// Remove club from teacher's managed list
+export const removeTeacherClub = async (clubId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+        await api.delete(`/users/teacher/clubs/${clubId}`);
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error removing club from teacher:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to remove club' };
+    }
+};
+
+// Get all reports for teacher's managed clubs
+export interface TeacherReport {
+    id: string;
+    eventId: string;
+    eventTitle: string;
+    eventDate: string;
+    clubId: string;
+    clubName: string;
+    reportUrl: string;
+    reportSubmittedBy: string;
+    reportSubmittedByName: string;
+    reportSubmittedAt: Date;
+}
+
+export const getTeacherReports = async (): Promise<TeacherReport[]> => {
+    try {
+        const response = await api.get('/users/teacher/reports');
+        return response.data.map(mapId);
+    } catch (error) {
+        console.error('Error fetching teacher reports:', error);
+        return [];
+    }
+};
+
+// Assign teacher role (Admin only)
+export const assignTeacherRole = async (email: string, name: string): Promise<{ success: boolean; error?: string; isNewUser?: boolean }> => {
+    try {
+        const response = await api.post('/users/assign-teacher', { email, name });
+        return {
+            success: true,
+            isNewUser: response.data.isNewUser
+        };
+    } catch (error: any) {
+        console.error('Error assigning teacher role:', error);
+        return { success: false, error: error.response?.data?.message || 'Failed to assign teacher role' };
     }
 };

@@ -164,12 +164,25 @@ router.post('/signup', signupLimiter, async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Check if there's a pre-assigned role for this email (e.g., teacher invitation)
+        const preAssignedUser = await User.findOne({ email, password: { $exists: false } });
+        let assignedRole = isFirstAdmin ? 'admin' : 'user';
+
+        if (preAssignedUser && !isFirstAdmin) {
+            // User was pre-assigned a role (like teacher) - use that role
+            assignedRole = preAssignedUser.role;
+
+            // Delete the invitation record
+            await User.deleteOne({ _id: preAssignedUser._id });
+        }
+
         // Create user
         const newUser = new User({
             email,
             password: hashedPassword,
             name,
-            role: isFirstAdmin ? 'admin' : 'user', // Allow admin role only for first admin, otherwise force user
+            role: assignedRole,
+            managedClubs: preAssignedUser?.managedClubs || [],
         });
 
         await newUser.save();
@@ -195,6 +208,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
                 email: newUser.email,
                 name: newUser.name,
                 role: newUser.role,
+                roles: newUser.roles || [],
                 profileImage: newUser.profileImage,
                 likedClubs: newUser.likedClubs || [],
             },
@@ -322,6 +336,7 @@ router.post('/login', authLimiter, async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: effectiveRole,
+                roles: user.roles || [],
                 clubId: effectiveClubId,
                 clubName: effectiveClubName,
                 profileImage: user.profileImage,
@@ -439,6 +454,7 @@ router.get('/me', verifyToken, async (req, res) => {
             email: user.email,
             name: user.name,
             role: effectiveRole,
+            roles: user.roles || [],
             clubId: effectiveClubId,
             clubName: effectiveClubName,
             profileImage: user.profileImage,
@@ -534,6 +550,7 @@ router.post('/google', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: effectiveRole,
+                roles: user.roles || [],
                 clubId: effectiveClubId,
                 clubName: effectiveClubName,
                 profileImage: user.profileImage,

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Calendar, Trash2, Edit, Search, TrendingUp, Bell, Plus, UserPlus, X, Send, Image as ImageIcon, Menu, Settings2 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
-import { DBClub, DBPost, DBNotification, ClubMember } from '../types/auth';
+import { DBClub, DBPost, DBNotification, ClubMember, User } from '../types/auth';
 import ConfirmModal from '../components/ConfirmModal';
 import {
   getClubs,
@@ -13,6 +13,7 @@ import {
   createClubPresident,
   createClubTreasurer,
   createClubAdvisor,
+  getTeachers, // NEW
   removeClubOfficer,
   getClubMembers,
   removeClubMember,
@@ -22,6 +23,8 @@ import {
   getNotifications,
   createNotification,
   deleteNotification,
+  assignTeacherRole,
+  removeTeacher,
 } from '../lib/dbService';
 
 
@@ -190,7 +193,7 @@ const DEPARTMENTS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'clubs' | 'posts' | 'notifications' | 'teachers'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data states
@@ -198,6 +201,7 @@ export default function AdminDashboard() {
   const [posts, setPosts] = useState<DBPost[]>([]);
   const [notifications, setNotifications] = useState<DBNotification[]>([]);
   const [clubMembers, setClubMembers] = useState<Record<string, ClubMember[]>>({});
+  const [teachers, setTeachers] = useState<User[]>([]); // NEW
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -210,6 +214,7 @@ export default function AdminDashboard() {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [showEditClubModal, setShowEditClubModal] = useState(false);
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<DBClub | null>(null);
   const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
@@ -257,6 +262,11 @@ export default function AdminDashboard() {
     type: 'system' as const,
   });
 
+  const [newTeacher, setNewTeacher] = useState({
+    email: '',
+    name: '',
+  });
+
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Inline club name editing states
@@ -293,6 +303,10 @@ export default function AdminDashboard() {
       if (activeTab === 'notifications' || activeTab === 'overview') {
         const notificationsData = await getNotifications();
         setNotifications(notificationsData);
+      }
+      if (activeTab === 'teachers') {
+        const teachersData = await getTeachers();
+        setTeachers(teachersData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -676,6 +690,46 @@ export default function AdminDashboard() {
     });
   };
 
+  const handleAssignTeacher = async () => {
+    if (!newTeacher.email || !newTeacher.name) {
+      setFormMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    try {
+      const result = await assignTeacherRole(newTeacher.email, newTeacher.name);
+      if (result.success) {
+        setFormMessage({ type: 'success', text: result.isNewUser ? 'Teacher invitation sent successfully!' : 'User role updated to teacher!' });
+        setNewTeacher({ email: '', name: '' });
+        setTimeout(() => {
+          setShowAddTeacherModal(false);
+          setFormMessage(null);
+          loadData(); // Refresh list
+        }, 2000);
+      } else {
+        setFormMessage({ type: 'error', text: result.error || 'Failed to assign teacher role' });
+      }
+    } catch (error) {
+      setFormMessage({ type: 'error', text: 'An error occurred' });
+    }
+  };
+
+  const handleRemoveTeacher = async (teacherId: string) => {
+    if (window.confirm('Are you sure you want to remove this teacher? Their teacher privileges will be revoked.')) {
+      try {
+        const success = await removeTeacher(teacherId);
+        if (success) {
+          loadData(); // Refresh list
+        } else {
+          alert('Failed to remove teacher');
+        }
+      } catch (error) {
+        console.error('Error removing teacher:', error);
+        alert('Error removing teacher');
+      }
+    }
+  };
+
   // Inline club name editing handlers
   const handleEditClubName = (club: DBClub) => {
     setEditingClubId(club.id!);
@@ -706,6 +760,8 @@ export default function AdminDashboard() {
     setEditingClubName('');
   };
 
+  // Teacher handlers
+
 
 
 
@@ -716,507 +772,568 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 pb-12">
-      {/* Page Title Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
-          <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
-            Administrative Control Center
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            Manage clubs, events, and system settings • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Stats Cards - 2x2 Grid like Secretary Dashboard */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Total Clubs</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-[#DAA520] dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Upcoming</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Posts</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                <Bell className="w-4 h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Alerts</p>
-              </div>
-            </div>
+    <>
+      <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 pb-12">
+        {/* Page Title Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
+            <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
+              Administrative Control Center
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
+              Manage clubs, events, and system settings • <span className="text-[#DAA520]">Welcome, {user?.name}</span>
+            </p>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8 relative z-30">
-          {/* Mobile Header for Tabs */}
-          <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-            <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-[#DAA520]" />
-              Menu
-            </span>
-            <button
-              onClick={() => setIsMobileTabOpen(!isMobileTabOpen)}
-              className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-            >
-              {isMobileTabOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
-            <div className="flex flex-col md:flex-row md:overflow-x-auto">
-              {[
-                { id: 'overview', label: 'Overview', icon: TrendingUp },
-                { id: 'clubs', label: 'Manage Clubs', icon: Users },
-                { id: 'posts', label: 'Manage Posts', icon: Edit },
-                { id: 'notifications', label: 'Notifications', icon: Bell }
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id as any);
-                      setIsMobileTabOpen(false);
-                    }}
-                    className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-2 text-left md:text-center ${isActive
-                      ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
-                      : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      } `}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''} `} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-4 sm:p-8 min-h-[500px]">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="w-10 h-10 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            <>
-              {/* Overview Tab */}
-              {activeTab === 'overview' && (
-                <div className="space-y-8">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white border-l-4 border-[#DAA520] pl-3">Recent Campus Activity</h3>
-                    <button onClick={() => setActiveTab('posts')} className="text-sm font-semibold text-[#002147] dark:text-[#DAA520] hover:underline whitespace-nowrap">View All Activity &rarr;</button>
-                  </div>
-
-                  {posts.length === 0 && clubs.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-300">
-                      <p className="text-slate-500">No activity yet. Get started by creating a club!</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                      {posts.slice(0, 5).map((post) => (
-                        <div key={post.id} className="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
-                          <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'} `}>
-                            {post.type === 'event' ? <Calendar className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-slate-800 dark:text-white text-lg">{post.title}</h4>
-                            <p className="text-sm text-slate-500">Posted by <span className="font-semibold text-[#002147] dark:text-blue-400">{post.clubName}</span> • {post.date}</p>
-                          </div>
-                          <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold uppercase text-slate-500">
-                            {post.type}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Stats Cards - 2x2 Grid like Secretary Dashboard */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
                 </div>
-              )}
+                <div>
+                  <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{clubs.length}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Total Clubs</p>
+                </div>
+              </div>
+            </div>
 
-              {/* Clubs Tab */}
-              {activeTab === 'clubs' && (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 flex-wrap bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div className="relative flex-1 min-w-[200px]">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Search clubs by name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]"
-                      />
-                    </div>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5 text-[#DAA520] dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Upcoming</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{posts.length}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Posts</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <Bell className="w-4 h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{notifications.filter(n => !n.read).length}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Alerts</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8 relative z-30">
+            {/* Mobile Header for Tabs */}
+            <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+              <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Settings2 className="w-5 h-5 text-[#DAA520]" />
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMobileTabOpen(!isMobileTabOpen)}
+                className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                {isMobileTabOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+
+            <div className={`${isMobileTabOpen ? 'block' : 'hidden'} md:block transition-all`}>
+              <div className="flex flex-col md:flex-row md:overflow-x-auto">
+                {[
+                  { id: 'overview', label: 'Overview', icon: TrendingUp },
+                  { id: 'clubs', label: 'Manage Clubs', icon: Users },
+                  { id: 'posts', label: 'Manage Posts', icon: Edit },
+                  { id: 'notifications', label: 'Notifications', icon: Bell },
+                  { id: 'teachers', label: 'Teachers', icon: UserPlus }
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
                     <button
-                      onClick={() => setShowCreateClubModal(true)}
-                      className="bg-[#002147] hover:bg-[#00152e] text-white px-6 py-3 rounded-lg font-bold uppercase tracking-wide text-sm transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id as any);
+                        setIsMobileTabOpen(false);
+                      }}
+                      className={`flex items-center gap-2 px-4 sm:px-8 py-4 sm:py-5 font-semibold transition-all whitespace-nowrap border-l-4 md:border-l-0 md:border-b-2 text-left md:text-center ${isActive
+                        ? 'text-[#002147] dark:text-[#DAA520] border-[#002147] dark:border-[#DAA520] bg-blue-50/50 dark:bg-blue-900/10'
+                        : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        } `}
                     >
-                      <Plus className="w-5 h-5" />
-                      Register New Club
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-[#DAA520]' : ''} `} />
+                      {tab.label}
                     </button>
-                  </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                  {filteredClubs.length === 0 ? (
-                    <div className="text-center py-20">
-                      <Users className="w-20 h-20 text-slate-200 dark:text-slate-700 mx-auto mb-6" />
-                      <h3 className="text-xl font-bold text-slate-400 dark:text-slate-500">No clubs found</h3>
-                      <p className="text-slate-400 dark:text-slate-500 mt-2">Start by registering a new student organization.</p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-4 sm:p-8 min-h-[500px]">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <>
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                  <div className="space-y-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white border-l-4 border-[#DAA520] pl-3">Recent Campus Activity</h3>
+                      <button onClick={() => setActiveTab('posts')} className="text-sm font-semibold text-[#002147] dark:text-[#DAA520] hover:underline whitespace-nowrap">View All Activity &rarr;</button>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {filteredClubs.map((club) => (
-                        <div key={club.id} className="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 group">
-                          {/* Decorative Top Border */}
-                          <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'} `}></div>
 
-                          <div className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-3xl shadow-inner border border-slate-100 dark:border-slate-600 overflow-hidden">
-                                {club.image ? (
-                                  <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
-                                ) : (
-                                  club.icon
-                                )}
-                              </div>
-                              <div className="flex flex-wrap justify-end gap-2 max-w-[calc(100%-5rem)]">
-                                <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-wider text-slate-500">
-                                  {club.category}
-                                </div>
-                                {club.departments?.map(dept => (
-                                  <div key={dept} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-full text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                                    {dept.match(/\(([^)]+)\)/)?.[1] || dept}
-                                  </div>
-                                ))}
-                              </div>
+                    {posts.length === 0 && clubs.length === 0 ? (
+                      <div className="text-center py-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-300">
+                        <p className="text-slate-500">No activity yet. Get started by creating a club!</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4">
+                        {posts.slice(0, 5).map((post) => (
+                          <div key={post.id} className="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
+                            <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'} `}>
+                              {post.type === 'event' ? <Calendar className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
                             </div>
-
-
-                            {/* Club Name with Inline Editing */}
-                            {editingClubId === club.id ? (
-                              <div className="mb-2 space-y-2">
-                                <input
-                                  type="text"
-                                  value={editingClubName}
-                                  onChange={(e) => setEditingClubName(e.target.value)}
-                                  className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#002147]"
-                                  placeholder="Enter club name..."
-                                  autoFocus
-                                />
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={handleCancelEditClubName}
-                                    className="flex-1 px-3 py-1.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    onClick={() => handleSaveClubName(club.id!)}
-                                    disabled={savingClubName || !editingClubName.trim()}
-                                    className="flex-1 px-3 py-1.5 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
-                                  >
-                                    {savingClubName ? (
-                                      <>
-                                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Saving...
-                                      </>
-                                    ) : (
-                                      'Save'
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 mb-2 group/name">
-                                <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white transition-transform duration-200 group-hover:scale-[1.02]">{club.name}</h4>
-                                <button
-                                  onClick={() => handleEditClubName(club)}
-                                  className="opacity-0 group-hover/name:opacity-100 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
-                                  title="Edit club name"
-                                >
-                                  <Edit className="w-4 h-4 text-slate-400 hover:text-[#002147] dark:hover:text-[#DAA520]" />
-                                </button>
-                              </div>
-                            )}
-                            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
-
-                            {/* Officers Grid */}
-                            {/* Officers Grid */}
-                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 mb-6 space-y-4 border border-slate-100 dark:border-slate-700">
-
-                              {/* Secretary List */}
-                              <div className="space-y-1">
-                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
-                                  <span className="font-bold text-slate-400 uppercase">Secretaries</span>
-                                  <button onClick={() => openSecretaryModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Secretary">
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                                {getOfficersByRole(club.id!, 'secretary').length > 0 ? (
-                                  getOfficersByRole(club.id!, 'secretary').map(officer => (
-                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
-                                      <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
-                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  club.secretaryEmail ? (
-                                    <div className="flex justify-between items-center text-xs pl-1">
-                                      <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
-                                      <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ) : (
-                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
-                                  )
-                                )}
-                              </div>
-
-                              {/* President List */}
-                              <div className="space-y-1">
-                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
-                                  <span className="font-bold text-slate-400 uppercase">Presidents</span>
-                                  <button onClick={() => openPresidentModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add President">
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                                {getOfficersByRole(club.id!, 'president').length > 0 ? (
-                                  getOfficersByRole(club.id!, 'president').map(officer => (
-                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
-                                      <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
-                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  club.presidentEmail ? (
-                                    <div className="flex justify-between items-center text-xs pl-1">
-                                      <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={club.presidentEmail}>{club.presidentEmail}</span>
-                                      <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ) : (
-                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
-                                  )
-                                )}
-                              </div>
-
-                              {/* Treasurer List */}
-                              <div className="space-y-1">
-                                <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
-                                  <span className="font-bold text-slate-400 uppercase">Treasurers</span>
-                                  <button onClick={() => openTreasurerModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Treasurer">
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                                {getOfficersByRole(club.id!, 'treasurer').length > 0 ? (
-                                  getOfficersByRole(club.id!, 'treasurer').map(officer => (
-                                    <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
-                                      <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
-                                      <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  club.treasurerEmail ? (
-                                    <div className="flex justify-between items-center text-xs pl-1">
-                                      <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
-                                      <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  ) : (
-                                    <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
-                                  )
-                                )}
-                              </div>
-
-                              {/* Faculty Advisor - keep single */}
-                              <div className="flex justify-between items-center text-xs pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
-                                <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
-                                {club.advisorEmail ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate max-w-[100px]" title={club.advisorEmail}>{club.advisorEmail}</span>
-                                    <button onClick={() => openEditAdvisorModal(club)} className="text-slate-400 hover:text-blue-500"><Edit className="w-3 h-3" /></button>
-                                    <button onClick={() => handleRemoveOfficer(club.id!, 'advisor')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                  </div>
-                                ) : (
-                                  <button onClick={() => openAdvisorModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
-                                )}
-                              </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-slate-800 dark:text-white text-lg">{post.title}</h4>
+                              <p className="text-sm text-slate-500">Posted by <span className="font-semibold text-[#002147] dark:text-blue-400">{post.clubName}</span> • {post.date}</p>
                             </div>
-
-                            <div className="flex gap-3">
-                              <button
-                                onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
-                                className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                              >
-                                EDIT IMAGE
-                              </button>
-                              <button
-                                onClick={() => openEditClubModal(club)}
-                                className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                              >
-                                EDIT DETAILS
-                              </button>
-                              <button
-                                onClick={() => handleDeleteClub(club.id!)}
-                                className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                            <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold uppercase text-slate-500">
+                              {post.type}
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Posts Tab */}
-              {activeTab === 'posts' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-700">
-                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">All Posts & Announcements</h3>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                )}
 
-                  {posts.length === 0 ? (
-                    <div className="text-center py-20">
-                      <Edit className="w-16 h-16 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
-                      <p className="text-slate-400">No posts available.</p>
+                {/* Clubs Tab */}
+                {activeTab === 'clubs' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 flex-wrap bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <div className="relative flex-1 min-w-[200px]">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search clubs by name..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setShowCreateClubModal(true)}
+                        className="bg-[#002147] hover:bg-[#00152e] text-white px-6 py-3 rounded-lg font-bold uppercase tracking-wide text-sm transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                      >
+                        <Plus className="w-5 h-5" />
+                        Register New Club
+                      </button>
                     </div>
-                  ) : (
-                    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
-                      <table className="w-full text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-                          <tr>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Title / Club</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                          {posts.map((post) => (
-                            <tr key={post.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                              <td className="px-6 py-4">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.type === 'event'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-purple-100 text-purple-800'
-                                  } `}>
-                                  {post.type}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <p className="font-bold text-slate-900 dark:text-white">{post.title}</p>
-                                <p className="text-xs text-slate-500">{post.clubName}</p>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                                {post.date}
-                              </td>
-                              <td className="px-6 py-4 text-right">
+
+                    {filteredClubs.length === 0 ? (
+                      <div className="text-center py-20">
+                        <Users className="w-20 h-20 text-slate-200 dark:text-slate-700 mx-auto mb-6" />
+                        <h3 className="text-xl font-bold text-slate-400 dark:text-slate-500">No clubs found</h3>
+                        <p className="text-slate-400 dark:text-slate-500 mt-2">Start by registering a new student organization.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredClubs.map((club) => (
+                          <div key={club.id} className="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 group">
+                            {/* Decorative Top Border */}
+                            <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'} `}></div>
+
+                            <div className="p-6">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-3xl shadow-inner border border-slate-100 dark:border-slate-600 overflow-hidden">
+                                  {club.image ? (
+                                    <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
+                                  ) : (
+                                    club.icon
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap justify-end gap-2 max-w-[calc(100%-5rem)]">
+                                  <div className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    {club.category}
+                                  </div>
+                                  {club.departments?.map(dept => (
+                                    <div key={dept} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-full text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                      {dept.match(/\(([^)]+)\)/)?.[1] || dept}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+
+                              {/* Club Name with Inline Editing */}
+                              {editingClubId === club.id ? (
+                                <div className="mb-2 space-y-2">
+                                  <input
+                                    type="text"
+                                    value={editingClubName}
+                                    onChange={(e) => setEditingClubName(e.target.value)}
+                                    className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-base font-semibold focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                                    placeholder="Enter club name..."
+                                    autoFocus
+                                  />
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={handleCancelEditClubName}
+                                      className="flex-1 px-3 py-1.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-all"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => handleSaveClubName(club.id!)}
+                                      disabled={savingClubName || !editingClubName.trim()}
+                                      className="flex-1 px-3 py-1.5 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                                    >
+                                      {savingClubName ? (
+                                        <>
+                                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                          Saving...
+                                        </>
+                                      ) : (
+                                        'Save'
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 mb-2 group/name">
+                                  <h4 className="font-serif font-bold text-xl text-slate-900 dark:text-white transition-transform duration-200 group-hover:scale-[1.02]">{club.name}</h4>
+                                  <button
+                                    onClick={() => handleEditClubName(club)}
+                                    className="opacity-0 group-hover/name:opacity-100 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
+                                    title="Edit club name"
+                                  >
+                                    <Edit className="w-4 h-4 text-slate-400 hover:text-[#002147] dark:hover:text-[#DAA520]" />
+                                  </button>
+                                </div>
+                              )}
+                              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">{club.description}</p>
+
+                              {/* Officers Grid */}
+                              {/* Officers Grid */}
+                              <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 mb-6 space-y-4 border border-slate-100 dark:border-slate-700">
+
+                                {/* Secretary List */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                    <span className="font-bold text-slate-400 uppercase">Secretaries</span>
+                                    <button onClick={() => openSecretaryModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Secretary">
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {getOfficersByRole(club.id!, 'secretary').length > 0 ? (
+                                    getOfficersByRole(club.id!, 'secretary').map(officer => (
+                                      <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                        <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                        <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    club.secretaryEmail ? (
+                                      <div className="flex justify-between items-center text-xs pl-1">
+                                        <span className="text-green-600 dark:text-green-400 font-semibold truncate max-w-[140px]" title={club.secretaryEmail}>{club.secretaryEmail}</span>
+                                        <button onClick={() => handleRemoveOfficer(club.id!, 'secretary')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                    )
+                                  )}
+                                </div>
+
+                                {/* President List */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                    <span className="font-bold text-slate-400 uppercase">Presidents</span>
+                                    <button onClick={() => openPresidentModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add President">
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {getOfficersByRole(club.id!, 'president').length > 0 ? (
+                                    getOfficersByRole(club.id!, 'president').map(officer => (
+                                      <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                        <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                        <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    club.presidentEmail ? (
+                                      <div className="flex justify-between items-center text-xs pl-1">
+                                        <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]" title={club.presidentEmail}>{club.presidentEmail}</span>
+                                        <button onClick={() => handleRemoveOfficer(club.id!, 'president')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                    )
+                                  )}
+                                </div>
+
+                                {/* Treasurer List */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between items-center text-xs pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+                                    <span className="font-bold text-slate-400 uppercase">Treasurers</span>
+                                    <button onClick={() => openTreasurerModal(club)} className="text-[#002147] dark:text-blue-400 hover:bg-white dark:hover:bg-slate-800 p-1 rounded transition-colors" title="Add Treasurer">
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  {getOfficersByRole(club.id!, 'treasurer').length > 0 ? (
+                                    getOfficersByRole(club.id!, 'treasurer').map(officer => (
+                                      <div key={officer.id} className="flex justify-between items-center text-xs pl-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded px-1 py-0.5 transition-colors">
+                                        <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={officer.email}>{officer.email}</span>
+                                        <button onClick={() => handleRemoveMember(club.id!, officer.id!, officer.name)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    club.treasurerEmail ? (
+                                      <div className="flex justify-between items-center text-xs pl-1">
+                                        <span className="text-amber-600 dark:text-amber-400 font-semibold truncate max-w-[140px]" title={club.treasurerEmail}>{club.treasurerEmail}</span>
+                                        <button onClick={() => handleRemoveOfficer(club.id!, 'treasurer')} className="text-slate-400 hover:text-red-500 p-1"><Trash2 className="w-3 h-3" /></button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-slate-400 italic pl-1">None assigned</div>
+                                    )
+                                  )}
+                                </div>
+
+                                {/* Faculty Advisor - keep single */}
+                                <div className="flex justify-between items-center text-xs pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
+                                  <span className="font-bold text-slate-400 uppercase">Faculty Advisor</span>
+                                  {club.advisorEmail ? (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate max-w-[100px]" title={club.advisorEmail}>{club.advisorEmail}</span>
+                                      <button onClick={() => openEditAdvisorModal(club)} className="text-slate-400 hover:text-blue-500"><Edit className="w-3 h-3" /></button>
+                                      <button onClick={() => handleRemoveOfficer(club.id!, 'advisor')} className="text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ) : (
+                                    <button onClick={() => openAdvisorModal(club)} className="text-[#002147] dark:text-blue-400 hover:underline font-medium">+ Assign</button>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex gap-3">
                                 <button
-                                  onClick={() => handleDeletePost(post.id!)}
-                                  className="text-slate-400 hover:text-red-600 transition-colors p-2"
+                                  onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
+                                  className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                  EDIT IMAGE
+                                </button>
+                                <button
+                                  onClick={() => openEditClubModal(club)}
+                                  className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                  EDIT DETAILS
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteClub(club.id!)}
+                                  className="p-2 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Notifications Tab */}
-              {activeTab === 'notifications' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">System Broadcasts</h3>
-                    <button
-                      onClick={() => setShowNotificationModal(true)}
-                      className="bg-[#002147] hover:bg-[#00152e] text-white px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-md"
-                    >
-                      <Send className="w-4 h-4" />
-                      NEW BROADCAST
-                    </button>
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200">
-                      <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                      <p className="text-slate-500 font-medium">No previous broadcasts.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-5 rounded-xl border-l-4 ${notification.read
-                            ? 'bg-white dark:bg-slate-800 border-slate-300'
-                            : 'bg-blue-50 dark:bg-blue-900/10 border-[#002147] shadow-sm'
-                            } `}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-[#DAA520] uppercase tracking-widest">{notification.type || 'SYSTEM'}</span>
-                                <span className="text-xs text-slate-400">• {new Date(notification.createdAt).toLocaleDateString()}</span>
                               </div>
-                              <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{notification.title}</h4>
-                              <p className="text-slate-600 dark:text-slate-300">{notification.message}</p>
                             </div>
-                            <button
-                              onClick={() => handleDeleteNotification(notification.id!)}
-                              className="text-slate-300 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Posts Tab */}
+                {activeTab === 'posts' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-700">
+                      <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">All Posts & Announcements</h3>
+                    </div>
+
+                    {posts.length === 0 ? (
+                      <div className="text-center py-20">
+                        <Edit className="w-16 h-16 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
+                        <p className="text-slate-400">No posts available.</p>
+                      </div>
+                    ) : (
+                      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Title / Club</th>
+                              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                            {posts.map((post) => (
+                              <tr key={post.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${post.type === 'event'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                    } `}>
+                                    {post.type}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <p className="font-bold text-slate-900 dark:text-white">{post.title}</p>
+                                  <p className="text-xs text-slate-500">{post.clubName}</p>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                                  {post.date}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <button
+                                    onClick={() => handleDeletePost(post.id!)}
+                                    className="text-slate-400 hover:text-red-600 transition-colors p-2"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Notifications Tab */}
+                {activeTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">System Broadcasts</h3>
+                      <button
+                        onClick={() => setShowNotificationModal(true)}
+                        className="bg-[#002147] hover:bg-[#00152e] text-white px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shadow-md"
+                      >
+                        <Send className="w-4 h-4" />
+                        NEW BROADCAST
+                      </button>
+                    </div>
+
+                    {notifications.length === 0 ? (
+                      <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200">
+                        <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-500 font-medium">No previous broadcasts.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-5 rounded-xl border-l-4 ${notification.read
+                              ? 'bg-white dark:bg-slate-800 border-slate-300'
+                              : 'bg-blue-50 dark:bg-blue-900/10 border-[#002147] shadow-sm'
+                              } `}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs font-bold text-[#DAA520] uppercase tracking-widest">{notification.type || 'SYSTEM'}</span>
+                                  <span className="text-xs text-slate-400">• {new Date(notification.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{notification.title}</h4>
+                                <p className="text-slate-600 dark:text-slate-300">{notification.message}</p>
+                              </div>
+                              <button
+                                onClick={() => handleDeleteNotification(notification.id!)}
+                                className="text-slate-300 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {activeTab === 'teachers' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white border-l-4 border-[#DAA520] pl-3">
+                        Teacher Management
+                      </h3>
+                      <button
+                        onClick={() => setShowAddTeacherModal(true)}
+                        className="flex items-center gap-2 bg-[#002147] hover:bg-[#003366] text-white px-4 py-2 rounded-lg transition-colors font-semibold"
+                      >
+                        <UserPlus className="w-5 h-5" />
+                        Add Teacher
+                      </button>
+                    </div>
+
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>Note:</strong> Teachers can monitor event reports from clubs they manage. When you add a teacher by email, they will receive an invitation to create their account.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {teachers.map(teacher => (
+                        <div key={teacher.id} className="relative bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group">
+                          <button
+                            onClick={() => handleRemoveTeacher(teacher.id)}
+                            className="absolute top-2 right-2 p-1.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                            title="Remove Teacher"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4 overflow-hidden">
+                            {teacher.profileImage ? (
+                              <img src={teacher.profileImage} alt={teacher.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Users className="w-10 h-10 text-slate-400" />
+                            )}
+                          </div>
+                          <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-1">{teacher.name}</h4>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">{teacher.email}</p>
+
+                          <div className="mt-auto w-full pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                              {teacher.managedClubs?.length || 0} Clubs Managed
+                            </span>
                           </div>
                         </div>
                       ))}
+
+                      {teachers.length === 0 && (
+                        <div className="col-span-full bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-sm border border-dashed border-slate-300 dark:border-slate-600">
+                          <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No Teachers Yet</h3>
+                          <p className="text-slate-500 dark:text-slate-400">Add teachers to get started</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Create Club Modal */}
         {showCreateClubModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
@@ -1826,7 +1943,73 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Confirm Modal */}
+
+        {/* Add Teacher Modal */}
+        {showAddTeacherModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Add Teacher</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Assign teacher role to monitor event reports</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAddTeacherModal(false);
+                    setFormMessage(null);
+                    setNewTeacher({ email: '', name: '' });
+                  }}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {formMessage && (
+                <div className={`mb-4 p-3 rounded-lg text-sm ${formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  {formMessage.text}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teacher Email</label>
+                  <input
+                    type="email"
+                    value={newTeacher.email}
+                    onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                    placeholder="teacher@walchandsangli.ac.in"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teacher Name</label>
+                  <input
+                    type="text"
+                    value={newTeacher.name}
+                    onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                    placeholder="Full Name"
+                  />
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                    If the user exists, their role will be updated to teacher. If not, they'll receive an invitation to create an account.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleAssignTeacher}
+                  className="w-full bg-[#002147] hover:bg-[#003366] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
+                >
+                  Assign Teacher Role
+                </button>
+              </div>
+            </div>
+          </div>
+        )}        {/* Confirm Modal */}
         <ConfirmModal
           isOpen={confirmModal.isOpen}
           onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
@@ -1837,6 +2020,6 @@ export default function AdminDashboard() {
           variant={confirmModal.variant}
         />
       </div>
-    </div >
+    </>
   );
 }

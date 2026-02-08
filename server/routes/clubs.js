@@ -104,14 +104,28 @@ router.post('/', verifySuperAdmin, async (req, res) => {
                     };
                     const targetRole = roleMap[officer.role];
 
-                    if (targetRole && existingUser.role !== targetRole && existingUser.role !== 'admin') {
-                        existingUser.role = targetRole;
+                    if (targetRole && existingUser.role !== 'admin') {
+                        // Initialize roles array if it doesn't exist
+                        if (!existingUser.roles) {
+                            existingUser.roles = [];
+                        }
+
+                        // Add role to roles array if not already present
+                        if (!existingUser.roles.includes(targetRole)) {
+                            existingUser.roles.push(targetRole);
+                        }
+
+                        // Update primary role if not admin and current role is 'user'
+                        if (existingUser.role === 'user' || existingUser.role !== targetRole) {
+                            existingUser.role = targetRole;
+                        }
+
                         // Also set club context if missing
                         if (!existingUser.clubId) existingUser.clubId = savedClub._id.toString();
                         if (!existingUser.clubName) existingUser.clubName = savedClub.name;
 
                         await existingUser.save();
-                        console.log(`[Club Create] Synced global role for ${officer.email} to ${targetRole}`);
+                        console.log(`[Club Create] Synced global role for ${officer.email} to ${targetRole}, roles: ${existingUser.roles.join(', ')}`);
                     }
                 }
             }
@@ -158,6 +172,90 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
         // We do NOT demote existing officers when a new one is added.
         // The new officer will be added/promoted in the auto-create block below.
         // Existing officers remain until explicitly removed.
+
+        // === HANDLE OFFICER REMOVAL (Offboarding) ===
+        const officerFields = [
+            { emailField: 'secretaryEmail', role: 'club-secretary', memberRole: 'Secretary' },
+            { emailField: 'presidentEmail', role: 'president', memberRole: 'President' },
+            { emailField: 'treasurerEmail', role: 'treasurer', memberRole: 'Treasurer' },
+            { emailField: 'advisorEmail', role: 'advisor', memberRole: 'Advisor' },
+        ];
+
+        for (const officer of officerFields) {
+            // Check if field is present in updates AND is explicitly null (meaning removed)
+            // And if the club currently HAS an officer in that slot
+            if (updates.hasOwnProperty(officer.emailField) && updates[officer.emailField] === null && club[officer.emailField]) {
+                const oldEmail = club[officer.emailField];
+                console.log(`[Club Update] Removing ${officer.memberRole}: ${oldEmail}`);
+
+                // 1. Demote ClubMember to 'Member'
+                try {
+                    const clubMember = await ClubMember.findOne({
+                        clubId: req.params.id,
+                        email: { $regex: new RegExp(`^${oldEmail}$`, 'i') }
+                    });
+
+                    if (clubMember && (clubMember.role === officer.memberRole)) {
+                        clubMember.role = 'Member';
+                        clubMember.boardType = 'member';
+                        await clubMember.save();
+                        console.log(`[Club Update] Demoted ${oldEmail} from ${officer.memberRole} to Member`);
+                    }
+                } catch (err) {
+                    console.error(`[Club Update] Error updating ClubMember for ${oldEmail}:`, err);
+                }
+
+                // 2. Update User Global Role
+                try {
+                    const user = await User.findOne({ email: { $regex: new RegExp(`^${oldEmail}$`, 'i') } });
+                    if (user) {
+                        // Remove the specific role from roles array
+                        if (user.roles && user.roles.includes(officer.role)) {
+                            user.roles = user.roles.filter(r => r !== officer.role);
+                        }
+
+                        // Use set to ensure unique roles and clean array
+                        user.roles = [...new Set(user.roles || [])];
+
+                        // Recalculate primary role if the removed role was the primary one
+                        if (user.role === officer.role) {
+                            // Hierarchy: Admin > Teacher > Advisor > President > Treasurer > Secretary > Member > User
+                            const has = (r) => user.roles.includes(r);
+
+                            if (user.role === 'admin') { /* keep admin */ }
+                            else if (has('teacher')) user.role = 'teacher';
+                            else if (has('advisor')) user.role = 'advisor';
+                            else if (has('president')) user.role = 'president';
+                            else if (has('treasurer')) user.role = 'treasurer';
+                            else if (has('club-secretary')) user.role = 'club-secretary';
+
+                            // If none of the above, check if they are still a member of ANY club
+                            else {
+                                // We can assume they are at least a member of this club now (since we demoted, not deleted)
+                                // So 'club-member' is appropriate if they have no other officer roles
+                                user.role = 'club-member';
+                            }
+                        }
+
+                        // Clear club context if they are no longer an officer of THIS club
+                        if (user.clubId === req.params.id) {
+                            // If they are now just a member or user, clear the quick-access clubId
+                            // (Unless they are an officer of ANOTHER club? 
+                            //  Ideally we'd find their "next best" club, but for now clearing is safer)
+                            if (['user', 'club-member'].includes(user.role)) {
+                                user.clubId = null;
+                                user.clubName = null;
+                            }
+                        }
+
+                        await user.save();
+                        console.log(`[Club Update] User ${oldEmail} role updated to ${user.role}, roles: ${user.roles.join(', ')}`);
+                    }
+                } catch (err) {
+                    console.error(`[Club Update] Error updating User for ${oldEmail}:`, err);
+                }
+            }
+        }
 
         const updatedClub = await Club.findByIdAndUpdate(req.params.id, updates, { new: true });
         if (!updatedClub) return res.status(404).json({ message: 'Club not found' });
@@ -213,14 +311,28 @@ router.put('/:id', verifyClubOfficer, async (req, res) => {
                     };
                     const targetRole = roleMap[mapping.role];
 
-                    if (targetRole && existingUser.role !== targetRole && existingUser.role !== 'admin') {
-                        existingUser.role = targetRole;
+                    if (targetRole && existingUser.role !== 'admin') {
+                        // Initialize roles array if it doesn't exist
+                        if (!existingUser.roles) {
+                            existingUser.roles = [];
+                        }
+
+                        // Add role to roles array if not already present
+                        if (!existingUser.roles.includes(targetRole)) {
+                            existingUser.roles.push(targetRole);
+                        }
+
+                        // Update primary role
+                        if (existingUser.role === 'user' || existingUser.role !== targetRole) {
+                            existingUser.role = targetRole;
+                        }
+
                         // Always update club context when role changes
                         existingUser.clubId = req.params.id;
                         existingUser.clubName = updatedClub.name;
 
                         await existingUser.save();
-                        console.log(`[Club Update] Synced global role for ${email} to ${targetRole}`);
+                        console.log(`[Club Update] Synced global role for ${email} to ${targetRole}, roles: ${existingUser.roles.join(', ')}`);
                     }
                 }
             }
@@ -488,13 +600,18 @@ router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
         // Recalculate and update user role based on remaining memberships
         const user = await User.findOne({ email: { $regex: new RegExp(`^${escapeRegExp(memberEmail)}$`, 'i') } });
         if (user && user.role !== 'admin') {
-            // Check all memberships for this user
-            // Note: If demoted, the 'Member' record still exists, so they are still a 'club-member' at least
+            // Check all remaining memberships for this user
             const remainingMemberships = await ClubMember.find({
                 email: { $regex: new RegExp(`^${escapeRegExp(memberEmail)}$`, 'i') }
             });
 
+            // Initialize roles array if it doesn't exist
+            if (!user.roles) {
+                user.roles = [];
+            }
+
             let newRole = 'user';
+            const newRoles = [];
 
             if (remainingMemberships.length > 0) {
                 // Default base role if any membership exists
@@ -513,17 +630,46 @@ router.delete('/:id/members/:memberId', verifyClubOfficer, async (req, res) => {
                     boardTypes.includes('main') ||
                     boardTypes.includes('executive');
 
-                if (hasAdvisor) newRole = 'advisor';
-                else if (hasPresident) newRole = 'president';
-                else if (hasTreasurer) newRole = 'treasurer';
-                else if (hasOfficerAccess) newRole = 'club-secretary';
+                // Build roles array
+                if (hasAdvisor) {
+                    newRoles.push('advisor');
+                    newRole = 'advisor'; // Primary role
+                }
+                if (hasPresident) {
+                    newRoles.push('president');
+                    if (newRole === 'user' || newRole === 'club-member') newRole = 'president';
+                }
+                if (hasTreasurer) {
+                    newRoles.push('treasurer');
+                    if (newRole === 'user' || newRole === 'club-member') newRole = 'treasurer';
+                }
+                if (hasOfficerAccess) {
+                    newRoles.push('club-secretary');
+                    if (newRole === 'user' || newRole === 'club-member') newRole = 'club-secretary';
+                }
             }
+
+            // Check if user has teacher role - preserve it if they do
+            if (user.roles.includes('teacher') || user.role === 'teacher') {
+                newRoles.push('teacher');
+                // If they lost advisor role but still have teacher, set primary to teacher
+                if (!newRoles.includes('advisor') && newRole !== 'advisor') {
+                    newRole = 'teacher';
+                }
+            }
+
+            // Remove duplicates from roles array
+            user.roles = [...new Set(newRoles)];
 
             // Only update if role actually changes
             if (user.role !== newRole) {
                 user.role = newRole;
                 await user.save();
-                console.log(`[Club Delete] Synced global role for ${memberEmail} to ${newRole}`);
+                console.log(`[Club Delete] Synced global role for ${memberEmail} to ${newRole}, roles array: ${user.roles.join(', ')}`);
+            } else if (JSON.stringify(user.roles.sort()) !== JSON.stringify(newRoles.sort())) {
+                // Update if roles array changed even if primary role didn't
+                await user.save();
+                console.log(`[Club Delete] Updated roles array for ${memberEmail}: ${user.roles.join(', ')}`);
             }
         }
 

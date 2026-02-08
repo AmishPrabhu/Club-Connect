@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'treasurer' | 'advisor';
+export type UserRole = 'user' | 'club-secretary' | 'admin' | 'president' | 'treasurer' | 'advisor' | 'teacher';
 
 // Club member roles
 export type ClubMemberRole = 'president' | 'vice-president' | 'treasurer' | 'secretary' | 'coordinator' | 'member';
@@ -46,8 +46,12 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  roles?: UserRole[]; // Array of all roles user has (for multi-role support)
   clubId?: string; // For club secretaries
   clubName?: string; // For club secretaries
+  clubName?: string; // For club secretaries
+  managedClubs?: string[]; // For teachers - club IDs they manage
+  profileImage?: string; // Profile picture URL
   createdAt?: Date;
   updatedAt?: Date;
   likedClubs?: string[]; // Array of club IDs
@@ -78,8 +82,10 @@ export interface DBUser {
   email: string;
   name: string;
   role: UserRole;
+  role: UserRole;
   clubId?: string;
   clubName?: string;
+  profileImage?: string;
   createdAt: Date;
   updatedAt: Date;
 }
