@@ -312,7 +312,8 @@ router.post('/remove-teacher', verifyToken, async (req, res) => {
 router.get('/teacher/clubs', verifyToken, async (req, res) => {
     try {
         // Verify user is a teacher
-        if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        const isTeacher = req.user.role === 'teacher' || (req.user.roles && req.user.roles.includes('teacher'));
+        if (!isTeacher && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Only teachers can access this endpoint' });
         }
 
@@ -332,7 +333,8 @@ router.get('/teacher/clubs', verifyToken, async (req, res) => {
 router.post('/teacher/clubs', verifyToken, async (req, res) => {
     try {
         // Verify user is a teacher
-        if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        const isTeacher = req.user.role === 'teacher' || (req.user.roles && req.user.roles.includes('teacher'));
+        if (!isTeacher && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Only teachers can access this endpoint' });
         }
 
@@ -368,7 +370,8 @@ router.post('/teacher/clubs', verifyToken, async (req, res) => {
 router.delete('/teacher/clubs/:clubId', verifyToken, async (req, res) => {
     try {
         // Verify user is a teacher
-        if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        const isTeacher = req.user.role === 'teacher' || (req.user.roles && req.user.roles.includes('teacher'));
+        if (!isTeacher && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Only teachers can access this endpoint' });
         }
 
@@ -392,7 +395,8 @@ router.delete('/teacher/clubs/:clubId', verifyToken, async (req, res) => {
 router.get('/teacher/reports', verifyToken, async (req, res) => {
     try {
         // Verify user is a teacher
-        if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        const isTeacher = req.user.role === 'teacher' || (req.user.roles && req.user.roles.includes('teacher'));
+        if (!isTeacher && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Only teachers can access this endpoint' });
         }
 
@@ -403,7 +407,9 @@ router.get('/teacher/reports', verifyToken, async (req, res) => {
         const Post = (await import('../models/Post.js')).default;
         let query = { type: 'event', reportUrl: { $ne: null } };
 
-        if (req.user.role === 'teacher') {
+        // Ensure we filter for teachers (even if they have other roles) unless they are strictly ADMIN
+        // If they are admin, they see all. If they are teacher (or multi-role teacher), filter by managed clubs.
+        if (req.user.role !== 'admin') {
             if (!user.managedClubs || user.managedClubs.length === 0) {
                 return res.json([]); // No managed clubs, return empty array
             }

@@ -15,6 +15,7 @@ export default function TeacherDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddClubModal, setShowAddClubModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedYear, setSelectedYear] = useState<string>('');
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     useEffect(() => {
@@ -89,8 +90,22 @@ export default function TeacherDashboard() {
         downloadFile(report.reportUrl, filename);
     };
 
+    const getClubReports = (clubId: string) => {
+        let filtered = reports.filter(r => r.clubId === clubId);
+
+        if (selectedYear) {
+            filtered = filtered.filter(r => {
+                const reportYear = new Date(r.eventDate).getFullYear().toString();
+                return reportYear === selectedYear;
+            });
+        }
+
+        return filtered;
+    };
+
     const handleDownloadAllReports = async (clubId: string) => {
-        const clubReports = reports.filter(r => r.clubId === clubId);
+        // Use getClubReports to respect the current filter
+        const clubReports = getClubReports(clubId);
 
         if (clubReports.length === 0) {
             setMessage({ type: 'error', text: 'No reports to download.' });
@@ -108,10 +123,6 @@ export default function TeacherDashboard() {
                 downloadFile(report.reportUrl, filename);
             }, i * 1000); // 1s delay
         }
-    };
-
-    const getClubReports = (clubId: string) => {
-        return reports.filter(r => r.clubId === clubId);
     };
 
     const filteredClubs = allClubs.filter(club =>
@@ -270,17 +281,30 @@ export default function TeacherDashboard() {
 
                         {activeTab === 'reports' ? (
                             <>
-                                <div className="flex justify-between items-center mb-6">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Event Reports</h2>
-                                    {getClubReports(selectedClub.id!).length > 0 && (
-                                        <button
-                                            onClick={() => handleDownloadAllReports(selectedClub.id!)}
-                                            className="flex items-center gap-2 bg-[#DAA520] hover:bg-[#B8860B] text-white px-4 py-2 rounded-lg transition-colors"
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <select
+                                            value={selectedYear}
+                                            onChange={(e) => setSelectedYear(e.target.value)}
+                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#002147]"
                                         >
-                                            <Download className="w-5 h-5" />
-                                            Download All Reports
-                                        </button>
-                                    )}
+                                            <option value="">All Years</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                        </select>
+                                        {getClubReports(selectedClub.id!).length > 0 && (
+                                            <button
+                                                onClick={() => handleDownloadAllReports(selectedClub.id!)}
+                                                className="flex items-center gap-2 bg-[#DAA520] hover:bg-[#B8860B] text-white px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                Download All ({getClubReports(selectedClub.id!).length})
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {getClubReports(selectedClub.id!).length === 0 ? (
@@ -288,7 +312,9 @@ export default function TeacherDashboard() {
                                         <AlertCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Reports Available</h3>
                                         <p className="text-slate-500 dark:text-slate-400">
-                                            No event reports have been submitted for {selectedClub.name} yet.
+                                            {selectedYear
+                                                ? `No event reports found for ${selectedYear}.`
+                                                : `No event reports have been submitted for ${selectedClub.name} yet.`}
                                         </p>
                                     </div>
                                 ) : (

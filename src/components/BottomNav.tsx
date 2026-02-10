@@ -101,6 +101,17 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                             <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"><User className="w-4 h-4" /></div>
                             <span>My Profile</span>
                         </button>
+
+                        {/* Teacher Dashboard - Show if user has teacher role in roles array OR primary role */}
+                        {(user.role === 'teacher' || user.roles?.includes('teacher')) && (
+                            <button
+                                onClick={() => { onNavigate('teacherDashboard'); setShowMenu(false); }}
+                                className="w-full text-left px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-[#002147] dark:hover:text-blue-400 rounded-xl flex items-center gap-3 font-medium transition-colors"
+                            >
+                                <div className="p-1.5 rounded-lg bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400"><Shield className="w-4 h-4" /></div>
+                                <span>Teacher Dashboard</span>
+                            </button>
+                        )}
                     </div>
 
                     <div className="border-t border-slate-100 dark:border-slate-700 p-2 mt-1">

@@ -456,16 +456,27 @@ router.post('/:id/members', verifyClubOfficer, async (req, res) => {
         let existingUser = null;
         if (userId) {
             existingUser = await User.findById(userId);
-            if (existingUser && existingUser.role === 'user') {
-                existingUser.role = 'club-member';
-                await existingUser.save();
-            }
         } else if (email) {
             existingUser = await User.findOne({ email });
-            if (existingUser && existingUser.role === 'user') {
-                existingUser.role = 'club-member';
-                await existingUser.save();
+        }
+
+        if (existingUser) {
+            // Initialize roles array if missing
+            if (!existingUser.roles) existingUser.roles = [];
+
+            // Add 'club-member' to roles if not present
+            if (!existingUser.roles.includes('club-member')) {
+                existingUser.roles.push('club-member');
             }
+
+            // Only update primary role to 'club-member' if their current role is 'user'
+            // Do NOT overwrite if they are teacher, admin, advisor, etc.
+            const privilegedRoles = ['admin', 'teacher', 'advisor', 'president', 'treasurer', 'club-secretary'];
+            if (existingUser.role === 'user' && !privilegedRoles.includes(existingUser.role)) {
+                existingUser.role = 'club-member';
+            }
+
+            await existingUser.save();
         }
 
         // Send invitation email if user doesn't exist (fire-and-forget, don't block API response)

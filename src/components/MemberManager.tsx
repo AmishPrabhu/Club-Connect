@@ -10,6 +10,7 @@ interface MemberManagerProps {
     clubName: string;
     isReadOnly?: boolean;
     userRole?: UserRole;
+    boardType?: string;
 }
 
 // Helper to sort members by board priority: Main > Executive > Member
@@ -35,7 +36,7 @@ const BOARD_TYPE_COLORS: Record<string, string> = {
     'member': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
 };
 
-export default function MemberManager({ clubId, clubName, isReadOnly = false, userRole }: MemberManagerProps) {
+export default function MemberManager({ clubId, clubName, isReadOnly = false, userRole, boardType }: MemberManagerProps) {
     const [members, setMembers] = useState<ClubMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -257,7 +258,14 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
     // Check if user can export (secretary or president) - handle both original role names and lowercase from membership
     const roleLC = userRole?.toLowerCase();
-    const canExport = roleLC === 'club-secretary' || roleLC === 'president' || roleLC === 'secretary' || roleLC === 'teacher' || roleLC === 'advisor';
+    const canExport =
+        roleLC === 'club-secretary' ||
+        roleLC === 'president' ||
+        roleLC === 'secretary' ||
+        roleLC === 'teacher' ||
+        roleLC === 'advisor' ||
+        boardType === 'main' ||
+        boardType === 'executive';
 
     return (
         <div className="space-y-6">

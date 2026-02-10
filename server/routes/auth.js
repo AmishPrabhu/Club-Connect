@@ -196,7 +196,12 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
         // Create token
         const token = jwt.sign(
-            { id: newUser._id, email: newUser.email, role: newUser.role },
+            {
+                id: newUser._id,
+                email: newUser.email,
+                role: newUser.role,
+                roles: newUser.roles || []
+            },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -324,7 +329,12 @@ router.post('/login', authLimiter, async (req, res) => {
 
         // Create token
         const token = jwt.sign(
-            { id: user._id, email: user.email, role: effectiveRole },
+            {
+                id: user._id,
+                email: user.email,
+                role: effectiveRole,
+                roles: user.roles || []
+            },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -538,7 +548,12 @@ router.post('/google', async (req, res) => {
 
         // Create JWT token
         const token = jwt.sign(
-            { id: user._id, email: user.email, role: effectiveRole },
+            {
+                id: user._id,
+                email: user.email,
+                role: effectiveRole,
+                roles: user.roles || []
+            },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -647,7 +662,12 @@ router.post('/google/signup', async (req, res) => {
 
         // Create token
         const token = jwt.sign(
-            { id: newUser._id, email: newUser.email, role: newUser.role },
+            {
+                id: newUser._id,
+                email: newUser.email,
+                role: newUser.role,
+                roles: newUser.roles || []
+            },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
