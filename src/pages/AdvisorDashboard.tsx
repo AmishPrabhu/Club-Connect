@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2, Plus } from 'lucide-react';
+import { Shield, Calendar, Clock, Users, Eye, UserPlus, Edit, X, Trash2, Plus, FileText, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
 import { Page } from '../types/page';
 import { DBPost, DBClub, ClubMember } from '../types/auth';
-import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer, verifyEventBudget, getClubMembers, removeClubMember } from '../lib/dbService';
+import { getPosts, getClubs, createClubSecretary, createClubPresident, createClubTreasurer, removeClubOfficer, verifyEventBudget, getClubMembers, removeClubMember, TeacherReport, getTeacherReports } from '../lib/dbService';
 import ConfirmModal from '../components/ConfirmModal';
 
 interface AdvisorDashboardProps {
@@ -17,8 +17,9 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
     const { selectedMembership } = useNavigation();
     const activeClubId = selectedMembership?.clubId || user?.clubId;
 
-    const [activeTab, setActiveTab] = useState<'events' | 'team' | 'budgets'>('events');
+    const [activeTab, setActiveTab] = useState<'events' | 'team' | 'budgets' | 'reports'>('events');
     const [events, setEvents] = useState<DBPost[]>([]);
+    const [reports, setReports] = useState<TeacherReport[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [clubName, setClubName] = useState('');
     const [club, setClub] = useState<DBClub | null>(null);
@@ -105,6 +106,11 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                 const members = await getClubMembers(activeClubId);
                 setClubMembers(members);
 
+                // Get reports
+                const fetchedReports = await getTeacherReports();
+                const clubReports = fetchedReports.filter(r => r.clubId === activeClubId);
+                setReports(clubReports);
+
             } catch (error) {
                 console.error('Error loading advisor data:', error);
             } finally {
@@ -114,6 +120,31 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
 
         loadData();
     }, [activeClubId, selectedMembership, user, onNavigate]);
+
+
+
+    const downloadFile = async (url: string, filename: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            window.URL.revokeObjectURL(blobUrl);
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(url, '_blank');
+        }
+    };
+
+    const handleDownloadReport = (report: TeacherReport) => {
+        const filename = `Report-${report.eventTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+        downloadFile(report.reportUrl, filename);
+    };
 
     // Helper function to get officers by role
     const getOfficersByRole = (role: string): ClubMember[] => {
@@ -336,6 +367,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                 <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
+                        { id: 'reports', label: 'Reports', icon: FileText },
                         { id: 'budgets', label: 'Budgets', icon: Edit },
                         { id: 'team', label: 'Team', icon: Users },
                     ].map((tab) => {
@@ -343,7 +375,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id as 'events' | 'team' | 'budgets')}
+                                onClick={() => setActiveTab(tab.id as 'events' | 'team' | 'budgets' | 'reports')}
                                 className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 font-semibold transition-all border-b-2 whitespace-nowrap flex-shrink-0 text-sm md:text-base ${activeTab === tab.id
                                     ? 'text-[#002147] dark:text-cyan-400 border-[#002147]'
                                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border-transparent'
@@ -396,6 +428,66 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                         </div>
                                     </div>
                                 ))
+                            )}
+                        </div>
+                    )}
+
+                    {/* Reports Tab */}
+                    {activeTab === 'reports' && (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white mb-2">Event Reports</h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                                        View and download event reports submitted by the club.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {reports.length === 0 ? (
+                                <div className="text-center py-12 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                    <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                                    <p className="text-slate-500 dark:text-slate-400">No reports available.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {reports.map((report) => (
+                                        <div
+                                            key={report.id}
+                                            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all"
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <FileText className="w-6 h-6 text-[#002147] dark:text-[#DAA520]" />
+                                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">{report.eventTitle}</h3>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                                            <Calendar className="w-4 h-4" />
+                                                            Event Date: {new Date(report.eventDate).toLocaleDateString()}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                                            <Users className="w-4 h-4" />
+                                                            Submitted by: {report.reportSubmittedByName}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                                            <Clock className="w-4 h-4" />
+                                                            Submitted: {new Date(report.reportSubmittedAt).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDownloadReport(report)}
+                                                    className="bg-[#002147] hover:bg-[#003366] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ml-4"
+                                                >
+                                                    <Download className="w-5 h-5" />
+                                                    Download
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     )}

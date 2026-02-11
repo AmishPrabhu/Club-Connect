@@ -391,29 +391,61 @@ router.delete('/teacher/clubs/:clubId', verifyToken, async (req, res) => {
     }
 });
 
-// Get all reports for teacher's managed clubs
+// Get all reports for teacher's managed clubs AND advisor's assigned clubs
 router.get('/teacher/reports', verifyToken, async (req, res) => {
     try {
-        // Verify user is a teacher
-        const isTeacher = req.user.role === 'teacher' || (req.user.roles && req.user.roles.includes('teacher'));
-        if (!isTeacher && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Only teachers can access this endpoint' });
+        const userId = req.user.id;
+        const userRole = req.user.role;
+        const userRoles = req.user.roles || [];
+
+        // Verify user is a teacher OR advisor OR admin
+        const isTeacher = userRole === 'teacher' || userRoles.includes('teacher');
+        const isAdvisor = userRole === 'advisor' || userRoles.includes('advisor');
+        const isAdmin = userRole === 'admin';
+
+        if (!isTeacher && !isAdvisor && !isAdmin) {
+            return res.status(403).json({ message: 'Only teachers, advisors, or admins can access this endpoint' });
         }
 
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // For admin, show all reports; for teacher, only show reports from managed clubs
         const Post = (await import('../models/Post.js')).default;
+        const ClubMember = (await import('../models/ClubMember.js')).default;
+
         let query = { type: 'event', reportUrl: { $ne: null } };
 
-        // Ensure we filter for teachers (even if they have other roles) unless they are strictly ADMIN
-        // If they are admin, they see all. If they are teacher (or multi-role teacher), filter by managed clubs.
-        if (req.user.role !== 'admin') {
-            if (!user.managedClubs || user.managedClubs.length === 0) {
-                return res.json([]); // No managed clubs, return empty array
+        // If not admin, restrict to managed clubs
+        if (!isAdmin) {
+            let accessibleClubIds = [];
+
+            // 1. Add clubs managed by Teacher (from User.managedClubs)
+            if (isTeacher && user.managedClubs && user.managedClubs.length > 0) {
+                accessibleClubIds.push(...user.managedClubs);
             }
-            query.clubId = { $in: user.managedClubs };
+
+            // 2. Add clubs where user is an Advisor (from ClubMember)
+            if (isAdvisor) {
+                const advisorMemberships = await ClubMember.find({
+                    $or: [
+                        { userId: userId },
+                        { email: user.email }
+                    ],
+                    role: { $regex: /^advisor$/i } // Case-insensitive check for 'Advisor'
+                });
+
+                const advisorClubIds = advisorMemberships.map(m => m.clubId);
+                accessibleClubIds.push(...advisorClubIds);
+            }
+
+            // Remove duplicates
+            accessibleClubIds = [...new Set(accessibleClubIds)];
+
+            if (accessibleClubIds.length === 0) {
+                return res.json([]); // No accessible clubs with reports
+            }
+
+            query.clubId = { $in: accessibleClubIds };
         }
 
         const events = await Post.find(query).sort({ reportSubmittedAt: -1 });
@@ -434,7 +466,7 @@ router.get('/teacher/reports', verifyToken, async (req, res) => {
 
         res.json(reports);
     } catch (error) {
-        console.error('Error fetching teacher reports:', error);
+        console.error('Error fetching reports:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
