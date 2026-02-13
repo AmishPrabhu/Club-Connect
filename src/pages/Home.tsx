@@ -537,21 +537,45 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
                           {/* Action Buttons */}
                           <div className="flex flex-col gap-3">
-                            {/* Register Button - Shows when registrationLink exists */}
-                            {post.registrationLink && (
-                              <a
-                                href={post.registrationLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-full py-3 bg-[#DAA520] hover:bg-[#c99a1d] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                                Register Now
-                              </a>
-                            )}
+                            {/* Register Button - Shows when registrationLink exists and registration hasn't ended */}
+                            {post.registrationLink && (() => {
+                              // Check if registration period has ended
+                              if (post.registrationEnd) {
+                                const registrationEndDateTime = new Date(post.registrationEnd);
+                                if (post.registrationEndTime) {
+                                  const timeMatch = post.registrationEndTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+                                  if (timeMatch) {
+                                    let hours = parseInt(timeMatch[1]);
+                                    const minutes = parseInt(timeMatch[2]);
+                                    const period = timeMatch[3];
+                                    if (period) {
+                                      if (period.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+                                      if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
+                                    }
+                                    registrationEndDateTime.setHours(hours, minutes, 59, 999);
+                                  }
+                                } else {
+                                  registrationEndDateTime.setHours(23, 59, 59, 999);
+                                }
+                                if (registrationEndDateTime < new Date()) {
+                                  return null;
+                                }
+                              }
+                              return (
+                                <a
+                                  href={post.registrationLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-full py-3 bg-[#DAA520] hover:bg-[#c99a1d] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                  Register Now
+                                </a>
+                              );
+                            })()}
 
                             {/* RSVP Button */}
                             <button
