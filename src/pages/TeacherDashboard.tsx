@@ -132,14 +132,14 @@ export default function TeacherDashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="w-12 h-12 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 pb-20">
+        <div className="min-h-screen pb-20">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#002147] to-[#003366] text-white p-6 shadow-lg">
                 <div className="max-w-7xl mx-auto">
@@ -186,7 +186,7 @@ export default function TeacherDashboard() {
                         </div>
 
                         {managedClubs.length === 0 ? (
-                            <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-sm">
+                            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-12 text-center shadow-sm">
                                 <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Clubs Added</h3>
                                 <p className="text-slate-500 dark:text-slate-400 mb-6">Add clubs to start monitoring their event reports</p>
@@ -204,7 +204,7 @@ export default function TeacherDashboard() {
                                     return (
                                         <div
                                             key={club.id}
-                                            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-slate-200 dark:border-slate-700"
+                                            className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm hover:shadow-md transition-all border border-slate-200/60 dark:border-slate-700/40"
                                         >
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="flex items-center gap-3">
@@ -287,7 +287,7 @@ export default function TeacherDashboard() {
                                         <select
                                             value={selectedYear}
                                             onChange={(e) => setSelectedYear(e.target.value)}
-                                            className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                                            className="px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#002147]"
                                         >
                                             <option value="">All Years</option>
                                             <option value="2024">2024</option>
@@ -308,7 +308,7 @@ export default function TeacherDashboard() {
                                 </div>
 
                                 {getClubReports(selectedClub.id!).length === 0 ? (
-                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-sm">
+                                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-12 text-center shadow-sm">
                                         <AlertCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Reports Available</h3>
                                         <p className="text-slate-500 dark:text-slate-400">
@@ -322,7 +322,7 @@ export default function TeacherDashboard() {
                                         {getClubReports(selectedClub.id!).map(report => (
                                             <div
                                                 key={report.id}
-                                                className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all"
+                                                className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40 hover:shadow-md transition-all"
                                             >
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
@@ -373,8 +373,8 @@ export default function TeacherDashboard() {
             {/* Add Club Modal */}
             {
                 showAddClubModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl">
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Add Club to Dashboard</h3>
                                 <button

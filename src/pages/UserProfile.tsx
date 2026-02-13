@@ -511,7 +511,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       )}
 
       {/* Profile Header - Horizontal layout on mobile */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl p-3 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-4 md:mb-8">
+      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-4 md:mb-8">
         <div className="flex items-start gap-3 sm:gap-6">
           {/* Avatar - Left side */}
           <div className="relative group flex-shrink-0">
@@ -756,7 +756,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden relative z-30">
+        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 mb-8 overflow-hidden relative z-30">
           {/* Mobile Header for Tabs */}
           <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
             <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1047,7 +1047,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                     {displayedEvents.map(({ event, rsvpDate, certificateUrl }) => (
                       <div
                         key={event.id}
-                        className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+                        className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/60 dark:border-slate-700/40 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                           <div className="flex-1">
@@ -1110,7 +1110,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
                             <button
                               onClick={() => event.id && onNavigateToPost(event.id)}
-                              className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                              className="p-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
                               title="View Details"
                             >
                               <ExternalLink className="w-4 h-4" />
@@ -1143,7 +1143,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 ) : (
                   <div className="grid gap-4">
                     {userTasks.map((task) => (
-                      <div key={task.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                      <div key={task.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/60 dark:border-slate-700/40 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -1184,7 +1184,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                             <div>
                               <button
                                 onClick={() => onNavigateToPost(task.eventId)}
-                                className="p-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                                className="p-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-blue-600 dark:text-blue-400 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
                                 title="View Event"
                               >
                                 <ExternalLink className="w-4 h-4" />
@@ -1218,7 +1218,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                     <div className="space-y-4">
                       {clubMessages[activeTab.replace('messages-', '')]?.length > 0 ? (
                         clubMessages[activeTab.replace('messages-', '')].map(msg => (
-                          <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                          <div key={msg.id} className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-200/60 dark:border-slate-700/40">
                             <div className="flex justify-between items-start mb-3">
                               <div>
                                 <h4 className="font-bold text-lg text-slate-900 dark:text-white">{msg.title}</h4>
@@ -1261,7 +1261,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
           </p>
           <button
             onClick={() => setShowChangePasswordModal(true)}
-            className="px-4 py-2 bg-white dark:bg-slate-800 text-blue-600 border border-blue-200 dark:border-blue-900/50 rounded-lg text-sm font-bold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            className="px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-blue-600 border border-blue-200 dark:border-blue-900/50 rounded-lg text-sm font-bold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
           >
             Change Password
           </button>
@@ -1275,7 +1275,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
           </p>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="px-4 py-2 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            className="px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-red-600 border border-red-200 dark:border-red-900/50 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >
             Delete Account
           </button>
@@ -1285,8 +1285,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       {/* Delete Confirmation Modal */}
       {
         showDeleteModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                   <div className="w-6 h-6 text-red-600 dark:text-red-400">⚠️</div>
@@ -1388,8 +1388,8 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
       {/* Change Password Modal */}
       {showChangePasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                 <Lock className="w-6 h-6 text-blue-600 dark:text-blue-400" />

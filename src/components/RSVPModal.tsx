@@ -100,7 +100,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform animate-slideUp">
+      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl max-w-md w-full p-8 transform animate-slideUp">
         {/* Form Step - Only shown for non-logged-in users */}
         {step === 'form' && (
           <>

@@ -149,7 +149,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                 Back
             </button>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg border border-slate-200/60 dark:border-slate-700/40">
                 {/* Cover Image */}
                 {post.coverImage && (
                     <div
@@ -162,7 +162,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 duration-300 pointer-events-none">
-                            <span className="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm shadow-sm font-medium">Click to expand</span>
+                            <span className="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full shadow-sm font-medium">Click to expand</span>
                         </div>
                     </div>
                 )}

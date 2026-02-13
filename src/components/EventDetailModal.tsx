@@ -56,7 +56,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={handleBackdropClick}
             >
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
                     {/* Header - Simple Gradient without Image */}
                     <div className="relative bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
                         <button

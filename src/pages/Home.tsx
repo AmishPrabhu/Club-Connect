@@ -126,33 +126,38 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
 
 
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'event': return 'from-blue-500 to-cyan-500';
-      case 'announcement': return 'from-purple-500 to-pink-500';
-      default: return 'from-amber-500 to-orange-500';
-    }
+  const getEventColor = (_type: string) => {
+    return 'from-slate-600 to-slate-700 dark:from-slate-500 dark:to-slate-600';
   };
 
   // Filter to show only upcoming/incomplete events on home page (exclude announcements)
   const upcomingPosts = posts.filter(post => post.type === 'event' && post.date && new Date(post.date || '').getTime() >= new Date().getTime());
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col min-h-screen relative">
+      {/* Page-level floating dots — visible across the entire page */}
+      <div className="page-dots">
+        <div className="float-dot w-3 h-3 bg-cyan-400 top-[8%] right-[12%] animate-float-slow opacity-70"></div>
+        <div className="float-dot w-2.5 h-2.5 bg-[#DAA520] top-[25%] right-[35%] animate-float-medium opacity-60"></div>
+        <div className="float-dot w-2 h-2 bg-purple-400 top-[40%] right-[8%] animate-float-fast opacity-50"></div>
+        <div className="float-dot w-1.5 h-1.5 bg-green-400 top-[55%] left-[55%] animate-float-medium opacity-50" style={{ animationDelay: '1s' }}></div>
+        <div className="float-dot w-2 h-2 bg-pink-300 top-[15%] left-[65%] animate-float-slow opacity-40" style={{ animationDelay: '2s' }}></div>
+        <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[65%] left-[10%] animate-float-medium opacity-50" style={{ animationDelay: '0.5s' }}></div>
+        <div className="float-dot w-1.5 h-1.5 bg-amber-400 top-[75%] right-[20%] animate-float-fast opacity-45" style={{ animationDelay: '1.5s' }}></div>
+        <div className="float-dot w-2 h-2 bg-rose-300 top-[85%] left-[40%] animate-float-slow opacity-35" style={{ animationDelay: '3s' }}></div>
+        <div className="float-dot w-1.5 h-1.5 bg-teal-400 top-[45%] left-[25%] animate-float-medium opacity-40" style={{ animationDelay: '2.5s' }}></div>
+        <div className="float-dot w-2 h-2 bg-violet-400 top-[92%] right-[45%] animate-float-slow opacity-35" style={{ animationDelay: '4s' }}></div>
+      </div>
 
       {/* Hero Section */}
-      {/* Hero Section */}
-      <div className="bg-[#002147] relative overflow-hidden pt-4 pb-8 md:pt-20 md:pb-32 transition-all duration-300">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.wce.ac.in/images/WCE_Main_Building.jpg')] bg-cover bg-center mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#002147]/90"></div>
+      <div className="relative overflow-hidden pt-4 pb-8 md:pt-20 md:pb-32 transition-all duration-300">
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
           {/* Left Column: Text & Actions */}
           <div className="w-full md:w-3/5 text-center md:text-left">
             {/* Mobile-Only App Greeting */}
             <div className="block md:hidden w-full text-left mb-4">
-              <p className="text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">
+              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
                 {(() => {
                   if (!user) return 'Welcome Guest';
                   const parts = user.name.split(' ').filter(p => p.trim());
@@ -172,21 +177,21 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   return `Welcome Back, ${friendlyName}`;
                 })()}
               </p>
-              <h1 className="text-2xl font-serif font-bold text-white leading-tight">
+              <h1 className="text-2xl font-serif font-bold text-slate-900 dark:text-white leading-tight">
                 Campus <span className="text-[#DAA520]">Connect</span>
               </h1>
             </div>
 
             {/* Desktop-Only Full Branding */}
             <div className="hidden md:block">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/50 border border-blue-700 text-blue-200 text-xs font-bold uppercase tracking-wider mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-6">
                 <Award className="w-4 h-4 text-[#DAA520]" />
                 <span>Est. 1947 • A Premier Institute</span>
               </div>
-              <h1 className="text-6xl font-serif font-bold text-white leading-tight mb-6">
+              <h1 className="text-6xl font-serif font-bold text-slate-900 dark:text-white leading-tight mb-6">
                 Walchand College of <span className="text-[#DAA520]">Engineering</span>
               </h1>
-              <p className="text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed">
+              <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
                 Discover vibrant student communities, participate in exciting events, and lead the future. The official platform for all club activities.
               </p>
             </div>
@@ -197,11 +202,12 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           {/* Right Column: Hero Visual - Desktop Only */}
           <div className="hidden md:block md:w-2/5">
             <div className="relative">
-              <div className="absolute -inset-4 bg-[#DAA520]/20 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute -inset-6 bg-[#DAA520]/15 dark:bg-[#DAA520]/10 rounded-full blur-3xl"></div>
+              <div className="absolute -inset-2 bg-white/30 dark:bg-white/5 rounded-full blur-xl"></div>
               <img
                 src="/wce-logo.png"
                 alt="WCE Emblem"
-                className="w-64 h-64 object-contain mx-auto relative z-10 drop-shadow-2xl opacity-90"
+                className="w-64 h-64 object-contain mx-auto relative z-10 drop-shadow-[0_8px_24px_rgba(218,165,32,0.25)]"
               />
             </div>
           </div>
@@ -220,7 +226,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <button
               id="tour-stats-clubs-card"
               onClick={() => onNavigate('dashboard')}
-              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-lg md:rounded-2xl shadow-lg p-2.5 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-[#DAA520] text-left gap-1 md:gap-0"
+              className="w-full glass-card glass-card-hover rounded-lg md:rounded-2xl p-2.5 md:p-6 flex flex-row items-center justify-between group cursor-pointer text-left gap-1 md:gap-0"
             >
               <div className="flex flex-col items-start">
                 <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
@@ -238,7 +244,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   )}
                 </div>
               </div>
-              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 dark:bg-white/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 {isLoading ? (
                   <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
                 ) : (
@@ -251,7 +257,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             <button
               id="tour-stats-events-card"
               onClick={() => onNavigate('events')}
-              className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-[#002147] dark:text-white rounded-lg md:rounded-2xl shadow-lg p-2.5 md:p-6 flex flex-row items-center justify-between group transition-all transform hover:-translate-y-1 hover:shadow-xl border-l-4 border-l-[#002147] text-left gap-1 md:gap-0"
+              className="w-full glass-card glass-card-hover rounded-lg md:rounded-2xl p-2.5 md:p-6 flex flex-row items-center justify-between group cursor-pointer text-left gap-1 md:gap-0"
             >
               <div className="flex flex-col items-start">
                 <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
@@ -269,7 +275,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   )}
                 </div>
               </div>
-              <div className="w-7 h-7 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 dark:bg-white/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 {isLoading ? (
                   <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
                 ) : (
@@ -295,14 +301,14 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-                  className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#002147] dark:focus:border-blue-500 shadow-sm focus:shadow-lg transition-all"
+                  className="w-full pl-12 pr-4 py-4 glass-input rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DAA520]/50 focus:border-[#DAA520]/30 shadow-sm focus:shadow-lg transition-all"
                 />
 
               </div>
 
               {/* Live Search Dropdown */}
               {showDropdown && searchQuery.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-xl border border-slate-200/60 dark:border-slate-700/40 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* Clubs Section */}
                   {matchingClubs.length > 0 && (
                     <div className="py-2 border-b border-slate-100 dark:border-slate-700/50">
@@ -406,7 +412,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : upcomingPosts.length === 0 ? (
-                <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                <div className="text-center py-16 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
                   <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-white">No upcoming events</h3>
                   <p className="text-slate-500 dark:text-slate-400">Check back later for new activities!</p>
@@ -418,10 +424,10 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 cursor-pointer mb-6 transform hover:-translate-y-1 duration-300"
+                      className="group glass-card glass-card-hover rounded-3xl overflow-hidden cursor-pointer mb-6"
                     >
                       {/* Card Header for Desktop/Mobile Consistency */}
-                      <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
+                      <div className="px-5 py-4 flex items-center justify-between border-b border-white/20 dark:border-slate-700/30">
                         <div className="flex items-center gap-3">
                           {club?.image ? (
                             <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white dark:bg-slate-700 shadow-sm p-0.5" />
@@ -430,7 +436,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                           )}
                           <span className="font-bold text-slate-900 dark:text-white font-serif truncate max-w-[150px] md:max-w-none">{post.clubName}</span>
                         </div>
-                        <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                        <span className="px-3 py-1 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
                           Upcoming
                         </span>
                       </div>
@@ -449,7 +455,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 group-hover/image:scale-110"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
-                                <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">Click to expand</span>
                               </div>
                             </>
                           ) : (
@@ -458,14 +464,14 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                             </div>
                           )}
                           {/* Mobile Date Overlay */}
-                          <div className="md:hidden absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center">
+                          <div className="md:hidden absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center">
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{post.date ? new Date(post.date!).toLocaleDateString('en-US', { month: 'short' }) : '---'}</span>
                             <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{post.date ? new Date(post.date!).getDate() : '--'}</span>
                           </div>
                         </div>
 
                         {/* Event Details */}
-                        <div className="flex-1 min-w-0 max-w-full p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
+                        <div className="flex-1 min-w-0 max-w-full p-5 md:p-6 flex flex-col justify-between bg-white/85 dark:bg-slate-900/80 backdrop-blur-md">
                           <div>
                             <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-all w-full">
                               {post.title}
@@ -538,7 +544,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-[#DAA520] hover:bg-[#c99a1d] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -553,7 +559,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                 e.stopPropagation();
                                 setRsvpEvent(post);
                               }}
-                              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                              className="w-full py-3 bg-[#002147] hover:bg-[#003366] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -570,13 +576,13 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             </div>
 
             <div className="hidden md:block lg:col-span-1" id="tour-notifications-panel">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 h-full">
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+              <div className="glass-card rounded-2xl p-6 h-full">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/20 dark:border-slate-700/30">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-slate-900 dark:text-white">Announcements</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Latest announcements</p>
                   </div>
-                  <Bell className="w-5 h-5 text-[#DAA520] animate-pulse" />
+                  <Bell className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                 </div>
 
                 {notifications.length === 0 ? (
@@ -598,10 +604,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                         onClick={() => onNavigateToNotification(notif)}
                       >
                         <div className="flex gap-3 items-start">
-                          <div className={`mt-0.5 p-1.5 rounded-md flex-shrink-0 ${notif.type === 'system' ? 'bg-amber-100 text-amber-600' :
-                            notif.type === 'announcement' ? 'bg-purple-100 text-purple-600' :
-                              'bg-blue-100 text-blue-600'
-                            }`}>
+                          <div className={`mt-0.5 p-1.5 rounded-md flex-shrink-0 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400`}>
                             {notif.type === 'system' ? <Shield className="w-3.5 h-3.5" /> :
                               notif.type === 'announcement' ? <Megaphone className="w-3.5 h-3.5" /> :
                                 <Calendar className="w-3.5 h-3.5" />}
@@ -644,7 +647,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           <div className="flex flex-col md:flex-row gap-6 lg:gap-8 h-auto md:h-[500px]">
             {/* Left: MiniCalendar - Styled */}
             <div className="w-full md:w-auto flex-none">
-              <div className="w-full md:w-[320px] lg:w-[350px] h-full bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-6 text-sm">
+              <div className="w-full md:w-[320px] lg:w-[350px] h-full glass-card rounded-2xl overflow-hidden p-6 text-sm">
                 <MiniCalendar
                   events={posts}
                   selectedDate={selectedDate}
@@ -654,7 +657,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             </div>
 
             {/* Right: Weekly Events - Styled */}
-            <div className="flex-1 h-full min-w-0 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="flex-1 h-full min-w-0 glass-card rounded-2xl overflow-hidden">
               <WeeklyEvents
                 events={posts}
                 onNavigateToPost={onNavigateToPost}

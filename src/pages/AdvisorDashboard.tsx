@@ -307,7 +307,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12" >
             {/* Header */}
-            < div className="mb-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border-l-4 border-[#DAA520]" >
+            < div className="mb-4 p-3 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-sm border-l-4 border-[#DAA520]" >
                 <div className="flex flex-row items-center gap-3">
                     <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-[#002147] shrink-0">
                         <Shield className="w-5 h-5 md:w-6 md:h-6 text-[#002147]" />
@@ -325,7 +325,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
 
             {/* Stats Cards */}
             < div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6" >
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-[#002147]">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-[#002147]">
                     <div className="flex flex-col items-center text-center gap-1">
                         <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-1">
                             <Calendar className="w-4 h-4 text-[#002147] dark:text-blue-400" />
@@ -337,7 +337,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-[#DAA520]">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-[#DAA520]">
                     <div className="flex flex-col items-center text-center gap-1">
                         <div className="p-1.5 bg-amber-50 dark:bg-amber-900/20 rounded-lg mb-1">
                             <Clock className="w-4 h-4 text-[#DAA520] dark:text-green-400" />
@@ -349,7 +349,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-slate-400">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 shadow-sm border-l-2 md:border-l-4 border-slate-400">
                     <div className="flex flex-col items-center text-center gap-1">
                         <div className="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg mb-1">
                             <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
@@ -363,7 +363,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
             </div >
 
             {/* Navigation Tabs */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-6 md:mb-8 overflow-hidden">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 mb-6 md:mb-8 overflow-hidden">
                 <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto scrollbar-hide">
                     {[
                         { id: 'events', label: 'Events', icon: Calendar },
@@ -454,7 +454,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     {reports.map((report) => (
                                         <div
                                             key={report.id}
-                                            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all"
+                                            className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40 hover:shadow-md transition-all"
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
@@ -517,7 +517,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             return (
                                                 <div
                                                     key={event.id}
-                                                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                    className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 border border-slate-200/60 dark:border-slate-700/40 shadow-sm"
                                                 >
                                                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                                                         <div className="flex-1">
@@ -610,7 +610,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     <div className="space-y-2">
                                         {getOfficersByRole('secretary').length > 0 ? (
                                             getOfficersByRole('secretary').map(officer => (
-                                                <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div key={officer.id} className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
@@ -626,7 +626,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             ))
                                         ) : (
                                             club?.secretaryEmail ? (
-                                                <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">Secretary</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.secretaryEmail}</p>
@@ -670,7 +670,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     <div className="space-y-2">
                                         {getOfficersByRole('president').length > 0 ? (
                                             getOfficersByRole('president').map(officer => (
-                                                <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div key={officer.id} className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
@@ -686,7 +686,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             ))
                                         ) : (
                                             club?.presidentEmail ? (
-                                                <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">President</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.presidentEmail}</p>
@@ -730,7 +730,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     <div className="space-y-2">
                                         {getOfficersByRole('treasurer').length > 0 ? (
                                             getOfficersByRole('treasurer').map(officer => (
-                                                <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div key={officer.id} className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
@@ -746,7 +746,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             ))
                                         ) : (
                                             club?.treasurerEmail ? (
-                                                <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                <div className="flex justify-between items-center bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                                     <div className="min-w-0">
                                                         <p className="font-medium text-sm text-slate-900 dark:text-white truncate">Treasurer</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.treasurerEmail}</p>
@@ -784,7 +784,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
             {
                 showEditRoleModal && editingRole && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-6 w-full max-w-md">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                                     {club?.secretaryEmail && editingRole === 'secretary' ? 'Edit' :

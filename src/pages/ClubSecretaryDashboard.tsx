@@ -76,7 +76,7 @@ function NotificationSender({ club }: { club: DBClub }) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Notification title"
             />
           </div>
@@ -88,7 +88,7 @@ function NotificationSender({ club }: { club: DBClub }) {
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Your notification message..."
             />
           </div>
@@ -348,7 +348,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Message Subject"
               />
             </div>
@@ -358,7 +358,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
                 rows={4}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Write your message here..."
               />
             </div>
@@ -392,7 +392,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
         ) : (
           <div className="space-y-4">
             {pastMessages.map((msg) => (
-              <div key={msg.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+              <div key={msg.id} className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
                 <div className="flex justify-between items-start mb-2">
                   <h5 className="font-bold text-slate-900 dark:text-white">{msg.title}</h5>
                   <span className="text-xs text-slate-500">{new Date(msg.createdAt).toLocaleDateString()}</span>
@@ -810,7 +810,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Header - Horizontal on mobile */}
-      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
         <div className="flex items-center gap-3 md:gap-4">
           <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-2 border-[#002147] overflow-hidden flex-shrink-0">
             {club.image && club.image.startsWith('http') ? (
@@ -832,7 +832,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
       {/* Stats Cards - Compact on mobile */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200/60 dark:border-slate-700/40">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-lg">
               <Users className="w-4 h-4 md:w-6 md:h-6 text-[#002147] dark:text-blue-400" />
@@ -844,7 +844,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200/60 dark:border-slate-700/40">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md md:rounded-lg">
               <Calendar className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-amber-400" />
@@ -856,7 +856,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200/60 dark:border-slate-700/40">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md md:rounded-lg">
               <Edit className="w-4 h-4 md:w-6 md:h-6 text-[#002147] dark:text-purple-400" />
@@ -868,7 +868,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200 dark:border-slate-700">
+        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-lg md:rounded-xl p-3 md:p-6 shadow-sm md:shadow-lg border border-slate-200/60 dark:border-slate-700/40">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="p-1.5 md:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md md:rounded-lg">
               <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-[#DAA520] dark:text-slate-400" />
@@ -882,7 +882,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8 relative z-30">
+      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 mb-8 relative z-30">
         {/* Mobile Header for Tabs */}
         <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
           <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1217,7 +1217,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                       type="text"
                       value={fullForm}
                       onChange={(e) => setFullForm(e.target.value)}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 dark:text-white text-sm"
                       placeholder="e.g., Association of Computer Science Engineering Students"
                     />
                     <div className="flex gap-2">
@@ -1291,7 +1291,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows={6}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
                       placeholder="Write a brief description of your club..."
                     />
                     <div className="flex gap-2">
@@ -1501,7 +1501,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         return (
                           <div
                             key={post.id}
-                            className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"
+                            className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 border border-slate-200/60 dark:border-slate-700/40 shadow-sm"
                           >
                             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                               <div className="flex-1">
@@ -1752,7 +1752,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {
         isCreatePostModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-end">
                 <button
                   onClick={() => { setIsCreatePostModalOpen(false); setFormMessage(null); }}
@@ -2091,7 +2091,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             />
                             {/* Overlay with click prompt */}
                             <div className="absolute inset-0 bg-transparent group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-slate-200 dark:border-slate-700">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-slate-900 dark:text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-slate-200/60 dark:border-slate-700/40">
                                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                                 </svg>
@@ -2223,7 +2223,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                     </label>
                     <div className="mb-4">
                       {newPost.coverImage && (
-                        <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-slate-700 group cursor-zoom-in"
+                        <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3 border border-slate-200/60 dark:border-slate-700/40 group cursor-zoom-in"
                           onClick={(e) => openImageModal(e, newPost.coverImage)}>
                           <img
                             src={newPost.coverImage}
@@ -2231,7 +2231,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             className="w-full h-full object-cover"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 duration-300 pointer-events-none">
-                            <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm shadow-sm">Click to expand</span>
+                            <span className="bg-black/50 text-white text-xs px-2 py-1 rounded shadow-sm">Click to expand</span>
                           </div>
 
                           <button
@@ -2302,7 +2302,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {
         showCollisionWarning && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
                   <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -2350,7 +2350,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {
         editingPostId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-lg">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Event Photos</h3>
                 <button
@@ -2391,7 +2391,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {
         editingRegistrationLink && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                   {editingRegistrationLink.currentLink ? 'Edit Registration Link' : 'Add Registration Link'}
@@ -2471,7 +2471,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       {
         editingEventWhatsapp && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">

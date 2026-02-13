@@ -48,7 +48,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
             {showMenu && user && (
                 <div
                     ref={menuRef}
-                    className="fixed bottom-20 right-4 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in slide-in-from-bottom-4 zoom-in-95 duration-200 origin-bottom-right"
+                    className="fixed bottom-20 right-4 w-72 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in slide-in-from-bottom-4 zoom-in-95 duration-200 origin-bottom-right"
                 >
                     <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center gap-3">

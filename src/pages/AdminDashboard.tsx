@@ -138,7 +138,7 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
           onError={(e) => { (e.target as HTMLImageElement).src = '/club-default.jpg'; }}
         />
         {(isUploading || isSaving) && (
-          <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center backdrop-blur-sm">
+          <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-white border-t-[#DAA520] rounded-full animate-spin"></div>
           </div>
         )}
@@ -773,10 +773,10 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-50 dark:bg-college-blue-900 pb-12">
+      <div className="min-h-screen pb-12">
         {/* Page Title Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-6 shadow-sm border-l-4 border-[#002147]">
             <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white">
               Administrative Control Center
             </h1>
@@ -789,7 +789,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {/* Stats Cards - 2x2 Grid like Secretary Dashboard */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 md:p-4 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <Users className="w-4 h-4 md:w-5 md:h-5 text-[#002147] dark:text-blue-400" />
@@ -801,7 +801,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 md:p-4 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
                   <Calendar className="w-4 h-4 md:w-5 md:h-5 text-[#DAA520] dark:text-amber-400" />
@@ -813,7 +813,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 md:p-4 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                   <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
@@ -825,7 +825,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 md:p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-3 md:p-4 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <Bell className="w-4 h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400" />
@@ -839,7 +839,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700 mt-8 relative z-30">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-t-xl border-b border-slate-200 dark:border-slate-800 mt-8 relative z-30">
             {/* Mobile Header for Tabs */}
             <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
               <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -887,7 +887,7 @@ export default function AdminDashboard() {
 
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-4 sm:p-8 min-h-[500px]">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-b-xl shadow-sm border border-t-0 border-slate-200 dark:border-slate-700 p-4 sm:p-8 min-h-[500px]">
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="w-10 h-10 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
@@ -909,7 +909,7 @@ export default function AdminDashboard() {
                     ) : (
                       <div className="grid grid-cols-1 gap-4">
                         {posts.slice(0, 5).map((post) => (
-                          <div key={post.id} className="flex items-center p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
+                          <div key={post.id} className="flex items-center p-4 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-100 dark:border-slate-700 rounded-lg hover:border-college-blue-200 transition-colors shadow-sm">
                             <div className={`p-3 rounded-full mr-4 ${post.type === 'event' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'} `}>
                               {post.type === 'event' ? <Calendar className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
                             </div>
@@ -930,7 +930,7 @@ export default function AdminDashboard() {
                 {/* Clubs Tab */}
                 {activeTab === 'clubs' && (
                   <div className="space-y-6">
-                    <div className="flex items-center gap-4 flex-wrap bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-4 flex-wrap bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
                       <div className="relative flex-1 min-w-[200px]">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <input
@@ -938,7 +938,7 @@ export default function AdminDashboard() {
                           placeholder="Search clubs by name..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                          className="w-full pl-10 pr-4 py-3 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]"
                         />
                       </div>
                       <button
@@ -959,7 +959,7 @@ export default function AdminDashboard() {
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredClubs.map((club) => (
-                          <div key={club.id} className="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 group">
+                          <div key={club.id} className="relative bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/60 dark:border-slate-700/40 group">
                             {/* Decorative Top Border */}
                             <div className={`h-2 w-full bg-gradient-to-r ${club.color || 'from-blue-500 to-blue-600'} `}></div>
 
@@ -1136,13 +1136,13 @@ export default function AdminDashboard() {
                               <div className="flex gap-3">
                                 <button
                                   onClick={() => { setSelectedClub(club); setShowImageUploadModal(true); }}
-                                  className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                  className="flex-1 py-2 rounded-lg border border-slate-200/60 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                                 >
                                   EDIT IMAGE
                                 </button>
                                 <button
                                   onClick={() => openEditClubModal(club)}
-                                  className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                  className="flex-1 py-2 rounded-lg border border-slate-200/60 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                                 >
                                   EDIT DETAILS
                                 </button>
@@ -1174,7 +1174,7 @@ export default function AdminDashboard() {
                         <p className="text-slate-400">No posts available.</p>
                       </div>
                     ) : (
-                      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
+                      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-lg border border-slate-200/60 dark:border-slate-700/40 overflow-hidden overflow-x-auto">
                         <table className="w-full text-left">
                           <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                             <tr>
@@ -1244,7 +1244,7 @@ export default function AdminDashboard() {
                           <div
                             key={notification.id}
                             className={`p-5 rounded-xl border-l-4 ${notification.read
-                              ? 'bg-white dark:bg-slate-800 border-slate-300'
+                              ? 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-300'
                               : 'bg-blue-50 dark:bg-blue-900/10 border-[#002147] shadow-sm'
                               } `}
                           >
@@ -1293,7 +1293,7 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {teachers.map(teacher => (
-                        <div key={teacher.id} className="relative bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center group">
+                        <div key={teacher.id} className="relative bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40 flex flex-col items-center text-center group">
                           <button
                             onClick={() => handleRemoveTeacher(teacher.id)}
                             className="absolute top-2 right-2 p-1.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
@@ -1320,7 +1320,7 @@ export default function AdminDashboard() {
                       ))}
 
                       {teachers.length === 0 && (
-                        <div className="col-span-full bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-sm border border-dashed border-slate-300 dark:border-slate-600">
+                        <div className="col-span-full bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-12 text-center shadow-sm border border-dashed border-slate-300 dark:border-slate-600">
                           <UserPlus className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No Teachers Yet</h3>
                           <p className="text-slate-500 dark:text-slate-400">Add teachers to get started</p>
@@ -1335,8 +1335,8 @@ export default function AdminDashboard() {
         </div>
 
         {showCreateClubModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Register Club</h3>
@@ -1363,7 +1363,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newClub.fullForm}
                     onChange={(e) => setNewClub({ ...newClub, fullForm: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g., Association of Computer Science Engineering Students"
                   />
                 </div>
@@ -1374,7 +1374,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newClub.name}
                     onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g., Google Developer Student Club"
                   />
                 </div>
@@ -1385,7 +1385,7 @@ export default function AdminDashboard() {
                     rows={3}
                     value={newClub.description}
                     onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
                     placeholder="Brief description of the club's purpose and activities..."
                   />
                 </div>
@@ -1395,7 +1395,7 @@ export default function AdminDashboard() {
                   <select
                     value={newClub.category}
                     onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
                   >
                     {CLUB_CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
@@ -1407,7 +1407,7 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Departments</label>
                   <div className="grid grid-cols-2 gap-2">
                     {DEPARTMENTS.map(dept => (
-                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <input
                           type="checkbox"
                           checked={newClub.departments.includes(dept)}
@@ -1442,8 +1442,8 @@ export default function AdminDashboard() {
 
         {/* Create Secretary Modal */}
         {showCreateSecretaryModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Secretary</h3>
@@ -1467,7 +1467,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newSecretary.name}
                     onChange={(e) => setNewSecretary({ ...newSecretary, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g. Amish Prabhu"
                   />
                 </div>
@@ -1478,7 +1478,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newSecretary.email}
                     onChange={(e) => setNewSecretary({ ...newSecretary, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="secretary@walchandsangli.ac.in"
                   />
                 </div>
@@ -1497,8 +1497,8 @@ export default function AdminDashboard() {
 
         {/* Create President Modal */}
         {showCreatePresidentModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign President</h3>
@@ -1522,7 +1522,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newRoleUser.name}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g. Amish Prabhu"
                   />
                 </div>
@@ -1533,7 +1533,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="president@walchandsangli.ac.in"
                   />
                 </div>
@@ -1552,8 +1552,8 @@ export default function AdminDashboard() {
 
         {/* Create Treasurer Modal */}
         {showCreateTreasurerModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Treasurer</h3>
@@ -1577,7 +1577,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newRoleUser.name}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g. Amish Prabhu"
                   />
                 </div>
@@ -1588,7 +1588,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="treasurer@walchandsangli.ac.in"
                   />
                 </div>
@@ -1607,8 +1607,8 @@ export default function AdminDashboard() {
 
         {/* Create Advisor Modal */}
         {showCreateAdvisorModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Faculty Advisor</h3>
@@ -1632,7 +1632,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newRoleUser.name}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g. Amish Prabhu"
                   />
                 </div>
@@ -1643,7 +1643,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="advisor@walchandsangli.ac.in"
                   />
                 </div>
@@ -1662,8 +1662,8 @@ export default function AdminDashboard() {
 
         {/* Edit Advisor Modal */}
         {showEditAdvisorModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Edit Advisor</h3>
@@ -1691,7 +1691,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newRoleUser.name}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="Advisor Name"
                   />
                 </div>
@@ -1702,7 +1702,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newRoleUser.email}
                     onChange={(e) => setNewRoleUser({ ...newRoleUser, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="advisor@wce.ac.in"
                   />
                 </div>
@@ -1724,8 +1724,8 @@ export default function AdminDashboard() {
 
         {/* Edit Club Details Modal */}
         {showEditClubModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Edit Club Details</h3>
@@ -1749,7 +1749,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newClub.fullForm || ''}
                     onChange={(e) => setNewClub({ ...newClub, fullForm: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g., Association of Computer Science Engineering Students"
                   />
                 </div>
@@ -1760,7 +1760,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newClub.name}
                     onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="e.g., Google Developer Student Club"
                   />
                 </div>
@@ -1771,7 +1771,7 @@ export default function AdminDashboard() {
                     rows={3}
                     value={newClub.description}
                     onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium resize-none"
                     placeholder="Brief description of the club's purpose and activities..."
                   />
                 </div>
@@ -1781,7 +1781,7 @@ export default function AdminDashboard() {
                   <select
                     value={newClub.category}
                     onChange={(e) => setNewClub({ ...newClub, category: e.target.value as any })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium appearance-none"
                   >
                     {CLUB_CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
@@ -1793,7 +1793,7 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Departments</label>
                   <div className="grid grid-cols-2 gap-2">
                     {DEPARTMENTS.map(dept => (
-                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <label key={dept} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <input
                           type="checkbox"
                           checked={newClub.departments.includes(dept)}
@@ -1828,8 +1828,8 @@ export default function AdminDashboard() {
 
         {/* Send Notification Modal */}
         {showNotificationModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-8 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">New Broadcast</h3>
@@ -1853,7 +1853,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newNotification.title}
                     onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147] transition-all font-medium"
                     placeholder="Broadcast Headline"
                   />
                 </div>
@@ -1864,7 +1864,7 @@ export default function AdminDashboard() {
                     rows={4}
                     value={newNotification.message}
                     onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium resize-none"
                     placeholder="Type your message here..."
                   />
                 </div>
@@ -1875,7 +1875,7 @@ export default function AdminDashboard() {
                     <select
                       value={newNotification.type}
                       onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value as any })}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium appearance-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-college-blue-primary transition-all font-medium appearance-none"
                     >
                       <option value="system">System Update</option>
                       <option value="announcement">General Announcement</option>
@@ -1903,8 +1903,8 @@ export default function AdminDashboard() {
 
         {/* Image Upload Modal */}
         {showImageUploadModal && selectedClub && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <div>
                   <h3 className="text-xl font-serif font-bold text-college-blue-primary dark:text-white">
@@ -1946,8 +1946,8 @@ export default function AdminDashboard() {
 
         {/* Add Teacher Modal */}
         {showAddTeacherModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 w-full max-w-md shadow-2xl border border-slate-200/60 dark:border-slate-700/40">
               <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
                 <div>
                   <h3 className="text-2xl font-serif font-bold text-[#002147] dark:text-white">Add Teacher</h3>
@@ -1978,7 +1978,7 @@ export default function AdminDashboard() {
                     type="email"
                     value={newTeacher.email}
                     onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
                     placeholder="teacher@walchandsangli.ac.in"
                   />
                 </div>
@@ -1989,7 +1989,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newTeacher.name}
                     onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/40 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002147]"
                     placeholder="Full Name"
                   />
                 </div>

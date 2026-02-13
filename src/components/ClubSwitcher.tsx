@@ -126,7 +126,7 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
                     <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                         <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Switch Club

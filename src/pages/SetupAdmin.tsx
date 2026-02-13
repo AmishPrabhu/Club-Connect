@@ -71,7 +71,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
+        <div className="min-h-screen flex items-center justify-center p-6">
             <div className="max-w-md w-full">
                 {/* Back Button */}
                 <button
@@ -98,7 +98,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                 </div>
 
                 {/* Form */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border-l-4 border-[#DAA520]">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 shadow-sm border-l-4 border-[#DAA520] border border-slate-200/60 dark:border-slate-700/40">
                     <form onSubmit={handleCreateAdmin} className="space-y-6">
                         {message && (
                             <div className={`p-4 rounded-lg ${message.type === 'success'
@@ -124,7 +124,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                                     placeholder="Super Admin"
                                     required
                                 />
@@ -141,7 +141,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                                     placeholder="admin@wce.ac.in"
                                     required
                                 />
@@ -158,7 +158,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                                     placeholder="Enter a strong password"
                                     minLength={6}
                                     required
@@ -180,7 +180,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                         type="text"
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                                         placeholder="Enter OTP sent to current Admin"
                                         required
                                     />

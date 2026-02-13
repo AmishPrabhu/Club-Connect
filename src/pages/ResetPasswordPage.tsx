@@ -67,9 +67,9 @@ export default function ResetPasswordPage({ onNavigate }: ResetPasswordPageProps
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="min-h-screen flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#002147] p-6 text-center">
                         <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -132,7 +132,7 @@ export default function ResetPasswordPage({ onNavigate }: ResetPasswordPageProps
                                             type={showPassword ? 'text' : 'password'}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[#002147]/20 focus:border-[#002147] transition-all outline-none"
+                                            className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#002147]/20 focus:border-[#002147] transition-all outline-none"
                                             placeholder="Enter new password"
                                             required
                                             minLength={6}
@@ -157,7 +157,7 @@ export default function ResetPasswordPage({ onNavigate }: ResetPasswordPageProps
                                             type={showPassword ? 'text' : 'password'}
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[#002147]/20 focus:border-[#002147] transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#002147]/20 focus:border-[#002147] transition-all outline-none"
                                             placeholder="Confirm new password"
                                             required
                                         />

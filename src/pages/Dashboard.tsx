@@ -116,10 +116,19 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 scroll-mt-32" id="tour-dashboard-stats">
+    <div className="min-h-screen pb-20 scroll-mt-32 relative" id="tour-dashboard-stats">
+      {/* Page-level floating dots */}
+      <div className="page-dots">
+        <div className="float-dot w-3 h-3 bg-cyan-400 top-[10%] right-[10%] animate-float-slow opacity-60"></div>
+        <div className="float-dot w-2 h-2 bg-[#DAA520] top-[30%] right-[30%] animate-float-medium opacity-50"></div>
+        <div className="float-dot w-1.5 h-1.5 bg-purple-400 top-[50%] left-[80%] animate-float-fast opacity-40"></div>
+        <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[70%] left-[15%] animate-float-medium opacity-45" style={{ animationDelay: '1s' }}></div>
+        <div className="float-dot w-2 h-2 bg-pink-300 top-[85%] right-[50%] animate-float-slow opacity-35" style={{ animationDelay: '2s' }}></div>
+        <div className="float-dot w-1.5 h-1.5 bg-teal-400 top-[60%] left-[35%] animate-float-fast opacity-40" style={{ animationDelay: '1.5s' }}></div>
+      </div>
       {/* Page Header */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative overflow-hidden px-4 md:px-6 py-6 md:py-12">
+        <div className="max-w-7xl mx-auto relative z-10">
           {onBack && (
             <button
               onClick={onBack}
@@ -158,12 +167,12 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-              className="w-full pl-9 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg md:rounded-xl text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147] dark:focus:ring-blue-500 focus:border-transparent transition-all shadow-sm focus:shadow-lg"
+              className="w-full pl-9 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-4 glass-input rounded-lg md:rounded-xl text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DAA520]/50 transition-all shadow-sm focus:shadow-lg"
             />
 
             {/* Live Search Dropdown */}
             {showDropdown && (
-              <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-xl border border-slate-200/60 dark:border-slate-700/40 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {searchResults.length > 0 ? (
                   <div className="py-2">
                     <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
@@ -212,9 +221,9 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-2.5 md:px-4 py-1.5 md:py-2.5 rounded-md md:rounded-lg font-bold text-xs md:text-sm transition-all border whitespace-nowrap flex-shrink-0 ${selectedCategory === category
-                    ? 'bg-[#002147] text-white border-[#002147] shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  className={`px-2.5 md:px-4 py-1.5 md:py-2.5 rounded-md md:rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap flex-shrink-0 ${selectedCategory === category
+                    ? 'bg-[#DAA520] text-white shadow-md border border-[#DAA520]'
+                    : 'glass-card text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80'
                     }`}
                 >
                   {category.charAt(0).toUpperCase() + category.slice(1)}

@@ -366,7 +366,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                 <input
                                                     value={editingMember.name}
                                                     onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -374,7 +374,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                 <input
                                                     value={editingMember.email}
                                                     onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                         </div>
@@ -384,7 +384,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                 <select
                                                     value={editingMember.academicYear || ''}
                                                     onChange={(e) => setEditingMember({ ...editingMember, academicYear: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 >
                                                     <option value="">Year</option>
                                                     <option value="FY">FY</option>
@@ -399,7 +399,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                     type="date"
                                                     value={editingMember.joinedAt instanceof Date ? editingMember.joinedAt.toISOString().split('T')[0] : new Date(editingMember.joinedAt).toISOString().split('T')[0]}
                                                     onChange={(e) => setEditingMember({ ...editingMember, joinedAt: new Date(e.target.value) })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -414,7 +414,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                             role: bt === 'member' ? 'Member' : editingMember.role
                                                         });
                                                     }}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 >
                                                     {BOARD_TYPE_OPTIONS.map((bt) => (
                                                         <option key={bt.value} value={bt.value}>
@@ -430,7 +430,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                         type="text"
                                                         value={editingMember.role}
                                                         onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
-                                                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                         placeholder="App Executive"
                                                     />
                                                 </div>
@@ -514,7 +514,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             {/* Add Member Modal */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md">
+                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Add New Member</h3>
                             <button

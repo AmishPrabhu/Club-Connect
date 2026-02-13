@@ -317,7 +317,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     // Wait for both auth and data to finish loading before making access decision
     if (isLoading || authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -325,7 +325,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
     if (!post) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
+            <div className="min-h-screen flex flex-col items-center justify-center text-slate-900 dark:text-white">
                 <h1 className="text-2xl font-bold mb-4">Event Not Found</h1>
                 <p>The event you are looking for does not exist or has been deleted.</p>
                 {onBack && (
@@ -339,7 +339,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
     if (!hasAccess) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
+            <div className="min-h-screen flex flex-col items-center justify-center text-slate-900 dark:text-white">
                 <h1 className="text-2xl font-bold mb-4 text-red-600">Access Denied</h1>
                 <p>You do not have permission to manage this event.</p>
                 {onBack && (
@@ -352,10 +352,10 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-6 px-4 md:py-12 md:px-6">
+        <div className="min-h-screen py-6 px-4 md:py-12 md:px-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                     <div className="flex items-start md:items-center gap-3 md:gap-4">
                         {onBack && (
                             <button onClick={onBack} className="mt-1 md:mt-0 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white flex-shrink-0">
@@ -388,7 +388,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 )}
 
                 {/* Tabs */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 mb-8">
                     <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
                         {/* Treasurer only sees Budget tab */}
                         {isTreasurer ? (
@@ -475,7 +475,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         {activeTab === 'details' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-2 space-y-6">
-                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                             <AlignLeft className="w-5 h-5 text-[#DAA520]" />
                                             Basic Information
@@ -487,7 +487,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="text"
                                                     value={formData.title}
                                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
                                             <div>
@@ -496,13 +496,13 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     rows={5}
                                                     value={formData.content}
                                                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                             <Calendar className="w-5 h-5 text-[#DAA520]" />
                                             Date & Time
@@ -514,7 +514,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="date"
                                                     value={formData.date}
                                                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
                                             <div className="space-y-3">
@@ -537,7 +537,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newStart = `${e.target.value}:${currentMin} ${currentPeriod}`;
                                                             setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">Hr</option>
                                                         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((h) => (
@@ -559,7 +559,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newStart = `${currentHour}:${e.target.value} ${currentPeriod}`;
                                                             setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">Min</option>
                                                         {['00', '15', '30', '45'].map((m) => (
@@ -580,7 +580,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newStart = `${currentHour}:${currentMin} ${e.target.value}`;
                                                             setFormData({ ...formData, time: endTime ? `${newStart} - ${endTime}` : newStart });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">-</option>
                                                         <option value="AM">AM</option>
@@ -605,7 +605,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newEnd = `${e.target.value}:${currentMin} ${currentPeriod}`;
                                                             setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">Hr</option>
                                                         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((h) => (
@@ -627,7 +627,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newEnd = `${currentHour}:${e.target.value} ${currentPeriod}`;
                                                             setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">Min</option>
                                                         {['00', '15', '30', '45'].map((m) => (
@@ -648,7 +648,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                             const newEnd = `${currentHour}:${currentMin} ${e.target.value}`;
                                                             setFormData({ ...formData, time: startTime ? `${startTime} - ${newEnd}` : newEnd });
                                                         }}
-                                                        className="w-16 px-2 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
+                                                        className="w-16 px-2 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm text-center"
                                                     >
                                                         <option value="">-</option>
                                                         <option value="AM">AM</option>
@@ -673,13 +673,13 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                         type="date"
                                                         value={formData.registrationStart}
                                                         onChange={(e) => setFormData({ ...formData, registrationStart: e.target.value })}
-                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                     />
                                                     <input
                                                         type="time"
                                                         value={formData.registrationStartTime}
                                                         onChange={(e) => setFormData({ ...formData, registrationStartTime: e.target.value })}
-                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                     />
                                                 </div>
                                             </div>
@@ -692,20 +692,20 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                         type="date"
                                                         value={formData.registrationEnd}
                                                         onChange={(e) => setFormData({ ...formData, registrationEnd: e.target.value })}
-                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                     />
                                                     <input
                                                         type="time"
                                                         value={formData.registrationEndTime}
                                                         onChange={(e) => setFormData({ ...formData, registrationEndTime: e.target.value })}
-                                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                     />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                             <MapPin className="w-5 h-5 text-[#DAA520]" />
                                             Location
@@ -717,7 +717,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="text"
                                                     value={formData.location}
                                                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
                                             <div>
@@ -726,7 +726,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="url"
                                                     value={formData.locationUrl}
                                                     onChange={(e) => setFormData({ ...formData, locationUrl: e.target.value })}
-                                                    className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                                    className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                                 />
                                             </div>
                                         </div>
@@ -735,7 +735,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                 {/* Sidebar */}
                                 <div className="space-y-6">
-                                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                             <LinkIcon className="w-5 h-5 text-[#DAA520]" />
                                             Links
@@ -747,7 +747,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="url"
                                                     value={formData.registrationlink}
                                                     onChange={(e) => setFormData({ ...formData, registrationlink: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
                                                     placeholder="https://..."
                                                 />
                                             </div>
@@ -757,7 +757,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="url"
                                                     value={formData.responseSpreadsheetUrl}
                                                     onChange={(e) => setFormData({ ...formData, responseSpreadsheetUrl: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
                                                     placeholder="https://docs.google.com/spreadsheets/d/..."
                                                 />
                                             </div>
@@ -767,7 +767,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                                     type="url"
                                                     value={formData.eventWhatsappLink}
                                                     onChange={(e) => setFormData({ ...formData, eventWhatsappLink: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
+                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white text-sm"
                                                     placeholder="https://chat.whatsapp.com/..."
                                                 />
                                             </div>
@@ -798,7 +798,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 {/* Participants Tab */}
                 {activeTab === 'participants' && (
                     <div className="space-y-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             {/* Actions Header */}
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
@@ -842,7 +842,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         </div>
 
                         {/* Add Participant Form */}
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                 <UserPlus className="w-5 h-5 text-[#DAA520]" />
                                 Add Participant (from Google Form)
@@ -856,7 +856,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     <input
                                         type="text"
                                         id="newParticipantName"
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                         placeholder="Participant name"
                                     />
                                 </div>
@@ -865,7 +865,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     <input
                                         type="email"
                                         id="newParticipantEmail"
-                                        className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                                        className="w-full px-4 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
                                         placeholder="email@walchandsangli.ac.in"
                                     />
                                 </div>
@@ -1043,7 +1043,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         </div>
 
                         {/* Participant List */}
-                        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
                             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 flex-1">
                                     <h3 className="font-bold text-slate-900 dark:text-white whitespace-nowrap">Participants ({eventRsvps.length})</h3>
@@ -1212,7 +1212,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 {/* Budget Tab - For Treasurer */}
                 {activeTab === 'budget' && (
                     <div className="space-y-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                 <Save className="w-5 h-5 text-[#DAA520]" />
                                 Event Budget
@@ -1339,7 +1339,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         </div>
 
                         {/* Certificate Template Section */}
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                 <Award className="w-5 h-5 text-[#DAA520]" />
                                 Certificate Template
@@ -1428,7 +1428,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                         {/* Name Position Settings */}
                         {certificateTemplateUrl && (
-                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                 <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4">
                                     Name Position Settings
                                 </h2>
@@ -1441,7 +1441,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             max="100"
                                             value={namePosition.x}
                                             onChange={(e) => setNamePosition({ ...namePosition, x: Number(e.target.value) })}
-                                            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                         />
                                     </div>
                                     <div>
@@ -1452,7 +1452,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             max="100"
                                             value={namePosition.y}
                                             onChange={(e) => setNamePosition({ ...namePosition, y: Number(e.target.value) })}
-                                            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                         />
                                     </div>
                                     <div>
@@ -1463,7 +1463,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             max="120"
                                             value={namePosition.fontSize}
                                             onChange={(e) => setNamePosition({ ...namePosition, fontSize: Number(e.target.value) })}
-                                            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                         />
                                     </div>
                                     <div>
@@ -1471,7 +1471,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         <select
                                             value={namePosition.fontFamily}
                                             onChange={(e) => setNamePosition({ ...namePosition, fontFamily: e.target.value })}
-                                            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
+                                            className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                                         >
                                             <option value="Arial">Arial</option>
                                             <option value="Times New Roman">Times New Roman</option>
@@ -1485,7 +1485,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                             type="color"
                                             value={namePosition.color}
                                             onChange={(e) => setNamePosition({ ...namePosition, color: e.target.value })}
-                                            className="w-full h-10 px-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer"
+                                            className="w-full h-10 px-1 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer"
                                         />
                                     </div>
                                 </div>
@@ -1507,7 +1507,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                         {/* Generate Certificates Section */}
                         {certificateTemplateUrl && (
-                            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                 <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4">
                                     Generate Certificates
                                 </h2>
@@ -1652,7 +1652,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         )}
 
                         {/* Generated Certificates List */}
-                        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200/60 dark:border-slate-700/40">
                             <div className="p-4 border-b border-slate-200 dark:border-slate-700">
                                 <h3 className="font-bold text-slate-900 dark:text-white">Generated Certificates ({eventRsvps.filter(r => r.certificateUrl).length})</h3>
                             </div>
@@ -1692,7 +1692,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                 {/* Report Tab */}
                 {activeTab === 'report' && (
                     <div className="space-y-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-[#DAA520]" />
                                 Event Report

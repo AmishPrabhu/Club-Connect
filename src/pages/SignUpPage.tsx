@@ -274,7 +274,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     };
 
     return (
-        <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
+        <div className="min-h-screen flex">
             {/* Left Split - Inspiration Side */}
             <div className="hidden lg:flex w-1/2 bg-college-blue-900 relative overflow-hidden flex-col justify-between p-12 text-white">
                 {/* Background Pattern */}
@@ -320,7 +320,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
             {/* Right Split - Functionality */}
             <div className="w-full lg:w-1/2 flex flex-col h-full overflow-y-auto">
-                <div className="p-6 lg:p-8 w-full flex-none z-10 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                <div className="p-6 lg:p-8 w-full flex-none z-10 sticky top-0 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md">
                     <button
                         onClick={() => {
                             if (step === 'OTP') setStep('EMAIL');
@@ -379,7 +379,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                         {/* Google Sign Up - only show if not already in Google signup mode and in EMAIL step */}
                         {!googleData && step === 'EMAIL' && (
                             <>
-                                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 flex flex-col items-center">
+                                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 p-4 flex flex-col items-center">
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={() => setError('Google sign-in failed. Please try again.')}
@@ -399,7 +399,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                         <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
                                     </div>
                                     <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
-                                        <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-400">Or Register Manually</span>
+                                        <span className="px-4 bg-transparent text-slate-400">Or Register Manually</span>
                                     </div>
                                 </div>
                             </>

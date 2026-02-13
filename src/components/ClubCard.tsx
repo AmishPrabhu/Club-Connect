@@ -39,9 +39,9 @@ export default function ClubCard({ club, onClick, isLiked = false, onToggleLike 
   return (
     <div
       onClick={onClick}
-      className="group bg-white dark:bg-slate-900 rounded-xl p-3 md:p-6 border border-slate-200 dark:border-slate-800 hover:border-[#002147] dark:hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col h-full"
+      className="group glass-card glass-card-hover rounded-xl p-3 md:p-6 cursor-pointer relative overflow-hidden flex flex-col h-full"
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#DAA520] to-[#002147]"></div>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#DAA520]/60 to-[#002147]/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
       {/* Favorite Button - Absolute Top Right */}
       <button
@@ -75,17 +75,17 @@ export default function ClubCard({ club, onClick, isLiked = false, onToggleLike 
       </p>
 
       <div className="flex flex-wrap gap-2 mb-2 md:mb-4">
-        <span className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 truncate">
+        <span className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-white/50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 border border-white/40 dark:border-slate-600/50 backdrop-blur-sm truncate">
           {club.category}
         </span>
         {club.departments?.map(dept => (
-          <span key={dept} className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 text-[#002147] dark:text-blue-300 border border-blue-100 dark:border-blue-800 truncate">
+          <span key={dept} className="px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wide bg-[#002147]/5 dark:bg-blue-900/20 text-[#002147] dark:text-blue-300 border border-[#002147]/10 dark:border-blue-800/30 backdrop-blur-sm truncate">
             {dept.match(/\(([^)]+)\)/)?.[1] || dept}
           </span>
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-slate-100 dark:border-slate-800 mt-auto">
+      <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-white/20 dark:border-slate-700/30 mt-auto">
         <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-4 w-full">
           <div className="flex items-center gap-1 text-[9px] md:text-xs font-semibold text-slate-500 dark:text-slate-400">
             <Users className="w-3 h-3 md:w-4 md:h-4" />

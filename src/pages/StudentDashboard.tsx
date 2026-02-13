@@ -98,7 +98,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
         <div className="min-h-screen p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="mb-6 md:mb-8 p-4 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+                <div className="mb-6 md:mb-8 p-4 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
                     <button
                         onClick={() => onNavigate('home')}
                         className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] mb-4 font-medium transition-colors text-sm md:text-base"
@@ -133,7 +133,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#002147]">
+                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border-l-4 border-[#002147]">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                 <CalendarCheck className="w-6 h-6 text-[#002147]" />
@@ -142,7 +142,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                         </div>
                         <p className="text-4xl font-bold text-[#002147] dark:text-white">{upcomingEvents.length}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520]">
+                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520]">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
                                 <History className="w-6 h-6 text-[#DAA520]" />
@@ -217,7 +217,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                         {displayedEvents.map(({ event, rsvpDate, certificateUrl }) => (
                             <div
                                 key={event.id}
-                                className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow"
+                                className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 border border-slate-200/60 dark:border-slate-700/40 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                     <div className="flex-1">

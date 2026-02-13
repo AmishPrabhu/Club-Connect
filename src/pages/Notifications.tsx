@@ -102,7 +102,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
+      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/60 dark:border-slate-700/40 mb-8">
         <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
           {[
             { id: 'all', label: 'All', count: notifications.length },

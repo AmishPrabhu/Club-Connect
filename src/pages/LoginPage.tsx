@@ -133,7 +133,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex">
       {/* Left Split - Visual Side for Campus Vibe */}
       <div className="hidden lg:flex w-1/2 bg-college-blue-900 relative overflow-hidden flex-col justify-between p-12 text-white">
         {/* Background Overlay Image */}
@@ -283,7 +283,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
+                <span className="px-4 bg-transparent text-slate-500 dark:text-slate-400">Or continue with</span>
               </div>
             </div>
 

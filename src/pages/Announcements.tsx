@@ -79,7 +79,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+        <div className="flex flex-col min-h-screen pb-20">
             <ImageModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -87,7 +87,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
             />
 
             {/* Page Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12">
                 <div className="max-w-7xl mx-auto">
                     <button
                         onClick={onBack}
@@ -130,7 +130,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                             <select
                                 value={clubFilter}
                                 onChange={(e) => handleClubFilterChange(e.target.value)}
-                                className="w-full appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg md:rounded-xl pl-9 md:pl-10 pr-10 py-2.5 md:py-3 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#002147] dark:focus:ring-blue-500 cursor-pointer shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                                className="w-full appearance-none bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/40 rounded-lg md:rounded-xl pl-9 md:pl-10 pr-10 py-2.5 md:py-3 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#002147] dark:focus:ring-blue-500 cursor-pointer shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all"
                             >
                                 <option value="all">All Clubs</option>
                                 {allClubNames.map((name) => (
@@ -169,7 +169,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                     <div
                                         key={post.id}
                                         onClick={() => onNavigateToPost(post.id!)}
-                                        className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all cursor-pointer"
+                                        className="group bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl overflow-hidden shadow-lg border border-slate-200/60 dark:border-slate-700/40 hover:shadow-xl transition-all cursor-pointer"
                                     >
                                         <div className="flex flex-col sm:flex-row">
                                             {/* Left: Cover Image or Styled Icon */}
@@ -184,7 +184,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
                                                     />
                                                     <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
-                                                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">Click to expand</span>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -194,7 +194,7 @@ export default function Announcements({ onBack, onNavigateToPost }: Announcement
                                                     <div className="absolute bottom-4 left-4 w-10 h-10 bg-white/10 rounded-full blur-sm" />
 
                                                     {/* Icon */}
-                                                    <div className="relative z-10 w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border border-[#DAA520]/50">
+                                                    <div className="relative z-10 w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border border-[#DAA520]/50">
                                                         <Megaphone className="w-7 h-7 text-[#DAA520]" />
                                                     </div>
 

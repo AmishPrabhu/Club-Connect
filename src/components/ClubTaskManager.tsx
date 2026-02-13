@@ -124,21 +124,21 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
             {/* Stats Cards - Compact horizontal on mobile */}
             <div className="grid grid-cols-3 gap-2 md:gap-4">
-                <div onClick={() => setFilter('pending')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'pending' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('pending')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'pending' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] md:text-sm font-medium text-orange-600 dark:text-orange-400">Pending</span>
                         <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500" />
                     </div>
                     <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
                 </div>
-                <div onClick={() => setFilter('in-progress')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('in-progress')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] md:text-sm font-medium text-blue-600 dark:text-blue-400">In Progress</span>
                         <AlertCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500" />
                     </div>
                     <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{inProgressCount}</p>
                 </div>
-                <div onClick={() => setFilter('completed')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('completed')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] md:text-sm font-medium text-green-600 dark:text-green-400">Completed</span>
                         <CheckCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-green-500" />
@@ -148,7 +148,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
             </div>
 
             {/* Task List */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <h4 className="font-semibold text-slate-900 dark:text-white capitalize">{filter === 'all' ? 'All Tasks' : `${filter} Tasks`}</h4>
                     <button onClick={() => setFilter('all')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</button>
@@ -192,7 +192,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                                         <select
                                             value={task.status}
                                             onChange={(e) => updateStatus(task.id, e.target.value as any)}
-                                            className={`text-sm rounded-lg border-slate-300 dark:border-slate-600 px-2 py-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 ${task.status === 'completed' ? 'text-green-600 font-medium' :
+                                            className={`text-sm rounded-lg border-slate-300 dark:border-slate-600 px-2 py-1 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 ${task.status === 'completed' ? 'text-green-600 font-medium' :
                                                 task.status === 'in-progress' ? 'text-blue-600 font-medium' :
                                                     'text-orange-600 font-medium'
                                                 }`}
@@ -218,7 +218,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
             {/* Create Task Modal */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full p-4 md:p-6 my-4 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
+                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-xl max-w-lg w-full p-4 md:p-6 my-4 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
                         <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Task</h3>
 
                         <div className="space-y-4">

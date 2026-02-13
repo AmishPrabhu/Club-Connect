@@ -109,9 +109,9 @@ export default function LocationPickerModal({
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl h-[80vh] flex flex-col overflow-hidden shadow-2xl relative">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl w-full max-w-2xl h-[80vh] flex flex-col overflow-hidden shadow-2xl relative">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 z-10 shrink-0">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md z-10 shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                             <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />

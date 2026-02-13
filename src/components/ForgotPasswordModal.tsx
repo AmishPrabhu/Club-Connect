@@ -65,7 +65,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slideUp">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-slideUp">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">Reset Password</h2>

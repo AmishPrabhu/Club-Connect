@@ -73,7 +73,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         Back to Club Details
       </button>
 
-      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
         <div className="flex items-center gap-3 md:gap-4">
           <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden bg-[#002147] flex items-center justify-center border-2 border-[#DAA520] shadow-md flex-shrink-0">
             {club.image ? (
@@ -139,7 +139,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : members.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="text-center py-16 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200/60 dark:border-slate-700/40">
           <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">No members found for this club.</p>
         </div>
@@ -158,7 +158,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
                   {boardMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 md:p-4 hover:shadow-md transition-shadow"
+                      className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 p-3 md:p-4 hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg border-2 border-[#DAA520] flex-shrink-0">

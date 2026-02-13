@@ -226,7 +226,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         <div className="absolute inset-0 bg-[#002147] opacity-90"></div>
         <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-40 mix-blend-overlay`}></div>
         <div className="relative z-10 p-4 md:p-12 flex items-center gap-3 md:gap-0 md:flex-col md:text-center text-white">
-          <div className="w-12 h-12 md:w-24 md:h-24 md:mx-auto md:mb-4 md:mb-6 rounded-xl md:rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#DAA520] shadow-lg flex-shrink-0">
+          <div className="w-12 h-12 md:w-24 md:h-24 md:mx-auto md:mb-4 md:mb-6 rounded-xl md:rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center border-2 border-[#DAA520] shadow-lg flex-shrink-0">
             {club.image ? (
               <img
                 src={club.image}
@@ -252,7 +252,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
         {/* Left Side - 70% desktop, 66% tablet */}
         <div className="md:col-span-2 lg:col-span-5 space-y-4 md:space-y-8">
           {/* Club Info */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm p-4 md:p-8 border-l-4 border-[#002147]">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl md:rounded-2xl shadow-sm p-4 md:p-8 border-l-4 border-[#002147]">
             <h3 className="text-base md:text-xl font-serif font-bold text-[#002147] dark:text-white mb-2 md:mb-4">About the Club</h3>
             <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300 mb-4 md:mb-8 leading-relaxed font-serif">
               {club.description}
@@ -325,7 +325,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
           </div>
 
           {/* Posts Timeline */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl md:rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 overflow-hidden">
             <div className="p-3 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 md:mb-4 gap-2 md:gap-4">
                 <h2 className="text-base md:text-2xl font-serif font-bold text-[#002147] dark:text-white flex items-center gap-1.5 md:gap-2">
@@ -420,7 +420,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110 cursor-zoom-in"
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
-                                  <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                  <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">Click to expand</span>
                                 </div>
                               </div>
                             ) : (
@@ -430,7 +430,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
                                 <div className="absolute bottom-2 left-2 w-6 h-6 bg-white/10 rounded-full blur-sm" />
 
                                 {/* Event type icon */}
-                                <div className="relative z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                <div className="relative z-10 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
                                   <Calendar className="w-5 h-5 text-white" />
                                 </div>
 
@@ -511,7 +511,7 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
 
         {/* Right Side - 30% */}
         <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start" id="tour-member-board">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6">
+          <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
                 {club.image ? (

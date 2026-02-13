@@ -20,11 +20,11 @@ export default function NotificationDetail({ notification, onBack, onNavigateToP
                 <span>Back</span>
             </button>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/40">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 md:p-8 border-b border-slate-200 dark:border-slate-700">
                     <div className="flex items-start gap-3 md:gap-4">
-                        <div className={`shrink-0 p-2 md:p-3 rounded-xl bg-white dark:bg-slate-800 shadow-md ${notification.type === 'event' ? 'text-blue-600' :
+                        <div className={`shrink-0 p-2 md:p-3 rounded-xl bg-white/85 dark:bg-slate-900/80 backdrop-blur-md shadow-md ${notification.type === 'event' ? 'text-blue-600' :
                             notification.type === 'announcement' ? 'text-purple-600' : 'text-slate-600'
                             }`}>
                             <Bell className="w-8 h-8" />

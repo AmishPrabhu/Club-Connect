@@ -104,15 +104,24 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+        <div className="flex flex-col min-h-screen pb-20 relative">
             <ImageModal
                 isOpen={!!selectedImage}
                 onClose={() => setSelectedImage(null)}
                 imageUrl={selectedImage || ''}
             />
+            {/* Page-level floating dots */}
+            <div className="page-dots">
+                <div className="float-dot w-3 h-3 bg-cyan-400 top-[10%] right-[8%] animate-float-slow opacity-60"></div>
+                <div className="float-dot w-2 h-2 bg-[#DAA520] top-[35%] right-[25%] animate-float-medium opacity-50"></div>
+                <div className="float-dot w-1.5 h-1.5 bg-pink-300 top-[50%] left-[75%] animate-float-fast opacity-40"></div>
+                <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[70%] left-[12%] animate-float-medium opacity-45" style={{ animationDelay: '1s' }}></div>
+                <div className="float-dot w-2 h-2 bg-violet-400 top-[88%] right-[40%] animate-float-slow opacity-35" style={{ animationDelay: '2s' }}></div>
+                <div className="float-dot w-1.5 h-1.5 bg-amber-400 top-[60%] left-[30%] animate-float-fast opacity-40" style={{ animationDelay: '1.5s' }}></div>
+            </div>
             {/* Page Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-6 md:py-12">
-                <div className="max-w-7xl mx-auto">
+            <div className="relative overflow-hidden px-4 md:px-6 py-6 md:py-12">
+                <div className="max-w-7xl mx-auto relative z-10">
                     <button
                         onClick={onBack}
                         className="flex items-center gap-2 mb-4 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium text-sm md:text-base"
@@ -152,9 +161,9 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                 <button
                                     key={status}
                                     onClick={() => handleStatusFilterChange(status)}
-                                    className={`px-2.5 md:px-4 py-1.5 md:py-2.5 rounded-md md:rounded-lg font-bold text-xs md:text-sm transition-all border whitespace-nowrap flex-shrink-0 ${statusFilter === status
-                                        ? 'bg-[#002147] text-white border-[#002147] shadow-md'
-                                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                    className={`px-2.5 md:px-4 py-1.5 md:py-2.5 rounded-md md:rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap flex-shrink-0 ${statusFilter === status
+                                        ? 'bg-[#DAA520] text-white shadow-md border border-[#DAA520]'
+                                        : 'glass-card text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80'
                                         }`}
                                 >
                                     {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -170,7 +179,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                             <select
                                 value={clubFilter}
                                 onChange={(e) => handleClubFilterChange(e.target.value)}
-                                className="w-full appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg md:rounded-xl pl-9 md:pl-10 pr-10 py-2.5 md:py-3 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#002147] dark:focus:ring-blue-500 cursor-pointer shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                                className="w-full appearance-none glass-input rounded-lg md:rounded-xl pl-9 md:pl-10 pr-10 py-2.5 md:py-3 text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#DAA520]/50 cursor-pointer shadow-sm hover:bg-white/70 dark:hover:bg-slate-700/70 transition-all"
                             >
                                 <option value="all">All Clubs</option>
                                 {allClubNames.map((clubName: string) => (
@@ -187,7 +196,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                             <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : filteredPosts.length === 0 ? (
-                        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                        <div className="text-center py-20 glass-card rounded-2xl border border-dashed border-white/30 dark:border-slate-700/50">
                             <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-slate-400" />
                             </div>
@@ -220,10 +229,10 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                     <div
                                         key={post.id}
                                         onClick={() => post.id && onNavigateToPost(post.id)}
-                                        className="group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-800 cursor-pointer relative hover:-translate-y-1 duration-300"
+                                        className="group glass-card glass-card-hover rounded-3xl overflow-hidden cursor-pointer relative duration-300"
                                     >
                                         {/* Card Header */}
-                                        <div className="px-5 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/50">
+                                        <div className="px-5 py-4 flex items-center justify-between border-b border-white/20 dark:border-slate-700/30">
                                             <div className="flex items-center gap-3">
                                                 {club?.image ? (
                                                     <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white dark:bg-slate-700 shadow-sm p-0.5" />
@@ -273,7 +282,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover/image:scale-110"
                                                         />
                                                         <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100 duration-300 pointer-events-none">
-                                                            <span className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Click to expand</span>
+                                                            <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">Click to expand</span>
                                                         </div>
                                                     </>
                                                 ) : (
@@ -282,14 +291,14 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                                     </div>
                                                 )}
                                                 {/* Date Overlay (Mobile & Desktop) */}
-                                                <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center border border-slate-100 dark:border-slate-700 pointer-events-none">
+                                                <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 rounded-lg shadow-lg flex flex-col items-center border border-slate-100 dark:border-slate-700 pointer-events-none">
                                                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{post.date ? new Date(post.date).toLocaleDateString('en-US', { month: 'short' }) : '---'}</span>
                                                     <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{post.date ? new Date(post.date).getDate() : '--'}</span>
                                                 </div>
                                             </div>
 
                                             {/* Event Details */}
-                                            <div className="flex-1 min-w-0 max-w-full p-5 md:p-6 flex flex-col justify-between bg-white dark:bg-slate-800">
+                                            <div className="flex-1 min-w-0 max-w-full p-5 md:p-6 flex flex-col justify-between">
                                                 <div>
                                                     <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 leading-tight group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-all w-full">
                                                         {post.title}
@@ -328,7 +337,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                                 </div>
 
                                                 <div className="flex gap-2 mt-auto">
-                                                    <button className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                                    <button className="flex-1 py-3 bg-[#002147] hover:bg-[#003366] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                                                         View Details
                                                     </button>
                                                 </div>
@@ -343,7 +352,7 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
                                 <div className="text-center pt-8">
                                     <button
                                         onClick={loadMoreEvents}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#002147] hover:text-[#002147] transition-all shadow-sm hover:shadow-md"
+                                        className="inline-flex items-center gap-2 px-6 py-3 glass-card text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all shadow-sm hover:shadow-md"
                                     >
                                         <ChevronDown className="w-4 h-4" />
                                         Load More Events
