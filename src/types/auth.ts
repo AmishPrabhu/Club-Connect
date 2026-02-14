@@ -49,7 +49,6 @@ export interface User {
   roles?: UserRole[]; // Array of all roles user has (for multi-role support)
   clubId?: string; // For club secretaries
   clubName?: string; // For club secretaries
-  clubName?: string; // For club secretaries
   managedClubs?: string[]; // For teachers - club IDs they manage
   profileImage?: string; // Profile picture URL
   createdAt?: Date;
@@ -81,7 +80,6 @@ export interface AuthContextType extends AuthState {
 export interface DBUser {
   email: string;
   name: string;
-  role: UserRole;
   role: UserRole;
   clubId?: string;
   clubName?: string;
@@ -210,7 +208,8 @@ export interface DBNotification {
   userId?: string; // Target user, empty for global
   clubId?: string; // Source club
   relatedId?: string; // ID of the related entity (e.g., postId)
-  read: boolean;
+  link?: string; // Optional link for navigation
+  read: boolean; // Whether the notification has been read
   createdAt: Date;
 }
 
