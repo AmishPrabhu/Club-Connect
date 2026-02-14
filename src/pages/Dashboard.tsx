@@ -163,23 +163,6 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
             </div>
           )}
         </div>
-
-        {/* Stats Section */}
-        <div className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-[#002147] to-[#003366] text-white overflow-hidden relative group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-bold mb-2">Are you a club member?</h3>
-              <p className="text-slate-300">Join a club today to explore new opportunities and connect with peers.</p>
-            </div>
-            <button
-              onClick={() => onNavigateToClub('all')}
-              className="px-8 py-4 bg-white text-[#002147] rounded-2xl font-bold hover:bg-cyan-50 transition-all flex items-center gap-2 shadow-xl"
-            >
-              Explore All <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
