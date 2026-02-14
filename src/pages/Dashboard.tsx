@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, TrendingUp, Users, ChevronRight, ArrowLeft } from 'lucide-react';
+import { TrendingUp, Search, Filter, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
 import { getClubs, getPosts, toggleClubLike } from '../lib/dbService';
@@ -116,34 +116,33 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   };
 
   return (
-    <div className="min-h-screen pb-28 scroll-mt-32 relative" id="tour-dashboard-stats">
+    <div className="min-h-screen pb-28 scroll-mt-32 relative overflow-hidden" id="tour-dashboard-stats">
+      {/* Background Environment */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+        <div className="absolute top-[10%] left-[5%] w-1.5 h-1.5 bg-cyan-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-[40%] right-[10%] w-2.5 h-2.5 bg-purple-400/30 rounded-full animate-pulse delay-700"></div>
+        <div className="absolute bottom-[20%] left-[15%] w-2 h-2 bg-blue-400/30 rounded-full animate-pulse delay-1000"></div>
+      </div>
 
       {/* Page Header */}
-      <div className="relative overflow-hidden px-4 md:px-6 py-6 md:py-12">
-        <div className="max-w-7xl mx-auto relative z-10">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 mb-4 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium text-sm md:text-base"
-            >
-              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-              Back to Home
-            </button>
-          )}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-[#002147]/5 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-[#002147] dark:text-blue-400" />
-                </div>
-                <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white">
-                  Discover Clubs
-                </h1>
+      <div className="px-4 md:px-6 py-6 md:py-10 max-w-7xl mx-auto w-full">
+        <div className="gradient-card p-6 md:p-10 relative overflow-hidden group">
+          {/* Background Glows */}
+          <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-cyan-100 dark:bg-cyan-500/10 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl">
-                Explore the diverse range of student organizations at Walchand College of Engineering. Find your community and get involved.
-              </p>
+              <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight">
+                Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">Clubs</span>
+              </h1>
             </div>
+            <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              Explore a diverse range of student-led organizations at Walchand College of Engineering. Find your passion and build your community.
+            </p>
           </div>
         </div>
       </div>

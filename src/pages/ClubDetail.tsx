@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus, Instagram } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, ChevronRight, X, ZoomIn, Globe, Instagram, MessageCircle, Share2, Award, Info, FileText, ChevronLeft } from 'lucide-react';
 import { DBClub, DBPost, Attachment } from '../types/auth';
 import { getPosts } from '../lib/dbService';
 
@@ -212,37 +212,49 @@ export default function ClubDetail({ clubId, onBack, onNavigateToMember, onNavig
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium text-sm md:text-base"
-      >
-        <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-        Back to Dashboard
-      </button>
+    <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12 relative overflow-hidden">
+      {/* Background Environment */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+        <div className="absolute top-[10%] left-[5%] w-1.5 h-1.5 bg-cyan-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-[40%] right-[10%] w-2.5 h-2.5 bg-purple-400/30 rounded-full animate-pulse delay-700"></div>
+        <div className="absolute bottom-[20%] left-[15%] w-2 h-2 bg-blue-400/30 rounded-full animate-pulse delay-1000"></div>
+      </div>
 
-      {/* Club Header - Compact on mobile */}
-      <div className="relative mb-4 md:mb-8 rounded-xl md:rounded-2xl overflow-hidden shadow-xl border-t-4 border-[#DAA520]">
-        <div className="absolute inset-0 bg-[#002147] opacity-90"></div>
-        <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-40 mix-blend-overlay`}></div>
-        <div className="relative z-10 p-4 md:p-12 flex items-center gap-3 md:gap-0 md:flex-col md:text-center text-white">
-          <div className="w-12 h-12 md:w-24 md:h-24 md:mx-auto md:mb-4 md:mb-6 rounded-xl md:rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center border-2 border-[#DAA520] shadow-lg flex-shrink-0">
-            {club.image ? (
-              <img
-                src={club.image}
-                alt={club.name}
-                className="w-full h-full object-contain p-1.5 md:p-2 bg-white rounded-lg md:rounded-xl"
-              />
-            ) : (
-              <span className="text-2xl md:text-5xl">{club.icon}</span>
-            )}
-          </div>
-          <div className="flex-1 min-w-0 md:flex-none">
-            <h1 className="text-lg md:text-4xl font-serif font-bold mb-0.5 md:mb-2 tracking-wide text-[#DAA520] truncate md:whitespace-normal">{club.name}</h1>
-            {club.fullForm && (
-              <p className="text-white/90 font-medium text-xs md:text-lg mb-1 md:mb-2 md:max-w-2xl md:mx-auto">{club.fullForm}</p>
-            )}
-            <p className="text-white/80 md:max-w-2xl md:mx-auto font-light text-xs md:text-lg line-clamp-2 md:line-clamp-none">Igniting Innovation & Excellence at Walchand College of Engineering</p>
+      {/* Club Header - Premium Box Style */}
+      <div className="relative mb-6 md:mb-10 w-full">
+        <div className="gradient-card p-6 md:p-12 relative overflow-hidden group border-t-4 border-cyan-500 shadow-2xl">
+          {/* Background Glows */}
+          <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+          <div className="absolute inset-0 bg-[#002147]/90 -z-10"></div>
+          <div className={`absolute inset-0 bg-gradient-to-r ${club.color} opacity-30 mix-blend-overlay -z-10`}></div>
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-10 text-white">
+            {/* Club Logo/Icon */}
+            <div className="w-20 h-20 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-white/10 flex items-center justify-center border-2 border-white/20 shadow-lg backdrop-blur-sm group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
+              {club.image ? (
+                <img
+                  src={club.image}
+                  alt={club.name}
+                  className="w-full h-full object-contain p-2 md:p-4 bg-white rounded-xl"
+                />
+              ) : (
+                <span className="text-4xl md:text-6xl">{club.icon}</span>
+              )}
+            </div>
+
+            <div className="flex-1 text-center md:text-left min-w-0">
+              <h1 className="text-2xl md:text-5xl font-bold mb-2 tracking-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 drop-shadow-sm truncate block">{club.name}</span>
+              </h1>
+              {club.fullForm && (
+                <p className="text-white/90 font-medium text-sm md:text-xl mb-3 md:max-w-3xl">{club.fullForm}</p>
+              )}
+              <p className="text-white/70 md:max-w-3xl font-light text-xs md:text-lg leading-relaxed line-clamp-2 md:line-clamp-none">
+                Igniting Innovation & Excellence at Walchand College of Engineering. Join us to explore new horizons and develop industry-ready skills.
+              </p>
+            </div>
           </div>
         </div>
       </div>
