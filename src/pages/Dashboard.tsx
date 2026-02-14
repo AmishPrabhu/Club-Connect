@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, TrendingUp, Users, ChevronRight } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
-import { getClubs, getPosts, toggleClubLike } from '../lib/dbService';
+import { getClubs, toggleClubLike } from '../lib/dbService';
 
 interface DashboardProps {
   user: any;
@@ -12,7 +12,7 @@ interface DashboardProps {
   onOpenSecretaryDashboard?: () => void;
 }
 
-export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboard, onOpenSecretaryDashboard }: DashboardProps) {
+export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
   const [clubs, setClubs] = useState<DBClub[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -27,11 +27,8 @@ export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboa
         const clubsData = await getClubs();
         setClubs(clubsData);
 
-        if (user?.id) {
-          const userLikedClubs = clubsData
-            .filter(club => club.likedBy?.includes(user.id))
-            .map(club => club.id);
-          setLikedClubs(new Set(userLikedClubs));
+        if (user?.likedClubs) {
+          setLikedClubs(new Set(user.likedClubs));
         }
       } catch (error) {
         console.error('Error loading clubs:', error);
@@ -43,7 +40,7 @@ export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboa
   }, [user]);
 
   const handleLikeToggle = async (clubId: string) => {
-    if (!user) return;
+    if (!user?.id) return;
 
     const isLiked = likedClubs.has(clubId);
     const newLikedClubs = new Set(likedClubs);
@@ -56,7 +53,7 @@ export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboa
     setLikedClubs(newLikedClubs);
 
     try {
-      await toggleClubLike(clubId, user.id);
+      await toggleClubLike(user.id, clubId, isLiked);
     } catch (error) {
       console.error('Error toggling like:', error);
       setLikedClubs(likedClubs);
@@ -122,8 +119,8 @@ export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboa
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeCategory === category
-                    ? 'bg-[#DAA520] text-white shadow-lg shadow-[#DAA520]/20'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  ? 'bg-[#DAA520] text-white shadow-lg shadow-[#DAA520]/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
               >
                 {category}
@@ -141,20 +138,20 @@ export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboa
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-80 rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse"></div>
+                <div key={i} className="h-48 md:h-80 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse"></div>
               ))}
             </div>
           ) : filteredClubs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
               {filteredClubs.map((club) => (
                 <ClubCard
                   key={club.id}
                   club={club}
-                  onClick={() => onNavigateToClub(club.id)}
-                  isLiked={likedClubs.has(club.id)}
-                  onLikeToggle={() => handleLikeToggle(club.id)}
+                  onClick={() => club.id && onNavigateToClub(club.id)}
+                  isLiked={club.id ? likedClubs.has(club.id) : false}
+                  onToggleLike={() => club.id && handleLikeToggle(club.id)}
                 />
               ))}
             </div>
