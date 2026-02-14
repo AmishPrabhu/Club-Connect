@@ -376,7 +376,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group glass-card glass-card-hover rounded-3xl overflow-hidden cursor-pointer mb-6"
+                      className="group glass-card glass-card-hover rounded-2xl overflow-hidden cursor-pointer mb-6"
                     >
                       {/* Card Header for Desktop/Mobile Consistency */}
                       <div className="px-5 py-4 flex items-center justify-between border-b border-white/20 dark:border-slate-700/30">

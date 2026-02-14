@@ -78,8 +78,8 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
 
             {club.image && (
               <div className="relative shrink-0 w-32 h-32 md:w-56 md:h-56">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-[2rem] blur-2xl opacity-20 animate-pulse"></div>
-                <div className="relative h-full w-full bg-white dark:bg-slate-800 p-4 md:p-8 rounded-[2rem] border border-white/50 dark:border-slate-700/50 shadow-2xl backdrop-blur-xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-[1.25rem] blur-2xl opacity-20 animate-pulse"></div>
+                <div className="relative h-full w-full bg-white dark:bg-slate-800 p-4 md:p-8 rounded-[1.25rem] border border-white/50 dark:border-slate-700/50 shadow-2xl backdrop-blur-xl flex items-center justify-center">
                   <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
                 </div>
               </div>
@@ -92,7 +92,7 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
         {/* Left Column: Stats and Tabs */}
         <div className="lg:col-span-1 space-y-8">
           {/* Quick Links Card */}
-          <div className="glass-card p-8 rounded-[2rem] border border-white/50 dark:border-white/5 shadow-xl">
+          <div className="glass-card p-8 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
               <Info className="w-5 h-5 text-cyan-500" />
               Information
@@ -135,7 +135,7 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
           </div>
 
           {/* Tags Card */}
-          <div className="glass-card p-8 rounded-[2rem] border border-white/50 dark:border-white/5 shadow-xl">
+          <div className="glass-card p-8 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl">
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Expertise</h3>
             <div className="flex flex-wrap gap-2">
               {['Competitive Coding', 'Web Dev', 'Mobile Dev', 'Open Source', 'UI/UX'].map((tag) => (
@@ -147,16 +147,15 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
           </div>
         </div>
 
-        {/* Right Column: Content */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="glass-card p-1 rounded-[1.5rem] border border-white/50 dark:border-white/5 shadow-xl inline-flex mb-4">
+          <div className="glass-card p-1 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl inline-flex mb-4">
             {(['about', 'events', 'announcements'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-8 py-3 rounded-2xl text-sm font-bold transition-all ${activeTab === tab
-                    ? 'bg-[#002147] text-white shadow-lg'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-[#002147] text-white shadow-lg'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -166,7 +165,7 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
 
           <div className="min-h-[400px]">
             {activeTab === 'about' && (
-              <div className="glass-card p-8 md:p-10 rounded-[2.5rem] border border-white/50 dark:border-white/5 shadow-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
+              <div className="glass-card p-8 md:p-10 rounded-[1.75rem] border border-white/50 dark:border-white/5 shadow-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Our Mission</h2>
                 <div className="prose dark:prose-invert max-w-none">
                   <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed mb-8">
@@ -174,14 +173,14 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-                    <div className="p-6 rounded-3xl bg-cyan-500/5 border border-cyan-500/10">
+                    <div className="p-6 rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
                       <h4 className="font-bold text-cyan-600 dark:text-cyan-400 mb-2 flex items-center gap-2">
                         <CheckCircle className="w-5 h-5" />
                         Vision
                       </h4>
                       <p className="text-sm text-slate-600 dark:text-slate-400">To create a world-class coding community within WCE.</p>
                     </div>
-                    <div className="p-6 rounded-3xl bg-purple-500/5 border border-purple-500/10">
+                    <div className="p-6 rounded-2xl bg-purple-500/5 border border-purple-500/10">
                       <h4 className="font-bold text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-2">
                         <Plus className="w-5 h-5" />
                         Motto
@@ -206,10 +205,10 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
                     <div
                       key={post.id}
                       onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group glass-card p-6 rounded-3xl border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-between"
+                      className="group glass-card p-6 rounded-2xl border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-between"
                     >
                       <div className="flex items-center gap-6">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${activeTab === 'events' ? 'bg-cyan-500/10 text-cyan-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${activeTab === 'events' ? 'bg-cyan-500/10 text-cyan-500' : 'bg-purple-500/10 text-purple-500'}`}>
                           {activeTab === 'events' ? <Calendar className="w-7 h-7" /> : <Archive className="w-7 h-7" />}
                         </div>
                         <div>
@@ -221,7 +220,7 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-20 glass-card rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <div className="text-center py-20 glass-card rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                     <Archive className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No {activeTab} found</h3>
                     <p className="text-slate-500 dark:text-slate-400">Check back later for updates</p>

@@ -133,7 +133,7 @@ export default function Announcements({ onNavigateToPost }: AnnouncementsProps) 
                             <div className="animate-spin rounded-full h-10 w-10 border-4 border-purple-500 border-t-transparent"></div>
                         </div>
                     ) : filteredPosts.length === 0 ? (
-                        <div className="text-center py-20 glass-card rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <div className="text-center py-20 glass-card rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                             <Megaphone className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                             <h3 className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-2">No Announcements Found</h3>
                             <p className="text-slate-500 dark:text-slate-500">
@@ -146,7 +146,7 @@ export default function Announcements({ onNavigateToPost }: AnnouncementsProps) 
                                 <div
                                     key={post.id}
                                     onClick={() => onNavigateToPost(post.id!)}
-                                    className="group glass-card glass-card-hover rounded-2xl overflow-hidden border border-slate-200/60 dark:border-white/5 cursor-pointer"
+                                    className="group glass-card glass-card-hover rounded-xl overflow-hidden border border-slate-200/60 dark:border-white/5 cursor-pointer"
                                 >
                                     <div className="flex flex-col sm:flex-row">
                                         {post.coverImage ? (

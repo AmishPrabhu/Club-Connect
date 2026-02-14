@@ -129,8 +129,8 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                     key={status}
                                     onClick={() => handleStatusFilterChange(status)}
                                     className={`px-3 md:px-5 py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-all whitespace-nowrap flex-shrink-0 ${statusFilter === status
-                                            ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20 border border-[#002147]'
-                                            : 'glass-card text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 shadow-sm'
+                                        ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20 border border-[#002147]'
+                                        : 'glass-card text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 shadow-sm'
                                         }`}
                                 >
                                     {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -163,7 +163,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                             <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : filteredPosts.length === 0 ? (
-                        <div className="text-center py-20 glass-card rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                        <div className="text-center py-20 glass-card rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                             <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-slate-400" />
                             </div>
@@ -186,7 +186,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                     <div
                                         key={post.id}
                                         onClick={() => post.id && onNavigateToPost(post.id)}
-                                        className="group glass-card glass-card-hover rounded-3xl overflow-hidden cursor-pointer relative duration-300 border border-slate-200 dark:border-white/10 hover:shadow-xl"
+                                        className="group glass-card glass-card-hover rounded-2xl overflow-hidden cursor-pointer relative duration-300 border border-slate-200 dark:border-white/10 hover:shadow-xl"
                                     >
                                         <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-white/5">
                                             <div className="flex items-center gap-3">

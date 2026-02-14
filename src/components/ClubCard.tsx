@@ -60,9 +60,9 @@ export default function ClubCard({ club, onClick, isLiked = false, onToggleLike 
 
       {/* Header: Icon + Category Badge */}
       <div className="flex items-start justify-between mb-3 md:mb-4">
-        <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl border border-white/10 bg-slate-800/50 shadow-inner backdrop-blur-sm group-hover:border-cyan-500/30 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300`}>
+        <div className={`w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-3xl border border-white/10 bg-slate-800/50 shadow-inner backdrop-blur-sm group-hover:border-cyan-500/30 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300`}>
           {club.image ? (
-            <img src={club.image} alt={club.name} className="w-full h-full object-cover rounded-xl md:rounded-2xl" />
+            <img src={club.image} alt={club.name} className="w-full h-full object-cover rounded-lg md:rounded-xl" />
           ) : (
             <span className="drop-shadow-md">{club.icon}</span>
           )}

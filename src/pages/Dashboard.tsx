@@ -140,7 +140,7 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
           {isLoading ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-48 md:h-80 rounded-2xl md:rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse"></div>
+                <div key={i} className="h-48 md:h-80 rounded-xl md:rounded-2xl bg-slate-100 dark:bg-slate-900 animate-pulse"></div>
               ))}
             </div>
           ) : filteredClubs.length > 0 ? (
