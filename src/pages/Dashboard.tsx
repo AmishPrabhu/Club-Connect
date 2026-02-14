@@ -1,122 +1,77 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, Search, Filter, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings } from 'lucide-react';
+import { Search, TrendingUp, Users, ChevronRight } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
 import { getClubs, getPosts, toggleClubLike } from '../lib/dbService';
-import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
-  onNavigateToClub: (clubId: string, slug?: string) => void;
-  onBack?: () => void;
+  user: any;
+  onNavigateToClub: (clubId: string) => void;
+  onSignOut: () => void;
+  onOpenAdvisorDashboard?: () => void;
+  onOpenSecretaryDashboard?: () => void;
 }
 
-export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) {
-  const { user, updateUser } = useAuth();
+export default function Dashboard({ user, onNavigateToClub, onOpenAdvisorDashboard, onOpenSecretaryDashboard }: DashboardProps) {
   const [clubs, setClubs] = useState<DBClub[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [isLoading, setIsLoading] = useState(true);
+  const [likedClubs, setLikedClubs] = useState<Set<string>>(new Set());
 
-  const categories = ['all', 'technical', 'cultural', 'sports', 'academic'];
+  const categories = ['All', 'Technical', 'Cultural', 'Sports', 'Academic'];
 
-  // Fetch clubs and posts from Firestore
   useEffect(() => {
-    const loadData = async () => {
+    const loadClubs = async () => {
       try {
-        const [clubsData, postsData] = await Promise.all([
-          getClubs(),
-          getPosts()
-        ]);
+        const clubsData = await getClubs();
+        setClubs(clubsData);
 
-        // Calculate total events for each club
-        const clubsWithCounts = clubsData.map(club => {
-          const clubEventsCount = postsData.filter(post =>
-            post.clubId === club.id
-          ).length;
-
-          return {
-            ...club,
-            upcomingEvents: clubEventsCount // Overwrite with total count
-          };
-        });
-
-        setClubs(clubsWithCounts);
+        if (user?.id) {
+          const userLikedClubs = clubsData
+            .filter(club => club.likedBy?.includes(user.id))
+            .map(club => club.id);
+          setLikedClubs(new Set(userLikedClubs));
+        }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading clubs:', error);
       } finally {
         setIsLoading(false);
       }
     };
+    loadClubs();
+  }, [user]);
 
-    loadData();
-  }, []);
+  const handleLikeToggle = async (clubId: string) => {
+    if (!user) return;
 
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
+    const isLiked = likedClubs.has(clubId);
+    const newLikedClubs = new Set(likedClubs);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleToggleLike = async (clubId: string, isLiked: boolean) => {
-    if (!user) return; // Should prompt login?
-
-    // Optimistically update global user state so Profile reflects it immediately
-    // isLiked is the OLD state (before toggle) passed from ClubCard
-    // If it WAS liked, we are removing it.
-    let newLikedClubs = user.likedClubs || [];
     if (isLiked) {
-      newLikedClubs = newLikedClubs.filter(id => id !== clubId);
+      newLikedClubs.delete(clubId);
     } else {
-      newLikedClubs = [...newLikedClubs, clubId];
+      newLikedClubs.add(clubId);
     }
+    setLikedClubs(newLikedClubs);
 
-    updateUser({ likedClubs: newLikedClubs });
-
-    // API Call
-    await toggleClubLike(user.id, clubId, isLiked);
+    try {
+      await toggleClubLike(clubId, user.id);
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      setLikedClubs(likedClubs);
+    }
   };
 
-  const filteredClubs = clubs.filter((club) => {
+  const filteredClubs = clubs.filter(club => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       club.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Case-insensitive category check
-    const clubCategory = (club.category || '').toLowerCase();
-    const targetCategory = selectedCategory.toLowerCase();
-
-    const matchesCategory = selectedCategory === 'all' || clubCategory === targetCategory;
+    const matchesCategory = activeCategory === 'All' || club.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const searchResults = clubs.filter((club) =>
-    club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    club.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setShowDropdown(e.target.value.length > 0);
-  };
-
-  const handleResultClick = (clubId: string) => {
-    const club = clubs.find(c => c.id === clubId);
-    onNavigateToClub(clubId, club?.slug);
-    setShowDropdown(false);
-    setSearchQuery('');
-  };
-
   return (
-    <div className="min-h-screen pb-28 scroll-mt-32 relative overflow-hidden" id="tour-dashboard-stats">
+    <div className="flex flex-col min-h-screen pb-20 relative overflow-hidden">
       {/* Background Environment */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
         <div className="absolute top-[10%] left-[5%] w-1.5 h-1.5 bg-cyan-400/30 rounded-full animate-pulse"></div>
@@ -147,116 +102,86 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="py-4 md:py-6">
-          {/* Search Bar */}
-          <div className="relative mb-4 md:mb-6" id="tour-search-bar">
-            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400" />
+      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
+        {/* Search and Filters */}
+        <div className="py-6 space-y-6">
+          <div className="relative max-w-2xl mx-auto md:mx-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               placeholder="Search clubs by name, category, or description..."
               value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-              className="w-full pl-9 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-4 glass-input rounded-lg md:rounded-xl text-sm md:text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DAA520]/50 transition-all shadow-sm focus:shadow-lg"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all shadow-sm"
             />
-
-            {/* Live Search Dropdown */}
-            {showDropdown && (
-              <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-xl border border-slate-200/60 dark:border-slate-700/40 max-h-96 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                {searchResults.length > 0 ? (
-                  <div className="py-2">
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
-                      Clubs
-                    </div>
-                    {searchResults.map((club) => (
-                      <button
-                        key={club.id}
-                        onClick={() => handleResultClick(club.id!)}
-                        className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group border-b border-slate-100 dark:border-slate-700/50 last:border-0"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {club.image ? (
-                              <img src={club.image} alt={club.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <Users className="w-5 h-5 text-slate-400" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
-                              {club.name}
-                            </h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-md">
-                              {club.category.charAt(0).toUpperCase() + club.category.slice(1)} • {club.upcomingEvents || 0} events
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#002147] opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                    <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>No clubs found matching "{searchQuery}"</p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-          {/* Category Filter */}
-          <div className="mb-4 md:mb-6">
-            <div className="flex overflow-x-auto scrollbar-hide gap-1.5 md:gap-2 pb-2 -mx-3 px-3 md:mx-0 md:px-0">
-              {categories.map((category: string) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-2.5 md:px-4 py-1.5 md:py-2.5 rounded-md md:rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap flex-shrink-0 ${selectedCategory === category
-                    ? 'bg-[#DAA520] text-white shadow-md border border-[#DAA520]'
-                    : 'glass-card text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80'
-                    }`}
-                >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </button>
-              ))}
-            </div>
+
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeCategory === category
+                    ? 'bg-[#DAA520] text-white shadow-lg shadow-[#DAA520]/20'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Clubs Grid */}
+        <div className="py-6">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              Showing {filteredClubs.length} clubs
+            </h2>
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-80 rounded-3xl bg-slate-100 dark:bg-slate-900 animate-pulse"></div>
+              ))}
             </div>
-          ) : filteredClubs.length === 0 ? (
-            <div className="text-center py-16">
-              <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-              <p className="text-xl text-slate-600 dark:text-slate-400 mb-2">
-                {clubs.length === 0 ? 'No clubs yet' : 'No clubs found matching your criteria'}
-              </p>
-              {clubs.length === 0 && (
-                <p className="text-sm text-slate-500 dark:text-slate-500">
-                  Clubs will appear here once an admin creates them.
-                </p>
-              )}
+          ) : filteredClubs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {filteredClubs.map((club) => (
+                <ClubCard
+                  key={club.id}
+                  club={club}
+                  onClick={() => onNavigateToClub(club.id)}
+                  isLiked={likedClubs.has(club.id)}
+                  onLikeToggle={() => handleLikeToggle(club.id)}
+                />
+              ))}
             </div>
           ) : (
-            <>
-              <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
-                Showing {filteredClubs.length} {filteredClubs.length === 1 ? 'club' : 'clubs'}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                {filteredClubs.map((club) => (
-                  <ClubCard
-                    key={club.id}
-                    club={club}
-                    onClick={() => onNavigateToClub(club.id!, club.slug)}
-                    isLiked={user?.likedClubs?.includes(club.id!)}
-                    onToggleLike={handleToggleLike}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+              <Users className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No clubs found</h3>
+              <p className="text-slate-500 dark:text-slate-400">Try adjusting your search or category filter</p>
+            </div>
           )}
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-[#002147] to-[#003366] text-white overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <h3 className="text-2xl font-bold mb-2">Are you a club member?</h3>
+              <p className="text-slate-300">Join a club today to explore new opportunities and connect with peers.</p>
+            </div>
+            <button
+              onClick={() => onNavigateToClub('all')}
+              className="px-8 py-4 bg-white text-[#002147] rounded-2xl font-bold hover:bg-cyan-50 transition-all flex items-center gap-2 shadow-xl"
+            >
+              Explore All <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
