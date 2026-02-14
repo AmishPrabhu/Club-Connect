@@ -213,29 +213,29 @@ export default function TeacherDashboard() {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                                 {managedClubs.map(club => {
                                     const clubReports = getClubReports(club.id!);
                                     return (
                                         <div
                                             key={club.id}
-                                            className="glass-card p-6 hover:border-cyan-500/30 transition-all hover:scale-[1.02] duration-300 group"
+                                            className="glass-card p-3 md:p-6 hover:border-cyan-500/30 transition-all hover:scale-[1.02] duration-300 group flex flex-col justify-between h-full"
                                         >
-                                            <div className="flex items-start justify-between mb-6">
+                                            <div className="flex items-start justify-between mb-3 md:mb-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className="relative">
                                                         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
                                                         <img
                                                             src={club.image || '/club-default.jpg'}
                                                             alt={club.name}
-                                                            className="w-16 h-16 rounded-full object-cover relative z-10 border-2 border-white dark:border-slate-700 shadow-md"
+                                                            className="w-10 h-10 md:w-16 md:h-16 rounded-full object-cover relative z-10 border-2 border-white dark:border-slate-700 shadow-md"
                                                         />
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-xl text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                                                             {club.name}
                                                         </h3>
-                                                        <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1">
+                                                        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1">
                                                             <div className="p-1 rounded bg-slate-100 dark:bg-slate-800">
                                                                 <FileText className="w-3 h-3 text-cyan-500" />
                                                             </div>
@@ -252,10 +252,10 @@ export default function TeacherDashboard() {
                                                 </button>
                                             </div>
 
-                                            <div className="flex gap-3">
+                                            <div className="flex gap-2 md:gap-3 mt-auto">
                                                 <button
                                                     onClick={() => setSelectedClub(club)}
-                                                    className="flex-1 px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors text-sm shadow-sm"
+                                                    className="flex-1 px-2 py-2 md:px-4 md:py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors text-xs md:text-sm shadow-sm whitespace-nowrap"
                                                 >
                                                     View Details
                                                 </button>

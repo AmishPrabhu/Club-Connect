@@ -645,191 +645,215 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
 
                                 <div className="grid gap-6">
                                     {/* Secretary Section */}
-                                    <div className="glass-card p-6 bg-slate-50/50 dark:bg-slate-800/30">
-                                        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
-                                            <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                                Secretaries
-                                            </h4>
-                                            <button
-                                                onClick={() => openEditRoleModal('secretary', 'add')}
-                                                className="flex items-center gap-1.5 text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-                                            >
-                                                <Plus className="w-3 h-3" /> Add New
-                                            </button>
+                                    <div className="glass-card p-4 md:p-6 relative overflow-hidden group/card bg-white/50 dark:bg-slate-800/50 h-full flex flex-col">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
+                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                                <Users className="w-8 h-8 md:w-12 md:h-12 text-blue-500" />
+                                            </div>
                                         </div>
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            <div className="flex flex-wrap gap-2 justify-between items-center mb-4">
+                                                <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                                    Secretaries
+                                                </h4>
+                                                <button
+                                                    onClick={() => openEditRoleModal('secretary', 'add')}
+                                                    className="flex items-center gap-1.5 text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white p-2 md:px-3 md:py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                                                    title="Add New"
+                                                >
+                                                    <Plus className="w-4 h-4 md:w-3 md:h-3" />
+                                                    <span className="hidden md:inline">Add New</span>
+                                                </button>
+                                            </div>
 
-                                        <div className="space-y-3">
-                                            {getOfficersByRole('secretary').length > 0 ? (
-                                                getOfficersByRole('secretary').map(officer => (
-                                                    <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleRemoveMember(officer.id!, officer.name)}
-                                                            className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                            title="Remove"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                club?.secretaryEmail ? (
-                                                    <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">Secretary</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.secretaryEmail}</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
+                                            <div className="space-y-3 flex-1">
+                                                {getOfficersByRole('secretary').length > 0 ? (
+                                                    getOfficersByRole('secretary').map(officer => (
+                                                        <div key={officer.id} className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
+                                                            </div>
                                                             <button
-                                                                onClick={() => openEditRoleModal('secretary', 'edit')}
-                                                                className="text-slate-400 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                                                title="Edit"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleRemoveRole('secretary')}
+                                                                onClick={() => handleRemoveMember(officer.id!, officer.name)}
                                                                 className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                                 title="Remove"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         </div>
-                                                    </div>
+                                                    ))
                                                 ) : (
-                                                    <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl">No secretaries assigned</div>
-                                                )
-                                            )}
+                                                    club?.secretaryEmail ? (
+                                                        <div className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">Secretary</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.secretaryEmail}</p>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => openEditRoleModal('secretary', 'edit')}
+                                                                    className="text-slate-400 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRemoveRole('secretary')}
+                                                                    className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                                    title="Remove"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50 border-dashed">No secretaries assigned</div>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
                                     {/* President Section */}
-                                    <div className="glass-card p-6 bg-slate-50/50 dark:bg-slate-800/30">
-                                        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
-                                            <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                                                Presidents
-                                            </h4>
-                                            <button
-                                                onClick={() => openEditRoleModal('president', 'add')}
-                                                className="flex items-center gap-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-                                            >
-                                                <Plus className="w-3 h-3" /> Add New
-                                            </button>
+                                    <div className="glass-card p-4 md:p-6 relative overflow-hidden group/card bg-white/50 dark:bg-slate-800/50 h-full flex flex-col">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
+                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                                <Users className="w-8 h-8 md:w-12 md:h-12 text-amber-500" />
+                                            </div>
                                         </div>
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            <div className="flex flex-wrap gap-2 justify-between items-center mb-4">
+                                                <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                                    Presidents
+                                                </h4>
+                                                <button
+                                                    onClick={() => openEditRoleModal('president', 'add')}
+                                                    className="flex items-center gap-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white p-2 md:px-3 md:py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                                                    title="Add New"
+                                                >
+                                                    <Plus className="w-4 h-4 md:w-3 md:h-3" />
+                                                    <span className="hidden md:inline">Add New</span>
+                                                </button>
+                                            </div>
 
-                                        <div className="space-y-3">
-                                            {getOfficersByRole('president').length > 0 ? (
-                                                getOfficersByRole('president').map(officer => (
-                                                    <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleRemoveMember(officer.id!, officer.name)}
-                                                            className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                            title="Remove"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                club?.presidentEmail ? (
-                                                    <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">President</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.presidentEmail}</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
+                                            <div className="space-y-3 flex-1">
+                                                {getOfficersByRole('president').length > 0 ? (
+                                                    getOfficersByRole('president').map(officer => (
+                                                        <div key={officer.id} className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
+                                                            </div>
                                                             <button
-                                                                onClick={() => openEditRoleModal('president', 'edit')}
-                                                                className="text-slate-400 hover:text-amber-500 p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                                                                title="Edit"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleRemoveRole('president')}
+                                                                onClick={() => handleRemoveMember(officer.id!, officer.name)}
                                                                 className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                                 title="Remove"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         </div>
-                                                    </div>
+                                                    ))
                                                 ) : (
-                                                    <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl">No presidents assigned</div>
-                                                )
-                                            )}
+                                                    club?.presidentEmail ? (
+                                                        <div className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">President</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.presidentEmail}</p>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => openEditRoleModal('president', 'edit')}
+                                                                    className="text-slate-400 hover:text-amber-500 p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRemoveRole('president')}
+                                                                    className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                                    title="Remove"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50 border-dashed">No presidents assigned</div>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Treasurer Section */}
-                                    <div className="glass-card p-6 bg-slate-50/50 dark:bg-slate-800/30">
-                                        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
-                                            <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                                Treasurers
-                                            </h4>
-                                            <button
-                                                onClick={() => openEditRoleModal('treasurer', 'add')}
-                                                className="flex items-center gap-1.5 text-xs font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-                                            >
-                                                <Plus className="w-3 h-3" /> Add New
-                                            </button>
+                                    <div className="glass-card p-4 md:p-6 relative overflow-hidden group/card bg-white/50 dark:bg-slate-800/50 h-full flex flex-col">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
+                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-green-500/20 flex items-center justify-center">
+                                                <Users className="w-8 h-8 md:w-12 md:h-12 text-green-500" />
+                                            </div>
                                         </div>
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            <div className="flex flex-wrap gap-2 justify-between items-center mb-4">
+                                                <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                                    Treasurers
+                                                </h4>
+                                                <button
+                                                    onClick={() => openEditRoleModal('treasurer', 'add')}
+                                                    className="flex items-center gap-1.5 text-xs font-bold bg-green-500 hover:bg-green-600 text-white p-2 md:px-3 md:py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                                                    title="Add New"
+                                                >
+                                                    <Plus className="w-4 h-4 md:w-3 md:h-3" />
+                                                    <span className="hidden md:inline">Add New</span>
+                                                </button>
+                                            </div>
 
-                                        <div className="space-y-3">
-                                            {getOfficersByRole('treasurer').length > 0 ? (
-                                                getOfficersByRole('treasurer').map(officer => (
-                                                    <div key={officer.id} className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleRemoveMember(officer.id!, officer.name)}
-                                                            className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                            title="Remove"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                club?.treasurerEmail ? (
-                                                    <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <div className="min-w-0">
-                                                            <p className="font-bold text-sm text-slate-900 dark:text-white truncate">Treasurer</p>
-                                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.treasurerEmail}</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
+                                            <div className="space-y-3 flex-1">
+                                                {getOfficersByRole('treasurer').length > 0 ? (
+                                                    getOfficersByRole('treasurer').map(officer => (
+                                                        <div key={officer.id} className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{officer.name}</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{officer.email}</p>
+                                                            </div>
                                                             <button
-                                                                onClick={() => openEditRoleModal('treasurer', 'edit')}
-                                                                className="text-slate-400 hover:text-green-500 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                                                                title="Edit"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleRemoveRole('treasurer')}
+                                                                onClick={() => handleRemoveMember(officer.id!, officer.name)}
                                                                 className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                                 title="Remove"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         </div>
-                                                    </div>
+                                                    ))
                                                 ) : (
-                                                    <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl">No treasurers assigned</div>
-                                                )
-                                            )}
+                                                    club?.treasurerEmail ? (
+                                                        <div className="w-full flex justify-between items-center gap-2 bg-white/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm overflow-hidden backdrop-blur-sm">
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">Treasurer</p>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{club.treasurerEmail}</p>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => openEditRoleModal('treasurer', 'edit')}
+                                                                    className="text-slate-400 hover:text-green-500 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRemoveRole('treasurer')}
+                                                                    className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                                    title="Remove"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-slate-400 italic text-center py-4 bg-slate-100/30 dark:bg-slate-800/30 rounded-xl border border-slate-200/50 dark:border-slate-700/50 border-dashed">No treasurers assigned</div>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -32,7 +32,6 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   }, [isAuthenticated, user, onNavigate]);
 
   // Lockout state
-  // Lockout state
   const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
   // Update lockout state when email changes
@@ -135,182 +134,211 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   return (
     <div className="min-h-screen flex">
       {/* Left Split - Visual Side for Campus Vibe */}
-      <div className="hidden lg:flex w-1/2 bg-college-blue-900 relative overflow-hidden flex-col justify-between p-12 text-white">
-        {/* Background Overlay Image */}
+      <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
         {/* Background Overlay Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="/wce-campus.png"
             alt="Walchand College Campus"
-            className="w-full h-full object-cover grayscale"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-[#002147]/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-slate-900/40 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
         </div>
+
         <div className="relative z-10 w-full">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <img src="/wce-logo.png" alt="WCE Logo" className="w-12 h-12 bg-white rounded-full p-1 shadow-lg" />
             <div>
               <h2 className="text-xl font-serif font-bold tracking-wide">Walchand College of Engineering</h2>
-              <p className="text-xs text-college-gold uppercase tracking-widest font-semibold">Established 1947</p>
+              <p className="text-xs text-yellow-500 uppercase tracking-widest font-semibold">Established 1947</p>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 mb-8">
+        <div className="relative z-10 mb-12">
           <h1 className="text-6xl font-serif font-bold mb-6 text-shadow-lg leading-tight">
             Welcome to <br />
-            <span className="text-college-gold">Club Connect</span>
+            <span className="text-yellow-500">Club Connect</span>
           </h1>
-          <p className="text-xl font-light text-blue-100 max-w-lg leading-relaxed">
+          <p className="text-xl font-light text-slate-200 max-w-lg leading-relaxed">
             The central hub for all student activities, club management, and event organization at WCE Sangli.
           </p>
         </div>
 
-        <div className="relative z-10 text-xs text-blue-300 font-medium">
+        <div className="relative z-10 text-xs text-slate-300 font-medium">
           &copy; {new Date().getFullYear()} WCE Technical Team. All Rights Reserved.
         </div>
       </div>
 
       {/* Right Split - Functional Side */}
-      <div className="w-full lg:w-1/2 flex flex-col h-full">
-        <div className="p-6 lg:p-8 w-full flex-none z-10">
+      <div className="w-full lg:w-1/2 relative bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-col h-full overflow-y-auto">
+        {/* Background Gradients for Right Side */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[80px] animate-pulse"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="p-6 lg:p-12 w-full flex-none z-10">
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-2 text-slate-500 hover:text-college-blue-primary dark:hover:text-blue-400 transition-all font-medium text-sm group"
+            className="inline-flex items-center gap-2 text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors font-medium text-sm group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Campus Home
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center items-center w-full px-6 lg:px-16 pb-12">
+        <div className="flex-1 flex flex-col justify-center items-center w-full px-6 lg:px-16 pb-12 z-10">
           <div className="w-full max-w-md">
-            <div className="text-center mb-10">
-              <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
-                <ShieldCheck className="w-8 h-8 text-college-blue-primary dark:text-blue-400" />
+            {/* Hero / Welcome Card */}
+            <div className="gradient-card p-8 mb-6 text-left relative overflow-hidden group">
+              {/* Background Glows */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
+              <div className="relative z-10">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
+                  Welcome <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">Back</span>
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Sign in to access your dashboard</p>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Student & Faculty Login</h2>
-              <p className="text-slate-500 dark:text-slate-400">Please sign in to continue to your dashboard</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-md animate-in fade-in slide-in-from-top-2">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300 flex items-center gap-2">
-                    <span className="text-xl">⚠️</span> {error}
-                  </p>
-                </div>
-              )}
+            <div className="glass-card p-8 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative overflow-hidden">
+              {/* Decorative top border */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500"></div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
-                  Official Email ID
-                </label>
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
-                    placeholder="name@walchandsangli.ac.in"
-                    required
-                  />
-                </div>
-              </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl animate-in fade-in slide-in-from-top-2">
+                    <p className="text-sm font-medium text-red-700 dark:text-red-300 flex items-center gap-2">
+                      <span className="text-xl">⚠️</span> {error}
+                    </p>
+                  </div>
+                )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-xs ml-1">
-                  Password
-                </label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-college-blue-primary transition-colors" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-college-blue-primary/50 focus:border-college-blue-primary transition-all shadow-sm"
-                    placeholder="••••••••"
-                    required
-                  />
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">
+                    Official Email ID
+                  </label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-400 transition-colors" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all font-medium"
+                      placeholder="name@walchandsangli.ac.in"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">
+                    Password
+                  </label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-400 transition-colors" />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-12 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all font-medium"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                    onClick={() => setIsForgotPasswordOpen(true)}
+                    className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:underline transition-all"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    Forgot Credentials?
                   </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !!lockoutUntil}
+                  className={`w-full font-bold py-3.5 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg shadow-cyan-500/20 ${lockoutUntil
+                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                >
+                  {isSubmitting ? (
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : lockoutUntil ? (
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-5 h-5" />
+                      Locked ({timeLeft})
+                    </span>
+                  ) : (
+                    <>
+                      <span>Access Dashboard</span>
+                      <ArrowLeft className="w-5 h-5 rotate-180" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-500 dark:text-slate-400 rounded-full">Or continue with</span>
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              {/* Google Sign-In Button */}
+              <div className="flex justify-center">
+                <div className="w-full flex justify-center [&>div]:w-full [&>div>div]:w-full">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError('Google sign-in failed. Please try again.')}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    width="100%"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-4">
+                Only @walchandsangli.ac.in emails are allowed
+              </p>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-center">
+                <p className="text-slate-500 dark:text-slate-400 mb-4 text-sm">New to Club Connect?</p>
                 <button
-                  type="button"
-                  onClick={() => setIsForgotPasswordOpen(true)}
-                  className="text-sm font-semibold text-college-blue-primary dark:text-blue-400 hover:text-college-blue-700 dark:hover:text-blue-300 hover:underline transition-all"
+                  onClick={() => onNavigate('signUp')}
+                  className="w-full py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors bg-white/50 dark:bg-slate-800/50"
                 >
-                  Forgot Credentials?
+                  Create Student Account
                 </button>
               </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !!lockoutUntil}
-                className={`w-full font-bold py-4 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg ${lockoutUntil
-                  ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
-                  : 'bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] hover:scale-[1.02] active:scale-[0.98] hover:shadow-yellow-500/30'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <div className="w-6 h-6 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
-                ) : lockoutUntil ? (
-                  <span className="flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Locked ({timeLeft})
-                  </span>
-                ) : (
-                  <>
-                    <span>Access Dashboard</span>
-                    <ArrowLeft className="w-5 h-5 rotate-180" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-transparent text-slate-500 dark:text-slate-400">Or continue with</span>
-              </div>
             </div>
 
-            {/* Google Sign-In Button */}
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError('Google sign-in failed. Please try again.')}
-                theme="outline"
-                size="large"
-                text="signin_with"
-                shape="rectangular"
-                logo_alignment="left"
-              />
-            </div>
-            <p className="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
-              Only @walchandsangli.ac.in emails are allowed
-            </p>
-
-            <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
-              <p className="text-slate-500 dark:text-slate-400 mb-4">New to the platform?</p>
-              <button
-                onClick={() => onNavigate('signUp')}
-                className="px-8 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:border-college-gold hover:text-college-blue-primary transition-colors"
-              >
-                Create Student Account
-              </button>
+            <div className="mt-8 text-center">
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                &copy; {new Date().getFullYear()} WCE Technical Team. All Rights Reserved.
+              </p>
             </div>
           </div>
         </div>

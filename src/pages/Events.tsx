@@ -189,17 +189,17 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                         className="group glass-card glass-card-hover rounded-2xl overflow-hidden cursor-pointer relative duration-300 border border-slate-200 dark:border-white/10 hover:shadow-xl"
                                     >
                                         <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-white/5">
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
                                                 {club?.image ? (
-                                                    <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white shadow-sm p-0.5" />
+                                                    <img src={club.image} alt={club.name} className="w-8 h-8 rounded-lg object-contain bg-white shadow-sm p-0.5 shrink-0" />
                                                 ) : (
-                                                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
                                                         <Calendar className="w-4 h-4 text-slate-500" />
                                                     </div>
                                                 )}
-                                                <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{post.clubName}</span>
+                                                <span className="font-bold text-slate-800 dark:text-slate-200 truncate pr-2">{post.clubName}</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 shrink-0 ml-2">
                                                 {canManage && onManageEvent && (
                                                     <button
                                                         onClick={(e) => {
@@ -212,11 +212,11 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                                     </button>
                                                 )}
                                                 {isUpcoming ? (
-                                                    <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-500/20">
+                                                    <span className="px-2 md:px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-500/20 whitespace-nowrap">
                                                         Upcoming
                                                     </span>
                                                 ) : (
-                                                    <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-600">
+                                                    <span className="px-2 md:px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-600 whitespace-nowrap">
                                                         Completed
                                                     </span>
                                                 )}
