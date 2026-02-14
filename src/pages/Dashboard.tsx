@@ -77,8 +77,8 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
       </div>
 
       {/* Page Header */}
-      <div className="px-4 md:px-6 py-6 md:py-10 max-w-7xl mx-auto w-full">
-        <div className="gradient-card p-6 md:p-10 relative overflow-hidden group">
+      <div className="px-4 md:px-6 py-4 md:py-6 max-w-7xl mx-auto w-full">
+        <div className="gradient-card p-5 md:p-8 relative overflow-hidden group">
           {/* Background Glows */}
           <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
@@ -101,7 +101,7 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
         {/* Search and Filters */}
-        <div className="py-6 space-y-6">
+        <div className="py-2 space-y-4">
           <div className="relative max-w-2xl mx-auto md:mx-0">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -109,7 +109,7 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
               placeholder="Search clubs by name, category, or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all shadow-sm"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all shadow-sm"
             />
           </div>
 
@@ -130,8 +130,8 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
         </div>
 
         {/* Clubs Grid */}
-        <div className="py-6">
-          <div className="flex items-center justify-between mb-8">
+        <div className="pt-2 pb-6">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
               Showing {filteredClubs.length} clubs
             </h2>
@@ -156,7 +156,7 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+            <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
               <Users className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No clubs found</h3>
               <p className="text-slate-500 dark:text-slate-400">Try adjusting your search or category filter</p>
