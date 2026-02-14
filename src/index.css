@@ -57,236 +57,181 @@
    MESH GRADIENT BACKGROUNDS
    ============================ */
 
+
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 189 94% 43%;
+    /* Neon Cyan #06b6d4 */
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 258 90% 66%;
+    /* Electric Purple #8b5cf6 */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 189 94% 43%;
+  }
+}
+
 body {
-  @apply text-slate-900 dark:text-slate-200 font-sans;
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 font-sans;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+  background-attachment: fixed;
+  background-size: cover;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f4f5f7;
-  background-image:
-    radial-gradient(circle at 5% 8%, rgba(147, 197, 253, 0.50) 0%, transparent 25%),
-    radial-gradient(circle at 90% 5%, rgba(253, 200, 150, 0.40) 0%, transparent 20%),
-    radial-gradient(circle at 25% 90%, rgba(216, 180, 254, 0.40) 0%, transparent 22%),
-    radial-gradient(circle at 95% 70%, rgba(252, 182, 182, 0.35) 0%, transparent 18%),
-    radial-gradient(circle at 60% 40%, rgba(186, 230, 253, 0.25) 0%, transparent 20%),
-    radial-gradient(circle at 40% 55%, rgba(253, 224, 168, 0.20) 0%, transparent 15%);
-  background-attachment: fixed;
-  background-size: cover;
-}
-
-.dark body,
-body:is(.dark *) {
-  background-color: #0b1120;
-  background-image:
-    radial-gradient(circle at 5% 8%, rgba(56, 120, 200, 0.30) 0%, transparent 25%),
-    radial-gradient(circle at 90% 5%, rgba(120, 80, 200, 0.22) 0%, transparent 20%),
-    radial-gradient(circle at 25% 90%, rgba(80, 160, 200, 0.22) 0%, transparent 22%),
-    radial-gradient(circle at 95% 70%, rgba(160, 80, 160, 0.18) 0%, transparent 18%),
-    radial-gradient(circle at 60% 40%, rgba(40, 80, 160, 0.15) 0%, transparent 20%),
-    radial-gradient(circle at 40% 55%, rgba(60, 140, 140, 0.12) 0%, transparent 15%);
-  background-attachment: fixed;
-  background-size: cover;
-}
-
-/* Soft pastel mesh gradient — used on hero and page headers */
-.mesh-gradient-hero {
-  background:
-    radial-gradient(ellipse at 0% 0%, rgba(168, 210, 255, 0.45) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 10%, rgba(255, 228, 196, 0.35) 0%, transparent 45%),
-    radial-gradient(ellipse at 40% 80%, rgba(233, 196, 255, 0.30) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 60%, rgba(255, 200, 200, 0.25) 0%, transparent 40%),
-    linear-gradient(180deg, #f5f7fa 0%, #eef1f5 100%);
-}
-
-.dark .mesh-gradient-hero {
-  background:
-    radial-gradient(ellipse at 0% 0%, rgba(30, 58, 95, 0.50) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 10%, rgba(60, 40, 20, 0.30) 0%, transparent 45%),
-    radial-gradient(ellipse at 40% 80%, rgba(50, 30, 70, 0.30) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 60%, rgba(40, 20, 30, 0.20) 0%, transparent 40%),
-    linear-gradient(180deg, #0f172a 0%, #0a0f1a 100%);
-}
-
-/* Lighter version for sub-pages (clubs, events) */
-.mesh-gradient-page {
-  background:
-    radial-gradient(ellipse at 10% 20%, rgba(168, 210, 255, 0.30) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 20%, rgba(255, 228, 196, 0.25) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 90%, rgba(233, 196, 255, 0.15) 0%, transparent 50%),
-    linear-gradient(180deg, #f8f9fc 0%, #f0f2f5 100%);
-}
-
-.dark .mesh-gradient-page {
-  background:
-    radial-gradient(ellipse at 10% 20%, rgba(30, 58, 95, 0.35) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 20%, rgba(60, 40, 20, 0.20) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 90%, rgba(50, 30, 70, 0.15) 0%, transparent 50%),
-    linear-gradient(180deg, #0f172a 0%, #0c1220 100%);
 }
 
 /* ============================
-   GLASSMORPHISM CARDS
+   NEON / CYBER CARDS
    ============================ */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  /* Light Mode */
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  @apply border border-slate-200 backdrop-blur-xl rounded-[2rem];
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .dark .glass-card {
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  /* Dark Mode */
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  @apply border border-white/10;
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.25),
-    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Glass hover lift — adds 3D depth on interaction */
 .glass-card-hover {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card-hover:hover {
-  transform: translateY(-6px);
+  @apply border-cyan-500/30 bg-white/80 dark:bg-slate-800/80;
+  transform: translateY(-2px);
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.10),
-    0 8px 16px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.05),
+    0 0 20px rgba(6, 182, 212, 0.15);
+  /* Neon Glow */
 }
 
-.dark .glass-card-hover:hover {
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.35),
-    0 8px 16px rgba(0, 0, 0, 0.20),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+/* Gradient Cards (like "Premium Plan") */
+.gradient-card {
+  /* Light Mode */
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  @apply border border-slate-200 backdrop-blur-3xl rounded-[2.5rem] relative overflow-hidden;
 }
 
-/* ============================
-   FLOATING DECORATIVE DOTS
-   ============================ */
+.dark .gradient-card {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  @apply border border-white/10;
+}
 
-/* Persistent full-page floating dots wrapper */
-.page-dots {
-  position: fixed;
+.gradient-card::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
 }
 
-.float-dot {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1;
+.dark .gradient-card::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
-@keyframes floatSlow {
-
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  25% {
-    transform: translateY(-12px) translateX(6px);
-  }
-
-  50% {
-    transform: translateY(-6px) translateX(-4px);
-  }
-
-  75% {
-    transform: translateY(-18px) translateX(8px);
-  }
-}
-
-@keyframes floatMedium {
-
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  33% {
-    transform: translateY(-15px) translateX(-8px);
-  }
-
-  66% {
-    transform: translateY(-8px) translateX(12px);
-  }
-}
-
-@keyframes floatFast {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.animate-float-slow {
-  animation: floatSlow 8s ease-in-out infinite;
-}
-
-.animate-float-medium {
-  animation: floatMedium 6s ease-in-out infinite;
-}
-
-.animate-float-fast {
-  animation: floatFast 4s ease-in-out infinite;
-}
-
-/* ============================
-   FROSTED GLASS HEADER
-   ============================ */
-
-.glass-header {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-}
-
-.dark .glass-header {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-}
-
-/* ============================
-   FROSTED GLASS INPUT
-   ============================ */
-
+/* Input Fields */
 .glass-input {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.40);
+  @apply bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500;
+  transition: all 0.2s;
 }
 
-.dark .glass-input {
-  background: rgba(30, 41, 59, 0.50);
-  border: 1px solid rgba(148, 163, 184, 0.15);
+.glass-input:focus {
+  @apply border-cyan-500/50 ring-2 ring-cyan-500/20 outline-none bg-white/80 dark:bg-slate-900/80;
+}
+
+/* Floating Bottom Nav */
+.floating-nav {
+  @apply fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 p-2 rounded-full;
+  background: rgba(255, 255, 255, 0.85);
+  /* Light Mode bg */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  /* Light Mode border */
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 50;
+  width: auto;
+  min-width: 300px;
+  justify-content: space-between;
+}
+
+.dark .floating-nav {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.nav-item {
+  @apply relative p-3 rounded-full text-slate-400 transition-all duration-300;
+}
+
+.nav-item.active {
+  @apply text-cyan-400 bg-cyan-950/30;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+}
+
+.nav-item.active::after {
+  content: '';
+  @apply absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-cyan-400 rounded-full;
+  box-shadow: 0 0 8px cyan;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-700;
 }
 
 /* ============================

@@ -104,21 +104,13 @@ export default function Events({ onBack, onNavigateToPost, user, onManageEvent }
     };
 
     return (
-        <div className="flex flex-col min-h-screen pb-20 relative">
+        <div className="flex flex-col min-h-screen pb-28 relative">
             <ImageModal
                 isOpen={!!selectedImage}
                 onClose={() => setSelectedImage(null)}
                 imageUrl={selectedImage || ''}
             />
-            {/* Page-level floating dots */}
-            <div className="page-dots">
-                <div className="float-dot w-3 h-3 bg-cyan-400 top-[10%] right-[8%] animate-float-slow opacity-60"></div>
-                <div className="float-dot w-2 h-2 bg-[#DAA520] top-[35%] right-[25%] animate-float-medium opacity-50"></div>
-                <div className="float-dot w-1.5 h-1.5 bg-pink-300 top-[50%] left-[75%] animate-float-fast opacity-40"></div>
-                <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[70%] left-[12%] animate-float-medium opacity-45" style={{ animationDelay: '1s' }}></div>
-                <div className="float-dot w-2 h-2 bg-violet-400 top-[88%] right-[40%] animate-float-slow opacity-35" style={{ animationDelay: '2s' }}></div>
-                <div className="float-dot w-1.5 h-1.5 bg-amber-400 top-[60%] left-[30%] animate-float-fast opacity-40" style={{ animationDelay: '1.5s' }}></div>
-            </div>
+
             {/* Page Header */}
             <div className="relative overflow-hidden px-4 md:px-6 py-6 md:py-12">
                 <div className="max-w-7xl mx-auto relative z-10">

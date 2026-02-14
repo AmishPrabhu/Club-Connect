@@ -511,11 +511,15 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       )}
 
       {/* Profile Header - Horizontal layout on mobile */}
-      <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-8 shadow-sm border-l-4 border-[#DAA520] mb-4 md:mb-8">
-        <div className="flex items-start gap-3 sm:gap-6">
+      <div className="glass-card p-3 md:p-6 mb-4 md:mb-8 relative overflow-hidden group">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
+        <div className="relative z-10 flex items-start gap-3 sm:gap-5">
           {/* Avatar - Left side */}
           <div className="relative group flex-shrink-0">
-            <div className="w-12 h-12 sm:w-24 sm:h-24 bg-[#002147] rounded-xl md:rounded-2xl flex items-center justify-center text-lg sm:text-4xl shadow-md border-2 border-[#DAA520] overflow-hidden">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xl sm:text-3xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden group-hover:border-cyan-500/50 transition-colors duration-300">
               {profileData.profileImage ? (
                 <img
                   src={profileData.profileImage}
@@ -523,15 +527,15 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-white font-bold">
-                  {profileData.name ? profileData.name.charAt(0).toUpperCase() : '👨‍🎓'}
+                <span className="text-slate-400 dark:text-slate-500 font-bold group-hover:text-cyan-500 transition-colors">
+                  {profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'}
                 </span>
               )}
             </div>
 
             {/* Persistent camera badge indicator */}
-            <div className="absolute bottom-0 right-0 bg-[#DAA520] rounded-full p-1 sm:p-1.5 shadow-lg border-2 border-white dark:border-slate-800 pointer-events-none">
-              <Camera className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white" />
+            <div className="absolute -bottom-1 -right-1 bg-cyan-500 rounded-lg p-1 shadow-lg border-2 border-white dark:border-slate-900 pointer-events-none">
+              <Camera className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white" />
             </div>
 
             {/* Upload button overlay */}
@@ -609,47 +613,49 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                 widget.open();
               }}
               disabled={isUploadingPhoto}
-              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl md:rounded-2xl cursor-pointer"
+              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer backdrop-blur-sm"
             >
               {isUploadingPhoto ? (
-                <div className="w-4 h-4 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Camera className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+                <Camera className="w-4 h-4 text-white" />
               )}
             </button>
           </div>
 
           {/* Info - Right side */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pt-0.5">
             {isEditing ? (
-              <div className="space-y-3 sm:space-y-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Your name"
-                  />
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Name</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="glass-input w-full px-3 py-1.5 text-sm"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Bio</label>
+                    <textarea
+                      rows={1}
+                      value={editForm.bio}
+                      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                      className="glass-input w-full px-3 py-1.5 text-sm resize-none"
+                      placeholder="Tell us about yourself..."
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bio</label>
-                  <textarea
-                    rows={2}
-                    value={editForm.bio}
-                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="Tell us about yourself..."
-                  />
-                </div>
-                <div className="flex gap-2 sm:gap-3">
+                <div className="flex gap-2">
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#002147] hover:bg-[#00152e] disabled:bg-slate-400 text-white rounded-lg font-bold transition-colors uppercase tracking-wide text-xs sm:text-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-lg font-bold shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50 text-xs"
                   >
-                    <Save className="w-3 h-3 sm:w-4 sm:h-4 text-[#DAA520]" />
+                    <Save className="w-3.5 h-3.5" />
                     {isSaving ? 'Saving...' : 'Save'}
                   </button>
                   <button
@@ -661,36 +667,39 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                         email: profileData.email
                       });
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors text-xs sm:text-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-bold transition-colors text-xs"
                   >
-                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <X className="w-3.5 h-3.5" />
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
               <>
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h1 className="text-base sm:text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">{profileData.name || 'User'}</h1>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 sm:line-clamp-none mt-0.5">
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate tracking-tight mb-0.5">
+                      {profileData.name || 'User'}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 md:line-clamp-none max-w-2xl leading-relaxed">
                       {profileData.bio || 'No bio yet. Click edit to add one!'}
                     </p>
                   </div>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex-shrink-0"
+                    className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400 ring-1 ring-slate-200 dark:ring-white/10"
                   >
-                    <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400" />
+                    <Edit className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-sm text-slate-600 dark:text-slate-400 mt-2">
-                  <div className="flex items-center gap-1">
-                    <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="truncate max-w-[120px] sm:max-w-none">{profileData.email}</span>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-y-1 gap-x-4 mt-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  <div className="flex items-center gap-1.5 break-all">
+                    <Mail className="w-3.5 h-3.5 text-cyan-500 flex-shrink-0" />
+                    <span>{profileData.email}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-[#DAA520]" />
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
                     <span>Joined {profileData.joinDate}</span>
                   </div>
                 </div>
@@ -700,55 +709,46 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
         </div>
 
         {/* Role Badges for Memberships */}
-        <div className="mt-3 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* 1. Global/System Roles (Admin/Teacher) - derived from all user roles */}
+        <div className="relative z-10 mt-4 pt-4 border-t border-slate-200/50 dark:border-white/5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {/* 1. Global/System Roles */}
             {(() => {
-              // Get all unique roles
               const allRoles = user?.roles && user.roles.length > 0 ? user.roles : [user?.role].filter(Boolean) as string[];
               const uniqueRoles = Array.from(new Set(allRoles));
-
-              // Filter for system roles only
               const systemRoles = uniqueRoles.filter(r => r === 'admin' || r === 'teacher');
 
               return systemRoles.map(role => (
-                <div key={role} className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold ${role === 'admin'
-                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
-                    : role === 'teacher'
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200'
-                      : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200'
-                    }`}>
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </span>
-                </div>
+                <span key={role} className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${role === 'admin'
+                  ? 'bg-amber-100/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'
+                  : 'bg-emerald-100/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
+                  }`}>
+                  {role}
+                </span>
               ));
             })()}
 
-            {/* 2. Club Memberships (Advisor, President, Secretary, etc.) */}
+            {/* 2. Club Memberships */}
             {memberships.map((m, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold ${m.role === 'president' || m.role === 'President' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200' :
-                  m.role === 'secretary' || m.role === 'Secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200' :
-                    m.role === 'treasurer' || m.role === 'Treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200' :
-                      m.role === 'advisor' || m.role === 'Advisor' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200' :
-                        'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+              <div key={idx} className="flex items-center gap-1.5">
+                <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${m.role === 'president' ? 'bg-amber-100/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' :
+                  m.role === 'secretary' ? 'bg-blue-100/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' :
+                    m.role === 'treasurer' ? 'bg-green-100/50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/30' :
+                      m.role === 'advisor' ? 'bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' :
+                        'bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                   }`}>
-                  {m.role === 'club-secretary' ? 'Club Secretary' : m.role.charAt(0).toUpperCase() + m.role.slice(1).replace('-', ' ')}
+                  {m.role === 'club-secretary' ? 'Club Secretary' : m.role.replace('-', ' ')}
                 </span>
-                <span className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">• {m.clubName}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-500 font-medium hidden sm:inline-block">of {m.clubName}</span>
               </div>
             ))}
 
-            {/* 3. Fallback: If no system roles (Admin/Teacher) & no memberships found, show User badge */}
+            {/* 3. Fallback User Badge */}
             {memberships.length === 0 &&
               !user?.roles?.includes('admin') && !user?.roles?.includes('teacher') &&
               user?.role !== 'admin' && user?.role !== 'teacher' && (
-                <div className="flex items-center gap-2">
-                  <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-sm font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
-                    User
-                  </span>
-                </div>
+                <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  Member
+                </span>
               )}
           </div>
         </div>
@@ -756,7 +756,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
       {/* Tabs - Hide for advisors */}
       {user?.role !== 'advisor' && (
-        <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 mb-8 overflow-hidden relative z-30">
+        <div className="glass-card mb-8 overflow-hidden relative z-30">
           {/* Mobile Header for Tabs */}
           <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
             <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">

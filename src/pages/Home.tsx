@@ -134,153 +134,105 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
   const upcomingPosts = posts.filter(post => post.type === 'event' && post.date && new Date(post.date || '').getTime() >= new Date().getTime());
 
   return (
-    <div className="flex flex-col min-h-screen relative">
+    <div className="flex flex-col min-h-screen relative pb-24 md:pb-0">
       {/* Page-level floating dots — visible across the entire page */}
-      <div className="page-dots">
-        <div className="float-dot w-3 h-3 bg-cyan-400 top-[8%] right-[12%] animate-float-slow opacity-70"></div>
-        <div className="float-dot w-2.5 h-2.5 bg-[#DAA520] top-[25%] right-[35%] animate-float-medium opacity-60"></div>
-        <div className="float-dot w-2 h-2 bg-purple-400 top-[40%] right-[8%] animate-float-fast opacity-50"></div>
-        <div className="float-dot w-1.5 h-1.5 bg-green-400 top-[55%] left-[55%] animate-float-medium opacity-50" style={{ animationDelay: '1s' }}></div>
-        <div className="float-dot w-2 h-2 bg-pink-300 top-[15%] left-[65%] animate-float-slow opacity-40" style={{ animationDelay: '2s' }}></div>
-        <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[65%] left-[10%] animate-float-medium opacity-50" style={{ animationDelay: '0.5s' }}></div>
-        <div className="float-dot w-1.5 h-1.5 bg-amber-400 top-[75%] right-[20%] animate-float-fast opacity-45" style={{ animationDelay: '1.5s' }}></div>
-        <div className="float-dot w-2 h-2 bg-rose-300 top-[85%] left-[40%] animate-float-slow opacity-35" style={{ animationDelay: '3s' }}></div>
-        <div className="float-dot w-1.5 h-1.5 bg-teal-400 top-[45%] left-[25%] animate-float-medium opacity-40" style={{ animationDelay: '2.5s' }}></div>
-        <div className="float-dot w-2 h-2 bg-violet-400 top-[92%] right-[45%] animate-float-slow opacity-35" style={{ animationDelay: '4s' }}></div>
-      </div>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden pt-4 pb-8 md:pt-20 md:pb-32 transition-all duration-300">
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
-          {/* Left Column: Text & Actions */}
-          <div className="w-full md:w-3/5 text-center md:text-left">
-            {/* Mobile-Only App Greeting */}
-            <div className="block md:hidden w-full text-left mb-4">
-              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">
-                {(() => {
-                  if (!user) return 'Welcome Guest';
-                  const parts = user.name.split(' ').filter(p => p.trim());
-                  if (parts.length === 0) return 'Welcome Guest';
+      {/* Hero Section - "Premium Plan" Style Card */}
+      {/* Hero Section - "Premium Plan" Style Card */}
+      <div className="px-3 md:px-6 pt-2 md:pt-4 pb-4 md:pb-6 max-w-7xl mx-auto w-full">
+        <div className="gradient-card p-5 md:p-10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 relative overflow-hidden group">
+          {/* Background Glows */}
+          <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-                  // Check if first part is an ID (contains numbers)
-                  const firstPart = parts[0];
-                  const hasNumbers = /\d/.test(firstPart);
-
-                  let friendlyName = firstPart;
-                  if (hasNumbers && parts.length > 1) {
-                    friendlyName = parts[1];
-                  }
-
-                  // Title Case
-                  friendlyName = friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1).toLowerCase();
-                  return `Welcome Back, ${friendlyName}`;
-                })()}
+          <div className="relative z-10 text-center md:text-left w-full md:w-auto">
+            {/* Mobile Branding */}
+            {/* Mobile Branding */}
+            <div className="md:hidden mb-2 text-left">
+              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">
+                Welcome Back, {user?.name?.split(' ')[0] || 'Student'}
               </p>
-              <h1 className="text-2xl font-serif font-bold text-slate-900 dark:text-white leading-tight">
-                Campus <span className="text-[#DAA520]">Connect</span>
+              <h1 className="text-3xl font-serif font-bold text-slate-900 dark:text-white leading-none">
+                Campus <span className="text-yellow-600 dark:text-yellow-400 font-sans">Connect</span>
               </h1>
             </div>
 
-            {/* Desktop-Only Full Branding */}
+            {/* Desktop Branding */}
             <div className="hidden md:block">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-6">
-                <Award className="w-4 h-4 text-[#DAA520]" />
-                <span>Est. 1947 • A Premier Institute</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 dark:bg-white/10 border border-white/20 text-cyan-700 dark:text-cyan-300 text-[10px] font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
+                <Award className="w-3.5 h-3.5" />
+                <span>Premier Institute</span>
               </div>
-              <h1 className="text-6xl font-serif font-bold text-slate-900 dark:text-white leading-tight mb-6">
-                Walchand College of <span className="text-[#DAA520]">Engineering</span>
+              <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+                Walchand College of <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">Engineering</span>
               </h1>
-              <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl leading-relaxed">
-                Discover vibrant student communities, participate in exciting events, and lead the future. The official platform for all club activities.
-              </p>
             </div>
 
+            <p className="hidden md:block text-slate-600 dark:text-slate-300 text-xs md:text-base max-w-lg mb-4 md:mb-6 leading-relaxed line-clamp-2 md:line-clamp-none px-2 md:px-0">
+              Discover vibrant student communities, participate in exciting events, and lead the future.
+            </p>
 
           </div>
 
-          {/* Right Column: Hero Visual - Desktop Only */}
-          <div className="hidden md:block md:w-2/5">
-            <div className="relative">
-              <div className="absolute -inset-6 bg-[#DAA520]/15 dark:bg-[#DAA520]/10 rounded-full blur-3xl"></div>
-              <div className="absolute -inset-2 bg-white/30 dark:bg-white/5 rounded-full blur-xl"></div>
-              <img
-                src="/wce-logo.png"
-                alt="WCE Emblem"
-                className="w-64 h-64 object-contain mx-auto relative z-10 drop-shadow-[0_8px_24px_rgba(218,165,32,0.25)]"
-              />
-            </div>
+          {/* Hero Visual - Hidden on small mobile to save space, or very small */}
+          <div className="relative z-10 hidden md:block w-32 h-32 md:w-48 md:h-48 flex-shrink-0 animate-float-slow">
+            <img
+              src="/wce-logo.png"
+              alt="WCE Emblem"
+              className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.4)]"
+            />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-16 relative z-20 w-full flex-grow">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-20 w-full flex-grow">
 
-        {/* Stats Overview - 2 Large Action Cards */}
-        <div className="relative mb-6 md:mb-12 -mt-4 md:-mt-16 z-20 px-3 md:px-0">
-          {/* Anchor for tour to ensure visibility under sticky header */}
-          <div id="tour-stats-grid-anchor" className="absolute inset-0 w-full h-full pointer-events-none scroll-mt-[200px]" />
-
-          <div className="grid grid-cols-2 gap-2 md:gap-6" id="tour-stats-grid-visual">
-            {/* Explore Clubs Card */}
+        {/* Navigation Grid - "Premium Feature" Style */}
+        <div className="mb-8">
+          <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 px-1">Quick Access</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Clubs Card */}
             <button
-              id="tour-stats-clubs-card"
               onClick={() => onNavigate('dashboard')}
-              className="w-full glass-card glass-card-hover rounded-lg md:rounded-2xl p-2.5 md:p-6 flex flex-row items-center justify-between group cursor-pointer text-left gap-1 md:gap-0"
+              className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider opacity-80 mb-0.5 md:mb-1">Explore</span>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 md:w-12 md:h-10 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse"></div>
-                      <div className="w-12 h-4 md:w-16 md:h-6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{clubs.length || '50+'}</span>
-                      <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Clubs</span>
-                    </>
-                  )}
-                </div>
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Users className="w-12 h-12 md:w-16 md:h-16 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 dark:bg-white/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                {isLoading ? (
-                  <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
-                ) : (
-                  <Users className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-[#DAA520]" />
-                )}
+
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-cyan-100 dark:bg-cyan-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-0.5 group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-0.5 leading-none">
+                  {clubs.length || '0'}
+                </h3>
+                <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  Active Clubs
+                </p>
               </div>
             </button>
 
-            {/* Upcoming Events Card */}
+            {/* Events Card */}
             <button
-              id="tour-stats-events-card"
               onClick={() => onNavigate('events')}
-              className="w-full glass-card glass-card-hover rounded-lg md:rounded-2xl p-2.5 md:p-6 flex flex-row items-center justify-between group cursor-pointer text-left gap-1 md:gap-0"
+              className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5 md:mb-1">Upcoming</span>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-2">
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 md:w-12 md:h-10 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse"></div>
-                      <div className="w-12 h-4 md:w-16 md:h-6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-xl md:text-4xl font-black text-[#002147] dark:text-white tracking-tighter leading-none">{upcomingPosts.length || '0'}</span>
-                      <span className="text-xs md:text-xl font-bold font-serif text-slate-700 dark:text-slate-300 leading-tight">Events</span>
-                    </>
-                  )}
-                </div>
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Calendar className="w-12 h-12 md:w-16 md:h-16 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="w-7 h-7 md:w-14 md:h-14 bg-[#002147]/5 dark:bg-white/5 rounded-md md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                {isLoading ? (
-                  <div className="w-4 h-4 md:w-7 md:h-7 bg-slate-200 dark:bg-slate-600 rounded animate-pulse"></div>
-                ) : (
-                  <Calendar className="w-4 h-4 md:w-7 md:h-7 text-[#002147] dark:text-blue-400" />
-                )}
+
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-0.5 group-hover:scale-110 transition-transform duration-300">
+                <Calendar className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-0.5 leading-none">
+                  {upcomingPosts.length || '0'}
+                </h3>
+                <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  Upcoming Events
+                </p>
               </div>
             </button>
           </div>

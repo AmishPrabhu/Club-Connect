@@ -116,16 +116,8 @@ export default function Dashboard({ onNavigateToClub, onBack }: DashboardProps) 
   };
 
   return (
-    <div className="min-h-screen pb-20 scroll-mt-32 relative" id="tour-dashboard-stats">
-      {/* Page-level floating dots */}
-      <div className="page-dots">
-        <div className="float-dot w-3 h-3 bg-cyan-400 top-[10%] right-[10%] animate-float-slow opacity-60"></div>
-        <div className="float-dot w-2 h-2 bg-[#DAA520] top-[30%] right-[30%] animate-float-medium opacity-50"></div>
-        <div className="float-dot w-1.5 h-1.5 bg-purple-400 top-[50%] left-[80%] animate-float-fast opacity-40"></div>
-        <div className="float-dot w-2.5 h-2.5 bg-blue-300 top-[70%] left-[15%] animate-float-medium opacity-45" style={{ animationDelay: '1s' }}></div>
-        <div className="float-dot w-2 h-2 bg-pink-300 top-[85%] right-[50%] animate-float-slow opacity-35" style={{ animationDelay: '2s' }}></div>
-        <div className="float-dot w-1.5 h-1.5 bg-teal-400 top-[60%] left-[35%] animate-float-fast opacity-40" style={{ animationDelay: '1.5s' }}></div>
-      </div>
+    <div className="min-h-screen pb-28 scroll-mt-32 relative" id="tour-dashboard-stats">
+
       {/* Page Header */}
       <div className="relative overflow-hidden px-4 md:px-6 py-6 md:py-12">
         <div className="max-w-7xl mx-auto relative z-10">

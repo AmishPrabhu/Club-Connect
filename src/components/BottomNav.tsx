@@ -126,23 +126,27 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                 </div>
             )}
 
-            <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 pb-safe z-40 safe-area-bottom">
-                <div className="flex items-center justify-around h-16 px-2">
+            {/* Mobile Bottom Nav - Floating Island Style */}
+            <div className="xl:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
+                <div className="absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-full border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl shadow-slate-200/50 dark:shadow-cyan-900/20"></div>
+
+                {/* Glow behind active item */}
+                {/* (Optional: could add a moving slider here if we had index, but simple active state works too) */}
+
+                <div className="relative flex items-center justify-between px-6 py-4">
                     {navItems.map((item) => {
                         const isActive = currentPage === item.id;
                         return (
                             <button
                                 key={item.id}
                                 onClick={() => onNavigate(item.id as Page)}
-                                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${isActive
-                                    ? 'text-[#002147] dark:text-[#DAA520]'
-                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                                className={`relative flex flex-col items-center justify-center transition-all duration-300 ${isActive ? 'text-cyan-600 dark:text-cyan-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                                     }`}
                             >
-                                <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
-                                    <item.icon className={`w-6 h-6 ${isActive ? 'fill-current' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+                                <div className={`relative p-2 rounded-full transition-all duration-500 ${isActive ? 'bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : ''}`}>
+                                    <item.icon className={`w-6 h-6 ${isActive ? 'fill-cyan-500/20' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                                 </div>
-                                <span className="text-[10px] font-bold tracking-wide">{item.label}</span>
+                                {isActive && <div className="absolute -bottom-2 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#06b6d4]"></div>}
                             </button>
                         );
                     })}
@@ -150,21 +154,21 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                     {/* Profile / Menu Tab */}
                     <button
                         onClick={handleMeClick}
-                        className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${['userProfile', 'login', 'adminDashboard', 'clubSecretaryDashboard'].includes(currentPage) || showMenu
-                            ? 'text-[#002147] dark:text-[#DAA520]'
-                            : 'text-slate-400 dark:text-slate-500'
+                        className={`relative flex flex-col items-center justify-center transition-all duration-300 ${['userProfile', 'login', 'adminDashboard', 'clubSecretaryDashboard'].includes(currentPage) || showMenu
+                            ? 'text-cyan-600 dark:text-cyan-400 scale-110'
+                            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                             }`}
                     >
-                        <div className={`p-1.5 rounded-xl ${['userProfile', 'login'].includes(currentPage) || showMenu ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                        <div className={`relative p-2 rounded-full transition-all duration-500 ${['userProfile', 'login'].includes(currentPage) || showMenu ? 'bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : ''}`}>
                             {user && user.name ? (
-                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#DAA520] to-orange-500 flex items-center justify-center text-[10px] text-white font-bold shadow-sm">
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-bold ring-2 ring-slate-900">
                                     {user.name.charAt(0)}
                                 </div>
                             ) : (
                                 <Menu className="w-6 h-6" />
                             )}
                         </div>
-                        <span className="text-[10px] font-bold tracking-wide">{user ? 'Me' : 'Login'}</span>
+                        {(['userProfile', 'login'].includes(currentPage) || showMenu) && <div className="absolute -bottom-2 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#06b6d4]"></div>}
                     </button>
                 </div>
             </div>
