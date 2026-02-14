@@ -827,6 +827,21 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     );
   }
 
+  // Define navigation tabs based on role
+  const navTabs = [
+    { id: 'overview', label: 'Overview', icon: TrendingUp },
+    { id: 'members', label: 'Members', icon: Users },
+    { id: 'posts', label: 'Drafts & Posts', icon: Edit },
+    { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'messages', label: 'Messages', icon: MessageSquare },
+    { id: 'budget', label: isReadOnly ? 'Budgets' : 'Budget', icon: Settings }
+  ].filter(tab => {
+    if (activeRole === 'treasurer') {
+      return ['overview', 'members', 'budget', 'messages'].includes(tab.id);
+    }
+    return true;
+  });
+
   if (!club) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 text-center">
@@ -855,7 +870,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
             <div className="relative z-10">
               <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
-                Secretary Portal
+                {selectedMembership?.role || (user?.role === 'club-secretary' ? 'Secretary' : (user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Lead'))} Portal
               </h1>
               <p className="text-slate-600 dark:text-slate-400 font-medium">
                 Manage members, posts, and budget for <span className="text-cyan-600 dark:text-cyan-400 font-bold">{club.name}</span>
@@ -883,14 +898,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
               {isMobileTabOpen && (
                 <div className="mt-2 p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl absolute z-40 w-[calc(100%-2rem)] left-4 right-4 animate-in slide-in-from-top-2 duration-200">
                   <div className="flex flex-col gap-1">
-                    {[
-                      { id: 'overview', label: 'Overview', icon: TrendingUp },
-                      { id: 'members', label: 'Members', icon: Users },
-                      { id: 'posts', label: 'Drafts & Posts', icon: Edit },
-                      { id: 'events', label: 'Events', icon: Calendar },
-                      { id: 'messages', label: 'Messages', icon: MessageSquare },
-                      { id: 'budget', label: 'Budget', icon: Settings } // Assuming budget uses Settings for now
-                    ].map((tab) => {
+                    {navTabs.map((tab) => {
                       const Icon = tab.icon;
                       const isActive = activeTab === tab.id;
                       return (
@@ -917,14 +925,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
             {/* Desktop View - Floating Glass Pills */}
             <div className="hidden md:flex flex-wrap items-center gap-2 p-1.5 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl w-fit mx-auto">
-              {[
-                { id: 'overview', label: 'Overview', icon: TrendingUp },
-                { id: 'members', label: 'Members', icon: Users },
-                { id: 'posts', label: 'Drafts & Posts', icon: Edit },
-                { id: 'events', label: 'Events', icon: Calendar },
-                { id: 'messages', label: 'Messages', icon: MessageSquare },
-                { id: 'budget', label: 'Budget', icon: Settings }
-              ].map((tab) => {
+              {navTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
                 return (
@@ -1409,7 +1410,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
             {/* Events Tab - For Treasurer */}
             {
-              activeTab === 'events' && (
+              activeTab === 'events' && !isReadOnly && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1676,7 +1677,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
             {/* Posts Tab */}
             {
-              activeTab === 'posts' && (
+              activeTab === 'posts' && !isReadOnly && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">

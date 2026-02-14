@@ -16,11 +16,7 @@ const BOARD_LABELS: Record<string, string> = {
   member: 'Member Board (FY)',
 };
 
-const BOARD_COLORS: Record<string, string> = {
-  main: 'border-amber-500 bg-amber-50 dark:bg-amber-900/20',
-  executive: 'border-purple-500 bg-purple-50 dark:bg-purple-900/20',
-  member: 'border-slate-400 bg-slate-50 dark:bg-slate-800',
-};
+
 
 export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailProps) {
   const [members, setMembers] = useState<ClubMember[]>([]);
@@ -64,122 +60,141 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
     : BOARD_ORDER;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-5xl mx-auto px-4 py-8 pb-24">
+      {/* Background Environment */}
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+        <div className="absolute top-[10%] left-[5%] w-1.5 h-1.5 bg-cyan-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-[40%] right-[10%] w-2.5 h-2.5 bg-purple-400/30 rounded-full animate-pulse delay-700"></div>
+      </div>
+
       <button
         onClick={onBack}
-        className="flex items-center gap-2 mb-6 text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white transition-colors font-medium"
+        className="flex items-center gap-2 mb-6 text-slate-500 hover:text-[#002147] dark:text-slate-400 dark:hover:text-white transition-colors font-bold text-xs uppercase tracking-wide group"
       >
-        <ArrowLeft className="w-5 h-5" />
-        Back to Club Details
+        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+          <ArrowLeft className="w-4 h-4" />
+        </div>
+        Back
       </button>
 
-      <div className="mb-4 md:mb-8 p-3 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl md:rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden bg-[#002147] flex items-center justify-center border-2 border-[#DAA520] shadow-md flex-shrink-0">
-            {club.image ? (
-              <img
-                src={club.image}
-                alt={club.name}
-                className="w-full h-full object-contain p-1.5 md:p-2 bg-white rounded-lg md:rounded-xl"
-              />
-            ) : (
-              <span className="text-xl md:text-4xl">{club.icon}</span>
-            )}
+      {/* Header Card - Compact & Row Layout */}
+      <div className="mb-8 glass-card p-5 relative overflow-hidden rounded-2xl flex items-center gap-5">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+
+        <div className="w-16 h-16 rounded-xl bg-white p-2 shadow-md shadow-slate-200/50 dark:shadow-none flex-shrink-0 relative z-10">
+          {club.image ? (
+            <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-2xl">{club.icon}</div>
+          )}
+        </div>
+
+        <div className="relative z-10 flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#002147]/10 dark:bg-blue-500/10 text-[#002147] dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider">
+              <Users className="w-3 h-3" />
+              <span>Directory</span>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-base md:text-3xl font-serif font-bold text-[#002147] dark:text-white truncate">
-              {club.name} - Member Board
-            </h1>
-          </div>
+          <h1 className="text-2xl font-serif font-bold text-slate-900 dark:text-white leading-tight truncate">
+            {club.name}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">
+            Member Board & Officers
+          </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-wrap items-center gap-4">
+      {/* Filters - Compact */}
+      <div className="mb-6 flex flex-wrap items-center gap-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-3 rounded-xl border border-white/20">
         {/* Board Type Filter */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Board:</label>
+        <div className="flex items-center gap-3">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Board</label>
           <select
             value={boardFilter}
             onChange={(e) => setBoardFilter(e.target.value)}
-            className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-transparent font-bold text-slate-700 dark:text-slate-200 text-sm focus:outline-none cursor-pointer hover:text-[#002147] dark:hover:text-white transition-colors"
           >
             <option value="">All</option>
             <option value="main">Main</option>
-            <option value="executive">Executive</option>
+            <option value="executive">Exec</option>
             <option value="member">Member</option>
           </select>
         </div>
 
+        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+
         {/* Year Filter */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Year:</label>
+        <div className="flex items-center gap-3">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Year</label>
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-transparent font-bold text-slate-700 dark:text-slate-200 text-sm focus:outline-none cursor-pointer hover:text-[#002147] dark:hover:text-white transition-colors"
           >
-            <option value="">All Years</option>
+            <option value="">All</option>
             <option value="2024">2024</option>
             <option value="2025">2025</option>
             <option value="2026">2026</option>
             <option value="2027">2027</option>
           </select>
         </div>
-
-        {(yearFilter || boardFilter) && (
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            Showing {boardFilter ? groupedMembers[boardFilter]?.length || 0 : filteredMembers.length} member{(boardFilter ? groupedMembers[boardFilter]?.length : filteredMembers.length) !== 1 ? 's' : ''}
-          </span>
-        )}
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : members.length === 0 ? (
-        <div className="text-center py-16 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200/60 dark:border-slate-700/40">
-          <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400">No members found for this club.</p>
+        <div className="text-center py-12 glass-card rounded-2xl border-dashed">
+          <Users className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">No members found</h3>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {displayBoardOrder.map((boardType) => {
             const boardMembers = groupedMembers[boardType];
             if (boardMembers.length === 0) return null;
 
             return (
-              <div key={boardType} className={`rounded-xl border-l-4 p-6 ${BOARD_COLORS[boardType]}`}>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                  {BOARD_LABELS[boardType]} ({boardMembers.length})
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              <div key={boardType} className="space-y-3">
+                <div className="flex items-center gap-3 px-1">
+                  <h2 className="text-lg font-serif font-bold text-slate-900 dark:text-white pl-3 border-l-4 border-[#002147]">
+                    {BOARD_LABELS[boardType]}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold">
+                    {boardMembers.length}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {boardMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-200/60 dark:border-slate-700/40 p-3 md:p-4 hover:shadow-md transition-shadow"
+                      className="glass-card glass-card-hover p-3 rounded-xl group relative overflow-hidden flex items-center gap-4"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-[#002147] rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg border-2 border-[#DAA520] flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full p-0.5 bg-gradient-to-br from-cyan-400 to-purple-500 flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                        <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800">
                           {member.profileImage ? (
                             <img
                               src={member.profileImage}
                               alt={member.name}
-                              className="w-full h-full rounded-full object-cover"
+                              className="w-full h-full object-cover"
                             />
                           ) : (
-                            member.name.charAt(0).toUpperCase()
+                            <span className="font-bold text-base text-slate-400">{member.name.charAt(0).toUpperCase()}</span>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm md:text-base font-semibold text-[#002147] dark:text-white truncate">
-                            {member.name}
-                          </h3>
-                          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 truncate">
-                            {member.role || 'Member'}
-                          </p>
-                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white truncate group-hover:text-[#002147] dark:group-hover:text-blue-400 transition-colors">
+                          {member.name}
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+                          {member.role || 'Member'}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -190,9 +205,9 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
         </div>
       )}
 
-      <div className="mt-12 text-center">
-        <p className="text-slate-600 dark:text-slate-400">
-          Total Members: {members.length}
+      <div className="mt-8 text-center pt-4 border-t border-slate-200 dark:border-slate-800">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          Total: <span className="text-slate-900 dark:text-white font-bold">{members.length}</span>
         </p>
       </div>
     </div>

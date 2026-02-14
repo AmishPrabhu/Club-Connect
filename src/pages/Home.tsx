@@ -195,6 +195,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             {/* Clubs Card */}
             <button
               onClick={() => onNavigate('dashboard')}
+              id="tour-stats-clubs-card"
               className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -217,6 +218,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
             {/* Events Card */}
             <button
               onClick={() => onNavigate('events')}
+              id="tour-stats-events-card"
               className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

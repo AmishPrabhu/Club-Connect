@@ -141,9 +141,13 @@ function AppContent() {
 
       {/* Main Pages */}
       {currentPage === 'home' && <Home onNavigate={navigateToPage} onNavigateToClub={navigateToClub} onNavigateToEvent={navigateToEvent} onNavigateToPost={navigateToPost} onNavigateToNotification={navigateToNotification} />}
-      {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} onBack={() => navigateToPage('home')} />}
+      {currentPage === 'dashboard' && <Dashboard onNavigateToClub={navigateToClub} user={user} onSignOut={onLogoutClick} />}
       {currentPage === 'club' && selectedClub && (
-        <ClubDetail clubId={selectedClub} onBack={() => navigateToPage('dashboard')} onNavigateToMember={navigateToMemberBoard} onNavigateToPost={navigateToPost} />
+        <ClubDetail
+          clubId={selectedClub}
+          onNavigateToPost={navigateToPost}
+          onNavigateToMemberBoard={navigateToMemberBoard}
+        />
       )}
       {currentPage === 'memberBoard' && selectedMember && (
         <MemberBoardDetail club={selectedMember} onBack={() => navigateToPage('club')} />
@@ -166,10 +170,10 @@ function AppContent() {
         <PostDetail postId={selectedPost} onBack={navigateBack} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'events' && (
-        <Events onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
+        <Events onNavigateToPost={navigateToPost} user={user} onManageEvent={navigateToManagement} />
       )}
       {currentPage === 'announcements' && (
-        <Announcements onBack={() => navigateToPage('home')} onNavigateToPost={navigateToPost} />
+        <Announcements onNavigateToPost={navigateToPost} />
       )}
 
 

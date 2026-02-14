@@ -1,36 +1,95 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Calendar, MapPin, Clock, CheckCircle, Archive, Plus, Instagram, Globe, MessageCircle, Share2, Award, Info, FileText, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
-import { DBClub, DBPost, Attachment } from '../types/auth';
-import { getPosts } from '../lib/dbService';
+import { Users, Calendar, Archive, MapPin, Clock } from 'lucide-react';
+import { DBClub, DBPost, ClubMember } from '../types/auth';
+import { getPosts, getClubs, getClubMembers } from '../lib/dbService';
 
 interface ClubDetailProps {
-  club: DBClub;
-  onBack: () => void;
+  clubId: string;
+  club?: DBClub; // Optional: allow passing full object if available
   onNavigateToPost: (postId: string) => void;
+  onNavigateToMemberBoard: (club: any) => void;
 }
 
-export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetailProps) {
+export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost, onNavigateToMemberBoard }: ClubDetailProps) {
+  const [club, setClub] = useState<DBClub | null>(initialClub || null);
   const [posts, setPosts] = useState<DBPost[]>([]);
-  const [activeTab, setActiveTab] = useState<'about' | 'events' | 'announcements'>('about');
-  const [isLoading, setIsLoading] = useState(true);
+  const [members, setMembers] = useState<ClubMember[]>([]);
+  const [postFilter, setPostFilter] = useState<'upcoming' | 'past'>('upcoming');
+  const [isLoading, setIsLoading] = useState(!initialClub);
 
   useEffect(() => {
-    const loadPosts = async () => {
+    const loadData = async () => {
       try {
-        const postsData = await getPosts();
-        const clubPosts = postsData.filter(p => p.clubId === club.id);
-        setPosts(clubPosts);
+        let currentClub = club;
+        if (!currentClub) {
+          const clubs = await getClubs();
+          const foundClub = clubs.find(c => c.id === clubId);
+          if (foundClub) {
+            setClub(foundClub);
+            currentClub = foundClub;
+          }
+        }
+
+        const targetId = clubId || currentClub?.id;
+
+        if (targetId) {
+          // Fetch Posts
+          const postsData = await getPosts();
+          const clubPosts = postsData.filter(p => p.clubId === targetId);
+          setPosts(clubPosts);
+
+          // Fetch Members
+          const membersData = await getClubMembers(targetId);
+          setMembers(membersData);
+        }
       } catch (error) {
-        console.error('Error loading club posts:', error);
+        console.error('Error loading club data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadPosts();
-  }, [club.id]);
+    loadData();
+  }, [clubId, club?.id]);
 
-  const events = posts.filter(p => p.type === 'event');
-  const announcements = posts.filter(p => p.type === 'announcement');
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#002147] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!club) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Club not found.</p>
+      </div>
+    );
+  }
+
+  // Filter posts based on toggle
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const filteredPosts = posts.filter(post => {
+    if (!post.date) return true; // Show if no date
+    const parsedDate = new Date(post.date);
+    if (isNaN(parsedDate.getTime())) return true;
+
+    const isPast = parsedDate < today;
+    return postFilter === 'upcoming' ? !isPast : isPast;
+  });
+
+  // Identify Officers from members list
+  const officers = members.filter(m => ['president', 'secretary', 'treasurer'].includes(m.role.toLowerCase()));
+
+  // Fallback if no members found
+  const displayOfficers = officers.length > 0 ? officers : [
+    { id: '1', name: 'Loading...', role: 'President', email: '' },
+    { id: '2', name: 'Loading...', role: 'Secretary', email: '' },
+    { id: '3', name: 'Loading...', role: 'Treasurer', email: '' }
+  ] as ClubMember[];
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12 relative overflow-hidden">
@@ -43,191 +102,180 @@ export default function ClubDetail({ club, onBack, onNavigateToPost }: ClubDetai
 
       {/* Club Header - Premium Box Style */}
       <div className="relative mb-6 md:mb-10 w-full">
-        <div className="gradient-card p-6 md:p-10 relative overflow-hidden group min-h-[220px] md:min-h-[280px] flex items-center">
+        <div className="gradient-card p-6 md:p-10 relative overflow-hidden group min-h-[220px] md:min-h-[280px] flex items-center justify-center">
           {/* Background Glows */}
           <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
           <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
             <div className="flex-1 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 dark:bg-white/10 border border-white/20 text-cyan-700 dark:text-cyan-300 text-[10px] font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
-                <Award className="w-3.5 h-3.5" />
-                <span>Premier Club</span>
-              </div>
-              <h1 className="text-3xl md:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight">
-                {club.name.split(' ').map((word, i) => (
-                  i === club.name.split(' ').length - 1 ? (
-                    <span key={i} className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">{word}</span>
-                  ) : word + ' '
-                ))}
+              <h1 className="text-4xl md:text-7xl font-bold text-slate-900 dark:text-white mb-4 leading-tight">
+                {club.name.replace('WCE ', '')}
               </h1>
-              <p className="text-sm md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed mx-auto md:mx-0">
-                {club.tagline || club.description.slice(0, 120) + '...'}
+              <h2 className="text-xl md:text-2xl font-serif italic text-slate-600 dark:text-slate-300 max-w-3xl mx-auto md:mx-0">
+                {club.name === 'WCE ACSES' ? 'Association of Computer Science and Engineering Students' : club.name}
+              </h2>
+              <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto md:mx-0">
+                Igniting Innovation & Excellence at Walchand College of Engineering
               </p>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-6">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/40 dark:bg-white/5 border border-white/20 backdrop-blur-sm shadow-sm">
-                  <Users className="w-4 h-4 text-cyan-500" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">50+ Members</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/40 dark:bg-white/5 border border-white/20 backdrop-blur-sm shadow-sm">
-                  <Calendar className="w-4 h-4 text-purple-500" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Active Daily</span>
-                </div>
-              </div>
             </div>
 
             {club.image && (
-              <div className="relative shrink-0 w-32 h-32 md:w-56 md:h-56">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-[1.25rem] blur-2xl opacity-20 animate-pulse"></div>
-                <div className="relative h-full w-full bg-white dark:bg-slate-800 p-4 md:p-8 rounded-[1.25rem] border border-white/50 dark:border-slate-700/50 shadow-2xl backdrop-blur-xl flex items-center justify-center">
-                  <img src={club.image} alt={club.name} className="w-full h-full object-contain" />
-                </div>
+              <div className="relative shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-2xl shadow-cyan-500/20 border border-white/20 bg-white/10 backdrop-blur-md p-4 flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500">
+                <img src={club.image} alt={club.name} className="w-full h-full object-contain drop-shadow-lg" />
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-        {/* Left Column: Stats and Tabs */}
-        <div className="lg:col-span-1 space-y-8">
-          {/* Quick Links Card */}
-          <div className="glass-card p-8 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              <Info className="w-5 h-5 text-cyan-500" />
-              Information
-            </h3>
-            <div className="space-y-6">
-              <div className="group cursor-pointer">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-transparent group-hover:bg-cyan-50 dark:group-hover:bg-cyan-500/10 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-slate-400 group-hover:text-cyan-500" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Club Charter</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12 items-start">
+        {/* Left Column: Content (About & Posts) */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* About Section */}
+          <div className="glass-card glass-card-hover rounded-2xl p-6 md:p-8 relative overflow-hidden">
+            <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6 border-l-4 border-[#002147] pl-4">About the Club</h2>
+            <div className="prose dark:prose-invert max-w-none">
+              <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed mb-8">
+                {club.description}
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-[#002147] flex items-center justify-center text-white shrink-0">
+                    <Users className="w-5 h-5" />
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Members</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">{members.length > 0 ? members.length : 50}</p>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white shrink-0">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Events</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Category</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">Technical</p>
+                  </div>
                 </div>
               </div>
-              <div className="group cursor-pointer">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-transparent group-hover:bg-purple-50 dark:group-hover:bg-purple-500/10 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-4 h-4 text-slate-400 group-hover:text-purple-500" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Member Directory</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-
-            <hr className="my-8 border-slate-100 dark:border-slate-800" />
-
-            <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Social Links</h3>
-            <div className="flex gap-4">
-              <a href="#" className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-cyan-500 hover:text-white transition-all transform hover:-translate-y-1">
-                <Globe className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-purple-500 hover:text-white transition-all transform hover:-translate-y-1">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-pink-500 hover:text-white transition-all transform hover:-translate-y-1">
-                <MessageCircle className="w-5 h-5" />
-              </a>
             </div>
           </div>
 
-          {/* Tags Card */}
-          <div className="glass-card p-8 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl">
-            <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Expertise</h3>
-            <div className="flex flex-wrap gap-2">
-              {['Competitive Coding', 'Web Dev', 'Mobile Dev', 'Open Source', 'UI/UX'].map((tag) => (
-                <span key={tag} className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-transparent">
-                  {tag}
-                </span>
-              ))}
+          {/* Posts Section */}
+          <div className="glass-card glass-card-hover rounded-2xl p-6 md:p-8 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <Calendar className="w-6 h-6 text-amber-500" />
+                Posts & Events
+              </h2>
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <button
+                  onClick={() => setPostFilter('upcoming')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${postFilter === 'upcoming' ? 'bg-[#002147] text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                >
+                  Upcoming
+                </button>
+                <button
+                  onClick={() => setPostFilter('past')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${postFilter === 'past' ? 'bg-[#002147] text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                >
+                  Past Events
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {filteredPosts.length > 0 ? (
+                filteredPosts.map(post => (
+                  <div
+                    key={post.id}
+                    onClick={() => post.id && onNavigateToPost(post.id)}
+                    className="group p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 transition-all cursor-pointer flex flex-col md:flex-row gap-6"
+                  >
+                    <div className="shrink-0 w-full md:w-48 h-32 rounded-lg overflow-hidden bg-slate-200">
+                      <img src={post.coverImage || `https://source.unsplash.com/random/400x300?event,${post.id}`} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="flex-1 py-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${post.type === 'event' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                          {post.type}
+                        </span>
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {post.date}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{post.title}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{post.content}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                  <Archive className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500">No {postFilter} posts found</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <div className="glass-card p-1 rounded-[1.25rem] border border-white/50 dark:border-white/5 shadow-xl inline-flex mb-4">
-            {(['about', 'events', 'announcements'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-2xl text-sm font-bold transition-all ${activeTab === tab
-                  ? 'bg-[#002147] text-white shadow-lg'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                  }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="min-h-[400px]">
-            {activeTab === 'about' && (
-              <div className="glass-card p-8 md:p-10 rounded-[1.75rem] border border-white/50 dark:border-white/5 shadow-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Our Mission</h2>
-                <div className="prose dark:prose-invert max-w-none">
-                  <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed mb-8">
-                    {club.description}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-                    <div className="p-6 rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
-                      <h4 className="font-bold text-cyan-600 dark:text-cyan-400 mb-2 flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5" />
-                        Vision
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">To create a world-class coding community within WCE.</p>
-                    </div>
-                    <div className="p-6 rounded-2xl bg-purple-500/5 border border-purple-500/10">
-                      <h4 className="font-bold text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-2">
-                        <Plus className="w-5 h-5" />
-                        Motto
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Excellence through collaboration and open source.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {(activeTab === 'events' || activeTab === 'announcements') && (
-              <div className="space-y-6">
-                {isLoading ? (
-                  <div className="flex flex-col gap-4">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="h-24 bg-slate-100 dark:bg-slate-900 animate-pulse rounded-2xl"></div>
-                    ))}
-                  </div>
-                ) : (activeTab === 'events' ? events : announcements).length > 0 ? (
-                  (activeTab === 'events' ? events : announcements).map((post) => (
-                    <div
-                      key={post.id}
-                      onClick={() => post.id && onNavigateToPost(post.id)}
-                      className="group glass-card p-6 rounded-2xl border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-6">
-                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${activeTab === 'events' ? 'bg-cyan-500/10 text-cyan-500' : 'bg-purple-500/10 text-purple-500'}`}>
-                          {activeTab === 'events' ? <Calendar className="w-7 h-7" /> : <Archive className="w-7 h-7" />}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-cyan-500 transition-colors">{post.title}</h4>
-                          <p className="text-sm text-slate-500 mt-1">{post.date}</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  ))
+        {/* Right Sidebar: Member Board */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="glass-card glass-card-hover rounded-2xl p-6 md:p-8 relative overflow-hidden">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-white p-2 shadow-sm">
+                {club.image ? (
+                  <img src={club.image} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
-                  <div className="text-center py-20 glass-card rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <Archive className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No {activeTab} found</h3>
-                    <p className="text-slate-500 dark:text-slate-400">Check back later for updates</p>
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center font-bold text-[#002147]">{(club.name || '').charAt(0)}</div>
                 )}
               </div>
-            )}
+              <div>
+                <h3 className="font-serif font-bold text-slate-900 dark:text-white text-lg leading-tight">{club.name.replace('WCE ', '')} - Member Board</h3>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+              Meet the dedicated members who make {club.name.replace('WCE ', '')} thrive
+            </p>
+
+            <div className="space-y-4" id="tour-member-board">
+              {/* Fallback if no members are loaded yet or just show typical officers */}
+              {displayOfficers.map((member, idx) => (
+                <div key={idx} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white hover:shadow-md transition-all">
+                  <div className="w-10 h-10 rounded-full bg-[#002147] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    {member.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">{member.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{member.role}</p>
+                  </div>
+                </div>
+              ))}
+              {members.length === 0 && displayOfficers[0]?.id.includes('Loading') && (
+                <div className="text-center py-4 text-xs text-slate-400 italic">
+                  Fetching members...
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => club && onNavigateToMemberBoard(club)}
+              className="w-full mt-8 py-3 bg-[#002147] hover:bg-[#003366] text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-900/20 transition-all transform hover:-translate-y-0.5"
+            >
+              VIEW FULL BOARD
+            </button>
           </div>
         </div>
       </div>
