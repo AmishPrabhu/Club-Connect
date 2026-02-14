@@ -270,7 +270,12 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{clubName} Members</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                        <Users className="w-5 h-5 md:w-6 md:h-6" />
+                    </div>
+                    {clubName} Members
+                </h3>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         <select
@@ -355,7 +360,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                         {sortedMembers.map((member) => (
                             <div
                                 key={member.id}
-                                className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 dark:border-slate-700"
+                                className="glass-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-blue-500/30 transition-all"
                             >
                                 {editingMember?.id === member.id && editingMember ? (
                                     // Edit mode
@@ -366,7 +371,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                 <input
                                                     value={editingMember.name}
                                                     onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full px-3 py-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -513,8 +518,8 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
 
             {/* Add Member Modal */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="glass-card p-6 w-full max-w-md shadow-2xl shadow-black/50">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Add New Member</h3>
                             <button

@@ -110,7 +110,12 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Roles & Tasks</h3>
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                            <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                        </div>
+                        Roles & Tasks
+                    </h3>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">Manage tasks and assignments for your club</p>
                 </div>
                 <button
@@ -124,31 +129,31 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
             {/* Stats Cards - Compact horizontal on mobile */}
             <div className="grid grid-cols-3 gap-2 md:gap-4">
-                <div onClick={() => setFilter('pending')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'pending' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('pending')} className={`glass-card cursor-pointer p-3 md:p-4 hover:border-orange-400/50 transition-all group ${filter === 'pending' ? 'ring-2 ring-orange-400 dark:ring-orange-500 bg-orange-50/50 dark:bg-orange-900/20' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] md:text-sm font-medium text-orange-600 dark:text-orange-400">Pending</span>
+                        <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Pending</span>
                         <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500" />
                     </div>
-                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
+                    <p className="text-xl md:text-3xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
                 </div>
-                <div onClick={() => setFilter('in-progress')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('in-progress')} className={`glass-card cursor-pointer p-3 md:p-4 hover:border-blue-400/50 transition-all group ${filter === 'in-progress' ? 'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] md:text-sm font-medium text-blue-600 dark:text-blue-400">In Progress</span>
+                        <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">In Progress</span>
                         <AlertCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500" />
                     </div>
-                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{inProgressCount}</p>
+                    <p className="text-xl md:text-3xl font-bold text-slate-900 dark:text-white">{inProgressCount}</p>
                 </div>
-                <div onClick={() => setFilter('completed')} className={`cursor-pointer p-2 md:p-4 rounded-lg md:rounded-xl border ${filter === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700' : 'bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-700'}`}>
+                <div onClick={() => setFilter('completed')} className={`glass-card cursor-pointer p-3 md:p-4 hover:border-green-400/50 transition-all group ${filter === 'completed' ? 'ring-2 ring-green-400 dark:ring-green-500 bg-green-50/50 dark:bg-green-900/20' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] md:text-sm font-medium text-green-600 dark:text-green-400">Completed</span>
+                        <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-green-600 dark:text-green-400">Completed</span>
                         <CheckCircle className="w-3.5 h-3.5 md:w-5 md:h-5 text-green-500" />
                     </div>
-                    <p className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white">{completedCount}</p>
+                    <p className="text-xl md:text-3xl font-bold text-slate-900 dark:text-white">{completedCount}</p>
                 </div>
             </div>
 
             {/* Task List */}
-            <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="glass-card overflow-hidden">
                 <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <h4 className="font-semibold text-slate-900 dark:text-white capitalize">{filter === 'all' ? 'All Tasks' : `${filter} Tasks`}</h4>
                     <button onClick={() => setFilter('all')} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All</button>
@@ -217,8 +222,8 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
             {/* Create Task Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl shadow-xl max-w-lg w-full p-4 md:p-6 my-4 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="glass-card max-w-lg w-full p-6 my-4 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto shadow-2xl shadow-black/50">
                         <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Task</h3>
 
                         <div className="space-y-4">
