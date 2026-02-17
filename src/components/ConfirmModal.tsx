@@ -26,10 +26,10 @@ const typeConfig = {
     },
     warning: {
         icon: AlertTriangle,
-        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
-        iconColor: 'text-amber-600 dark:text-amber-400',
-        buttonBg: 'bg-amber-600 hover:bg-amber-700',
-        borderColor: 'border-amber-200 dark:border-amber-800/50',
+        iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+        iconColor: 'text-blue-600 dark:text-blue-400',
+        buttonBg: 'bg-blue-600 hover:bg-blue-700',
+        borderColor: 'border-blue-200 dark:border-blue-800/50',
     },
     info: {
         icon: Info,

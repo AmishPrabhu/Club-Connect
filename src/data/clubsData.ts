@@ -51,7 +51,7 @@ export const clubs = [
     members: 300,
     icon: '🏆',
     image: '/codechef.jpg',
-    color: 'from-amber-500 to-orange-600',
+    color: 'from-blue-500 to-cyan-500',
     upcomingEvents: 5,
   },
   {
@@ -106,7 +106,7 @@ export const clubs = [
     members: 160,
     icon: '⚡',
     image: '/elesa.jpg',
-    color: 'from-yellow-500 to-orange-500',
+    color: 'from-cyan-500 to-blue-500',
     upcomingEvents: 2,
   },
   {
@@ -150,7 +150,7 @@ export const clubs = [
     members: 170,
     icon: '⚡',
     image: '/eesa.jpg',
-    color: 'from-amber-500 to-yellow-500',
+    color: 'from-blue-400 to-indigo-500',
     upcomingEvents: 2,
   },
   {
@@ -194,7 +194,7 @@ export const clubs = [
     members: 130,
     icon: '🎤',
     image: '/tedxwce.jpg',
-    color: 'from-red-500 to-orange-500',
+    color: 'from-red-500 to-rose-600',
     upcomingEvents: 1,
   },
   {
@@ -227,7 +227,7 @@ export const clubs = [
     members: 120,
     icon: '🏹',
     image: '/aaryans.jpg',
-    color: 'from-orange-500 to-red-500',
+    color: 'from-rose-500 to-red-500',
     upcomingEvents: 2,
   },
   {

@@ -73,9 +73,9 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
   }, []);
 
   return (
-    <div className="sticky top-0 z-50 pt-2.5 px-3 md:px-5">
-      <header className="glass-header shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-3 md:px-6 h-14 md:h-[4.5rem] flex items-center justify-between">
+    <div className="sticky top-0 z-50 pt-2 flex justify-center w-full mb-4">
+      <header className="glass-header shadow-sm w-[90%] max-w-[1400px]">
+        <div className="px-3 md:px-6 h-[4.5rem] flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button - Hidden as we switched to Bottom Nav */}
             <div className="lg:hidden w-2"></div>
@@ -97,7 +97,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 </span>
               </div>
               <div className="hidden md:flex flex-col">
-                <span className="text-lg font-serif font-bold tracking-tight leading-none text-slate-900 dark:text-white group-hover:text-[#DAA520] transition-colors">
+                <span className="text-lg font-serif font-bold tracking-tight leading-none text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
                   Walchand College of Engineering
                 </span>
                 <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 tracking-widest uppercase mt-0.5 ml-0.5">
@@ -115,7 +115,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                 id={`nav-${item.id}`}
                 onClick={() => onNavigate(item.id as Page)}
                 className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 ${currentPage === item.id
-                  ? 'bg-[#DAA520] text-white shadow-md'
+                  ? 'bg-blue-600 text-white shadow-md'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
               >
@@ -172,10 +172,10 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                   className="flex items-center gap-3 p-1 pl-2 pr-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 group"
                 >
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight group-hover:text-[#DAA520] transition-colors">{user.name.split(' ')[0]}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors">{user.name.split(' ')[0]}</p>
                     <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{displayRole}</p>
                   </div>
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-[#DAA520] to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white dark:ring-slate-800 group-hover:ring-[#DAA520]/50 transition-all">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white dark:ring-slate-800 group-hover:ring-blue-600/50 transition-all">
                     {user.name.charAt(0)}
                   </div>
                 </button>
@@ -246,7 +246,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                         onClick={() => setShowUserMenu(false)}
                         className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-college-blue-primary dark:hover:text-blue-400 rounded-lg flex items-center gap-3 font-medium transition-colors"
                       >
-                        <div className="p-1.5 rounded-md bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400"><ExternalLink className="w-4 h-4" /></div>
+                        <div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"><ExternalLink className="w-4 h-4" /></div>
                         <span>ERP Portal</span>
                       </a>
                     </div>
@@ -275,7 +275,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden absolute top-[4.5rem] left-0 right-0 glass-header shadow-xl animate-in slide-in-from-top-2 duration-200">
+          <div className="lg:hidden absolute top-full left-0 right-0 mt-2 glass-header shadow-xl animate-in slide-in-from-top-2 duration-200">
             <div className="p-4 space-y-2">
               {navItems.map((item) => (
                 <button
@@ -285,7 +285,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                     setIsMobileMenuOpen(false);
                   }}
                   className={`w-full text-left px-4 py-3 rounded-lg text-base font-bold transition-all ${currentPage === item.id
-                    ? 'bg-[#DAA520]/10 text-[#DAA520]'
+                    ? 'bg-blue-600/10 text-blue-600'
                     : 'text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                     }`}
                 >

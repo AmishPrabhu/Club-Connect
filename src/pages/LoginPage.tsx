@@ -151,7 +151,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <img src="/wce-logo.png" alt="WCE Logo" className="w-12 h-12 bg-white rounded-full p-1 shadow-lg" />
             <div>
               <h2 className="text-xl font-serif font-bold tracking-wide">Walchand College of Engineering</h2>
-              <p className="text-xs text-yellow-500 uppercase tracking-widest font-semibold">Established 1947</p>
+              <p className="text-xs text-blue-500 uppercase tracking-widest font-semibold">Established 1947</p>
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         <div className="relative z-10 mb-12">
           <h1 className="text-6xl font-serif font-bold mb-6 text-shadow-lg leading-tight">
             Welcome to <br />
-            <span className="text-yellow-500">Club Connect</span>
+            <span className="text-blue-500">Club Connect</span>
           </h1>
           <p className="text-xl font-light text-slate-200 max-w-lg leading-relaxed">
             The central hub for all student activities, club management, and event organization at WCE Sangli.
@@ -173,11 +173,11 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
       {/* Right Split - Functional Side */}
       <div className="w-full lg:w-1/2 relative bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-col h-full overflow-y-auto">
-        {/* Background Gradients for Right Side */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        {/* Background Gradients for Right Side - REMOVED for Solid Background */}
+        {/* <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[80px] animate-pulse"></div>
           <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
-        </div>
+        </div> */}
 
         <div className="p-6 lg:p-12 w-full flex-none z-10">
           <button
@@ -193,9 +193,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           <div className="w-full max-w-md">
             {/* Hero / Welcome Card */}
             <div className="gradient-card p-8 mb-6 text-left relative overflow-hidden group">
-              {/* Background Glows */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+              {/* Background Glows - REMOVED */}
+              {/* <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div> */}
 
               <div className="relative z-10">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
@@ -210,7 +210,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
             <div className="glass-card p-8 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative overflow-hidden">
               {/* Decorative top border */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (

@@ -257,7 +257,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[#002147] border-t-blue-600 rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -286,10 +286,11 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
     return (
         <div className="min-h-screen pb-24 relative overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Background Gradients */}
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            {/* Background Gradients - REMOVED */}
+            {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
                 <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-            </div>
+            </div> */}
 
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
@@ -431,7 +432,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                 ) : (
                                     <div className="grid gap-6">
                                         {events.map((event) => (
-                                            <div key={event.id} className="glass-card p-6 hover:border-amber-500/30 transition-all hover:scale-[1.01] group">
+                                            <div key={event.id} className="glass-card p-6 hover:border-blue-500/30 transition-all hover:scale-[1.01] group">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <h4 className="font-bold text-xl text-slate-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{event.title}</h4>
@@ -582,7 +583,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                                                 <div className="flex items-center gap-2">
                                                                     <span className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 ${event.budgetVerified
                                                                         ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                                                                         }`}>
                                                                         {event.budgetVerified ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                                                                         {event.budgetVerified ? 'Verified' : 'Awaiting Verification'}
@@ -718,8 +719,8 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     {/* President Section */}
                                     <div className="glass-card p-4 md:p-6 relative overflow-hidden group/card bg-white/50 dark:bg-slate-800/50 h-full flex flex-col">
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
-                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-amber-500/20 flex items-center justify-center">
-                                                <Users className="w-8 h-8 md:w-12 md:h-12 text-amber-500" />
+                                            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                                <Users className="w-8 h-8 md:w-12 md:h-12 text-blue-500" />
                                             </div>
                                         </div>
                                         <div className="relative z-10 flex flex-col h-full">
@@ -729,7 +730,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                                 </h4>
                                                 <button
                                                     onClick={() => openEditRoleModal('president', 'add')}
-                                                    className="flex items-center gap-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white p-2 md:px-3 md:py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                                                    className="flex items-center gap-1.5 text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white p-2 md:px-3 md:py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
                                                     title="Add New"
                                                 >
                                                     <Plus className="w-4 h-4 md:w-3 md:h-3" />
@@ -764,7 +765,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                                             <div className="flex gap-2">
                                                                 <button
                                                                     onClick={() => openEditRoleModal('president', 'edit')}
-                                                                    className="text-slate-400 hover:text-amber-500 p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                                                    className="text-slate-400 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                                     title="Edit"
                                                                 >
                                                                     <Edit className="w-4 h-4" />
@@ -881,9 +882,9 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                             </button>
                         </div>
 
-                        <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 mb-6">
-                            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-amber-700 dark:text-amber-300">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 mb-6">
+                            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-blue-700 dark:text-blue-300">
                                 This will create a new account for the user. Existing credentials will be replaced.
                             </p>
                         </div>
@@ -902,7 +903,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     type="text"
                                     value={roleForm.name}
                                     onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
                                     placeholder="e.g. Amish Prabhu"
                                 />
                             </div>
@@ -913,7 +914,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                     type="email"
                                     value={roleForm.email}
                                     onChange={(e) => setRoleForm({ ...roleForm, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
                                     placeholder="e.g. 2021bcs022@wce.ac.in"
                                 />
                             </div>
@@ -921,7 +922,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                             <button
                                 onClick={handleUpdateRole}
                                 disabled={isSaving}
-                                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 mt-2"
+                                className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 mt-2"
                             >
                                 {isSaving ? (
                                     <>

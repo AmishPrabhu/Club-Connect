@@ -513,8 +513,9 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
       {/* Profile Header - Horizontal layout on mobile */}
       <div className="glass-card p-3 md:p-6 mb-4 md:mb-8 relative overflow-hidden group">
         {/* Background Glows */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+        {/* Background Glows - REMOVED */}
+        {/* <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div> */}
 
         <div className="relative z-10 flex items-start gap-3 sm:gap-5">
           {/* Avatar - Left side */}
@@ -719,7 +720,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
 
               return systemRoles.map(role => (
                 <span key={role} className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${role === 'admin'
-                  ? 'bg-amber-100/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'
+                  ? 'bg-blue-100/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30'
                   : 'bg-emerald-100/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
                   }`}>
                   {role}
@@ -730,7 +731,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
             {/* 2. Club Memberships */}
             {memberships.map((m, idx) => (
               <div key={idx} className="flex items-center gap-1.5">
-                <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${m.role === 'president' ? 'bg-amber-100/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' :
+                <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${m.role === 'president' ? 'bg-blue-100/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' :
                   m.role === 'secretary' ? 'bg-blue-100/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' :
                     m.role === 'treasurer' ? 'bg-green-100/50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/30' :
                       m.role === 'advisor' ? 'bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' :
@@ -760,7 +761,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
           {/* Mobile Header for Tabs */}
           <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
             <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-[#DAA520]" />
+              <Settings2 className="w-5 h-5 text-blue-600" />
               Menu
             </span>
             <button
@@ -788,7 +789,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                     : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
                     }`}
                 >
-                  <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#DAA520]' : ''}`} />
+                  <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-blue-600' : ''}`} />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -804,7 +805,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                     : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
                     }`}
                 >
-                  <History className={`w-5 h-5 ${activeTab === 'tasks' ? 'text-[#DAA520]' : ''}`} />
+                  <History className={`w-5 h-5 ${activeTab === 'tasks' ? 'text-blue-600' : ''}`} />
                   <span>Tasks</span>
                   {unseenTasksCount > 0 && (
                     <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
@@ -825,7 +826,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                   : 'text-slate-500 dark:text-slate-300 border-transparent hover:text-[#002147] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 md:hover:bg-transparent'
                   }`}
               >
-                <Heart className={`w-5 h-5 ${activeTab === 'following' ? 'text-[#DAA520]' : ''}`} />
+                <Heart className={`w-5 h-5 ${activeTab === 'following' ? 'text-blue-600' : ''}`} />
                 <span>Following</span>
               </button>
 
@@ -875,7 +876,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                             <h4 className="font-bold text-slate-900 dark:text-white">{membership.clubName}</h4>
                             <div className="flex items-center gap-2 text-sm">
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
-                              ${membership.role === 'president' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' :
+                              ${membership.role === 'president' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
                                   membership.role === 'vice-president' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
                                     membership.role === 'treasurer' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
                                       membership.role === 'secretary' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -1100,7 +1101,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                                 href={certificateUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg border border-yellow-200 dark:border-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors flex items-center gap-2 text-xs font-bold"
+                                className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center gap-2 text-xs font-bold"
                                 title="Download Certificate"
                               >
                                 <Award className="w-4 h-4" />
@@ -1151,7 +1152,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
                                 : task.status === 'in-progress'
                                   ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                                 }`}>
                                 {task.status === 'in-progress' ? 'In Progress' : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                               </span>

@@ -50,7 +50,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
         switch (type) {
             case 'event': return 'from-blue-500 to-cyan-500';
             case 'announcement': return 'from-purple-500 to-pink-500';
-            default: return 'from-amber-500 to-orange-500';
+            default: return 'from-blue-500 to-blue-600';
         }
     };
 

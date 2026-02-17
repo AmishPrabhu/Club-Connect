@@ -52,7 +52,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                 >
                     <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#DAA520] to-orange-500 flex items-center justify-center text-white font-bold shadow-md">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
                                 {user.name?.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -127,8 +127,8 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
             )}
 
             {/* Mobile Bottom Nav - Floating Island Style */}
-            <div className="xl:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
-                <div className="absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-full border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl shadow-slate-200/50 dark:shadow-cyan-900/20"></div>
+            <div className="xl:hidden fixed bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
+                <div className="absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-2xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl shadow-slate-200/50 dark:shadow-cyan-900/20"></div>
 
                 {/* Glow behind active item */}
                 {/* (Optional: could add a moving slider here if we had index, but simple active state works too) */}
@@ -140,13 +140,13 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                             <button
                                 key={item.id}
                                 onClick={() => onNavigate(item.id as Page)}
-                                className={`relative flex flex-col items-center justify-center transition-all duration-300 ${isActive ? 'text-cyan-600 dark:text-cyan-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                                className={`relative flex flex-col items-center justify-center transition-all duration-300 ${isActive ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                                     }`}
                             >
-                                <div className={`relative p-2 rounded-full transition-all duration-500 ${isActive ? 'bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : ''}`}>
-                                    <item.icon className={`w-6 h-6 ${isActive ? 'fill-cyan-500/20' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+                                <div className={`relative p-2 rounded-full transition-all duration-500 ${isActive ? 'bg-blue-500/10 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : ''}`}>
+                                    <item.icon className={`w-6 h-6 ${isActive ? 'fill-blue-500/20' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                                 </div>
-                                {isActive && <div className="absolute -bottom-2 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#06b6d4]"></div>}
+                                {isActive && <div className="absolute -bottom-2 w-1 h-1 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]"></div>}
                             </button>
                         );
                     })}
@@ -155,20 +155,20 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                     <button
                         onClick={handleMeClick}
                         className={`relative flex flex-col items-center justify-center transition-all duration-300 ${['userProfile', 'login', 'adminDashboard', 'clubSecretaryDashboard'].includes(currentPage) || showMenu
-                            ? 'text-cyan-600 dark:text-cyan-400 scale-110'
+                            ? 'text-blue-600 dark:text-blue-400 scale-110'
                             : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                             }`}
                     >
-                        <div className={`relative p-2 rounded-full transition-all duration-500 ${['userProfile', 'login'].includes(currentPage) || showMenu ? 'bg-cyan-500/10 shadow-[0_0_15px_rgba(6,182,212,0.3)]' : ''}`}>
+                        <div className={`relative p-2 rounded-full transition-all duration-500 ${['userProfile', 'login'].includes(currentPage) || showMenu ? 'bg-blue-500/10 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : ''}`}>
                             {user && user.name ? (
-                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-bold ring-2 ring-slate-900">
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-[10px] text-white font-bold ring-2 ring-slate-900">
                                     {user.name.charAt(0)}
                                 </div>
                             ) : (
                                 <Menu className="w-6 h-6" />
                             )}
                         </div>
-                        {(['userProfile', 'login'].includes(currentPage) || showMenu) && <div className="absolute -bottom-2 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#06b6d4]"></div>}
+                        {(['userProfile', 'login'].includes(currentPage) || showMenu) && <div className="absolute -bottom-2 w-1 h-1 bg-blue-500 rounded-full shadow-[0_0_8px_#3b82f6]"></div>}
                     </button>
                 </div>
             </div>

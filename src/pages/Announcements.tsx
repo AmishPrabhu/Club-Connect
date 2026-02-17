@@ -163,9 +163,9 @@ export default function Announcements({ onNavigateToPost }: AnnouncementsProps) 
                                         ) : (
                                             <div className="sm:w-1/4 h-40 sm:h-auto flex flex-col justify-center items-center relative overflow-hidden bg-[#002147] border-r border-slate-200/10">
                                                 <div className="relative z-10 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-2">
-                                                    <Megaphone className="w-6 h-6 text-[#DAA520]" />
+                                                    <Megaphone className="w-6 h-6 text-blue-600" />
                                                 </div>
-                                                <span className="relative z-10 text-[10px] font-bold text-[#DAA520] uppercase tracking-widest">Announcement</span>
+                                                <span className="relative z-10 text-[10px] font-bold text-blue-600 uppercase tracking-widest">Announcement</span>
                                             </div>
                                         )}
 

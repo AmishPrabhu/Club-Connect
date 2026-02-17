@@ -298,7 +298,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                 <div className="relative z-10 mb-8">
                     <h1 className="text-5xl font-serif font-bold mb-4 leading-tight">
                         Start Your Journey<br />
-                        <span className="text-college-gold">Create an Account</span>
+                        <span className="text-blue-400">Create an Account</span>
                     </h1>
                     <p className="text-lg font-light text-blue-100 max-w-sm">
                         Join thousands of students involved in over 30+ technical and cultural clubs.
@@ -433,10 +433,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
                                     {isSubmitting ? (
-                                        <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
                                             <span>Send verification code</span>
@@ -481,10 +481,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
                                     {isSubmitting ? (
-                                        <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <span>Verify Code</span>
                                     )}
@@ -567,10 +567,10 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/30 flex items-center justify-center gap-3 mt-6"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3 mt-6"
                                 >
                                     {isSubmitting ? (
-                                        <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
                                             <UserPlus className="w-5 h-5" />

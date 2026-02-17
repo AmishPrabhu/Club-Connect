@@ -106,7 +106,7 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
         <div className={`relative ${className}`} ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-blue-800/50 hover:bg-blue-800 rounded-lg border border-blue-700 hover:border-blue-600 transition-all group"
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full border border-blue-500 hover:border-blue-400 shadow-lg shadow-blue-500/20 transition-all group"
             >
                 <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center overflow-hidden">
                     {selectedMembership?.clubImage ? (
@@ -116,7 +116,7 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                     )}
                 </div>
                 <div className="hidden sm:block text-left">
-                    <p className="text-xs font-medium text-white leading-tight truncate max-w-[100px] group-hover:text-[#DAA520] transition-colors">
+                    <p className="text-xs font-medium text-white leading-tight truncate max-w-[100px] group-hover:text-blue-200 transition-colors">
                         {selectedMembership?.clubName || 'Select Club'}
                     </p>
                     <p className="text-[10px] text-blue-300 capitalize">{selectedMembership?.role || 'No role'}</p>

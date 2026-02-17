@@ -29,7 +29,7 @@ export const notifications = [
     time: '3 days ago',
     read: true,
     icon: Trophy,
-    color: 'text-yellow-600'
+    color: 'text-blue-600'
   },
   {
     id: 4,

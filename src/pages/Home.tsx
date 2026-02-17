@@ -143,8 +143,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
       <div className="px-3 md:px-6 pt-2 md:pt-4 pb-4 md:pb-6 max-w-7xl mx-auto w-full">
         <div className="gradient-card p-5 md:p-10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 relative overflow-hidden group">
           {/* Background Glows */}
-          <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+          {/* Background Glows - REMOVED */}
+          {/* <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div> */}
 
           <div className="relative z-10 text-center md:text-left w-full md:w-auto">
             {/* Mobile Branding */}
@@ -154,7 +155,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                 Welcome Back, {user?.name?.split(' ')[0] || 'Student'}
               </p>
               <h1 className="text-3xl font-serif font-bold text-slate-900 dark:text-white leading-none">
-                Campus <span className="text-yellow-600 dark:text-yellow-400 font-sans">Connect</span>
+                Campus <span className="text-blue-600 dark:text-blue-400 font-sans">Connect</span>
               </h1>
             </div>
 
@@ -198,9 +199,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               id="tour-stats-clubs-card"
               className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              {/* <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Users className="w-12 h-12 md:w-16 md:h-16 text-cyan-600 dark:text-cyan-400" />
-              </div>
+              </div> */}
 
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-cyan-100 dark:bg-cyan-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-0.5 group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-4 h-4 md:w-5 md:h-5" />
@@ -221,9 +222,9 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
               id="tour-stats-events-card"
               className="glass-card glass-card-hover p-4 md:p-5 flex flex-col items-start gap-3 text-left group relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              {/* <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Calendar className="w-12 h-12 md:w-16 md:h-16 text-purple-600 dark:text-purple-400" />
-              </div>
+              </div> */}
 
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-0.5 group-hover:scale-110 transition-transform duration-300">
                 <Calendar className="w-4 h-4 md:w-5 md:h-5" />
@@ -255,7 +256,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => { if (searchQuery.length > 0) setShowDropdown(true); }}
-                  className="w-full pl-12 pr-4 py-4 glass-input rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DAA520]/50 focus:border-[#DAA520]/30 shadow-sm focus:shadow-lg transition-all"
+                  className="w-full pl-12 pr-4 py-4 glass-input rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/50 focus:border-blue-600/30 shadow-sm focus:shadow-lg transition-all"
                 />
 
               </div>
@@ -521,7 +522,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full py-3 bg-[#DAA520] hover:bg-[#c99a1d] text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                                 >
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

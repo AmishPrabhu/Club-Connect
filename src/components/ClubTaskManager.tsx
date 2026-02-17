@@ -129,10 +129,10 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
 
             {/* Stats Cards - Compact horizontal on mobile */}
             <div className="grid grid-cols-3 gap-2 md:gap-4">
-                <div onClick={() => setFilter('pending')} className={`glass-card cursor-pointer p-3 md:p-4 hover:border-orange-400/50 transition-all group ${filter === 'pending' ? 'ring-2 ring-orange-400 dark:ring-orange-500 bg-orange-50/50 dark:bg-orange-900/20' : ''}`}>
+                <div onClick={() => setFilter('pending')} className={`glass-card cursor-pointer p-3 md:p-4 hover:border-blue-400/50 transition-all group ${filter === 'pending' ? 'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Pending</span>
-                        <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500" />
+                        <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Pending</span>
+                        <Clock className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500" />
                     </div>
                     <p className="text-xl md:text-3xl font-bold text-slate-900 dark:text-white">{pendingCount}</p>
                 </div>
@@ -199,7 +199,7 @@ export default function ClubTaskManager({ club, posts, members: initialMembers }
                                             onChange={(e) => updateStatus(task.id, e.target.value as any)}
                                             className={`text-sm rounded-lg border-slate-300 dark:border-slate-600 px-2 py-1 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 ${task.status === 'completed' ? 'text-green-600 font-medium' :
                                                 task.status === 'in-progress' ? 'text-blue-600 font-medium' :
-                                                    'text-orange-600 font-medium'
+                                                    'text-blue-600 font-medium'
                                                 }`}
                                         >
                                             <option value="pending">Pending</option>

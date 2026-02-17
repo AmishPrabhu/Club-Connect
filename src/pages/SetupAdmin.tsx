@@ -90,7 +90,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                     </div>
 
                     <h1 className="text-3xl font-serif font-bold text-[#002147] dark:text-white mb-4">
-                        Create <span className="text-[#DAA520]">Super Admin</span>
+                        Create <span className="text-blue-600">Super Admin</span>
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-300 font-medium">
                         Set up the initial administrator account
@@ -98,7 +98,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                 </div>
 
                 {/* Form */}
-                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 shadow-sm border-l-4 border-[#DAA520] border border-slate-200/60 dark:border-slate-700/40">
+                <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-8 shadow-sm border-l-4 border-blue-600 border border-slate-200/60 dark:border-slate-700/40">
                     <form onSubmit={handleCreateAdmin} className="space-y-6">
                         {message && (
                             <div className={`p-4 rounded-lg ${message.type === 'success'
@@ -124,7 +124,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="Super Admin"
                                     required
                                 />
@@ -141,7 +141,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="admin@wce.ac.in"
                                     required
                                 />
@@ -158,7 +158,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="Enter a strong password"
                                     minLength={6}
                                     required
@@ -180,12 +180,12 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                         type="text"
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         placeholder="Enter OTP sent to current Admin"
                                         required
                                     />
                                 </div>
-                                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                                <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
                                     An existing Super Admin was found. Please enter the code sent to their email to authorize this transfer.
                                 </p>
                             </div>
@@ -203,7 +203,7 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                                 </>
                             ) : (
                                 <>
-                                    <Shield className="w-5 h-5 text-[#DAA520]" />
+                                    <Shield className="w-5 h-5 text-blue-600" />
                                     {showOtpInput ? 'Verify & Claim Admin' : 'Create Super Admin'}
                                 </>
                             )}
@@ -212,8 +212,8 @@ export default function SetupAdmin({ onNavigate }: SetupAdminProps) {
                 </div>
 
                 {/* Warning */}
-                <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
                         <strong>⚠️ Important:</strong> Remove or disable this page after creating the initial admin account for security.
                     </p>
                 </div>

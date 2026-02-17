@@ -139,7 +139,7 @@ function AdminImageUploader({ clubId, currentImage, onSuccess }: { clubId: strin
         />
         {(isUploading || isSaving) && (
           <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-white border-t-[#DAA520] rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-white border-t-blue-600 rounded-full animate-spin"></div>
           </div>
         )}
         <div className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-md">
@@ -176,7 +176,7 @@ const GRADIENT_COLORS = [
   'from-blue-500 to-cyan-500',
   'from-emerald-500 to-teal-500',
   'from-purple-500 to-pink-500',
-  'from-amber-500 to-orange-500',
+  'from-blue-500 to-cyan-500',
   'from-red-500 to-rose-500',
   'from-indigo-500 to-blue-500',
 ];
@@ -775,10 +775,11 @@ export default function AdminDashboard() {
     <>
       <div className="min-h-screen pb-24 relative overflow-hidden">
         {/* Background Gradients */}
-        <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        {/* Background Gradients - REMOVED */}
+        {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
           <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        </div>
+        </div> */}
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
           <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
@@ -811,10 +812,10 @@ export default function AdminDashboard() {
             </div>
 
             {/* Card 2: Upcoming Events */}
-            <div className="glass-card p-4 hover:border-amber-500/50 transition-colors group">
+            <div className="glass-card p-4 hover:border-blue-500/50 transition-colors group">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-amber-500/10 rounded-xl group-hover:bg-amber-500/20 transition-colors">
-                  <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div className="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-colors">
+                  <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">{posts.filter(p => p.type === 'event').length}</p>
@@ -1177,7 +1178,7 @@ export default function AdminDashboard() {
                                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Treasurer</span>
                                 {getOfficersByRole(club.id!, 'treasurer').length > 0 ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium truncate max-w-[100px]">
+                                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium truncate max-w-[100px]">
                                       {getOfficersByRole(club.id!, 'treasurer')[0].email.split('@')[0]}
                                     </span>
                                     <button onClick={() => handleRemoveMember(club.id!, getOfficersByRole(club.id!, 'treasurer')[0].id!, getOfficersByRole(club.id!, 'treasurer')[0].name)} className="text-slate-400 hover:text-red-500 transition-colors"><X className="w-3.5 h-3.5" /></button>
@@ -1280,7 +1281,7 @@ export default function AdminDashboard() {
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Broadcasts</h3>
                       <button
                         onClick={() => setShowNotificationModal(true)}
-                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all"
+                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all"
                       >
                         <Send className="w-4 h-4" />
                         NEW BROADCAST
@@ -1299,13 +1300,13 @@ export default function AdminDashboard() {
                             key={notification.id}
                             className={`p-5 rounded-xl border-l-4 ${notification.read
                               ? 'glass-card border-slate-300 dark:border-slate-700'
-                              : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border-amber-500'
+                              : 'bg-gradient-to-br from-blue-50 to-blue-50 dark:from-blue-900/10 dark:to-blue-900/10 border-blue-500'
                               } `}
                           >
                             <div className="flex items-start justify-between">
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">{notification.type || 'SYSTEM'}</span>
+                                  <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">{notification.type || 'SYSTEM'}</span>
                                   <span className="text-xs text-slate-400">• {new Date(notification.createdAt).toLocaleDateString()}</span>
                                 </div>
                                 <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{notification.title}</h4>
@@ -1489,7 +1490,7 @@ export default function AdminDashboard() {
                     onClick={handleCreateClub}
                     className="w-full bg-[#002147] hover:bg-[#00152e] text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
                   >
-                    <Plus className="w-5 h-5 text-[#DAA520]" />
+                    <Plus className="w-5 h-5 text-blue-600" />
                     REGISTER CLUB
                   </button>
                 </div>
@@ -1507,7 +1508,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Secretary</h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button onClick={() => { setShowCreateSecretaryModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
                     <X className="w-5 h-5" />
@@ -1564,7 +1565,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign President</h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button onClick={() => { setShowCreatePresidentModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
                     <X className="w-5 h-5" />
@@ -1621,7 +1622,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Treasurer</h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button onClick={() => { setShowCreateTreasurerModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
                     <X className="w-5 h-5" />
@@ -1659,7 +1660,7 @@ export default function AdminDashboard() {
 
                   <button
                     onClick={handleCreateTreasurer}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-500/30 flex items-center justify-center gap-2 mt-4"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2 mt-4"
                   >
                     <UserPlus className="w-5 h-5" />
                     CREATE ACCOUNT
@@ -1678,7 +1679,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Assign Faculty Advisor</h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button onClick={() => { setShowCreateAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
                     <X className="w-5 h-5" />
@@ -1735,14 +1736,14 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                   <div>
                     <h3 className="text-xl font-serif font-bold text-[#002147] dark:text-white">Edit Advisor</h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-[#DAA520]">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button onClick={() => { setShowEditAdvisorModal(false); setSelectedClub(null); setFormMessage(null); }} className="text-slate-400 hover:text-red-500 transition-colors bg-slate-50 dark:bg-slate-700 p-2 rounded-full">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="text-xs bg-amber-50 text-amber-800 border-l-4 border-amber-500 p-3 rounded mb-6 font-medium">
+                <div className="text-xs bg-blue-50 text-blue-800 border-l-4 border-blue-500 p-3 rounded mb-6 font-medium">
                   ⚠️ This will create a new advisor account. The old account will remain inactive until removed.
                 </div>
 
@@ -1780,7 +1781,7 @@ export default function AdminDashboard() {
                       onClick={handleReplaceAdvisor}
                       className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                     >
-                      <Edit className="w-5 h-5 text-[#DAA520]" />
+                      <Edit className="w-5 h-5 text-blue-600" />
                       UPDATE ADVISOR
                     </button>
                   </div>
@@ -1887,7 +1888,7 @@ export default function AdminDashboard() {
                       onClick={handleUpdateClubDetails}
                       className="w-full bg-[#002147] hover:bg-[#00152e] text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
                     >
-                      <Edit className="w-5 h-5 text-[#DAA520]" />
+                      <Edit className="w-5 h-5 text-blue-600" />
                       UPDATE DETAILS
                     </button>
                   </div>
@@ -1964,7 +1965,7 @@ export default function AdminDashboard() {
                       onClick={handleCreateNotification}
                       className="w-full bg-college-blue-primary hover:bg-college-blue-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
                     >
-                      <Send className="w-5 h-5 text-college-gold" />
+                      <Send className="w-5 h-5 text-blue-600" />
                       SEND BROADCAST
                     </button>
                   </div>
@@ -1984,7 +1985,7 @@ export default function AdminDashboard() {
                     <h3 className="text-xl font-serif font-bold text-college-blue-primary dark:text-white">
                       Update Logo
                     </h3>
-                    <p className="text-xs text-slate-500">For <span className="font-semibold text-college-gold">{selectedClub.name}</span></p>
+                    <p className="text-xs text-slate-500">For <span className="font-semibold text-blue-600">{selectedClub.name}</span></p>
                   </div>
                   <button
                     onClick={() => { setShowImageUploadModal(false); setSelectedClub(null); }}

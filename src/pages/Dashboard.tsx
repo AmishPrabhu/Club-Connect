@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, TrendingUp, Users, ChevronRight } from 'lucide-react';
+import { Search, TrendingUp, Users } from 'lucide-react';
 import ClubCard from '../components/ClubCard';
 import { DBClub } from '../types/auth';
 import { getClubs, toggleClubLike } from '../lib/dbService';
@@ -119,7 +119,7 @@ export default function Dashboard({ user, onNavigateToClub }: DashboardProps) {
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeCategory === category
-                  ? 'bg-[#DAA520] text-white shadow-lg shadow-[#DAA520]/20'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
               >

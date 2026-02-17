@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, FileText, Calendar, Users, Plus, X, Search, AlertCircle, CheckCircle, Loader2, Clock, ChevronDown, ChevronRight, Menu } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Calendar, Users, Plus, X, Search, AlertCircle, CheckCircle, Clock, ChevronDown, ChevronRight, Menu } from 'lucide-react';
 import { DBClub } from '../types/auth';
 import { getTeacherClubs, addTeacherClub, removeTeacherClub, getTeacherReports, getClubs, TeacherReport } from '../lib/dbService';
 import MemberManager from '../components/MemberManager';
@@ -131,18 +131,18 @@ export default function TeacherDashboard() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#002147] border-t-[#DAA520] rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[#002147] border-t-blue-600 rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
         <div className="min-h-screen pb-24 relative overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-            {/* Background Gradients */}
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            {/* Background Gradients - REMOVED */}
+            {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
                 <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-            </div>
+            </div> */}
 
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">

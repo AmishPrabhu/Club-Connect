@@ -150,8 +150,8 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
                     <p className="text-xl font-bold text-slate-900 dark:text-white">{members.length > 0 ? members.length : 50}</p>
                   </div>
                 </div>
-                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white shrink-0">
+                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white shrink-0">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
@@ -176,7 +176,7 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
           <div className="glass-card glass-card-hover rounded-2xl p-6 md:p-8 relative overflow-hidden">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Calendar className="w-6 h-6 text-amber-500" />
+                <Calendar className="w-6 h-6 text-blue-500" />
                 Posts & Events
               </h2>
               <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
@@ -201,7 +201,7 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
                   <div
                     key={post.id}
                     onClick={() => post.id && onNavigateToPost(post.id)}
-                    className="group p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 transition-all cursor-pointer flex flex-col md:flex-row gap-6"
+                    className="group p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all cursor-pointer flex flex-col md:flex-row gap-6"
                   >
                     <div className="shrink-0 w-full md:w-48 h-32 rounded-lg overflow-hidden bg-slate-200">
                       <img src={post.coverImage || `https://source.unsplash.com/random/400x300?event,${post.id}`} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -215,7 +215,7 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
                           <Clock className="w-3 h-3" /> {post.date}
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{post.title}</h3>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{post.title}</h3>
                       <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{post.content}</p>
                     </div>
                   </div>
@@ -263,7 +263,7 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
                   </div>
                 </div>
               ))}
-              {members.length === 0 && displayOfficers[0]?.id.includes('Loading') && (
+              {members.length === 0 && displayOfficers[0]?.id && displayOfficers[0].id.includes('Loading') && (
                 <div className="text-center py-4 text-xs text-slate-400 italic">
                   Fetching members...
                 </div>

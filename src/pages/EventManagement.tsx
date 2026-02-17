@@ -355,7 +355,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         <div className="min-h-screen py-6 px-4 md:py-12 md:px-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border-l-4 border-blue-600">
                     <div className="flex items-start md:items-center gap-3 md:gap-4">
                         {onBack && (
                             <button onClick={onBack} className="mt-1 md:mt-0 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white flex-shrink-0">
@@ -375,7 +375,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         {isSaving ? (
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <Save className="w-5 h-5 text-[#DAA520]" />
+                            <Save className="w-5 h-5 text-blue-600" />
                         )}
                         {isSaving ? 'Saving...' : 'Save All'}
                     </button>
@@ -399,7 +399,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                     }`}
                             >
-                                <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
+                                <Save className={`w-5 h-5 ${activeTab === 'budget' ? 'text-blue-600' : ''}`} />
                                 Budget
                             </button>
                         ) : (
@@ -411,7 +411,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <AlignLeft className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'details' ? 'text-[#DAA520]' : ''}`} />
+                                    <AlignLeft className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'details' ? 'text-blue-600' : ''}`} />
                                     Details
                                 </button>
 
@@ -422,7 +422,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Users className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'participants' ? 'text-[#DAA520]' : ''}`} />
+                                    <Users className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'participants' ? 'text-blue-600' : ''}`} />
                                     Participants
                                     {eventRsvps.length > 0 && (
                                         <span className="ml-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[10px] md:text-xs rounded-full font-bold">
@@ -437,7 +437,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Save className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'budget' ? 'text-[#DAA520]' : ''}`} />
+                                    <Save className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'budget' ? 'text-blue-600' : ''}`} />
                                     Budget
                                 </button>
                                 <button
@@ -447,7 +447,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <Award className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'certificates' ? 'text-[#DAA520]' : ''}`} />
+                                    <Award className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'certificates' ? 'text-blue-600' : ''}`} />
                                     Certificates
                                     {eventRsvps.filter(r => r.certificateUrl).length > 0 && (
                                         <span className="ml-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] md:text-xs rounded-full font-bold">
@@ -463,7 +463,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         : 'text-slate-500 dark:text-slate-400 hover:text-[#002147] dark:hover:text-white'
                                         }`}
                                 >
-                                    <FileText className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'report' ? 'text-[#DAA520]' : ''}`} />
+                                    <FileText className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === 'report' ? 'text-blue-600' : ''}`} />
                                     Report
                                 </button>
                             </>
@@ -477,7 +477,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 <div className="lg:col-span-2 space-y-6">
                                     <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                            <AlignLeft className="w-5 h-5 text-[#DAA520]" />
+                                            <AlignLeft className="w-5 h-5 text-blue-600" />
                                             Basic Information
                                         </h2>
                                         <div className="space-y-4">
@@ -504,7 +504,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                     <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                            <Calendar className="w-5 h-5 text-[#DAA520]" />
+                                            <Calendar className="w-5 h-5 text-blue-600" />
                                             Date & Time
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -707,7 +707,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
 
                                     <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                            <MapPin className="w-5 h-5 text-[#DAA520]" />
+                                            <MapPin className="w-5 h-5 text-blue-600" />
                                             Location
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -737,7 +737,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 <div className="space-y-6">
                                     <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                                         <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                            <LinkIcon className="w-5 h-5 text-[#DAA520]" />
+                                            <LinkIcon className="w-5 h-5 text-blue-600" />
                                             Links
                                         </h2>
                                         <div className="space-y-4">
@@ -802,7 +802,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                             {/* Actions Header */}
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-[#DAA520]" />
+                                    <Users className="w-5 h-5 text-blue-600" />
                                     Attendance Overview
                                 </h3>
                                 <button
@@ -844,7 +844,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         {/* Add Participant Form */}
                         <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                <UserPlus className="w-5 h-5 text-[#DAA520]" />
+                                <UserPlus className="w-5 h-5 text-blue-600" />
                                 Add Participant (from Google Form)
                             </h2>
                             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
@@ -903,7 +903,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         }}
                                         className="w-full px-4 py-2 bg-[#002147] hover:bg-[#00152e] text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
                                     >
-                                        <Plus className="w-4 h-4 text-[#DAA520]" />
+                                        <Plus className="w-4 h-4 text-blue-600" />
                                         Add Participant
                                     </button>
                                 </div>
@@ -1214,7 +1214,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     <div className="space-y-6">
                         <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                <Save className="w-5 h-5 text-[#DAA520]" />
+                                <Save className="w-5 h-5 text-blue-600" />
                                 Event Budget
                             </h2>
                             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
@@ -1229,7 +1229,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         {post.budgetImage ? (
                                             <span className={`px-3 py-1 rounded-full text-sm font-semibold ${post.budgetVerified
                                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
                                                 }`}>
                                                 {post.budgetVerified ? '✓ Verified by Advisor' : '⏳ Pending Verification'}
                                             </span>
@@ -1296,7 +1296,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         }}
                                         className="w-full px-6 py-4 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
                                     >
-                                        <Plus className="w-5 h-5 text-[#DAA520]" />
+                                        <Plus className="w-5 h-5 text-blue-600" />
                                         {post.budgetImage ? 'Update Budget Document' : 'Upload Budget Document'}
                                     </button>
 
@@ -1330,9 +1330,9 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     {eventRsvps.filter(r => r.certificateUrl).length}
                                 </p>
                             </div>
-                            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
-                                <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">Pending Certificates</p>
-                                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Pending Certificates</p>
+                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                                     {eventRsvps.filter(r => r.attendance === 'present' && !r.certificateUrl).length}
                                 </p>
                             </div>
@@ -1341,7 +1341,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                         {/* Certificate Template Section */}
                         <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                <Award className="w-5 h-5 text-[#DAA520]" />
+                                <Award className="w-5 h-5 text-blue-600" />
                                 Certificate Template
                             </h2>
 
@@ -1421,7 +1421,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 }}
                                 className="w-full px-4 py-3 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
                             >
-                                <Upload className="w-5 h-5 text-[#DAA520]" />
+                                <Upload className="w-5 h-5 text-blue-600" />
                                 {certificateTemplateUrl ? 'Change Template' : 'Upload Certificate Template'}
                             </button>
                         </div>
@@ -1694,7 +1694,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                     <div className="space-y-6">
                         <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/40">
                             <h2 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-4 flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-[#DAA520]" />
+                                <FileText className="w-5 h-5 text-blue-600" />
                                 Event Report
                             </h2>
                             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
@@ -1781,7 +1781,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 }}
                                 className="w-full px-6 py-4 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
                             >
-                                <Upload className="w-5 h-5 text-[#DAA520]" />
+                                <Upload className="w-5 h-5 text-blue-600" />
                                 {(post as any).reportUrl ? 'Update Report' : 'Upload Report (PDF)'}
                             </button>
 

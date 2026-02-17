@@ -74,10 +74,11 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 relative overflow-hidden">
       {/* Background Gradients */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      {/* Background Gradients - REMOVED */}
+      {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-      </div>
+      </div> */}
 
       <div className="max-w-5xl mx-auto px-4 py-8 md:px-8 md:py-12 relative z-10">
         {/* Header */}
@@ -193,7 +194,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
                             </h4>
                             <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${notification.clubId
                               ? 'bg-green-100/50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200/50 dark:border-green-700/30'
-                              : 'bg-amber-100/50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200/50 dark:border-amber-700/30'
+                              : 'bg-blue-100/50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-700/30'
                               }`}>
                               {getSourceLabel(notification)}
                             </span>

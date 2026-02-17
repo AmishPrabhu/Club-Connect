@@ -109,7 +109,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
     const getTypeColor = (type: string) => {
         return type === 'event'
             ? 'from-[#002147] to-[#003366]'
-            : 'from-[#DAA520] to-[#F0C05A]';
+            : 'from-blue-500 to-blue-400';
     };
 
     if (isLoading) {
@@ -436,7 +436,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                     )}
 
                     <div className="mb-8">
-                        <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-3 flex items-center gap-2 border-l-4 border-[#DAA520] pl-3">
+                        <h3 className="text-lg font-serif font-bold text-[#002147] dark:text-white mb-3 flex items-center gap-2 border-l-4 border-blue-600 pl-3">
                             Description
                         </h3>
                         <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">

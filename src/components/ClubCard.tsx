@@ -42,6 +42,7 @@ export default function ClubCard({ club, onClick, isLiked = false, onToggleLike 
       className="group glass-card glass-card-hover relative overflow-hidden flex flex-col h-full cursor-pointer p-3.5 md:p-5 transition-all duration-300 border-t border-white/10"
     >
       {/* Top Gradient Line (optional, enhances neon feel) */}
+      {/* Top Gradient Line (optional, enhances neon feel) */}
       <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       {/* Favorite Button - Absolute Top Right */}

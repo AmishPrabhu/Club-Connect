@@ -10,7 +10,7 @@ export default {
           secondary: '#003366',
           900: '#00152e',
         },
-        'college-gold': '#DAA520', // Academic Gold
+        'college-gold': '#2563eb', // Replaced with Blue-600
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],

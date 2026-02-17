@@ -31,7 +31,7 @@ const BOARD_TYPE_OPTIONS: { value: 'main' | 'executive' | 'member'; label: strin
 ];
 
 const BOARD_TYPE_COLORS: Record<string, string> = {
-    'main': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    'main': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     'executive': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     'member': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
 };

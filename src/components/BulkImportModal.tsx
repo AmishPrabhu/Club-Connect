@@ -219,8 +219,8 @@ export default function BulkImportModal({ isOpen, onClose, clubId, clubName, onS
                                     <p className="text-3xl font-bold text-green-600 dark:text-green-400">{result.added}</p>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Added</p>
                                 </div>
-                                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl text-center">
-                                    <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">{result.updated}</p>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-center">
+                                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{result.updated}</p>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Updated</p>
                                 </div>
                                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl text-center">

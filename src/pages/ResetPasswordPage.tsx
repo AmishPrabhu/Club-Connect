@@ -73,7 +73,7 @@ export default function ResetPasswordPage({ onNavigate }: ResetPasswordPageProps
                     {/* Header */}
                     <div className="bg-[#002147] p-6 text-center">
                         <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <KeyRound className="w-8 h-8 text-[#DAA520]" />
+                            <KeyRound className="w-8 h-8 text-blue-600" />
                         </div>
                         <h1 className="text-2xl font-bold text-white">Reset Password</h1>
                         <p className="text-blue-200 text-sm mt-1">Create a new password for your account</p>
@@ -167,10 +167,10 @@ export default function ResetPasswordPage({ onNavigate }: ResetPasswordPageProps
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-[#DAA520] hover:bg-[#B8860B] text-[#002147] font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-3"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-3"
                                 >
                                     {isLoading ? (
-                                        <div className="w-5 h-5 border-2 border-[#002147]/30 border-t-[#002147] rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
                                             <KeyRound className="w-5 h-5" />

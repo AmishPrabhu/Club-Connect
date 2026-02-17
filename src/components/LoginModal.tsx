@@ -8,7 +8,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   const roles = [
     { id: 'student', label: 'Student', icon: GraduationCap, color: 'bg-blue-600 hover:bg-blue-700' },
     { id: 'teacher', label: 'Teacher', icon: User, color: 'bg-emerald-600 hover:bg-emerald-700' },
-    { id: 'admin', label: 'Admin', icon: Shield, color: 'bg-amber-600 hover:bg-amber-700' },
+    { id: 'admin', label: 'Admin', icon: Shield, color: 'bg-blue-600 hover:bg-blue-700' },
   ];
 
   return (

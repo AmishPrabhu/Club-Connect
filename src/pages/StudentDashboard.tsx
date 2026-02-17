@@ -95,41 +95,47 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
     }
 
     return (
-        <div className="min-h-screen p-4 md:p-6">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="mb-6 md:mb-8 p-4 md:p-6 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border-l-4 border-[#DAA520]">
-                    <button
-                        onClick={() => onNavigate('home')}
-                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-[#002147] mb-4 font-medium transition-colors text-sm md:text-base"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Home
-                    </button>
+        <div className="min-h-screen pb-24 relative overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+            {/* Header Section */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+                <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                    <div className="relative z-10">
+                        <button
+                            onClick={() => onNavigate('home')}
+                            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 mb-4 font-medium transition-colors text-sm md:text-base group"
+                        >
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            Back to Home
+                        </button>
 
-                    <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#002147] dark:text-white mb-2 break-words">
-                        Welcome back, <span className="text-[#DAA520]">{(() => {
-                            const name = user?.name || 'Student';
-                            const parts = name.split(' ').filter(p => p.trim());
-                            if (parts.length === 0) return 'Student';
+                        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                            Welcome back, <span className="text-cyan-600 dark:text-cyan-400">{(() => {
+                                const name = user?.name || 'Student';
+                                const parts = name.split(' ').filter(p => p.trim());
+                                if (parts.length === 0) return 'Student';
 
-                            // Check if first part is an ID (contains numbers)
-                            const firstPart = parts[0];
-                            const hasNumbers = /\d/.test(firstPart);
+                                // Check if first part is an ID (contains numbers)
+                                const firstPart = parts[0];
+                                const hasNumbers = /\d/.test(firstPart);
 
-                            let friendlyName = firstPart;
-                            if (hasNumbers && parts.length > 1) {
-                                friendlyName = parts[1];
-                            }
+                                let friendlyName = firstPart;
+                                if (hasNumbers && parts.length > 1) {
+                                    friendlyName = parts[1];
+                                }
 
-                            // Title Case
-                            return friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1).toLowerCase();
-                        })()}</span>!
-                    </h1>
-                    <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">
-                        View and manage your event registrations
-                    </p>
+                                // Title Case
+                                return friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1).toLowerCase();
+                            })()}</span>!
+                        </h1>
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">
+                            View and manage your event registrations
+                        </p>
+                    </div>
                 </div>
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4">
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-8">
@@ -142,14 +148,14 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                         </div>
                         <p className="text-4xl font-bold text-[#002147] dark:text-white">{upcomingEvents.length}</p>
                     </div>
-                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border-l-4 border-[#DAA520]">
+                    <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-sm border-l-4 border-blue-600">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                                <History className="w-6 h-6 text-[#DAA520]" />
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <History className="w-6 h-6 text-blue-600" />
                             </div>
                             <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">Past Events</span>
                         </div>
-                        <p className="text-4xl font-bold text-[#DAA520] dark:text-white">{pastEvents.length}</p>
+                        <p className="text-4xl font-bold text-blue-600 dark:text-white">{pastEvents.length}</p>
                     </div>
                 </div>
 

@@ -860,10 +860,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     <>
       <div className="min-h-screen pb-24 relative overflow-hidden">
         {/* Background Gradients */}
-        <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        {/* Background Gradients - REMOVED */}
+        {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
           <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        </div>
+        </div> */}
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
           <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
@@ -1561,7 +1562,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                                     {post.budgetImage ? (
                                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${post.budgetVerified
                                         ? 'bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                        : 'bg-amber-100/80 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                        : 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                                         }`}>
                                         {post.budgetVerified ? (
                                           <><CheckCircle className="w-3 h-3" /> Verified</>
@@ -2358,8 +2359,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
               <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-xl p-6 w-full max-w-md">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
-                    <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                    <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">Time Collision Warning</h3>
                 </div>
@@ -2368,11 +2369,11 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   There {collisionEvents.length === 1 ? 'is' : 'are'} already {collisionEvents.length} event{collisionEvents.length === 1 ? '' : 's'} scheduled around the same time:
                 </p>
 
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6 max-h-40 overflow-y-auto">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6 max-h-40 overflow-y-auto">
                   {collisionEvents.map((event, index) => (
                     <div key={index} className="flex flex-col mb-2 last:mb-0">
-                      <span className="font-semibold text-amber-800 dark:text-amber-300">{event.title}</span>
-                      <span className="text-sm text-amber-600 dark:text-amber-400">{event.time} - {event.clubName}</span>
+                      <span className="font-semibold text-blue-800 dark:text-blue-300">{event.title}</span>
+                      <span className="text-sm text-blue-600 dark:text-blue-400">{event.time} - {event.clubName}</span>
                     </div>
                   ))}
                 </div>
@@ -2390,7 +2391,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                   </button>
                   <button
                     onClick={handleConfirmCollision}
-                    className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition-all"
+                    className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all"
                   >
                     Create Anyway
                   </button>
