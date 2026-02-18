@@ -43,7 +43,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<ClubMember | null>(null);
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-    const [yearFilter, setYearFilter] = useState<string>('');
+    const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
     const [boardTypeFilter, setBoardTypeFilter] = useState<string>('');
 
     // Confirm modal state
@@ -70,6 +70,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         boardType: 'member' as 'main' | 'executive' | 'member',
         academicYear: '' as string,
         joinedAt: new Date().getFullYear().toString(),
+        leftAt: undefined as string | undefined,
     });
 
     // Fetch members on mount
@@ -106,7 +107,8 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             id: tempId,
             ...newMember,
             role: newMember.boardType === 'member' ? 'Member' : newMember.role,
-            joinedAt: new Date(newMember.joinedAt)
+            joinedAt: new Date(newMember.joinedAt),
+            leftAt: newMember.leftAt ? new Date(newMember.leftAt) : undefined
         };
 
         setMembers(prev => [...prev, optimisticMember]);
@@ -114,14 +116,15 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
         setFormMessage(null);
 
         // Reset form immediately
-        const resetForm = { name: '', email: '', role: 'Member', boardType: 'member' as const, academicYear: '', joinedAt: new Date().getFullYear().toString() };
+        const resetForm = { name: '', email: '', role: 'Member', boardType: 'member' as const, academicYear: '', joinedAt: new Date().getFullYear().toString(), leftAt: undefined };
         setNewMember(resetForm);
 
         try {
             const result = await addClubMember(clubId, {
                 ...newMember,
                 role: newMember.boardType === 'member' ? 'Member' : newMember.role,
-                joinedAt: new Date(newMember.joinedAt)
+                joinedAt: new Date(newMember.joinedAt),
+                leftAt: newMember.leftAt ? new Date(newMember.leftAt) : undefined
             });
 
             if (result.success && result.memberId) {
@@ -159,6 +162,7 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             role: editingMember.role,
             academicYear: editingMember.academicYear,
             joinedAt: editingMember.joinedAt,
+            leftAt: editingMember.leftAt,
             boardType: editingMember.boardType
         });
 
@@ -223,7 +227,21 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
     // Export members to CSV
     const exportToCSV = () => {
         let filteredMembers = yearFilter
-            ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+            ? members.filter(m => {
+                const joinYear = new Date(m.joinedAt).getFullYear();
+                const selectedYear = parseInt(yearFilter);
+
+                // Member must have joined on or before selected year
+                if (joinYear > selectedYear) return false;
+
+                // If member left, they must have left ON or AFTER the selected year
+                if (m.leftAt) {
+                    const leftYear = new Date(m.leftAt).getFullYear();
+                    if (leftYear < selectedYear) return false;
+                }
+
+                return true;
+            })
             : members;
 
         // Apply board type filter
@@ -338,7 +356,21 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
             {/* Members List */}
             {(() => {
                 let filteredMembers = yearFilter
-                    ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+                    ? members.filter(m => {
+                        const joinYear = new Date(m.joinedAt).getFullYear();
+                        const selectedYear = parseInt(yearFilter);
+
+                        // Member must have joined on or before selected year
+                        if (joinYear > selectedYear) return false;
+
+                        // If member left, they must have left ON or AFTER the selected year
+                        if (m.leftAt) {
+                            const leftYear = new Date(m.leftAt).getFullYear();
+                            if (leftYear < selectedYear) return false;
+                        }
+
+                        return true;
+                    })
                     : members;
 
                 // Apply board type filter to displayed list
@@ -441,6 +473,46 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                 </div>
                                             )}
                                         </div>
+
+                                        {/* Left Club Field (Edit Mode) */}
+                                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Has Left Club?</label>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!editingMember.leftAt}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setEditingMember({ ...editingMember, leftAt: new Date() });
+                                                        } else {
+                                                            setEditingMember({ ...editingMember, leftAt: undefined });
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            {editingMember.leftAt && (
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Year Left</label>
+                                                    <select
+                                                        value={new Date(editingMember.leftAt).getFullYear().toString()}
+                                                        onChange={(e) => {
+                                                            const year = parseInt(e.target.value);
+                                                            const date = new Date(editingMember.leftAt || new Date());
+                                                            date.setFullYear(year);
+                                                            setEditingMember({ ...editingMember, leftAt: date });
+                                                        }}
+                                                        className="w-full px-3 py-2 bg-white/85 dark:bg-slate-900/80 backdrop-blur-md border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="2024">2024</option>
+                                                        <option value="2025">2025</option>
+                                                        <option value="2026">2026</option>
+                                                        <option value="2027">2027</option>
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-600">
                                             <button
                                                 onClick={() => setEditingMember(null)}
@@ -487,6 +559,11 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                                     <span className="flex items-center gap-1">
                                                         <span className="opacity-60">📅</span> Joined: {new Date(member.joinedAt).toLocaleDateString()}
                                                     </span>
+                                                    {member.leftAt && (
+                                                        <span className="flex items-center gap-1 text-red-500 dark:text-red-400">
+                                                            <span className="opacity-60">🚪</span> Left: {new Date(member.leftAt).toLocaleDateString()}
+                                                        </span>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -636,6 +713,45 @@ export default function MemberManager({ clubId, clubName, isReadOnly = false, us
                                     </select>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Left Club Field */}
+                        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    Has Left Club?
+                                </label>
+                                <input
+                                    type="checkbox"
+                                    checked={!!newMember.leftAt}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setNewMember({ ...newMember, leftAt: new Date().getFullYear().toString() });
+                                        } else {
+                                            const { leftAt, ...rest } = newMember;
+                                            setNewMember(rest as any);
+                                        }
+                                    }}
+                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                />
+                            </div>
+                            {newMember.leftAt && (
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Year Left
+                                    </label>
+                                    <select
+                                        value={newMember.leftAt}
+                                        onChange={(e) => setNewMember({ ...newMember, leftAt: e.target.value })}
+                                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-3 mt-6">

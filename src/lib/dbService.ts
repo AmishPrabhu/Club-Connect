@@ -785,9 +785,9 @@ export const updateParticipantCertificate = async (
 };
 
 // Upload/update event report (Club Secretary/President only)
-export const updateEventReport = async (eventId: string, reportUrl: string): Promise<boolean> => {
+export const updateEventReport = async (eventId: string, reportUrl: string | null, reportFilename?: string): Promise<boolean> => {
     try {
-        await api.put(`/posts/${eventId}/report`, { reportUrl });
+        await api.put(`/posts/${eventId}/report`, { reportUrl, reportFilename });
         return true;
     } catch (error) {
         console.error('Error updating event report:', error);
@@ -941,6 +941,7 @@ export interface TeacherReport {
     clubId: string;
     clubName: string;
     reportUrl: string;
+    reportFilename?: string | null;
     reportSubmittedBy: string;
     reportSubmittedByName: string;
     reportSubmittedAt: Date;

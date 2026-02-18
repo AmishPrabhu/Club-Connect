@@ -703,8 +703,10 @@ router.put('/:id/report', verifyToken, async (req, res) => {
             }
         }
 
-        const { reportUrl } = req.body;
-        if (!reportUrl) {
+        const { reportUrl, reportFilename } = req.body;
+
+        // Allow reportUrl to be null (for deletion) but require it if not deleting
+        if (reportUrl === undefined) {
             return res.status(400).json({ message: 'Report URL is required' });
         }
 
@@ -712,9 +714,11 @@ router.put('/:id/report', verifyToken, async (req, res) => {
             req.params.id,
             {
                 reportUrl,
-                reportSubmittedBy: req.user.id,
-                reportSubmittedByName: req.user.name || 'Club Officer',
-                reportSubmittedAt: new Date(),
+                reportFilename: reportUrl ? reportFilename : null, // Store filename if URL exists, else clear it
+                // Only update submission details if adding a report, otherwise clear them
+                reportSubmittedBy: reportUrl ? req.user.id : null,
+                reportSubmittedByName: reportUrl ? (req.user.name || 'Club Officer') : null,
+                reportSubmittedAt: reportUrl ? new Date() : null,
                 updatedAt: new Date()
             },
             { new: true }

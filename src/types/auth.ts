@@ -26,6 +26,7 @@ export interface ClubMember {
   academicYear?: string;
   profileImage?: string; // Profile picture URL
   joinedAt: Date;
+  leftAt?: Date; // Optional date when member left the club
 }
 
 // Club membership for multi-club support (used in UI for club switching)

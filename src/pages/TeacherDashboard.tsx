@@ -69,25 +69,61 @@ export default function TeacherDashboard() {
 
     const downloadFile = async (url: string, filename: string) => {
         try {
+            // Check if URL is valid
+            if (!url) throw new Error('URL is missing');
+
             const response = await fetch(url);
+
+            // Check if response is valid
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            // Check content type
+            const contentType = response.headers.get('content-type');
+            if (contentType) {
+                if (contentType.includes('application/json')) {
+                    throw new Error('Received JSON instead of file');
+                }
+                if (contentType.includes('text/html')) {
+                    throw new Error('Received HTML instead of file');
+                }
+            }
+
             const blob = await response.blob();
+
+            // Check blob size
+            if (blob.size < 100) {
+                // Suspiciously small blob, might be an error message
+                console.warn('Blob size is very small:', blob.size);
+            }
+
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = blobUrl;
             link.download = filename;
             document.body.appendChild(link);
             link.click();
-            window.URL.revokeObjectURL(blobUrl);
-            document.body.removeChild(link);
+
+            // Clean up
+            setTimeout(() => {
+                window.URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(link);
+            }, 100);
         } catch (error) {
-            console.error('Download failed:', error);
+            console.error('Download failed, falling back to direct open:', error);
+            // Fallback: open in new tab
             window.open(url, '_blank');
         }
     };
 
     const handleDownloadReport = (report: TeacherReport) => {
-        const filename = `Report-${report.eventTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-        downloadFile(report.reportUrl, filename);
+        const title = report.eventTitle || 'Untitled_Event';
+        const filename = report.reportFilename || `Report-${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+        if (report.reportUrl) {
+            downloadFile(report.reportUrl, filename);
+        } else {
+            console.error('Report URL missing for', report);
+            setMessage({ type: 'error', text: 'Report file URL is missing.' });
+        }
     };
 
     const getClubReports = (clubId: string) => {
@@ -115,12 +151,22 @@ export default function TeacherDashboard() {
 
         for (let i = 0; i < clubReports.length; i++) {
             const report = clubReports[i];
-            const filename = `Report-${report.eventTitle.replace(/[^a-z0-9]/gi, '_')}-${report.reportSubmittedByName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+            if (!report.reportUrl) continue;
+
+            const title = report.eventTitle || 'Untitled_Event';
+            const submittedBy = report.reportSubmittedByName || 'Unknown';
+            const filename = `Report-${title.replace(/[^a-z0-9]/gi, '_')}-${submittedBy.replace(/[^a-z0-9]/gi, '_')}.pdf`;
 
             setTimeout(() => {
                 downloadFile(report.reportUrl, filename);
             }, i * 1000);
         }
+    };
+
+    const handleViewDetails = (club: DBClub) => {
+        setSelectedClub(club);
+        setActiveTab('reports');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const filteredClubs = allClubs.filter(club =>
@@ -138,12 +184,6 @@ export default function TeacherDashboard() {
 
     return (
         <div className="min-h-screen pb-24 relative overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-            {/* Background Gradients - REMOVED */}
-            {/* <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-            </div> */}
-
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
                 <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
@@ -152,7 +192,10 @@ export default function TeacherDashboard() {
                         <div>
                             {selectedClub && (
                                 <button
-                                    onClick={() => setSelectedClub(null)}
+                                    onClick={() => {
+                                        setSelectedClub(null);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
                                     className="flex items-center gap-2 text-slate-500 hover:text-cyan-500 dark:text-slate-400 dark:hover:text-cyan-400 transition-colors mb-2 text-sm font-medium group"
                                 >
                                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -235,12 +278,12 @@ export default function TeacherDashboard() {
                                                         <h3 className="font-bold text-xl text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                                                             {club.name}
                                                         </h3>
-                                                        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1">
+                                                        <div className="text-xs md:text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1">
                                                             <div className="p-1 rounded bg-slate-100 dark:bg-slate-800">
                                                                 <FileText className="w-3 h-3 text-cyan-500" />
                                                             </div>
                                                             {clubReports.length} reports
-                                                        </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <button
@@ -254,7 +297,7 @@ export default function TeacherDashboard() {
 
                                             <div className="flex gap-2 md:gap-3 mt-auto">
                                                 <button
-                                                    onClick={() => setSelectedClub(club)}
+                                                    onClick={() => handleViewDetails(club)}
                                                     className="flex-1 px-2 py-2 md:px-4 md:py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors text-xs md:text-sm shadow-sm whitespace-nowrap"
                                                 >
                                                     View Details
@@ -417,7 +460,7 @@ export default function TeacherDashboard() {
                                                                             {report.eventTitle}
                                                                         </h3>
                                                                         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                                                            ID: {report.id.slice(0, 8)}
+                                                                            ID: {report.id?.slice(0, 8) || 'N/A'}
                                                                         </p>
                                                                     </div>
                                                                 </div>

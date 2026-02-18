@@ -459,6 +459,7 @@ router.get('/teacher/reports', verifyToken, async (req, res) => {
             clubId: event.clubId,
             clubName: event.clubName,
             reportUrl: event.reportUrl,
+            reportFilename: event.reportFilename,
             reportSubmittedBy: event.reportSubmittedBy,
             reportSubmittedByName: event.reportSubmittedByName,
             reportSubmittedAt: event.reportSubmittedAt,

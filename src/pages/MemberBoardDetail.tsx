@@ -21,7 +21,7 @@ const BOARD_LABELS: Record<string, string> = {
 export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailProps) {
   const [members, setMembers] = useState<ClubMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [yearFilter, setYearFilter] = useState<string>('');
+  const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
   const [boardFilter, setBoardFilter] = useState<string>('');
 
   useEffect(() => {
@@ -45,7 +45,22 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
 
   // Filter members by year
   const filteredMembers = yearFilter
-    ? members.filter(m => String(m.joinedAt).includes(yearFilter))
+    ? members.filter(m => {
+      const joinYear = new Date(m.joinedAt).getFullYear();
+      const selectedYear = parseInt(yearFilter);
+
+      // Member must have joined on or before selected year
+      if (joinYear > selectedYear) return false;
+
+      // If member left, they must have left ON or AFTER the selected year
+      // (i.e. if they left in 2025, they are still part of the 2025 board)
+      if (m.leftAt) {
+        const leftYear = new Date(m.leftAt).getFullYear();
+        if (leftYear < selectedYear) return false;
+      }
+
+      return true;
+    })
     : members;
 
   // Group members by board type

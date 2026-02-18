@@ -156,6 +156,10 @@ const postSchema = new mongoose.Schema({
         type: String, // URL of uploaded report document/PDF
         default: null,
     },
+    reportFilename: {
+        type: String,
+        default: null,
+    },
     reportSubmittedBy: {
         type: String, // User ID of officer who submitted report
         default: null,

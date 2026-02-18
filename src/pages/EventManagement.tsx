@@ -93,6 +93,11 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
         }
     }, [isTreasurer, isLoading]);
 
+    // Report Upload State
+    const [pendingReportUrl, setPendingReportUrl] = useState<string | null>(null);
+    const [pendingReportFilename, setPendingReportFilename] = useState<string | null>(null);
+    const [isSavingReport, setIsSavingReport] = useState(false);
+
     // Form State for Details
     const [formData, setFormData] = useState({
         title: '',
@@ -1751,6 +1756,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         resourceType: 'raw', // Important for PDFs/Docs
                                         clientAllowedFormats: ['pdf', 'doc', 'docx'],
                                         maxFileSize: 10000000,
+                                        access_mode: 'public', // Force public access to avoid 401 errors
                                     }, async (error: any, result: any) => {
                                         if (error) {
                                             console.error('Upload Error:', error);
@@ -1759,22 +1765,14 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         }
                                         if (result.event === 'success') {
                                             const reportUrl = result.info.secure_url;
+                                            // Construct filename from Cloudinary result
+                                            const filename = result.info.original_filename
+                                                ? (result.info.format ? `${result.info.original_filename}.${result.info.format}` : result.info.original_filename)
+                                                : 'Report.pdf';
 
-                                            // Dynamic import to avoid circular dependencies if any
-                                            const { updateEventReport, getPosts } = await import('../lib/dbService');
-
-                                            const success = await updateEventReport(post.id!, reportUrl);
-                                            if (success) {
-                                                setMessage({ type: 'success', text: 'Report uploaded successfully!' });
-                                                // Refresh post data
-                                                const posts = await getPosts();
-                                                const updatedPost = posts.find(p => p.id === eventId);
-                                                if (updatedPost) {
-                                                    setPost(updatedPost);
-                                                }
-                                            } else {
-                                                setMessage({ type: 'error', text: 'Failed to save report URL.' });
-                                            }
+                                            setPendingReportUrl(reportUrl);
+                                            setPendingReportFilename(filename);
+                                            setMessage({ type: 'success', text: 'File uploaded. Please click "Submit Report" to save changes.' });
                                         }
                                     });
                                     widget.open();
@@ -1782,8 +1780,113 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                 className="w-full px-6 py-4 bg-[#002147] hover:bg-[#00152e] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
                             >
                                 <Upload className="w-5 h-5 text-blue-600" />
-                                {(post as any).reportUrl ? 'Update Report' : 'Upload Report (PDF)'}
+                                {pendingReportUrl ? 'Replace Uploaded File' : ((post as any).reportUrl ? 'Update Report' : 'Upload Report (PDF)')}
                             </button>
+
+                            {/* Show Pending File Status */}
+                            {pendingReportUrl && (
+                                <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <FileText className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                                        <div>
+                                            <p className="font-bold text-yellow-800 dark:text-yellow-200">Unsaved Changes</p>
+                                            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                                                File uploaded: <span className="font-semibold">{pendingReportFilename || 'New Report'}</span>
+                                            </p>
+                                            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Click Submit Report to save.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={async () => {
+                                                setIsSavingReport(true);
+                                                try {
+                                                    const { updateEventReport, getPosts } = await import('../lib/dbService');
+                                                    const success = await updateEventReport(post.id!, pendingReportUrl, pendingReportFilename || undefined);
+
+                                                    if (success) {
+                                                        setMessage({ type: 'success', text: 'Report submitted successfully!' });
+                                                        setPendingReportUrl(null);
+                                                        setPendingReportFilename(null);
+                                                        // Refresh post data
+                                                        const posts = await getPosts();
+                                                        const updatedPost = posts.find(p => p.id === eventId);
+                                                        if (updatedPost) {
+                                                            setPost(updatedPost);
+                                                        }
+                                                    } else {
+                                                        setMessage({ type: 'error', text: 'Failed to submit report.' });
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Error submitting report:', error);
+                                                    setMessage({ type: 'error', text: 'Error submitting report.' });
+                                                } finally {
+                                                    setIsSavingReport(false);
+                                                }
+                                            }}
+                                            disabled={isSavingReport}
+                                            className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {isSavingReport ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="w-4 h-4" />
+                                                    Submit Report
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setPendingReportUrl(null);
+                                                setPendingReportFilename(null);
+                                            }}
+                                            className="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-bold transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Delete Existing Report Button */}
+                            {!pendingReportUrl && (post as any).reportUrl && (
+                                <button
+                                    onClick={() => {
+                                        setConfirmModal({
+                                            isOpen: true,
+                                            title: 'Delete Report',
+                                            message: 'Are you sure you want to delete this report? This action cannot be undone.',
+                                            type: 'danger',
+                                            variant: 'confirm',
+                                            onConfirm: async () => {
+                                                const { updateEventReport, getPosts } = await import('../lib/dbService');
+                                                const success = await updateEventReport(post.id!, null);
+
+                                                if (success) {
+                                                    setMessage({ type: 'success', text: 'Report deleted successfully' });
+                                                    // Refresh data
+                                                    const posts = await getPosts();
+                                                    const updatedPost = posts.find(p => p.id === eventId);
+                                                    if (updatedPost) {
+                                                        setPost(updatedPost);
+                                                    }
+                                                } else {
+                                                    setMessage({ type: 'error', text: 'Failed to delete report' });
+                                                }
+                                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                                            }
+                                        });
+                                    }}
+                                    className="w-full mt-3 px-6 py-3 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                    Delete Report
+                                </button>
+                            )}
 
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
                                 Supported formats: PDF, DOC, DOCX (Max 10MB)
