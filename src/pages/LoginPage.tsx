@@ -134,16 +134,15 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   return (
     <div className="min-h-screen flex">
       {/* Left Split - Visual Side for Campus Vibe */}
-      <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
+      <div className="hidden lg:flex w-1/2 bg-college-blue-900 relative overflow-hidden flex-col justify-between p-12 text-white">
         {/* Background Overlay Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="/wce-campus.png"
             alt="Walchand College Campus"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
           />
-          <div className="absolute inset-0 bg-slate-900/40 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-college-blue-900/70" />
         </div>
 
         <div className="relative z-10 w-full">
@@ -151,7 +150,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <img src="/wce-logo.png" alt="WCE Logo" className="w-12 h-12 bg-white rounded-full p-1 shadow-lg" />
             <div>
               <h2 className="text-xl font-serif font-bold tracking-wide">Walchand College of Engineering</h2>
-              <p className="text-xs text-blue-500 uppercase tracking-widest font-semibold">Established 1947</p>
+              <p className="text-xs text-amber-400 uppercase tracking-widest font-semibold">Established 1947</p>
             </div>
           </div>
         </div>
@@ -159,7 +158,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
         <div className="relative z-10 mb-12">
           <h1 className="text-6xl font-serif font-bold mb-6 text-shadow-lg leading-tight">
             Welcome to <br />
-            <span className="text-blue-500">Club Connect</span>
+            <span className="text-amber-400">Club Connect</span>
           </h1>
           <p className="text-xl font-light text-slate-200 max-w-lg leading-relaxed">
             The central hub for all student activities, club management, and event organization at WCE Sangli.

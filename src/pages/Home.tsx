@@ -177,12 +177,17 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           </div>
 
           {/* Hero Visual - Hidden on small mobile to save space, or very small */}
-          <div className="relative z-10 hidden md:block w-32 h-32 md:w-48 md:h-48 flex-shrink-0 animate-float-slow">
-            <img
-              src="/wce-logo.png"
-              alt="WCE Emblem"
-              className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.4)]"
-            />
+          <div className="relative z-10 hidden md:block w-64 h-36 md:w-80 md:h-48 flex-shrink-0 animate-float-slow overflow-hidden rounded-2xl shadow-[0_0_25px_rgba(6,182,212,0.4)] border border-white/10">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover scale-[1.25]"
+            >
+              <source src="/wce_campus.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </div>
