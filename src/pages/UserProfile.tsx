@@ -654,7 +654,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-lg font-bold shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50 text-xs"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-bold shadow-md transition-all disabled:opacity-50 text-xs"
                   >
                     <Save className="w-3.5 h-3.5" />
                     {isSaving ? 'Saving...' : 'Save'}
@@ -865,7 +865,7 @@ export default function UserProfile({ onBack, onNavigate, onNavigateToPost, onNa
                     <div className="grid gap-4">
                       {memberships.map((membership, index) => (
                         <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${membership.clubColor ? `bg-gradient-to-br ${membership.clubColor}` : 'bg-slate-200 dark:bg-slate-600'}`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${membership.clubColor ? 'bg-blue-700' : 'bg-slate-200 dark:bg-slate-600'}`}>
                             {membership.clubImage ? (
                               <img src={membership.clubImage} alt={membership.clubName} className="w-full h-full object-cover rounded-xl" />
                             ) : (

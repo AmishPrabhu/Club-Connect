@@ -52,7 +52,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                 >
                     <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+                            <div className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold shadow-md">
                                 {user.name?.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -161,7 +161,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
                     >
                         <div className={`relative p-2 rounded-full transition-all duration-500 ${['userProfile', 'login'].includes(currentPage) || showMenu ? 'bg-blue-500/10 shadow-[0_0_15px_rgba(37,99,235,0.3)]' : ''}`}>
                             {user && user.name ? (
-                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-[10px] text-white font-bold ring-2 ring-slate-900">
+                                <div className="w-6 h-6 rounded-full bg-blue-700 flex items-center justify-center text-[10px] text-white font-bold ring-2 ring-slate-900">
                                     {user.name.charAt(0)}
                                 </div>
                             ) : (

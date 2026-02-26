@@ -58,7 +58,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
             >
                 <div className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
                     {/* Header - Simple Gradient without Image */}
-                    <div className="relative bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
+                    <div className="relative bg-blue-700 p-6">
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors"
@@ -187,7 +187,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                                         href={event.registrationLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md text-sm"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-semibold transition-all shadow-md text-sm"
                                     >
                                         Register Now <ExternalLink className="w-4 h-4" />
                                     </a>
@@ -196,7 +196,7 @@ export default function EventDetailModal({ isOpen, onClose, event, onManageEvent
                             {!isPastEvent && (
                                 <button
                                     onClick={() => setIsRsvpModalOpen(true)}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md text-sm"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all shadow-md text-sm"
                                 >
                                     <Plus className="w-4 h-4" /> RSVP
                                 </button>

@@ -99,7 +99,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
                 <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
                     <div className="relative z-10">
                         <button
                             onClick={() => onNavigate('home')}
@@ -109,7 +109,7 @@ export default function StudentDashboard({ onNavigate, onNavigateToPost }: Stude
                             Back to Home
                         </button>
 
-                        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                             Welcome back, <span className="text-cyan-600 dark:text-cyan-400">{(() => {
                                 const name = user?.name || 'Student';
                                 const parts = name.split(' ').filter(p => p.trim());

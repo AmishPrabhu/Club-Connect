@@ -108,7 +108,7 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full border border-blue-500 hover:border-blue-400 shadow-lg shadow-blue-500/20 transition-all group"
             >
-                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center overflow-hidden">
+                <div className="w-6 h-6 rounded-md bg-blue-700 flex items-center justify-center overflow-hidden">
                     {selectedMembership?.clubImage ? (
                         <img src={selectedMembership.clubImage} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -150,7 +150,7 @@ export default function ClubSwitcher({ className }: ClubSwitcherProps) {
                                     : ''
                                     }`}
                             >
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-blue-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                                     {membership.clubImage ? (
                                         <img src={membership.clubImage} alt="" className="w-full h-full object-cover" />
                                     ) : (

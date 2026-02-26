@@ -126,9 +126,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
 
 
 
-  const getEventColor = (_type: string) => {
-    return 'from-slate-600 to-slate-700 dark:from-slate-500 dark:to-slate-600';
-  };
+
 
   // Filter to show only upcoming/incomplete events on home page (exclude announcements)
   const upcomingPosts = posts.filter(post => post.type === 'event' && post.date && new Date(post.date || '').getTime() >= new Date().getTime());
@@ -166,7 +164,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                 <span>Premier Institute</span>
               </div>
               <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
-                Walchand College of <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">Engineering</span>
+                Walchand College of <span className="text-blue-700 dark:text-blue-400">Engineering</span>
               </h1>
             </div>
 
@@ -177,17 +175,12 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
           </div>
 
           {/* Hero Visual - Hidden on small mobile to save space, or very small */}
-          <div className="relative z-10 hidden md:block w-64 h-36 md:w-80 md:h-48 flex-shrink-0 animate-float-slow overflow-hidden rounded-2xl shadow-[0_0_25px_rgba(6,182,212,0.4)] border border-white/10">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover scale-[1.25]"
-            >
-              <source src="/wce_campus.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+          <div className="relative z-10 hidden md:flex items-center justify-center w-64 h-36 md:w-80 md:h-48 flex-shrink-0 animate-float-slow overflow-hidden rounded-2xl">
+            <img
+              src="/wce-logo.png"
+              alt="Walchand College of Engineering"
+              className="w-full h-full object-contain drop-shadow-xl"
+            />
           </div>
         </div>
       </div>
@@ -314,7 +307,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                           className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group border-b border-slate-100 dark:border-slate-700/50 last:border-0"
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${getEventColor(post.type)} flex-shrink-0`}>
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-700 dark:bg-slate-600 flex-shrink-0">
                               <Calendar className="w-4 h-4 text-white" />
                             </div>
                             <div>
@@ -419,7 +412,7 @@ export default function Home({ onNavigate, onNavigateToClub, onNavigateToPost, o
                               </div>
                             </>
                           ) : (
-                            <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
+                            <div className="w-full h-full bg-slate-700 dark:bg-slate-800 flex items-center justify-center">
                               <Calendar className="w-16 h-16 text-white/40" />
                             </div>
                           )}

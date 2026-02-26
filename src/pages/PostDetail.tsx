@@ -106,11 +106,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
         setIsSaving(false);
     };
 
-    const getTypeColor = (type: string) => {
-        return type === 'event'
-            ? 'from-[#002147] to-[#003366]'
-            : 'from-blue-500 to-blue-400';
-    };
+
 
     if (isLoading) {
         // ... existing loading state
@@ -172,7 +168,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                     <div className="flex flex-col md:flex-row items-start justify-between mb-6 gap-4">
                         <div className="flex-1 w-full">
                             <div className="flex flex-wrap items-center gap-3 mb-3">
-                                <span className={`text-sm font-bold px-3 py-1 rounded-full bg-gradient-to-r ${getTypeColor(post.type)} text-white`}>
+                                <span className="text-sm font-bold px-3 py-1 rounded-full bg-blue-700 text-white">
                                     {post.type === 'event' ? 'Event' : 'Announcement'}
                                 </span>
                                 <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -380,7 +376,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                                     href={post.registrationLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-md"
                                 >
                                     <span>Register Now</span>
                                     <ExternalLink className="w-5 h-5" />
@@ -411,7 +407,7 @@ export default function PostDetail({ postId, onBack, onNavigateToPost, user, onM
                         <div className="mb-6">
                             <button
                                 onClick={() => setIsRsvpModalOpen(true)}
-                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg"
+                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-md"
                             >
                                 <Plus className="w-5 h-5" />
                                 RSVP for this Event

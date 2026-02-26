@@ -295,9 +295,9 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
                 <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
                     <div className="relative z-10">
-                        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                             Advisor Dashboard
                         </h1>
                         <p className="text-slate-600 dark:text-slate-400 font-medium">
@@ -337,7 +337,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                                             key={tab.id}
                                             onClick={() => { setActiveTab(tab.id as any); setIsMobileTabOpen(false); }}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                                                ? 'bg-blue-700 text-white shadow-lg'
                                                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                         >
                                             <Icon className="w-5 h-5" />
@@ -378,7 +378,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
 
                 {/* Inner Content Card */}
                 <div className="glass-card mt-6 p-4 sm:p-8 min-h-[500px] relative overflow-hidden mx-auto max-w-7xl">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"></div>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-600/20"></div>
                     <div className="p-2 sm:p-4">
 
                         {/* Events Tab */}
@@ -922,7 +922,7 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
                             <button
                                 onClick={handleUpdateRole}
                                 disabled={isSaving}
-                                className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 mt-2"
+                                className="w-full bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md mt-2"
                             >
                                 {isSaving ? (
                                     <>

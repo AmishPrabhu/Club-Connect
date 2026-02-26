@@ -46,13 +46,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
         loadData();
     }, []);
 
-    const getEventColor = (type: string) => {
-        switch (type) {
-            case 'event': return 'from-blue-500 to-cyan-500';
-            case 'announcement': return 'from-purple-500 to-pink-500';
-            default: return 'from-blue-500 to-blue-600';
-        }
-    };
+
 
     const loadMoreEvents = () => {
         setVisibleCount(prev => prev + 5);
@@ -98,9 +92,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
             {/* Page Header */}
             <div className="px-4 md:px-6 py-6 md:py-10 max-w-7xl mx-auto w-full">
                 <div className="gradient-card p-6 md:p-10 relative overflow-hidden group">
-                    {/* Background Glows */}
-                    <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 md:w-64 md:h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
 
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
@@ -108,7 +100,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                 <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                             </div>
                             <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight">
-                                Campus <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-cyan-400 dark:to-purple-400">Events</span>
+                                Campus <span className="text-blue-700 dark:text-blue-400">Events</span>
                             </h1>
                         </div>
                         <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
@@ -235,7 +227,7 @@ export default function Events({ onNavigateToPost, user, onManageEvent }: Events
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     />
                                                 ) : (
-                                                    <div className={`w-full h-full bg-gradient-to-br ${getEventColor(post.type)} flex items-center justify-center`}>
+                                                    <div className="w-full h-full bg-slate-700 dark:bg-slate-800 flex items-center justify-center">
                                                         <Calendar className="w-16 h-16 text-white/40" />
                                                     </div>
                                                 )}

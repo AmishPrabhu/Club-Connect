@@ -334,7 +334,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                         {/* Header Card */}
                         <div className="gradient-card p-8 mb-6 text-center relative overflow-hidden group">
                             <div className="relative z-10">
-                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-700 text-white shadow-md mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
                                     <GraduationCap className="w-6 h-6" />
                                 </div>
                                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
@@ -435,7 +435,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3"
+                                        className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-3"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -483,7 +483,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3"
+                                        className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-3"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -568,7 +568,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3"
+                                        className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-3"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

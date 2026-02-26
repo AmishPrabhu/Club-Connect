@@ -783,9 +783,9 @@ export default function AdminDashboard() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
           <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
             <div className="relative z-10">
-              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                 Administrative Control Center
               </h1>
               <p className="text-slate-600 dark:text-slate-400 font-medium">
@@ -887,7 +887,7 @@ export default function AdminDashboard() {
                           setIsMobileTabOpen(false);
                         }}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${isActive
-                          ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                          ? 'bg-blue-700 text-white shadow-lg'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                           }`}
                       >
@@ -933,7 +933,7 @@ export default function AdminDashboard() {
 
         <div className="glass-card mt-6 p-4 sm:p-8 min-h-[500px] relative overflow-hidden">
           {/* Background decoration for the content area */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-blue-600/20"></div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
@@ -946,7 +946,7 @@ export default function AdminDashboard() {
                 <div className="space-y-8">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <span className="w-1.5 h-8 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full"></span>
+                      <span className="w-1.5 h-8 bg-blue-600 rounded-full"></span>
                       Recent Campus Activity
                     </h3>
                     <button onClick={() => setActiveTab('posts')} className="group text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors uppercase tracking-wide flex items-center gap-2 bg-cyan-50 dark:bg-cyan-900/10 px-4 py-2 rounded-xl">
@@ -1007,7 +1007,7 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => setShowCreateClubModal(true)}
-                      className="w-full md:w-auto bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 whitespace-nowrap"
+                      className="w-full md:w-auto bg-blue-700 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wide text-sm transition-all flex items-center justify-center gap-2 shadow-md whitespace-nowrap"
                     >
                       <Plus className="w-5 h-5" />
                       New Club
@@ -1027,7 +1027,7 @@ export default function AdminDashboard() {
                       {filteredClubs.map((club) => (
                         <div key={club.id} className="group glass-card relative overflow-hidden flex flex-col h-full transition-all duration-300 hover:translate-y-[-4px]">
                           {/* Top Gradient Line */}
-                          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                          <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                           <div className="p-6 flex-grow flex flex-col">
                             {/* Header: Icon + Edit Name */}
@@ -1281,7 +1281,7 @@ export default function AdminDashboard() {
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Broadcasts</h3>
                       <button
                         onClick={() => setShowNotificationModal(true)}
-                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md transition-all"
                       >
                         <Send className="w-4 h-4" />
                         NEW BROADCAST
@@ -1300,7 +1300,7 @@ export default function AdminDashboard() {
                             key={notification.id}
                             className={`p-5 rounded-xl border-l-4 ${notification.read
                               ? 'glass-card border-slate-300 dark:border-slate-700'
-                              : 'bg-gradient-to-br from-blue-50 to-blue-50 dark:from-blue-900/10 dark:to-blue-900/10 border-blue-500'
+                              : 'bg-blue-50 dark:bg-blue-900/10 border-blue-500'
                               } `}
                           >
                             <div className="flex items-start justify-between">
@@ -1336,7 +1336,7 @@ export default function AdminDashboard() {
                       </h3>
                       <button
                         onClick={() => setShowAddTeacherModal(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2 rounded-xl transition-all font-bold shadow-lg shadow-emerald-500/20"
+                        className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-all font-bold shadow-md"
                       >
                         <UserPlus className="w-5 h-5" />
                         Add Teacher

@@ -187,7 +187,7 @@ export default function TeacherDashboard() {
             {/* Header Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
                 <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
                     <div className="relative z-10 flex justify-between items-start">
                         <div>
                             {selectedClub && (
@@ -202,7 +202,7 @@ export default function TeacherDashboard() {
                                     Back to Dashboard
                                 </button>
                             )}
-                            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                                 {selectedClub ? selectedClub.name : 'Teacher Dashboard'}
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 font-medium">
@@ -214,7 +214,7 @@ export default function TeacherDashboard() {
                         {!selectedClub && (
                             <button
                                 onClick={() => setShowAddClubModal(true)}
-                                className="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white rounded-xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] flex items-center gap-2 font-bold"
+                                className="px-5 py-2.5 bg-blue-700 hover:bg-blue-600 text-white rounded-xl shadow-md transition-all hover:scale-[1.02] flex items-center gap-2 font-bold"
                             >
                                 <Plus className="w-5 h-5" />
                                 <span className="hidden sm:inline">Add Club</span>
@@ -250,7 +250,7 @@ export default function TeacherDashboard() {
                                 </p>
                                 <button
                                     onClick={() => setShowAddClubModal(true)}
-                                    className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white rounded-xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] font-semibold"
+                                    className="px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-xl shadow-md transition-all hover:scale-[1.02] font-semibold"
                                 >
                                     Add Your First Club
                                 </button>
@@ -267,7 +267,7 @@ export default function TeacherDashboard() {
                                             <div className="flex items-start justify-between mb-3 md:mb-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className="relative">
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                                                        <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                                                         <img
                                                             src={club.image || '/club-default.jpg'}
                                                             alt={club.name}
@@ -342,7 +342,7 @@ export default function TeacherDashboard() {
                                             <button
                                                 onClick={() => { setActiveTab('reports'); setIsMobileTabOpen(false); }}
                                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${activeTab === 'reports'
-                                                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                                                    ? 'bg-blue-700 text-white shadow-lg'
                                                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                             >
                                                 <FileText className="w-5 h-5" />
@@ -351,7 +351,7 @@ export default function TeacherDashboard() {
                                             <button
                                                 onClick={() => { setActiveTab('members'); setIsMobileTabOpen(false); }}
                                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${activeTab === 'members'
-                                                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                                                    ? 'bg-blue-700 text-white shadow-lg'
                                                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                             >
                                                 <Users className="w-5 h-5" />
@@ -390,7 +390,7 @@ export default function TeacherDashboard() {
                         {/* Content Area */}
                         <div className="glass-card mt-6 p-4 sm:p-8 min-h-[500px] relative overflow-hidden mx-auto max-w-7xl">
                             {/* Background decoration */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"></div>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-blue-600/20"></div>
 
                             <div className="p-2 sm:p-4">
                                 {activeTab === 'reports' ? (

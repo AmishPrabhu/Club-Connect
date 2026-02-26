@@ -167,7 +167,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
               </button>
               <button
                 onClick={handleSubmitForm}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+                className="flex-1 px-4 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
               </button>
@@ -246,7 +246,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
               <button
                 onClick={handleRSVP}
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Confirming...' : 'Confirm RSVP'}
               </button>
@@ -338,7 +338,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
 
               <button
                 onClick={handleClose}
-                className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+                className="w-full px-4 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-md"
               >
                 Got it!
               </button>
@@ -368,7 +368,7 @@ export default function RSVPModal({ isOpen, onClose, event, clubName, user }: RS
               </button>
               <button
                 onClick={() => setStep('form')}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+                className="flex-1 px-4 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Try Again
               </button>

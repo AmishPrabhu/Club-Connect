@@ -103,9 +103,7 @@ export default function ClubDetail({ clubId, club: initialClub, onNavigateToPost
       {/* Club Header - Premium Box Style */}
       <div className="relative mb-6 md:mb-10 w-full">
         <div className="gradient-card p-6 md:p-10 relative overflow-hidden group min-h-[220px] md:min-h-[280px] flex items-center justify-center">
-          {/* Background Glows */}
-          <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
 
           <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
             <div className="flex-1 text-center md:text-left">

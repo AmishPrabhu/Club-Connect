@@ -197,11 +197,11 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div> */}
 
               <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-700 text-white shadow-md mb-4 transform -rotate-3 group-hover:rotate-0 transition-transform duration-300">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">
-                  Welcome <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">Back</span>
+                  Welcome <span className="text-blue-600 dark:text-blue-400">Back</span>
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Sign in to access your dashboard</p>
               </div>
@@ -276,7 +276,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                   disabled={isSubmitting || !!lockoutUntil}
                   className={`w-full font-bold py-3.5 px-6 rounded-xl transition-all transform flex items-center justify-center gap-3 shadow-lg shadow-cyan-500/20 ${lockoutUntil
                     ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-blue-700 hover:bg-blue-600 text-white hover:scale-[1.02] active:scale-[0.98]'
                     }`}
                 >
                   {isSubmitting ? (

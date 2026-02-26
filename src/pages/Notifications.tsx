@@ -93,17 +93,16 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
 
           <div className="gradient-card p-8 relative overflow-hidden group">
             {/* Background Glows */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
 
             <div className="relative z-10 flex items-center gap-4">
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 flex-shrink-0 relative overflow-hidden">
+              <div className="p-3.5 rounded-2xl bg-blue-700 text-white shadow-md flex-shrink-0 relative overflow-hidden">
                 <div className="absolute inset-0 bg-white/20 blur-sm"></div>
                 <Bell className="w-8 h-8 relative z-10" />
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white leading-tight">
-                  Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">Notifications</span>
+                  Your <span className="text-blue-600 dark:text-blue-400">Notifications</span>
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base font-medium mt-1">
                   Stay updated with the latest club activities
@@ -132,7 +131,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
               key={filter.id}
               onClick={() => setActiveFilter(filter.id as any)}
               className={`flex-shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${activeFilter === filter.id
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25'
+                ? 'bg-blue-700 text-white shadow-md'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
             >
@@ -180,7 +179,7 @@ export default function Notifications({ onBack, onNavigateToNotification }: Noti
                   <div className="flex items-start gap-5">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors ${notification.read
                       ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                      : 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20'
+                      : 'bg-blue-700 text-white shadow-md'
                       }`}>
                       <Icon className="w-6 h-6" />
                     </div>

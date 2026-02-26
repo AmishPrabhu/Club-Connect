@@ -119,7 +119,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                                             onNavigate('signUp');
                                         }
                                     }}
-                                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                    className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
                                 >
                                     Create Account
                                     <ArrowRight className="w-5 h-5" />
@@ -157,7 +157,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                                     type="button"
                                     onClick={handleSubmit}
                                     disabled={isLoading}
-                                    className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-blue-400 disabled:to-cyan-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                    className="flex-1 bg-blue-700 hover:bg-blue-600 disabled:bg-blue-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-md flex items-center justify-center gap-2"
                                 >
                                     {isLoading ? (
                                         <>
@@ -215,7 +215,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-blue-400 disabled:to-cyan-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                    className="flex-1 bg-blue-700 hover:bg-blue-600 disabled:bg-blue-400 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 disabled:scale-100 shadow-md flex items-center justify-center gap-2"
                                 >
                                     {isLoading ? (
                                         <>

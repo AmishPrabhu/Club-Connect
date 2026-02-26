@@ -111,7 +111,7 @@ function NotificationSender({ club }: { club: DBClub }) {
           <button
             onClick={handleSend}
             disabled={isSending}
-            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all flex items-center justify-center gap-2"
+            className="w-full bg-blue-700 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             {isSending ? (
               <>
@@ -243,7 +243,7 @@ function ImageUploader({ clubId, currentImage, onImageUpdated }: { clubId: strin
       <button
         onClick={openUploadWidget}
         disabled={isUploading || isSaving}
-        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+        className="w-full bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -352,7 +352,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
         </div>
 
         <div className="glass-card p-6 md:p-8 relative overflow-hidden">
-          <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${recipientGroup === 'members' ? 'from-cyan-500 to-blue-500' : 'from-purple-500 to-pink-500'}`}></div>
+          <div className={`absolute top-0 left-0 w-1 h-full ${recipientGroup === 'members' ? 'bg-blue-600' : 'bg-purple-600'}`}></div>
           <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-6 flex items-center gap-2">
             <MessageSquare className={`w-5 h-5 ${recipientGroup === 'members' ? 'text-cyan-500' : 'text-purple-500'}`} />
             Send New Message to {recipientGroup === 'members' ? 'Members' : 'All Presidents'}
@@ -392,8 +392,8 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
               onClick={handleSend}
               disabled={isSending}
               className={`w-full text-white px-6 py-3.5 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${recipientGroup === 'members'
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-cyan-500/20 hover:shadow-cyan-500/40'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/20 hover:shadow-purple-500/40'
+                ? 'bg-blue-700 hover:bg-blue-600 shadow-blue-500/20 hover:shadow-blue-500/40'
+                : 'bg-purple-700 hover:bg-purple-600 shadow-purple-500/20 hover:shadow-purple-500/40'
                 }`}
             >
               {isSending ? (
@@ -430,7 +430,7 @@ function MessageSender({ club, user }: { club: DBClub; user: User }) {
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap leading-relaxed mb-3">{msg.body}</p>
                 <div className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50 text-xs text-slate-400 flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-[10px]">
+                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-[10px]">
                     {msg.senderName.charAt(0)}
                   </div>
                   Sent by <span className="font-semibold text-slate-600 dark:text-slate-300">{msg.senderName}</span> ({msg.senderRole}) {recipientGroup === 'presidents' && msg.clubName !== 'Global Presidents' ? `from ${msg.clubName}` : ''}
@@ -870,7 +870,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
           <div className="glass-card p-6 md:p-8 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
             <div className="relative z-10">
-              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
                 {selectedMembership?.role || (user?.role === 'club-secretary' ? 'Secretary' : (user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Lead'))} Portal
               </h1>
               <p className="text-slate-600 dark:text-slate-400 font-medium">
@@ -910,7 +910,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                             setIsMobileTabOpen(false);
                           }}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${isActive
-                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
+                            ? 'bg-blue-700 text-white shadow-lg'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                         >
@@ -949,7 +949,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
         <div className="glass-card mt-6 p-4 sm:p-8 min-h-[500px] relative overflow-hidden mx-auto max-w-7xl">
           {/* Background decoration for the content area */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-blue-600/20"></div>
 
           <div className="p-4 sm:p-8">
             {/* Overview Tab */}
@@ -964,7 +964,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
 
                 {/* Club Information Card */}
                 <div className="glass-card p-4 md:p-6 relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-500 to-blue-600"></div>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
                   <div className="space-y-4 relative z-10">
                     <div className="flex justify-between items-center py-2 border-b border-slate-200/50 dark:border-slate-700/50">
                       <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Club Name</span>

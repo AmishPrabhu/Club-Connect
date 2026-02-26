@@ -175,7 +175,7 @@ export default function Header({ currentPage, onNavigate, onLogout, user }: Head
                     <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors">{user.name.split(' ')[0]}</p>
                     <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{displayRole}</p>
                   </div>
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white dark:ring-slate-800 group-hover:ring-blue-600/50 transition-all">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white dark:ring-slate-800 group-hover:ring-blue-600/50 transition-all">
                     {user.name.charAt(0)}
                   </div>
                 </button>

@@ -189,7 +189,7 @@ export default function MemberBoardDetail({ club, onBack }: MemberBoardDetailPro
                       key={member.id}
                       className="glass-card glass-card-hover p-3 rounded-xl group relative overflow-hidden flex items-center gap-4"
                     >
-                      <div className="w-12 h-12 rounded-full p-0.5 bg-gradient-to-br from-cyan-400 to-purple-500 flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                      <div className="w-12 h-12 rounded-full p-0.5 bg-blue-600 flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
                         <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800">
                           {member.profileImage ? (
                             <img
