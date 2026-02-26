@@ -106,7 +106,12 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
 
     const downloadFile = async (url: string, filename: string) => {
         try {
-            const response = await fetch(url);
+            // Force Cloudinary to serve as attachment to avoid PDF rendering errors
+            const downloadUrl = url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')
+                ? url.replace('/upload/', '/upload/fl_attachment/')
+                : url;
+
+            const response = await fetch(downloadUrl);
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -118,7 +123,10 @@ export default function AdvisorDashboard({ onNavigate, onNavigateToPost }: Advis
             document.body.removeChild(link);
         } catch (error) {
             console.error('Download failed:', error);
-            window.open(url, '_blank');
+            const fallbackUrl = url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')
+                ? url.replace('/upload/', '/upload/fl_attachment/')
+                : url;
+            window.open(fallbackUrl, '_blank');
         }
     };
 

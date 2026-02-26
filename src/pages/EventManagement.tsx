@@ -1723,7 +1723,13 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                     </div>
                                     {(post as any).reportUrl && (
                                         <a
-                                            href={(post as any).reportUrl}
+                                            href={
+                                                (post as any).reportUrl.includes('cloudinary.com') &&
+                                                    (post as any).reportUrl.includes('/upload/') &&
+                                                    !(post as any).reportUrl.includes('fl_attachment')
+                                                    ? (post as any).reportUrl.replace('/upload/', '/upload/fl_attachment/')
+                                                    : (post as any).reportUrl
+                                            }
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-2"

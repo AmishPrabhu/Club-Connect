@@ -72,7 +72,12 @@ export default function TeacherDashboard() {
             // Check if URL is valid
             if (!url) throw new Error('URL is missing');
 
-            const response = await fetch(url);
+            // Force Cloudinary to serve as attachment to avoid PDF rendering errors
+            const downloadUrl = url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')
+                ? url.replace('/upload/', '/upload/fl_attachment/')
+                : url;
+
+            const response = await fetch(downloadUrl);
 
             // Check if response is valid
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -111,7 +116,10 @@ export default function TeacherDashboard() {
         } catch (error) {
             console.error('Download failed, falling back to direct open:', error);
             // Fallback: open in new tab
-            window.open(url, '_blank');
+            const fallbackUrl = url.includes('cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')
+                ? url.replace('/upload/', '/upload/fl_attachment/')
+                : url;
+            window.open(fallbackUrl, '_blank');
         }
     };
 
