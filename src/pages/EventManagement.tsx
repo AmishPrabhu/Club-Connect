@@ -1759,7 +1759,7 @@ export default function EventManagement({ eventId, onBack, user: propUser }: Eve
                                         sources: ['local', 'url'],
                                         multiple: false,
                                         maxFiles: 1,
-                                        resourceType: 'raw', // Important for PDFs/Docs
+                                        resourceType: 'auto', // 'auto' handles PDFs natively without strict raw delivery restrictions
                                         clientAllowedFormats: ['pdf', 'doc', 'docx'],
                                         maxFileSize: 10000000,
                                         access_mode: 'public', // Force public access to avoid 401 errors
