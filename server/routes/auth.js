@@ -306,7 +306,7 @@ router.post('/login', authLimiter, async (req, res) => {
         let effectiveClubId = user.clubId;
         let effectiveClubName = user.clubName;
 
-        if (effectiveRole === 'user' || effectiveRole === 'club-member') {
+        if (['user', 'club-member', 'club-secretary', 'president', 'treasurer', 'advisor'].includes(effectiveRole)) {
             const officerMembership = await ClubMember.findOne({
                 $or: [{ userId: user._id }, { email: user.email }],
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
@@ -319,7 +319,10 @@ router.post('/login', authLimiter, async (req, res) => {
                     'Treasurer': 'treasurer',
                     'Advisor': 'advisor'
                 };
-                effectiveRole = roleMap[officerMembership.role] || effectiveRole;
+
+                if (effectiveRole === 'user' || effectiveRole === 'club-member') {
+                    effectiveRole = roleMap[officerMembership.role] || effectiveRole;
+                }
 
                 if (!effectiveClubId) {
                     effectiveClubId = officerMembership.clubId;
@@ -433,9 +436,8 @@ router.get('/me', verifyToken, async (req, res) => {
             };
         }));
 
-        // If role is 'user' or 'club-member', check if they have any officer memberships
-        // this handles cases where admin created them as 'user/club-member' but assigned officer role
-        if (effectiveRole === 'user' || effectiveRole === 'club-member') {
+        // If role is a standard or officer role, fetch officer memberships to get club context
+        if (['user', 'club-member', 'club-secretary', 'president', 'treasurer', 'advisor'].includes(effectiveRole)) {
             const officerMembership = await ClubMember.findOne({
                 $or: [{ userId: user._id }, { email: user.email }],
                 role: { $in: ['Secretary', 'President', 'Treasurer', 'Advisor'] }
@@ -449,9 +451,14 @@ router.get('/me', verifyToken, async (req, res) => {
                     'Treasurer': 'treasurer',
                     'Advisor': 'advisor'
                 };
-                effectiveRole = roleMap[officerMembership.role] || effectiveRole;
 
-                // Also provide a default club context if missing
+                // Only upgrade the role if they were previously just a user/member
+                // or if we want to ensure their effective role matches their highest office
+                if (effectiveRole === 'user' || effectiveRole === 'club-member') {
+                    effectiveRole = roleMap[officerMembership.role] || effectiveRole;
+                }
+
+                // Provide a default club context if missing
                 if (!effectiveClubId) {
                     effectiveClubId = officerMembership.clubId;
                 }
