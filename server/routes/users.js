@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Club from '../models/Club.js';
 import ClubMember from '../models/ClubMember.js';
 import { verifyToken } from '../middleware/auth.js';
+import { sendTeacherInvitationEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -254,10 +255,18 @@ router.post('/assign-teacher', verifyToken, async (req, res) => {
 
             await newUser.save();
 
+            // Send invitation email
+            const signUpUrl = `${process.env.FRONTEND_URL}?page=signup&email=${encodeURIComponent(email)}`;
+            await sendTeacherInvitationEmail({
+                name,
+                email,
+                signUpUrl
+            });
+
             return res.json({
                 success: true,
                 isNewUser: true,
-                message: 'Teacher invitation created. User will set password during signup.'
+                message: 'Teacher invitation created. User will receive an email to set their password during signup.'
             });
         }
     } catch (error) {
