@@ -515,7 +515,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     responseSpreadsheetUrl: '',
     eventWhatsappLink: '',
     relatedEventId: '',
-    attachments: [] as Attachment[]
+    attachments: [] as Attachment[],
+    totalSessions: 1,
   });
 
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -695,7 +696,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         relatedEventId: newPost.relatedEventId,
         relatedEventTitle: posts.find(p => p.id === newPost.relatedEventId)?.title || ''
       } : {}),
-      ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {})
+      ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {}),
+      ...(newPost.type === 'event' ? { totalSessions: newPost.totalSessions } : {})
     });
 
     if (result.success) {
@@ -724,7 +726,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
         responseSpreadsheetUrl: '',
         eventWhatsappLink: '',
         relatedEventId: '',
-        attachments: []
+        attachments: [],
+        totalSessions: 1,
       });
 
       // Refresh posts
@@ -1874,6 +1877,27 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                         className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    {/* Number of Sessions - Only for Events */}
+                    {newPost.type === 'event' && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          Number of Sessions
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={newPost.totalSessions}
+                          onChange={(e) => setNewPost({ ...newPost, totalSessions: Math.max(1, parseInt(e.target.value) || 1) })}
+                          className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="1"
+                        />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          Attendance will be tracked per session. Certificates require presence in all sessions.
+                        </p>
+                      </div>
+                    )}
 
                     {/* Related Event - Only for Announcements */}
                     {newPost.type === 'announcement' && (

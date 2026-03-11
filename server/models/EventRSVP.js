@@ -18,10 +18,14 @@ const eventRSVPSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    attendance: {
-        type: String,
-        enum: ['present', 'absent', 'pending'],
-        default: 'pending',
+    // Per-session attendance: keys are session numbers ("1", "2", etc.), values are status
+    sessionAttendance: {
+        type: Map,
+        of: {
+            type: String,
+            enum: ['present', 'absent', 'pending'],
+        },
+        default: () => new Map([['1', 'pending']]),
     },
     certificateUrl: {
         type: String, // URL of generated certificate for this participant
@@ -38,6 +42,22 @@ const eventRSVPSchema = new mongoose.Schema({
     },
 
 });
+
+// Virtual 'attendance' field: computes overall attendance from sessionAttendance
+// Returns 'present' only if ALL sessions are 'present'
+// Returns 'absent' if any session is 'absent'
+// Otherwise returns 'pending'
+eventRSVPSchema.virtual('attendance').get(function () {
+    if (!this.sessionAttendance || this.sessionAttendance.size === 0) return 'pending';
+    const values = Array.from(this.sessionAttendance.values());
+    if (values.every(v => v === 'present')) return 'present';
+    if (values.some(v => v === 'absent')) return 'absent';
+    return 'pending';
+});
+
+// Ensure virtuals are included when converting to JSON/Object
+eventRSVPSchema.set('toJSON', { virtuals: true });
+eventRSVPSchema.set('toObject', { virtuals: true });
 
 // Compound index to prevent duplicate RSVPs for same email on same event
 eventRSVPSchema.index({ eventId: 1, email: 1 }, { unique: true });

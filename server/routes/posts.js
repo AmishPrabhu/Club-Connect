@@ -80,20 +80,25 @@ router.post('/:id/rsvp', async (req, res) => {
             return res.status(400).json({ message: 'You have already RSVPed to this event.' });
         }
 
+        // Get event's totalSessions to initialize sessionAttendance
+        const event = await Post.findById(eventId);
+        const totalSessions = event?.totalSessions || 1;
+        const sessionAttendance = new Map();
+        for (let i = 1; i <= totalSessions; i++) {
+            sessionAttendance.set(String(i), 'pending');
+        }
+
         const newRSVP = new EventRSVP({
             eventId,
             name,
             email,
             userId: userId || null, // Optional
             source: 'rsvp', // Self-RSVP
+            sessionAttendance,
         });
 
         await newRSVP.save();
 
-        // Update post rsvp count (optional optimization, but good for list views)
-        // logic moved to get request or maintained here. 
-        // For simple sync, let's just update the Post doc if we want to cache it, 
-        // but Post model doesn't strictly persist it. The frontend interface expects it on Post.
         const rsvpCount = await EventRSVP.countDocuments({ eventId });
         await Post.findByIdAndUpdate(eventId, { rsvps: rsvpCount });
 
@@ -103,17 +108,19 @@ router.post('/:id/rsvp', async (req, res) => {
     }
 });
 
-// Update Participant Attendance (Secretary/Admin only)
+// Update Participant Attendance (Secretary/Admin only) - session-based
 router.patch('/:id/rsvps/:rsvpId', verifyToken, async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, session } = req.body;
         if (!['present', 'absent'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
 
+        const sessionKey = String(session || 1);
+
         const rsvp = await EventRSVP.findByIdAndUpdate(
             req.params.rsvpId,
-            { attendance: status },
+            { [`sessionAttendance.${sessionKey}`]: status },
             { new: true }
         );
         res.json(rsvp);
@@ -149,12 +156,20 @@ router.post('/:id/rsvps/add', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Participant with this email already exists.' });
         }
 
+        // Get event's totalSessions to initialize sessionAttendance
+        const event = await Post.findById(eventId);
+        const totalSessions = event?.totalSessions || 1;
+        const sessionAttendance = new Map();
+        for (let i = 1; i <= totalSessions; i++) {
+            sessionAttendance.set(String(i), 'pending');
+        }
+
         const newRSVP = new EventRSVP({
             eventId,
             name,
             email,
-            attendance: 'pending',
-            source: source || 'manual', // Use provided source or default to manual
+            sessionAttendance,
+            source: source || 'manual',
         });
 
         await newRSVP.save();
@@ -178,7 +193,7 @@ router.post('/', verifyClubOfficer, async (req, res) => {
             'clubId', 'clubName', 'clubImage', // These are validated by verifyClubOfficer implicitly but nice to be explicit
             'date', 'time', 'location', 'locationType', 'locationUrl',
             'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
-            'attachments'
+            'attachments', 'totalSessions'
         ];
 
         const postData = {};
@@ -321,7 +336,7 @@ router.put('/:id', verifyToken, async (req, res) => {
             'registrationStart', 'registrationStartTime', 'registrationEnd', 'registrationEndTime',
             'registrationLink', 'responseSpreadsheetUrl', 'eventWhatsappLink',
             'attachments',
-            'eventPhotos',
+            'eventPhotos', 'totalSessions',
             // Budget image allowed to be updated here or via specific route, 
             // but if updated here, we must reset verification (handled below or safely excluded)
             // Let's exclude budgetImage here to force use of the dedicated route which handles logic overrides

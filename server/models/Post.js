@@ -97,6 +97,13 @@ const postSchema = new mongoose.Schema({
         type: String, // WhatsApp group link for the event
     },
 
+    // Session tracking for events
+    totalSessions: {
+        type: Number,
+        default: 1,
+        min: 1,
+    },
+
     // Related event for announcements
     relatedEventId: {
         type: String,

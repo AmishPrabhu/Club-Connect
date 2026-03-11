@@ -172,6 +172,7 @@ export interface DBPost {
   registrationLink?: string;       // Optional registration link for events
   responseSpreadsheetUrl?: string;  // Optional Google Sheets URL for form responses
   eventWhatsappLink?: string;      // Optional WhatsApp group link for the event
+  totalSessions?: number;           // Number of sessions for this event (default 1)
   attachments?: Attachment[];      // Description images (uploaded when creating post)
   eventPhotos?: Attachment[];      // Event photos/videos (uploaded after event by secretary)
   relatedEventId?: string;         // For announcements: ID of a related upcoming event
@@ -221,7 +222,8 @@ export interface EventRSVP {
   name: string;
   email: string;
   rsvpedAt: Date;
-  attendance?: 'present' | 'absent' | 'pending';  // Attendance status for the event
+  attendance?: 'present' | 'absent' | 'pending';  // Computed virtual: present only if ALL sessions attended
+  sessionAttendance?: Record<string, 'present' | 'absent' | 'pending'>;  // Per-session attendance map
   certificateUrl?: string;  // URL of generated certificate for this participant
   source?: 'rsvp' | 'manual' | 'import';  // Source of registration
 }

@@ -707,10 +707,11 @@ export const createEventRSVP = async (
 export const updateParticipantAttendance = async (
     eventId: string,
     rsvpId: string,
-    status: 'present' | 'absent'
+    status: 'present' | 'absent',
+    session: number = 1
 ): Promise<boolean> => {
     try {
-        await api.patch(`/posts/${eventId}/rsvps/${rsvpId}`, { status });
+        await api.patch(`/posts/${eventId}/rsvps/${rsvpId}`, { status, session });
         return true;
     } catch (error) {
         console.error('Error updating attendance:', error);
