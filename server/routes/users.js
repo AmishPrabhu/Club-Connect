@@ -256,7 +256,7 @@ router.post('/assign-teacher', verifyToken, async (req, res) => {
             await newUser.save();
 
             // Send invitation email
-            const signUpUrl = `${process.env.FRONTEND_URL}?page=signup&email=${encodeURIComponent(email)}`;
+            const signUpUrl = `${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}`;
             await sendTeacherInvitationEmail({
                 name,
                 email,

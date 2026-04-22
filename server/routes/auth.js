@@ -258,7 +258,7 @@ router.post('/assign-officer', async (req, res) => {
 
         // URL to Signup page (pre-filling email if possible via query param)
         // Adjust frontend route as needed. Assuming /signup or ?page=signup
-        const signUpUrl = `${process.env.FRONTEND_URL}?page=signup&email=${encodeURIComponent(email)}`;
+        const signUpUrl = `${process.env.FRONTEND_URL}?page=signUp&email=${encodeURIComponent(email)}`;
 
         // Send invitation
         await sendClubInvitationEmail({

@@ -29,7 +29,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     const [canResend, setCanResend] = useState(true);
 
     const [error, setError] = useState('');
-    const { signUp, signInWithGoogle, signUpWithGoogle, sendOtp, verifyOtp, user, isAuthenticated } = useAuth();
+    const { signUp, signUpWithGoogle, sendOtp, verifyOtp, user, isAuthenticated } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Check for Google signup data on mount
@@ -240,27 +240,36 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
 
     const handleGoogleSuccess = async (credentialResponse: any) => {
         setError('');
-        // NOTE: signInWithGoogle is a top-level auth action, so we use local spinner
-        // But if it requires cleanup/redirect, the side effects happen in useEffect or parent
-        // Let's at least wrap it
-        /* 
-           Wait, signInWithGoogle might redirect if successful? 
-           No, AuthContext just sets user. But parent component might navigate.
-        */
-        setIsSubmitting(true);
-        const result = await signInWithGoogle(credentialResponse.credential);
-        setIsSubmitting(false);
+        
+        // On the signup page, always go to the password/name form
+        // Decode the Google JWT to extract user info without logging in
+        try {
+            const credential = credentialResponse.credential;
+            // Decode JWT payload (base64url encoded, second segment)
+            const payloadBase64 = credential.split('.')[1];
+            const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+            const payload = JSON.parse(payloadJson);
+            
+            const googleSignupData: GoogleSignupData = {
+                email: payload.email,
+                name: payload.name || '',
+                credential: credential,
+            };
 
-        if (!result.success) {
-            if (result.needsSignup && result.googleData) {
-                // Set Google data for signup form
-                setGoogleData(result.googleData);
-                setName(result.googleData.name);
-                setEmail(result.googleData.email);
-                setStep('DETAILS');
-            } else {
-                setError(result.error || 'Failed to sign in with Google');
+            // Validate email domain
+            if (!googleSignupData.email.endsWith('@walchandsangli.ac.in')) {
+                setError('Only @walchandsangli.ac.in email addresses are allowed');
+                return;
             }
+
+            // Set Google data and show password form
+            setGoogleData(googleSignupData);
+            setName(googleSignupData.name);
+            setEmail(googleSignupData.email);
+            setStep('DETAILS');
+        } catch (err) {
+            console.error('Failed to process Google credential:', err);
+            setError('Failed to process Google sign-up. Please try again.');
         }
     };
 

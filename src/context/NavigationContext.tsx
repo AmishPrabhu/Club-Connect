@@ -125,7 +125,7 @@ export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children
             // Only set isOpenedFromUrl on initial load, not on popstate
         } else if (pageParam === 'resetPassword') {
             setCurrentPage('resetPassword');
-        } else if (pageParam === 'signUp') {
+        } else if (pageParam === 'signUp' || pageParam === 'signup') {
             setCurrentPage('signUp');
         } else if (pageParam === 'club' && clubIdParam) {
             setSelectedClub(clubIdParam);
