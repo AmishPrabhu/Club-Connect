@@ -329,7 +329,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                   onClick={() => onNavigate('signUp')}
                   className="w-full py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors bg-white/50 dark:bg-slate-800/50"
                 >
-                  Create Student Account
+                  Create Account
                 </button>
               </div>
             </div>
