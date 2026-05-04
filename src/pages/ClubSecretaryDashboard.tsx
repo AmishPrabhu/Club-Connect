@@ -3,7 +3,7 @@ import {
   Users, Edit, Calendar, MessageSquare, Settings,
   ChevronRight, Plus, Menu, X, Send, Trash2, Link,
   Image as ImageIcon, TrendingUp, CheckCircle, Clock,
-  Instagram, Settings2
+  Instagram, Settings2, Bell
 } from 'lucide-react';
 import { Page } from '../types/page';
 import { User, DBClub, DBPost, Attachment, ClubMessage } from '../types/auth';
@@ -836,11 +836,13 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
     { id: 'members', label: 'Members', icon: Users },
     { id: 'posts', label: 'Drafts & Posts', icon: Edit },
     { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'tasks', label: 'Tasks', icon: CheckCircle },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'budget', label: isReadOnly ? 'Budgets' : 'Budget', icon: Settings }
   ].filter(tab => {
     if (activeRole === 'treasurer') {
-      return ['overview', 'members', 'budget', 'messages'].includes(tab.id);
+      return ['overview', 'members', 'budget', 'messages', 'tasks'].includes(tab.id);
     }
     return true;
   });
