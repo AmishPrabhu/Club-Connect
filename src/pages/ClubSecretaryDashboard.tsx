@@ -488,6 +488,7 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   const activeRole = selectedMembership?.role?.toLowerCase() || user?.role;
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobileTabOpen, setIsMobileTabOpen] = useState(false);
 
   const isReadOnly = activeRole === 'treasurer';
@@ -633,6 +634,8 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
   }, [activeClubId]);
 
   const handleCreatePost = async (forceCreate: boolean = false) => {
+    if (isSubmitting) return;
+
     if (!newPost.title.trim() || !newPost.content.trim()) {
       setFormMessage({ type: 'error', text: 'Please fill in all required fields.' });
       return;
@@ -645,135 +648,143 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
       return;
     }
 
-    // Build time string from 12-hour format
-    let timeString: string | undefined;
-    if (newPost.startHour && newPost.startMinute) {
-      timeString = `${newPost.startHour}:${newPost.startMinute} ${newPost.startPeriod}`;
-      if (newPost.endHour && newPost.endMinute) {
-        timeString += ` - ${newPost.endHour}:${newPost.endMinute} ${newPost.endPeriod}`;
-      }
-    }
-
-    // Check for time collision if it's an event with a start time (unless forceCreate is true)
-    if (!forceCreate && newPost.type === 'event' && newPost.date && newPost.startHour) {
-      // Convert to 24h for collision check
-      let startHour24 = parseInt(newPost.startHour);
-      if (newPost.startPeriod === 'PM' && startHour24 !== 12) startHour24 += 12;
-      if (newPost.startPeriod === 'AM' && startHour24 === 12) startHour24 = 0;
-      const startTime24 = `${startHour24.toString().padStart(2, '0')}:${newPost.startMinute}`;
-
-      const collisions = await checkEventTimeCollision(newPost.date, startTime24);
-      if (collisions.length > 0) {
-        setCollisionEvents(collisions);
-        setShowCollisionWarning(true);
-        return; // Stop here, wait for user to confirm or cancel
-      }
-    }
-
-    const result = await createPost({
-      title: newPost.title,
-      content: newPost.content,
-      type: newPost.type,
-      ...(newPost.date ? { date: newPost.date } : {}),
-      ...(timeString ? { time: timeString } : {}),
-      ...(newPost.location ? { location: newPost.location } : {}),
-      locationType: newPost.locationType,
-      ...(newPost.locationUrl ? { locationUrl: newPost.locationUrl } : {}),
-      ...(newPost.coverImage ? { coverImage: newPost.coverImage } : {}),
-      ...(newPost.registrationStart ? { registrationStart: newPost.registrationStart } : {}),
-      ...(newPost.registrationStartTime ? { registrationStartTime: newPost.registrationStartTime } : {}),
-      ...(newPost.registrationEnd ? { registrationEnd: newPost.registrationEnd } : {}),
-      ...(newPost.registrationEndTime ? { registrationEndTime: newPost.registrationEndTime } : {}),
-      clubId: club.id!,
-      clubName: club.name,
-      authorId: user.id,
-      authorName: user.name,
-      status: 'published',
-      registrationLink: newPost.registrationLink,
-      responseSpreadsheetUrl: newPost.responseSpreadsheetUrl,
-      eventWhatsappLink: newPost.eventWhatsappLink,
-      ...(newPost.relatedEventId ? {
-        relatedEventId: newPost.relatedEventId,
-        relatedEventTitle: posts.find(p => p.id === newPost.relatedEventId)?.title || ''
-      } : {}),
-      ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {}),
-      ...(newPost.type === 'event' ? { totalSessions: newPost.totalSessions } : {})
-    });
-
-    if (result.success) {
-      const postId = result.postId;
-      setFormMessage({ type: 'success', text: 'Post created successfully!' });
-      setNewPost({
-        title: '',
-        content: '',
-        type: 'announcement',
-        date: new Date().toISOString().split('T')[0],
-        startHour: '',
-        startMinute: '',
-        startPeriod: 'AM',
-        endHour: '',
-        endMinute: '',
-        endPeriod: 'PM',
-        location: '',
-        locationType: 'campus',
-        locationUrl: '',
-        registrationStart: '',
-        registrationStartTime: '',
-        registrationEnd: '',
-        registrationEndTime: '',
-        coverImage: '',
-        registrationLink: '',
-        responseSpreadsheetUrl: '',
-        eventWhatsappLink: '',
-        relatedEventId: '',
-        attachments: [],
-        totalSessions: 1,
-      });
-
-      // Refresh posts
-      const allPosts = await getPosts();
-      setPosts(allPosts.filter(p => p.clubId === activeClubId));
-
-      // Create a notification for the new post
-      await createNotification({
-        title: newPost.type === 'event' ? `New Event from ${club.name}` : `New Announcement from ${club.name}`,
-        message: `${newPost.title} - ${newPost.content.substring(0, 100)}${newPost.content.length > 100 ? '...' : ''}`,
-        type: newPost.type, // 'event' or 'announcement'
-        read: false,
-        clubId: club.id!,
-        relatedId: postId!, // Non-null assertion safe as prompt success check passed
-      });
-
-      // Send email notifications to RSVPed attendees if this is an announcement linked to an event
-      if (newPost.type === 'announcement' && newPost.relatedEventId && isEmailConfigured()) {
-        try {
-          const rsvps = await getEventRSVPs(newPost.relatedEventId);
-          if (rsvps.length > 0) {
-            const relatedEvent = posts.find(p => p.id === newPost.relatedEventId);
-            const attendees = rsvps.map(rsvp => ({ name: rsvp.name, email: rsvp.email }));
-            await sendEventUpdateEmails(
-              attendees,
-              relatedEvent?.title || 'Event',
-              `New announcement: ${newPost.title}`,
-              club.name,
-              club.id!
-            );
-            console.log(`Sent ${rsvps.length} email notifications for event announcement`);
-          }
-        } catch (emailError) {
-          console.error('Failed to send event announcement emails:', emailError);
-          // Don't fail the post creation if emails fail
+    setIsSubmitting(true);
+    try {
+      // Build time string from 12-hour format
+      let timeString: string | undefined;
+      if (newPost.startHour && newPost.startMinute) {
+        timeString = `${newPost.startHour}:${newPost.startMinute} ${newPost.startPeriod}`;
+        if (newPost.endHour && newPost.endMinute) {
+          timeString += ` - ${newPost.endHour}:${newPost.endMinute} ${newPost.endPeriod}`;
         }
       }
 
-      setTimeout(() => {
+      // Check for time collision if it's an event with a start time (unless forceCreate is true)
+      if (!forceCreate && newPost.type === 'event' && newPost.date && newPost.startHour) {
+        // Convert to 24h for collision check
+        let startHour24 = parseInt(newPost.startHour);
+        if (newPost.startPeriod === 'PM' && startHour24 !== 12) startHour24 += 12;
+        if (newPost.startPeriod === 'AM' && startHour24 === 12) startHour24 = 0;
+        const startTime24 = `${startHour24.toString().padStart(2, '0')}:${newPost.startMinute}`;
+
+        const collisions = await checkEventTimeCollision(newPost.date, startTime24);
+        if (collisions.length > 0) {
+          setCollisionEvents(collisions);
+          setShowCollisionWarning(true);
+          setIsSubmitting(false); // Reset submitting since we show warning modal and pause
+          return; // Stop here, wait for user to confirm or cancel
+        }
+      }
+
+      const result = await createPost({
+        title: newPost.title,
+        content: newPost.content,
+        type: newPost.type,
+        ...(newPost.date ? { date: newPost.date } : {}),
+        ...(timeString ? { time: timeString } : {}),
+        ...(newPost.location ? { location: newPost.location } : {}),
+        locationType: newPost.locationType,
+        ...(newPost.locationUrl ? { locationUrl: newPost.locationUrl } : {}),
+        ...(newPost.coverImage ? { coverImage: newPost.coverImage } : {}),
+        ...(newPost.registrationStart ? { registrationStart: newPost.registrationStart } : {}),
+        ...(newPost.registrationStartTime ? { registrationStartTime: newPost.registrationStartTime } : {}),
+        ...(newPost.registrationEnd ? { registrationEnd: newPost.registrationEnd } : {}),
+        ...(newPost.registrationEndTime ? { registrationEndTime: newPost.registrationEndTime } : {}),
+        clubId: club.id!,
+        clubName: club.name,
+        authorId: user.id,
+        authorName: user.name,
+        status: 'published',
+        registrationLink: newPost.registrationLink,
+        responseSpreadsheetUrl: newPost.responseSpreadsheetUrl,
+        eventWhatsappLink: newPost.eventWhatsappLink,
+        ...(newPost.relatedEventId ? {
+          relatedEventId: newPost.relatedEventId,
+          relatedEventTitle: posts.find(p => p.id === newPost.relatedEventId)?.title || ''
+        } : {}),
+        ...(newPost.attachments.length > 0 ? { attachments: newPost.attachments } : {}),
+        ...(newPost.type === 'event' ? { totalSessions: newPost.totalSessions } : {})
+      });
+
+      if (result.success) {
+        const postId = result.postId;
+        setFormMessage({ type: 'success', text: 'Post created successfully!' });
+        setNewPost({
+          title: '',
+          content: '',
+          type: 'announcement',
+          date: new Date().toISOString().split('T')[0],
+          startHour: '',
+          startMinute: '',
+          startPeriod: 'AM',
+          endHour: '',
+          endMinute: '',
+          endPeriod: 'PM',
+          location: '',
+          locationType: 'campus',
+          locationUrl: '',
+          registrationStart: '',
+          registrationStartTime: '',
+          registrationEnd: '',
+          registrationEndTime: '',
+          coverImage: '',
+          registrationLink: '',
+          responseSpreadsheetUrl: '',
+          eventWhatsappLink: '',
+          relatedEventId: '',
+          attachments: [],
+          totalSessions: 1,
+        });
+
+        // Refresh posts
+        const allPosts = await getPosts();
+        setPosts(allPosts.filter(p => p.clubId === activeClubId));
+
+        // Create a notification for the new post
+        await createNotification({
+          title: newPost.type === 'event' ? `New Event from ${club.name}` : `New Announcement from ${club.name}`,
+          message: `${newPost.title} - ${newPost.content.substring(0, 100)}${newPost.content.length > 100 ? '...' : ''}`,
+          type: newPost.type, // 'event' or 'announcement'
+          read: false,
+          clubId: club.id!,
+          relatedId: postId!, // Non-null assertion safe as prompt success check passed
+        });
+
+        // Send email notifications to RSVPed attendees if this is an announcement linked to an event
+        if (newPost.type === 'announcement' && newPost.relatedEventId && isEmailConfigured()) {
+          try {
+            const rsvps = await getEventRSVPs(newPost.relatedEventId);
+            if (rsvps.length > 0) {
+              const relatedEvent = posts.find(p => p.id === newPost.relatedEventId);
+              const attendees = rsvps.map(rsvp => ({ name: rsvp.name, email: rsvp.email }));
+              await sendEventUpdateEmails(
+                attendees,
+                relatedEvent?.title || 'Event',
+                `New announcement: ${newPost.title}`,
+                club.name,
+                club.id!
+              );
+              console.log(`Sent ${rsvps.length} email notifications for event announcement`);
+            }
+          } catch (emailError) {
+            console.error('Failed to send event announcement emails:', emailError);
+            // Don't fail the post creation if emails fail
+          }
+        }
+
+        // Close the modal immediately
         setIsCreatePostModalOpen(false);
         setFormMessage(null);
         setShowCollisionWarning(false);
         setCollisionEvents([]);
-      }, 1500);
-    } else {
-      setFormMessage({ type: 'error', text: result.error || 'Failed to create post' });
+      } else {
+        setFormMessage({ type: 'error', text: result.error || 'Failed to create post' });
+      }
+    } catch (error) {
+      console.error('Error during post creation:', error);
+      setFormMessage({ type: 'error', text: 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -2363,15 +2374,21 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => { setIsCreatePostModalOpen(false); setFormMessage(null); }}
-                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleCreatePost()}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
+                    disabled={isSubmitting}
+                    className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition-all ${
+                      isSubmitting
+                        ? 'bg-blue-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
-                    Create Post
+                    {isSubmitting ? 'Creating...' : 'Create Post'}
                   </button>
                 </div>
               </div>
@@ -2411,15 +2428,21 @@ export default function ClubSecretaryDashboard({ onNavigate, onNavigateToPost, u
                 <div className="flex gap-3">
                   <button
                     onClick={handleCancelCollision}
-                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Go Back
                   </button>
                   <button
                     onClick={handleConfirmCollision}
-                    className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all"
+                    disabled={isSubmitting}
+                    className={`flex-1 px-4 py-2 text-white rounded-lg font-semibold transition-all ${
+                      isSubmitting
+                        ? 'bg-blue-400 cursor-not-allowed'
+                        : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
                   >
-                    Create Anyway
+                    {isSubmitting ? 'Creating...' : 'Create Anyway'}
                   </button>
                 </div>
               </div>
